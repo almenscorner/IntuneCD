@@ -60,6 +60,13 @@ Well... all of the above ;)
     - Shell
 - Settings Catalog Policies
 
+## Required Azure AD application Graph API permissions
+- DeviceManagementApps.ReadWrite.All
+- DeviceManagementConfiguration.ReadWrite.All
+- DeviceManagementServiceConfig.ReadWrite.All
+
+If you just want to backup you can get away with only Read permission!
+
 ## How do I use it?
 You have two options, using a pipeline or running it locally. Let's have a look at both.
 
