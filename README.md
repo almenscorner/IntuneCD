@@ -8,12 +8,12 @@ The package can also be run standalone outside of a pipeline, or in one to only 
 
 ## Install this package
 ```python
-pip -i install IntuneCD
+pip install IntuneCD
 ```
 
 ## Update this package
 ```python
-pip -i install IntuneCD --upgrade
+pip install IntuneCD --upgrade
 ```
 
 ## What is backed up?
@@ -124,7 +124,7 @@ steps:
 - checkout: self
   persistCredentials: true
 
-- script: pip3 install -i IntuneCD
+- script: pip3 install IntuneCD
   displayName: Install IntuneCD
 
 - script: |
@@ -164,7 +164,7 @@ steps:
 - checkout: self
   persistCredentials: true
 
-- script: pip3 install -i IntuneCD
+- script: pip3 install IntuneCD
   displayName: Install IntuneCD
 
 - script: IntuneCD-startupdate -m 1
