@@ -48,7 +48,7 @@ def start():
         func = switcher.get(argument, "nothing")
         return func()
 
-    token = getAuth(selected_mode(opts.mode),opts.localauth)   
+    token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="PROD")   
 
     def run_update(path,token):
 

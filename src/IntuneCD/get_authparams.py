@@ -7,6 +7,8 @@ mode : str
     The mode used when using this tool
 localauth : str
     Path to dict with keys to authenticate
+tenant : str
+    Which tenant to authenticate to, PROD or DEV
 """
 
 import json
@@ -15,23 +17,23 @@ from .get_accesstoken import obtain_accesstoken
 
 resource = "https://graph.microsoft.com"
 
-def getAuth(mode,localauth):
+def getAuth(mode,localauth,tenant):
     if mode == 'devtoprod':
 
         if localauth:
             with open(localauth) as json_data:
                 auth_dict = json.load(json_data)
-            DEV_TENANT_NAME = auth_dict['params']['DEV_TENANT_NAME']
-            DEV_CLIENT_ID = auth_dict['params']['DEV_CLIENT_ID']
-            DEV_CLIENT_SECRET = auth_dict['params']['DEV_CLIENT_SECRET']
+            tenant_TENANT_NAME = auth_dict['params'][tenant+'_TENANT_NAME']
+            tenant_CLIENT_ID = auth_dict['params'][tenant+'_CLIENT_ID']
+            tenant_CLIENT_SECRET = auth_dict['params'][tenant+'_CLIENT_SECRET']
         else:
-            DEV_TENANT_NAME = os.environ.get("DEV_TENANT_NAME")
-            DEV_CLIENT_ID = os.environ.get("DEV_CLIENT_ID")
-            DEV_CLIENT_SECRET = os.environ.get("DEV_CLIENT_SECRET")
-        if ((DEV_TENANT_NAME is None) or (DEV_CLIENT_ID is None) or (DEV_CLIENT_SECRET is None)):
-            raise Exception("One or more os.environ variables for DEV not set")
+            tenant_TENANT_NAME = os.environ.get(tenant+"_TENANT_NAME")
+            tenant_CLIENT_ID = os.environ.get(tenant+"_CLIENT_ID")
+            tenant_CLIENT_SECRET = os.environ.get(tenant+"_CLIENT_SECRET")
+        if ((tenant_TENANT_NAME is None) or (tenant_CLIENT_ID is None) or (tenant_CLIENT_SECRET is None)):
+            raise Exception("One or more os.environ variables for " + tenant + " not set")
         else:
-            token = obtain_accesstoken(DEV_TENANT_NAME,DEV_CLIENT_ID,DEV_CLIENT_SECRET,resource)
+            token = obtain_accesstoken(tenant_TENANT_NAME,tenant_CLIENT_ID,tenant_CLIENT_SECRET,resource)
             return token
 
     elif mode == 'standalone':

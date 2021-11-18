@@ -55,7 +55,7 @@ def start():
         func = switcher.get(argument, "nothing")
         return func()
 
-    token = getAuth(selected_mode(opts.mode),opts.localauth)
+    token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="DEV")
 
     def run_backup(path,output,token):
 
