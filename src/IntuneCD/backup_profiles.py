@@ -17,6 +17,8 @@ import json
 import os
 import base64
 import yaml
+
+from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 
 ## Set MS Graph endpoint
@@ -37,6 +39,9 @@ def savebackup(path,output,token):
         print("Backing up profile: " + profile['displayName'])
         if os.path.exists(configpath)==False:
             os.mkdir(configpath)
+
+        ## Get filename without illegal characters
+        fname = clean_filename(profile['displayName'])
             
         ## If profile is custom macOS or iOS, decode the payload
         if ((profile['@odata.type'] == "#microsoft.graph.macOSCustomConfiguration") or (profile['@odata.type'] == "#microsoft.graph.iosCustomConfiguration")):
@@ -49,10 +54,10 @@ def savebackup(path,output,token):
             f.write(decoded)
             ## Save Device Configuration as JSON or YAML depending on configured value in "-o"
             if output != "json":
-                with open(configpath + profile['displayName']+".yaml",'w') as yamlFile:
+                with open(configpath+fname+".yaml",'w') as yamlFile:
                     yaml.dump(profile, yamlFile, sort_keys=False, default_flow_style=False)
             else:
-                with open(configpath + profile['displayName']+".json",'w') as jsonFile:
+                with open(configpath+fname+".json",'w') as jsonFile:
                     json.dump(profile, jsonFile, indent=10)
 
         ## If Device Configuration is custom Win10 and the OMA settings are encrypted, get them in plain text
@@ -80,17 +85,17 @@ def savebackup(path,output,token):
 
             ## Save Device Configuration as JSON or YAML depending on configured value in "-o"
             if output != "json":
-                with open(configpath + profile['displayName']+".yaml",'w') as yamlFile:
+                with open(configpath+fname+".yaml",'w') as yamlFile:
                     yaml.dump(profile, yamlFile, sort_keys=False, default_flow_style=False)
             else:
-                with open(configpath + profile['displayName']+".json",'w') as jsonFile:
+                with open(configpath+fname+".json",'w') as jsonFile:
                     json.dump(profile, jsonFile, indent=10)
 
         ## If Device Configuration are not custom, save it as as JSON or YAML depending on configured value in "-o"
         else:
             if output != "json":
-                with open(configpath+profile['displayName']+".yaml",'w') as yamlFile:
+                with open(configpath+fname+".yaml",'w') as yamlFile:
                     yaml.dump(profile, yamlFile, sort_keys=False, default_flow_style=False)
             else:
-                with open(configpath+profile['displayName']+".json",'w') as jsonFile:
+                with open(configpath+fname+".json",'w') as jsonFile:
                     json.dump(profile, jsonFile, indent=10)

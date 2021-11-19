@@ -17,6 +17,8 @@ import json
 import os
 import base64
 import yaml
+
+from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 
 ## Set MS Graph endpoint
@@ -37,12 +39,14 @@ def savebackup(path,output,token):
         if os.path.exists(configpath)==False:
             os.makedirs(configpath)
 
+        ## Get filename without illegal characters
+        fname = clean_filename(script_data['displayName'])
         ## Save Powershell script as JSON or YAML depending on configured value in "-o"
         if output != "json":
-            with open(configpath+script_data['displayName']+".yaml",'w') as yamlFile:
+            with open(configpath+fname+".yaml",'w') as yamlFile:
                 yaml.dump(script_data, yamlFile, sort_keys=False, default_flow_style=False)
         else:
-            with open(configpath+script_data['displayName']+".json",'w') as jsonFile:
+            with open(configpath+fname+".json",'w') as jsonFile:
                 json.dump(script_data, jsonFile, indent=10)
 
         ## Save Powershell script data to the script data folder        
