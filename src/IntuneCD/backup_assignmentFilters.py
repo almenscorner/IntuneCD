@@ -16,6 +16,8 @@ token : str
 import json
 import os
 import yaml
+
+from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 
 ## Set MS Graph endpoint
@@ -34,10 +36,12 @@ def savebackup(path,output,token):
         if os.path.exists(configpath)==False:
             os.mkdir(configpath)
 
+        ## Get filename without illegal characters
+        fname = clean_filename(assign_filter['displayName'])
         ## Save Filters as JSON or YAML depending on configured value in "-o"
         if output != "json":
-            with open(configpath+assign_filter['displayName']+".yaml",'w') as yamlFile:
+            with open(configpath+fname+".yaml",'w') as yamlFile:
                 yaml.dump(assign_filter, yamlFile, sort_keys=False, default_flow_style=False)
         else:
-            with open(configpath+assign_filter['displayName']+".json",'w') as jsonFile:
+            with open(configpath+fname+".json",'w') as jsonFile:
                 json.dump(assign_filter, jsonFile, indent=10)

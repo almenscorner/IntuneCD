@@ -59,41 +59,42 @@ def start():
 
     def run_backup(path,output,token):
 
-        from .backup_profiles import savebackup
-        savebackup(path,output,token)
-
-        from .backup_configurationPolicies import savebackup
-        savebackup(path,output,token)
-
-        from .backup_compliance import savebackup
-        savebackup(path,output,token)
-
-        from .backup_notificationTemplate import savebackup
-        savebackup(path,output,token)
-
-        from .backup_appleEnrollmentProfile import savebackup
-        savebackup(path,output,token)
-
-        from .backup_windowsEnrollmentProfile import savebackup
-        savebackup(path,output,token)
-
-        from .backup_shellScripts import savebackup
-        savebackup(path,output,token)
-
-        from .backup_powershellScripts import savebackup
-        savebackup(path,output,token)
-
-        from .backup_AppProtection import savebackup
-        savebackup(path,output,token)
-
         from .backup_appConfiguration import savebackup
         savebackup(path,output,token)
 
         from .backup_assignmentFilters import savebackup
         savebackup(path,output,token)
 
+        from .backup_AppProtection import savebackup
+        savebackup(path,output,token)
+
+        from .backup_appleEnrollmentProfile import savebackup
+        savebackup(path,output,token)
+
+        from .backup_compliance import savebackup
+        savebackup(path,output,token)
+
+        from .backup_configurationPolicies import savebackup
+        savebackup(path,output,token)
+
         from .backup_managementIntents import savebackup
         savebackup(path,output,token)
+
+        from .backup_notificationTemplate import savebackup
+        savebackup(path,output,token)
+
+        from .backup_powershellScripts import savebackup
+        savebackup(path,output,token)
+
+        from .backup_profiles import savebackup
+        savebackup(path,output,token)
+
+        from .backup_shellScripts import savebackup
+        savebackup(path,output,token)
+
+        from .backup_windowsEnrollmentProfile import savebackup
+        savebackup(path,output,token)
+
 
     if opts.output == 'json' or opts.output == 'yaml':
         if token is None:

@@ -16,6 +16,8 @@ token : str
 import json
 import os
 import yaml
+
+from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 
 ## Set MS Graph base endpoint
@@ -40,10 +42,12 @@ def savebackup(path,output,token):
         for k in remove_keys:
             policy.pop(k, None)
 
+        ## Get filename without illegal characters
+        fname = clean_filename(name)
         ## Save Configuration Policy as JSON or YAML depending on configured value in "-o"
         if output != "json":
-            with open(configpath+name+".yaml",'w') as yamlFile:
+            with open(configpath+fname+".yaml",'w') as yamlFile:
                 yaml.dump(policy, yamlFile, sort_keys=False, default_flow_style=False)
         else:
-            with open(configpath+name+".json",'w') as jsonFile:
+            with open(configpath+fname+".json",'w') as jsonFile:
                 json.dump(policy, jsonFile, indent=10)
