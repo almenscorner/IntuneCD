@@ -19,6 +19,7 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .get_add_assignments import get_assignments
 
 ## Set MS Graph base endpoint
 baseEndpoint = "https://graph.microsoft.com/beta/deviceManagement"
@@ -38,9 +39,13 @@ def savebackup(path,output,token):
         policy_settings = makeapirequest(baseEndpoint + "/configurationPolicies" + "/" + policy['id'] + "/settings",token)
         policy['settings'] = policy_settings['value']
 
+        pid = policy['id']
         remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
         for k in remove_keys:
             policy.pop(k, None)
+
+        ## Get assignments of Device Configuration
+        get_assignments(baseEndpoint + "/configurationPolicies",policy,pid,token)
 
         ## Get filename without illegal characters
         fname = clean_filename(name)
