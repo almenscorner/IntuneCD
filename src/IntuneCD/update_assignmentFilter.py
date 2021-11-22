@@ -14,7 +14,7 @@ token : str
 import json
 import os
 import yaml
-from .graph_request import makeapirequest,makeapirequestPatch
+from .graph_request import makeapirequest,makeapirequestPatch,makeapirequestPost
 
 from deepdiff import DeepDiff
 
@@ -52,6 +52,7 @@ def update(path,token):
 
                     ## If Filter exists, continue
                     if mem_data['value']:
+                        print("-" * 90)
                         fid = mem_data['value'][0]['id']
                         remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
                         for k in remove_keys:
@@ -63,7 +64,17 @@ def update(path,token):
                         if diff:
                             print("Updating Filter: " + repo_data['displayName'] + ", values changed:")
                             print(*diff.items(), sep='\n')
+                            repo_data.pop("platform", None)
                             request_data = json.dumps(repo_data)
                             makeapirequestPatch(endpoint + "/" + fid,token,q_param,request_data)
                         else:
                             print('No difference found for Filter: ' + repo_data['displayName'])
+
+                    ## If Filter does not exist, create it
+                    else:
+                        print("-" * 90)
+                        print("Assignment filter not found, creating filter: " + repo_data['displayName'])
+                        request_json = json.dumps(repo_data)
+                        print(request_json)
+                        post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
+                        print("Assignemnt filter created with id: " + post_request['id'])

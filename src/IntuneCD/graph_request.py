@@ -50,7 +50,11 @@ def makeapirequestPost(patchEndpoint,token,q_param=None,jdata=None,status_code=2
     else:
         response = requests.post(patchEndpoint,headers=headers,data=jdata)
     if response.status_code == status_code:
-        pass
+        if response.text:
+            json_data = json.loads(response.text)
+            return json_data
+        else:
+            pass
     else:
         raise Exception('Request failed with ',response.status_code,' - ',
             response.text)

@@ -20,9 +20,11 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .get_add_assignments import get_assignments
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/"
+assignment_endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
 
 ## Get all Shell scripts and save them in specified path
 def savebackup(path,output,token):
@@ -32,6 +34,7 @@ def savebackup(path,output,token):
     for script in data['value']:
         script_data = makeapirequest(endpoint + script['id'],token)
         remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
+        sid = script_data['id']
         for k in remove_keys:
             script_data.pop(k, None)
 
@@ -41,6 +44,10 @@ def savebackup(path,output,token):
 
         ## Get filename without illegal characters
         fname = clean_filename(script_data['displayName'])
+
+        ## Get assignments of Device Configuration
+        get_assignments(assignment_endpoint,script_data,sid,token)
+
         ## Save Shell script as JSON or YAML depending on configured value in "-o"
         if output != "json":
             with open(configpath+fname+".yaml",'w') as yamlFile:

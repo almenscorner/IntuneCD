@@ -19,6 +19,7 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .get_add_assignments import get_assignments
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/managedAppPolicies"
@@ -29,12 +30,23 @@ def savebackup(path,output,token):
     data = makeapirequest(endpoint,token)
 
     for profile in data['value']:
-        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
+        pid = profile['id']
+        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','deployedAppCount','isAssigned'}
         for k in remove_keys:
             profile.pop(k, None)
         print("Backing up App Protection: " + profile['displayName'])
         if os.path.exists(configpath)==False:
             os.mkdir(configpath)
+
+        if profile['@odata.type'] == "#microsoft.graph.iosManagedAppProtection":
+            platform = "ios"
+        elif profile['@odata.type'] == "#microsoft.graph.androidManagedAppProtection":
+            platform = "android"
+        elif profile['@odata.type'] == "#microsoft.graph.windowsManagedAppProtection":
+            platform = "windows"
+
+        platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform + "ManagedAppProtections"
+        get_assignments(platform_endpoint,profile,pid,token)
 
         ## Get filename without illegal characters
         fname = clean_filename(profile['displayName'])

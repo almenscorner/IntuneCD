@@ -20,6 +20,7 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .get_add_assignments import get_assignments
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts/"
@@ -38,6 +39,9 @@ def savebackup(path,output,token):
         print("Backing up Powershell script: " + script_data['displayName'])
         if os.path.exists(configpath)==False:
             os.makedirs(configpath)
+
+        ## Get assignments of Device Configuration
+        get_assignments(endpoint,script_data,script['id'],token)
 
         ## Get filename without illegal characters
         fname = clean_filename(script_data['displayName'])
