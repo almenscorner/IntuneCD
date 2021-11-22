@@ -20,6 +20,7 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .get_add_assignments import get_assignments
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
@@ -32,7 +33,7 @@ def savebackup(path,output,token):
 
     for profile in data['value']:
         pid = profile['id']
-        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
+        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','sourceId'}
         for k in remove_keys:
             profile.pop(k, None)
 
@@ -42,6 +43,9 @@ def savebackup(path,output,token):
 
         ## Get filename without illegal characters
         fname = clean_filename(profile['displayName'])
+
+        ## Get assignments of Device Configuration
+        get_assignments(endpoint,profile,pid,token)
             
         ## If profile is custom macOS or iOS, decode the payload
         if ((profile['@odata.type'] == "#microsoft.graph.macOSCustomConfiguration") or (profile['@odata.type'] == "#microsoft.graph.iosCustomConfiguration")):
