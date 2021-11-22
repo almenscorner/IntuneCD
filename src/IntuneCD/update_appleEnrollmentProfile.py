@@ -57,6 +57,7 @@ def update(path,token):
 
                         ## If Apple Enrollment Profile exists, continue
                         if profile_data['value']:
+                            print("-" * 90)
                             pid = profile_data['value'][0]['id']
                             ## Remove keys before using DeepDiff
                             remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
