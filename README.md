@@ -1,5 +1,5 @@
 ![PyPI - License](https://img.shields.io/pypi/l/IntuneCD?style=flat-square)
-![PyPI - Downloads](https://img.shields.io/pypi/dd/IntuneCD?style=flat-square)
+[![Downloads](https://pepy.tech/badge/intunecd/month)](https://pepy.tech/project/intunecd)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/IntuneCD?style=flat-square)
 ![PyPI](https://img.shields.io/pypi/v/IntuneCD?style=flat-square)
 ![Maintenance](https://img.shields.io/maintenance/yes/2021?style=flat-square)
@@ -12,6 +12,14 @@ The main function is to back up configurations from Intune to a Git repositry fr
 
 The package can also be run standalone outside of a pipeline, or in one to only backup data.
 
+## Whats new in 1.0.4
+- Backup of assignments
+- Update of assignments on existing configurations
+- Creation of configurations if they cannot be found by the script
+- For compliance, all rules are now backed up and can be updated
+
+**Note** that since this version includes assignments, additional API permissions are needed. Refer to the required permissions below.
+
 ## Install this package
 ```python
 pip install IntuneCD
@@ -23,12 +31,15 @@ pip install IntuneCD --upgrade
 ```
 
 ## What is backed up?
-- Application Configuration Policies
-- Application Protection Policies
-- Compliance Policies
-- Device Configurations
+- Application Configuration Policies (including assignments)
+- Application Protection Policies (including assignments)
+- Compliance Policies (including assignments)
+- Device Configurations (including assignments)
     - For custom macOS and iOS configurations, mobileconfigs are backed up
-- Endpoint Security
+- Enrollment profiles
+    - Apple Business Manager
+    - Windows Autopilot
+- Endpoint Security (including assignments)
     - Security Baselines
     - Antivirus
     - Disk Encryption
@@ -38,20 +49,23 @@ pip install IntuneCD --upgrade
     - Account Protection
 - Filters
 - Notification Templates
-- Scripts
+- Scripts (including assignments)
     - Powershell
     - Shell
-- Settings Catalog Policies
+- Settings Catalog Policies (including assignments)
 
 ## What can be updated?
 Well... all of the above ;)
 
-- Application Configuration Policies
-- Application Protection Policies
-- Compliance Policies
-- Device Configurations
+- Application Configuration Policies (including assignments)
+- Application Protection Policies (including assignments)
+- Compliance Policies (including assignments)
+- Device Configurations (including assignments)
     - Including custom macOS/iOS .mobileconfigs and custom Windows profiles
-- Endpoint Security
+- Enrollment profiles
+    - Apple Business Manager
+    - Windows Autopilot
+- Endpoint Security (including assignments)
     - Security Baselines
     - Antivirus
     - Disk Encryption
@@ -61,15 +75,41 @@ Well... all of the above ;)
     - Account Protection
 - Filters
 - Notification Templates
-- Scripts
+- Scripts (including assignments)
     - Powershell
     - Shell
-- Settings Catalog Policies
+- Settings Catalog Policies (including assignments)
+
+## What can be created?
+If the configuration the script is looking for cannot be found, it will create it. This means this tool could be used in a tenant to tenant migration scenario.
+
+Supported configurations for creation are:
+
+- Application Configuration Policies (including assignments)
+- Application Protection Policies (including assignments)
+- Compliance Policies (including assignments)
+- Device Configurations (including assignments)
+    - Including custom macOS/iOS .mobileconfigs and custom Windows profiles
+- Endpoint Security (including assignments)
+    - Security Baselines
+    - Antivirus
+    - Disk Encryption
+    - Firewall
+    - Endpoint Detection and Response
+    - Attach Surface Reduction
+    - Account Protection
+- Filters
+- Notification Templates
+- Scripts (including assignments)
+    - Powershell
+    - Shell
+- Settings Catalog Policies (including assignments)
 
 ## Required Azure AD application Graph API permissions
 - DeviceManagementApps.ReadWrite.All
 - DeviceManagementConfiguration.ReadWrite.All
 - DeviceManagementServiceConfig.ReadWrite.All
+- Group.Read.All
 
 If you just want to backup you can get away with only Read permission!
 
@@ -99,6 +139,8 @@ Options:
     params:TENANT_NAME, CLIENT_ID, CLIENT_SECRET when run
     in standalone mode and params:DEV_TENANT_NAME,
     DEV_CLIENT_ID, DEV_CLIENT_SECRET when run in devtoprod
+
+For IntuneCD-startupdate the -u parameter has been added which, if set, updates assignments for existing configurations. Again the groups are matched with displayName, so they must be the same in both tenants.
 
 ### Run locally
 First install the package using pip, then you must create a json which contains authentication parameters in the following format:
