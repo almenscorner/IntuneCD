@@ -29,7 +29,7 @@ def savebackup(path,output,token):
     data = makeapirequest(endpoint,token)
 
     for assign_filter in data['value']:
-        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','platform'}
+        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
         for k in remove_keys:
             assign_filter.pop(k, None)
         print("Backing up Filter: " + assign_filter['displayName'])
