@@ -52,8 +52,9 @@ def get_assignments(endpoint,object,objectID,token,extra_endpoint=None):
             if "groupId" in assignment['target']:
                 q_param = {"$select":"displayName"}
                 group_name = makeapirequest(group_endpoint + "/" + assignment['target']['groupId'],token,q_param)
-                assignment['target'].pop('groupId', None)
-                assignment['target']['groupName'] = group_name['displayName']
+                if group_name:
+                    assignment['target'].pop('groupId', None)
+                    assignment['target']['groupName'] = group_name['displayName']
             assign.append(assignment)
             object['assignments'] = assign
             return assign
@@ -122,24 +123,27 @@ def add_assignment(endpoint,object,objectID,token,status_code=200,extra_url=None
                 else:
                     assign.append(assignment)
 
-            print("No assignment found for: " + objectID + " adding assignment(s):")
-            print(assign, sep='\n')
+            if assign:
+                print("No assignment found for: " + objectID + " adding assignment(s):")
+                print(assign, sep='\n')
 
-            if ((extra_url == None) and (wap == False) and (script == False)):
-                request_data['assignments'] = assign
-                request_json = json.dumps(request_data)
-                makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json,status_code=status_code)
-            elif wap == True:
-                for target in assign:
-                    request_data['target'] = target['target']
+                if ((extra_url == None) and (wap == False) and (script == False)):
+                    request_data['assignments'] = assign
                     request_json = json.dumps(request_data)
-                    makeapirequestPost(endpoint + "/" + objectID + "/assignments",token,q_param=None,jdata=request_json,status_code=status_code)
-            elif script == True:
-                    request_data['deviceManagementScriptAssignments'] = assign
+                    makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json,status_code=status_code)
+                elif wap == True:
+                    for target in assign:
+                        request_data['target'] = target['target']
+                        request_json = json.dumps(request_data)
+                        makeapirequestPost(endpoint + "/" + objectID + "/assignments",token,q_param=None,jdata=request_json,status_code=status_code)
+                elif script == True:
+                        request_data['deviceManagementScriptAssignments'] = assign
+                        request_json = json.dumps(request_data)
+                        print(request_json)
+                        makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json)
+                else:
+                    request_data['assignments'] = assign
                     request_json = json.dumps(request_data)
-                    print(request_json)
-                    makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json)
+                    makeapirequestPost(endpoint + "/" + objectID + extra_url + "/assign",token,q_param=None,jdata=request_json,status_code=status_code)
             else:
-                request_data['assignments'] = assign
-                request_json = json.dumps(request_data)
-                makeapirequestPost(endpoint + "/" + objectID + extra_url + "/assign",token,q_param=None,jdata=request_json,status_code=status_code)
+                print("Unable to update assignment, group cannot be found")
