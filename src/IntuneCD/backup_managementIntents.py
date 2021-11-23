@@ -30,7 +30,9 @@ def savebackup(path,output,token):
     intents = makeapirequest(baseEndpoint + "/intents",token)
 
     for intent in intents['value']:
-        if intent['templateId'] != None:
+        if intent['templateId'] == None:
+            pass
+        else:
             print("Backing up Intent: " + intent['displayName'])
             ## Get Intent template details
             intent_template = makeapirequest(baseEndpoint + "/templates" + "/" + intent['templateId'],token)
