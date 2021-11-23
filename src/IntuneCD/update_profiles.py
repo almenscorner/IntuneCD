@@ -189,6 +189,9 @@ def update(path,token,assignment=False):
                         print("-" * 90)
                         print("Profile not found, creating profile: " + repo_data['displayName'])
                         request_json = json.dumps(repo_data)
-                        post_request = makeapirequestPost(patchEndpoint,token,q_param=None,jdata=request_json,status_code=201)
+                        if repo_data['@odata.type'] == "#microsoft.graph.windowsDeliveryOptimizationConfiguration":
+                            post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
+                        else:
+                            post_request = makeapirequestPost(patchEndpoint,token,q_param=None,jdata=request_json,status_code=201)
                         add_assignment(endpoint,assign_obj,post_request['id'],token)
                         print("Profile created with id: " + post_request['id'])
