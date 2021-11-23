@@ -168,10 +168,27 @@ def update(path,token,assignment=False):
 
                     ## If profile does not exist, create it and assign
                     else:
+                        ## If profile is custom win10, create correct omaSettings format before posting
+                        if repo_data['@odata.type'] == "#microsoft.graph.windows10CustomConfiguration":
+                            repo_omas = []
+                            for repo_omaSetting in repo_data['omaSettings']:
+                                if type(repo_omaSetting['value']) is dict:
+                                    remove_keys = {'isReadOnly','secretReferenceValueId','isEncrypted'}
+                                    for k in remove_keys:
+                                        repo_omaSetting.pop(k, None)
+                                    repo_omaSetting['value'] = repo_omaSetting['value']['value']
+                                    repo_omas.append(repo_omaSetting)
+                                else:
+                                    remove_keys = {'isReadOnly','secretReferenceValueId','isEncrypted'}
+                                    for k in remove_keys:
+                                        repo_omaSetting.pop(k, None)
+                                    repo_omas.append(repo_omaSetting)
+                            repo_data.pop('omaSettings')
+                            repo_data['omaSettings'] = repo_omas
+                        ## Post new profile
                         print("-" * 90)
                         print("Profile not found, creating profile: " + repo_data['displayName'])
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(patchEndpoint,token,q_param=None,jdata=request_json,status_code=201)
                         add_assignment(endpoint,assign_obj,post_request['id'],token)
                         print("Profile created with id: " + post_request['id'])
-                    
