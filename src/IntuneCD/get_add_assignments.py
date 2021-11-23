@@ -113,7 +113,7 @@ def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=
         ## If current assignment is none, add assignments        
         else:
             ## Get group id for each group if key = groupName
-            for assignment in object['assignments']:
+            for assignment in add_object['assignments']:
                 if "groupName" in assignment['target']:
                     group_q_param = {"$filter":"displayName eq " + "'" + assignment['target']['groupName'] + "'"}
                     group_data = makeapirequest(group_endpoint,token,group_q_param)
