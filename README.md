@@ -31,15 +31,21 @@ pip install IntuneCD --upgrade
 ```
 
 ## What is backed up?
-- Application Configuration Policies (including assignments)
-- Application Protection Policies (including assignments)
-- Compliance Policies (including assignments)
-- Device Configurations (including assignments)
+- Application Configuration Policies
+    - Including assignments
+- Application Protection Policies
+    - Including assignments
+- Compliance Policies
+    - Including assignments
+- Device Configurations
+    - Including assignments
     - For custom macOS and iOS configurations, mobileconfigs are backed up
 - Enrollment profiles
     - Apple Business Manager
     - Windows Autopilot
-- Endpoint Security (including assignments)
+        - Including assignments
+- Endpoint Security
+    - Including assignments
     - Security Baselines
     - Antivirus
     - Disk Encryption
@@ -49,23 +55,31 @@ pip install IntuneCD --upgrade
     - Account Protection
 - Filters
 - Notification Templates
-- Scripts (including assignments)
+- Scripts
+    - Including assignments
     - Powershell
     - Shell
-- Settings Catalog Policies (including assignments)
+- Settings Catalog Policies
+    - Including assignments
 
 ## What can be updated?
 Well... all of the above ;)
 
-- Application Configuration Policies (including assignments)
-- Application Protection Policies (including assignments)
-- Compliance Policies (including assignments)
-- Device Configurations (including assignments)
+- Application Configuration Policies
+    - Including assignments
+- Application Protection Policies
+    - Including assignments
+- Compliance Policies
+    - Including assignments
+- Device Configurations
+    - Including assignments
     - Including custom macOS/iOS .mobileconfigs and custom Windows profiles
 - Enrollment profiles
     - Apple Business Manager
     - Windows Autopilot
-- Endpoint Security (including assignments)
+        - Including assignments
+- Endpoint Security
+    - Including assignments
     - Security Baselines
     - Antivirus
     - Disk Encryption
@@ -75,22 +89,29 @@ Well... all of the above ;)
     - Account Protection
 - Filters
 - Notification Templates
-- Scripts (including assignments)
+- Scripts
+    - Including assignments
     - Powershell
     - Shell
-- Settings Catalog Policies (including assignments)
+- Settings Catalog Policies
+    - Including assignments
 
 ## What can be created?
 If the configuration the script is looking for cannot be found, it will create it. This means this tool could be used in a tenant to tenant migration scenario.
 
 Supported configurations for creation are:
 
-- Application Configuration Policies (including assignments)
-- Application Protection Policies (including assignments)
-- Compliance Policies (including assignments)
-- Device Configurations (including assignments)
+- Application Configuration Policies
+    - Including assignments
+- Application Protection Policies
+    - Including assignments
+- Compliance Policies
+    - Including assignments
+- Device Configurations
+    - Including assignments
     - Including custom macOS/iOS .mobileconfigs and custom Windows profiles
-- Endpoint Security (including assignments)
+- Endpoint Security
+    - Including assignments
     - Security Baselines
     - Antivirus
     - Disk Encryption
@@ -100,10 +121,12 @@ Supported configurations for creation are:
     - Account Protection
 - Filters
 - Notification Templates
-- Scripts (including assignments)
+- Scripts
+    - Including assignments
     - Powershell
     - Shell
-- Settings Catalog Policies (including assignments)
+- Settings Catalog Policies
+    - Including assignments
 
 ## Required Azure AD application Graph API permissions
 - DeviceManagementApps.ReadWrite.All
@@ -140,7 +163,7 @@ Options:
     in standalone mode and params:DEV_TENANT_NAME,
     DEV_CLIENT_ID, DEV_CLIENT_SECRET when run in devtoprod
 
-For IntuneCD-startupdate the -u parameter has been added which, if set, updates assignments for existing configurations. Again the groups are matched with displayName, so they must be the same in both tenants.
+For IntuneCD-startupdate 1.0.4 the -u parameter has been added which, if set, updates assignments for existing configurations. Again the groups are matched with displayName, so they must be the same in both tenants.
 
 ### Run locally
 First install the package using pip, then you must create a json which contains authentication parameters in the following format:
@@ -233,3 +256,6 @@ steps:
 
 ## Good to know
 When this tool tries to update configurations, it filters or searches for the displayname. Therefore the displayname from DEV must match in PROD.
+
+## Current known limitations
+Updating Windows Update Rings configurations is currently not supported, the tool can however create update rings if they don't exist.
