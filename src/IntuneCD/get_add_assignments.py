@@ -38,9 +38,9 @@ from .graph_request import makeapirequest,makeapirequestPost
 ## Set MS Graph endpoint
 group_endpoint = "https://graph.microsoft.com/beta/groups"
 
-def get_assignments(endpoint,object,objectID,token,extra_endpoint=None):
+def get_assignments(endpoint,get_object,objectID,token,extra_endpoint=None):
     remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','sourceId'}
-    assign = []
+    current_assignments = []
     if extra_endpoint == None:
         assignments = makeapirequest(endpoint + "/" + objectID + "/assignments", token)
     else:
@@ -55,34 +55,36 @@ def get_assignments(endpoint,object,objectID,token,extra_endpoint=None):
                 if group_name:
                     assignment['target'].pop('groupId', None)
                     assignment['target']['groupName'] = group_name['displayName']
-            assign.append(assignment)
-            object['assignments'] = assign
-            return assign
+            current_assignments.append(assignment)
+            get_object['assignments'] = current_assignments
+            return current_assignments
 
-def add_assignment(endpoint,object,objectID,token,status_code=200,extra_url=None,wap=False,script=False,extra_endpoint=None):
+def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=None,wap=False,script=False,extra_endpoint=None):
     ## Add assignment if assignments key exists
-    if "assignments" in object:
+    if "assignments" in add_object:
+        repo_assignments = add_object['assignments']
         ## If groupName, search for group
         request_data = {}
         assign = []
-
         ## Check if object has assignments assigned
         if extra_endpoint == None:
-            curr_assignment = get_assignments(endpoint,object,objectID,token)
+            curr_assignment = get_assignments(endpoint,add_object,objectID,token)
         else:
-            curr_assignment = get_assignments(endpoint,object,objectID,token,extra_endpoint)
+            curr_assignment = get_assignments(endpoint,add_object,objectID,token,extra_endpoint)
         ## Get details of current assignment
         if curr_assignment:
-            for assignment in object['assignments']:
+            curr_assignment_list = [value for elem in curr_assignment
+                      for value in elem['target'].values()]
+            for assignment in repo_assignments:
                 if "groupName" in assignment['target']:
-                    if assignment not in curr_assignment:
+                    if assignment['target']['groupName'] not in curr_assignment_list:
                         group_q_param = {"$filter":"displayName eq " + "'" + assignment['target']['groupName'] + "'"}
                         group_data = makeapirequest(group_endpoint,token,group_q_param)
                         if group_data['value']:
                             assignment['target'].pop('groupName')
                             assignment['target']['groupId'] = group_data['value'][0]['id']
                             assign.append(assignment)
-                elif assignment not in curr_assignment:
+                elif assignment['target']['@odata.type'] not in curr_assignment_list:
                     assign.append(assignment)
                 ## If missing assignments, add them
                 if assign:
