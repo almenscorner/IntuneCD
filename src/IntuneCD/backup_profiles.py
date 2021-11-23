@@ -33,7 +33,7 @@ def savebackup(path,output,token):
 
     for profile in data['value']:
         pid = profile['id']
-        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','sourceId'}
+        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','sourceId','supportsScopeTags'}
         for k in remove_keys:
             profile.pop(k, None)
 
