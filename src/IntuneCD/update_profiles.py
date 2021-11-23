@@ -24,7 +24,6 @@ from deepdiff import DeepDiff
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
-patchEndpoint = "https://graph.microsoft.com/v1.0/deviceManagement/deviceConfigurations/"
 
 def update(path,token,assignment=False):
 
@@ -57,9 +56,12 @@ def update(path,token,assignment=False):
                     
                     ## Get Device Configuration with query parameter
                     mem_data = makeapirequest(endpoint,token,q_param)
-
                     ## If Device Configuration exists, continue
                     if mem_data['value']:
+                        ## Updating Windows update rings is currently not supported
+                        if repo_data['@odata.type'] == "#microsoft.graph.windowsUpdateForBusinessConfiguration":
+                            continue
+
                         print("-" * 90)
                         pid = mem_data['value'][0]['id']
                         ## Remove keys before using DeepDiff
@@ -94,7 +96,7 @@ def update(path,token,assignment=False):
                                     payload = plistlib.dumps(repo_payload_config)
                                     repo_data['payload'] = str(base64.b64encode(payload),'utf-8')
                                     request_data = json.dumps(repo_data)
-                                    makeapirequestPatch(patchEndpoint + pid,token,q_param,request_data,status_code=204)
+                                    makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data,status_code=204)
                                 else:
                                     print('No difference found for profile: ' + repo_data['displayName'])
 
@@ -151,7 +153,7 @@ def update(path,token,assignment=False):
 
                             if repo_omas:
                                 request_data = json.dumps(repo_data)
-                                makeapirequestPatch(patchEndpoint + pid,token,q_param,request_data,status_code=204)
+                                makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data,status_code=204)
 
                         ## If Device Configuration is not custom, compare the values           
                         else:
@@ -162,7 +164,8 @@ def update(path,token,assignment=False):
                                 print("Updating profile: " + repo_data['displayName'] + ", values changed:")
                                 print(*diff.items(), sep='\n')
                                 request_data = json.dumps(repo_data)
-                                makeapirequestPatch(patchEndpoint + pid,token,q_param,request_data,status_code=204)
+                                print(request_data)
+                                makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data,status_code=204)
                             else:
                                 print('No difference found for profile: ' + repo_data['displayName'])
 
@@ -189,9 +192,6 @@ def update(path,token,assignment=False):
                         print("-" * 90)
                         print("Profile not found, creating profile: " + repo_data['displayName'])
                         request_json = json.dumps(repo_data)
-                        if repo_data['@odata.type'] == "#microsoft.graph.windowsDeliveryOptimizationConfiguration":
-                            post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
-                        else:
-                            post_request = makeapirequestPost(patchEndpoint,token,q_param=None,jdata=request_json,status_code=201)
+                        post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
                         add_assignment(endpoint,assign_obj,post_request['id'],token)
                         print("Profile created with id: " + post_request['id'])
