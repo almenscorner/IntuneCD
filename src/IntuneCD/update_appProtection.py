@@ -59,9 +59,14 @@ def update(path,token,assignment=False):
                         platform = "android"
                     elif repo_data['@odata.type'] == "#microsoft.graph.windowsManagedAppProtection":
                         platform = "windows"
+                    elif repo_data['@odata.type'] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
+                        platform = "mdmWindowsInformationProtectionPolicies"
 
-                    platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform + "ManagedAppProtections"
-                        
+                    if platform == "mdmWindowsInformationProtectionPolicies":
+                        platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform
+                    else: 
+                        platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform + "ManagedAppProtections"
+
                     ## Get App Protection with query parameter
                     mem_data = makeapirequest(endpoint,token,q_param)
 
