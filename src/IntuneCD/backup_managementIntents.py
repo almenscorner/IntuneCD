@@ -31,7 +31,7 @@ def savebackup(path,output,token):
 
     for intent in intents['value']:
         if intent['templateId'] == None:
-            pass
+            continue
         else:
             print("Backing up Intent: " + intent['displayName'])
             ## Get Intent template details
@@ -47,16 +47,19 @@ def savebackup(path,output,token):
             settings_delta = {}
             for intent_category in intent_template_categories['value']:
                 intent_settings = makeapirequest(baseEndpoint + "/intents" + "/" + intent['id'] + "/categories" + "/" + intent_category['id'] + "/settings",token)
+                for setting in intent_settings['value']:
+                    setting.pop('id', None)
                 settings_delta = intent_settings['value']
 
             intent_value = {
                 "displayName": intent['displayName'],
                 "description": intent['description'],
+                "templateId": intent['templateId'],
                 "settingsDelta": settings_delta,
                 "roleScopeTagIds": intent['roleScopeTagIds']
             }
 
-            ## Get assignments of Device Configuration
+            ## Get assignments of Intent
             get_assignments(baseEndpoint + "/intents",intent_value,intent['id'],token)
 
             ## Get filename without illegal characters
