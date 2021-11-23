@@ -21,6 +21,10 @@ def makeapirequest(endpoint,token,q_param=None):
                 json_data['value'].append(record['value'][count])
                 count += 1
         return(json_data)
+    elif response.status_code == 404:
+        print("Resource not found in Microsoft Graph: " + endpoint)
+    elif (("assignmentFilters" in endpoint) and ("FeatureNotEnabled" in response.text)):
+        print("Assignment filters not enabled in tenant, skipping")
     else:
         raise Exception('Request failed with ',response.status_code,' - ',
             response.text)
