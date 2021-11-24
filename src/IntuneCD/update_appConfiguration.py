@@ -22,6 +22,7 @@ from deepdiff import DeepDiff
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfigurations"
+app_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 def update(path,token,assignment=False):
 
@@ -66,6 +67,7 @@ def update(path,token,assignment=False):
                         remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
                         for k in remove_keys:
                             mem_data['value'][0].pop(k, None)
+                        repo_data.pop('targetedMobileApps', None)
 
                         ## Check if assignment needs updating and apply chanages
                         if assignment == True:
@@ -86,7 +88,23 @@ def update(path,token,assignment=False):
                     else:
                         print("-" * 90)
                         print("App Configuration not found, creating: " + repo_data['displayName'])
-                        request_json = json.dumps(repo_data)
-                        post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
-                        add_assignment(endpoint,assign_obj,post_request['id'],token,extra_url="/microsoft.graph.managedDeviceMobileAppConfiguration")
-                        print("App Configuration created with id: " + post_request['id'])
+                        app_ids = {}
+                        ## If backup contains targeted apps, search for the app
+                        if repo_data['targetedMobileApps']:
+                            q_param = {"$filter": "displayName eq " + "'" + repo_data['targetedMobileApps']['appName'] + "'"}
+                            app_request = makeapirequest(app_endpoint,token,q_param)
+                            if app_request['value']:
+                                ## If the app matches the type and name, add the app ID to app_ids
+                                if ((app_request['value'][0]['@odata.type'] == repo_data['targetedMobileApps']['type']) and (app_request['value'][0]['displayName'] == repo_data['targetedMobileApps']['appName'])):
+                                    app_ids = app_request['value'][0]['id']
+                        ## If the app could be found and matches type and name in backup, continue to create
+                        if app_ids:
+                            repo_data.pop('targetedMobileApps')
+                            repo_data['targetedMobileApps'] = [app_ids]
+                            request_json = json.dumps(repo_data)
+                            print(request_json)
+                            post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
+                            add_assignment(endpoint,assign_obj,post_request['id'],token,extra_url="/microsoft.graph.managedDeviceMobileAppConfiguration")
+                            print("App Configuration created with id: " + post_request['id'])
+                        else:
+                            print("App configured in App Configuration profile could not be found, skipping creation")
