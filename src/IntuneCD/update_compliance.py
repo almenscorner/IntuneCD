@@ -70,10 +70,11 @@ def update(path,token,assignment=False):
                         remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','@odata.context','scheduledActionConfigurations@odata.context','scheduledActionsForRule@odata.context'}
                         for k in remove_keys:
                             mem_data['value'][0].pop(k, None)
-                            for rule in mem_data['value'][0]['scheduledActionsForRule']:
-                                rule.pop(k, None)
-                            for scheduled_config in mem_data['value'][0]['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
-                                scheduled_config.pop(k, None)
+                            if mem_data['value'][0]['scheduledActionsForRule']:
+                                for rule in mem_data['value'][0]['scheduledActionsForRule']:
+                                    rule.pop(k, None)
+                                for scheduled_config in mem_data['value'][0]['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
+                                    scheduled_config.pop(k, None)
 
                         ## Check if assignment needs updating and apply chanages
                         if assignment == True:
