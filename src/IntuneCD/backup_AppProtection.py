@@ -44,8 +44,14 @@ def savebackup(path,output,token):
             platform = "android"
         elif profile['@odata.type'] == "#microsoft.graph.windowsManagedAppProtection":
             platform = "windows"
+        elif profile['@odata.type'] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
+            platform = "mdmWindowsInformationProtectionPolicies"
 
-        platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform + "ManagedAppProtections"
+        if platform == "mdmWindowsInformationProtectionPolicies":
+            platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform
+        else: 
+            platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform + "ManagedAppProtections"
+            
         get_assignments(platform_endpoint,profile,pid,token)
 
         ## Get filename without illegal characters
