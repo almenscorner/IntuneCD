@@ -141,7 +141,6 @@ def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=
                 elif script == True:
                         request_data['deviceManagementScriptAssignments'] = assign
                         request_json = json.dumps(request_data)
-                        print(request_json)
                         makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json)
                 else:
                     request_data['assignments'] = assign
