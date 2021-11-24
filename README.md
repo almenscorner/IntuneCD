@@ -182,10 +182,48 @@ When you have created the json, you can now run these commands
 IntuneCD-startbackup -m 1 -o yaml -p /path/to/save/in -a /path/to/auth.json/
 ```
 
+If you run without the -m parameter, make sure you have one auth.json pointing to DEV and another pointing to PROD, example:
+```json
+{
+    "params":{
+        "DEV_TENANT_NAME": "",
+        "DEV_CLIENT_ID": "",
+        "DEV_CLIENT_SECRET": ""
+    }
+}
+```
+
+```json
+{
+    "params":{
+        "PROD_TENANT_NAME": "",
+        "PROD_CLIENT_ID": "",
+        "PROD_CLIENT_SECRET": ""
+    }
+}
+```
+
+```python
+IntuneCD-startbackup -o yaml -p /path/to/save/in -a /path/to/auth_DEV.json/
+```
+
+```python
+IntuneCD-startbackup -p /path/to/save/in -a /path/to/auth_PROD.json/
+```
+
 ### Run from a pipeline
 I have tested this with Azure DevOps which is what I will give an example to. But it could just as well be run using GitHub Actions.
 
-In the example pipeline below I'm running with the parameters -m 1 (standalone mode) and -o yaml (output configurations in yaml format). If you are running this in DEV -> PROD mode, remove -m and add DEV_ in front of all env: variables except for REPO_DIR. CLIENT_SECRET or DEV_CLIENT_SECRET should be added as a secret variable.
+In the example pipeline below I'm running with the parameters -m 1 (standalone mode) and -o yaml (output configurations in yaml format). If you are running this in DEV -> PROD mode, remove -m and add DEV_ in front of all env: variables except for REPO_DIR. CLIENT_SECRET should be added as a secret variable.
+
+DEV env variables:
+```yaml
+  env:
+    REPO_DIR: $(REPO_DIR)
+    DEV_TENANT_NAME: $(TENANT_NAME)
+    DEV_CLIENT_ID: $(CLIENT_ID)
+    DEV_CLIENT_SECRET: $(CLIENT_SECRET)
+```
 
 **Example backup pipeline:**
 ```yaml
@@ -225,7 +263,16 @@ steps:
     git push origin HEAD:main
   displayName: Commit changes
 ```
-The following shows a pipeline which updates configurations in Intune. Again I'm running with -m 1. If this should update PROD, add PROD_ in front of all env: variables except REPO_DIR. CLIENT_SECRET or PROD_CLIENT_SECRET should be added as a secret variable.
+The following shows a pipeline which updates configurations in Intune. Again I'm running with -m 1. If this should update PROD, add PROD_ in front of all env: variables except REPO_DIR. CLIENT_SECRET should be added as a secret variable.
+
+PROD env variables:
+```yaml
+  env:
+    REPO_DIR: $(REPO_DIR)
+    PROD_TENANT_NAME: $(TENANT_NAME)
+    PROD_CLIENT_ID: $(CLIENT_ID)
+    PROD_CLIENT_SECRET: $(CLIENT_SECRET)
+```
 
 **Example update pipeline:**
 ```yaml
