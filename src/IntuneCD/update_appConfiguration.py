@@ -91,18 +91,16 @@ def update(path,token,assignment=False):
                         app_ids = {}
                         ## If backup contains targeted apps, search for the app
                         if repo_data['targetedMobileApps']:
-                            q_param = {"$filter": "displayName eq " + "'" + repo_data['targetedMobileApps']['appName'] + "'"}
+                            q_param = {"$filter": "(isof(" + "'"+str(repo_data['targetedMobileApps']['type']).replace('#', '') + "'" + '))',
+                                        "$search": repo_data['targetedMobileApps']['appName']}
                             app_request = makeapirequest(app_endpoint,token,q_param)
                             if app_request['value']:
-                                ## If the app matches the type and name, add the app ID to app_ids
-                                if ((app_request['value'][0]['@odata.type'] == repo_data['targetedMobileApps']['type']) and (app_request['value'][0]['displayName'] == repo_data['targetedMobileApps']['appName'])):
-                                    app_ids = app_request['value'][0]['id']
+                                app_ids = app_request['value'][0]['id']
                         ## If the app could be found and matches type and name in backup, continue to create
                         if app_ids:
                             repo_data.pop('targetedMobileApps')
                             repo_data['targetedMobileApps'] = [app_ids]
                             request_json = json.dumps(repo_data)
-                            print(request_json)
                             post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
                             add_assignment(endpoint,assign_obj,post_request['id'],token,extra_url="/microsoft.graph.managedDeviceMobileAppConfiguration")
                             print("App Configuration created with id: " + post_request['id'])
