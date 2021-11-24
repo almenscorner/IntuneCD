@@ -34,6 +34,9 @@ def update(path,token,assignment=False):
             # If path is Directory, skip
             if os.path.isdir(file):
                 continue
+            # If file is .DS_Store, skip
+            if filename == ".DS_Store":
+                continue
             
             (name,ext) = os.path.splitext(filename)
             ## Check which format the file is saved as then open file, load data and set query parameter

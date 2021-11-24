@@ -34,6 +34,10 @@ def update(path,token,assignment=False):
         pattern = configpath + "*/*"
         for filename in glob.glob(pattern, recursive=True):
 
+            # If file is .DS_Store, skip
+            if filename == ".DS_Store":
+                continue
+
             ## Check which format the file is saved as then open file, load data and set query parameter
             with open(filename) as f:
                     if filename.endswith(".yaml"):
