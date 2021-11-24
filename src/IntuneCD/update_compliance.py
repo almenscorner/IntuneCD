@@ -88,8 +88,9 @@ def update(path,token,assignment=False):
                             print(*diff.items(), sep='\n')
                             request_data = json.dumps(repo_data)
                             makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data,status_code=204)
-                        for mem_rule,repo_rule in zip(mem_data['value'][0]['scheduledActionsForRule'],repo_data['scheduledActionsForRule']):
-                            rdiff = DeepDiff(mem_rule, repo_rule, ignore_order=True).get('values_changed',{})
+                        if repo_data['scheduledActionsForRule']:
+                            for mem_rule,repo_rule in zip(mem_data['value'][0]['scheduledActionsForRule'],repo_data['scheduledActionsForRule']):
+                                rdiff = DeepDiff(mem_rule, repo_rule, ignore_order=True).get('values_changed',{})
                         if rdiff:
                             print("Updating rules for Compliance Policy: " + repo_data['displayName'] + ", values changed:")
                             print(*rdiff.items(), sep='\n')
