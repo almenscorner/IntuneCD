@@ -39,8 +39,9 @@ def savebackup(path,output,token):
             policy.pop(k, None)
             for rule in policy['scheduledActionsForRule']:
                 rule.pop(k, None)
-            for scheduled_config in policy['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
-                scheduled_config.pop(k, None)
+            if policy['scheduledActionsForRule']:
+                for scheduled_config in policy['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
+                    scheduled_config.pop(k, None)
 
         if os.path.exists(configpath)==False:
             os.makedirs(configpath)
