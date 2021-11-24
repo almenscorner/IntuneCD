@@ -10,7 +10,7 @@ IntuneCD or, Intune Continuous Delivery as it stands for is a Python package tha
 
 The main function is to back up configurations from Intune to a Git repositry from a DEV environment and if any configurations has changed, push them to PROD Intune environment.
 
-The package can also be run standalone outside of a pipeline, or in one to only backup data.
+The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
 ## Whats new in 1.0.4
 - Backup of assignments
@@ -18,7 +18,7 @@ The package can also be run standalone outside of a pipeline, or in one to only 
 - Creation of configurations if they cannot be found by the script
 - For compliance, all rules are now backed up and can be updated
 
-**Note** that since this version includes assignments, additional API permissions are needed. Refer to the required permissions below.
+:eyes: **Note** that since this version includes assignments, additional API permissions are needed. Refer to the required permissions below.
 
 ## Install this package
 ```python
@@ -97,9 +97,7 @@ Well... all of the above ;)
     - Including assignments
 
 ## What can be created?
-If the configuration the script is looking for cannot be found, it will create it. This means this tool could be used in a tenant to tenant migration scenario.
-
-Supported configurations for creation are:
+If the configuration the script is looking for cannot be found, it will create it. Supported configurations for creation are:
 
 - Application Configuration Policies
     - Including assignments
@@ -208,7 +206,7 @@ IntuneCD-startbackup -o yaml -p /path/to/save/in -a /path/to/auth_DEV.json/
 ```
 
 ```python
-IntuneCD-startbackup -p /path/to/save/in -a /path/to/auth_PROD.json/
+IntuneCD-startupdate -p /path/to/save/in -a /path/to/auth_PROD.json/
 ```
 
 ### Run from a pipeline
