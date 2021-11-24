@@ -78,6 +78,5 @@ def update(path,token):
                         print("-" * 90)
                         print("Assignment filter not found, creating filter: " + repo_data['displayName'])
                         request_json = json.dumps(repo_data)
-                        print(request_json)
                         post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
                         print("Assignemnt filter created with id: " + post_request['id'])
