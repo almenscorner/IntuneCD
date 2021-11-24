@@ -64,8 +64,10 @@ def update(path,token,assignment=False):
                         platform = "windows"
                     elif repo_data['@odata.type'] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
                         platform = "mdmWindowsInformationProtectionPolicies"
+                    elif repo_data['@odata.type'] == "#microsoft.graph.windowsInformationProtectionPolicy":
+                        platform = "windowsInformationProtectionPolicies"
 
-                    if platform == "mdmWindowsInformationProtectionPolicies":
+                    if ((platform == "mdmWindowsInformationProtectionPolicies") or (platform == "windowsInformationProtectionPolicies")):
                         platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform
                     else: 
                         platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform + "ManagedAppProtections"
@@ -93,7 +95,7 @@ def update(path,token,assignment=False):
                             print("Updating App protection: " + repo_data['displayName'] + ", values changed:")
                             print(*diff.items(), sep='\n')
                             request_data = json.dumps(repo_data)
-                            makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data,status_code=204)
+                            makeapirequestPatch(platform_endpoint + "/" + pid,token,q_param,request_data,status_code=204)
                         else:
                             print('No difference found for App protection: ' + repo_data['displayName'])
 
