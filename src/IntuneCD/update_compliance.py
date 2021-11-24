@@ -80,31 +80,38 @@ def update(path,token,assignment=False):
                         if assignment == True:
                             add_assignment(endpoint,assign_obj,pid,token)
 
-                        diff = DeepDiff(mem_data['value'][0], repo_data, ignore_order=True, exclude_paths="root['scheduledActionsForRule'][0]['scheduledActionConfigurations']").get('values_changed',{})
+                        diff = DeepDiff(mem_data['value'][0], repo_data, ignore_order=True, 
+                        exclude_paths="root['scheduledActionsForRule'][0]['scheduledActionConfigurations']").get('values_changed',{})
 
                         ## If any changed values are found, push them to Intune
                         if diff:
                             print("Updating Compliance policy: " + repo_data['displayName'] + ", values changed:")
                             print(*diff.items(), sep='\n')
+                            scheduled_actions = repo_data['scheduledActionsForRule']
+                            repo_data.pop('scheduledActionsForRule', None)
                             request_data = json.dumps(repo_data)
                             makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data,status_code=204)
+                            repo_data['scheduledActionsForRule'] = scheduled_actions
+
                         if repo_data['scheduledActionsForRule']:
                             for mem_rule,repo_rule in zip(mem_data['value'][0]['scheduledActionsForRule'],repo_data['scheduledActionsForRule']):
                                 rdiff = DeepDiff(mem_rule, repo_rule, ignore_order=True).get('values_changed',{})
-                        if rdiff:
-                            print("Updating rules for Compliance Policy: " + repo_data['displayName'] + ", values changed:")
-                            print(*rdiff.items(), sep='\n')
-                            request_data = {
-                                "deviceComplianceScheduledActionForRules": [
-                                    {
-                                        "ruleName": "PasswordRequired",
-                                        "scheduledActionConfigurations":
-                                            repo_data['scheduledActionsForRule'][0]['scheduledActionConfigurations']
-                                    }
-                                ]
-                            }
-                            request_json = json.dumps(request_data)
-                            makeapirequestPost(endpoint + "/" + pid + "/scheduleActionsForRules",token,q_param,request_json)
+                            if rdiff:
+                                print("Updating rules for Compliance Policy: " + repo_data['displayName'] + ", values changed:")
+                                print(*rdiff.items(), sep='\n')
+                                request_data = {
+                                    "deviceComplianceScheduledActionForRules": [
+                                        {
+                                            "ruleName": "PasswordRequired",
+                                            "scheduledActionConfigurations":
+                                                repo_data['scheduledActionsForRule'][0]['scheduledActionConfigurations']
+                                        }
+                                    ]
+                                }
+                                request_json = json.dumps(request_data)
+                                makeapirequestPost(endpoint + "/" + pid + "/scheduleActionsForRules",token,q_param,request_json)
+                            else:
+                                print('No difference in rules found for Compliance policy: ' + repo_data['displayName'])
                         else:
                             print('No difference found for Compliance policy: ' + repo_data['displayName'])
 
