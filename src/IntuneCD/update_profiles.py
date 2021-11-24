@@ -164,7 +164,6 @@ def update(path,token,assignment=False):
                                 print("Updating profile: " + repo_data['displayName'] + ", values changed:")
                                 print(*diff.items(), sep='\n')
                                 request_data = json.dumps(repo_data)
-                                print(request_data)
                                 makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data,status_code=204)
                             else:
                                 print('No difference found for profile: ' + repo_data['displayName'])
