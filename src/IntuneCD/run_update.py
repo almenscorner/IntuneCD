@@ -29,7 +29,11 @@ def start():
                "params:TENANT_NAME, CLIENT_ID, CLIENT_SECRET when run in standalone mode and "
                "params:PROD_TENANT_NAME, PROD_CLIENT_ID, PROD_CLIENT_SECRET when run in devtoprod"),
         type=str
-    )    
+    )
+    parser.add_option(
+        "-u",
+        action = "store_true"
+    )
 
     (opts, _) = parser.parse_args()
 
@@ -50,48 +54,48 @@ def start():
 
     token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="PROD")   
 
-    def run_update(path,token):
+    def run_update(path,token,assignment):
 
         from .update_appConfiguration import update
-        update(path,token)
+        update(path,token,assignment)
 
         from .update_assignmentFilter import update
         update(path,token)
 
         from .update_appProtection import update
-        update(path,token)
+        update(path,token,assignment)
 
         from .update_appleEnrollmentProfile import update
         update(path,token)
 
         from .update_compliance import update
-        update(path,token)
+        update(path,token,assignment)
 
         from .update_configurationPolicies import update
-        update(path,token)
+        update(path,token,assignment)
 
         from .update_managementIntents import update
-        update(path,token)
+        update(path,token,assignment)
 
         from .update_notificationTemplate import update
         update(path,token)
 
         from .update_powershellScripts import update
-        update(path,token)
+        update(path,token,assignment)
 
         from .update_profiles import update
-        update(path,token)
+        update(path,token,assignment)
 
         from .update_shellScripts import update
-        update(path,token)
+        update(path,token,assignment)
 
         from .update_windowsEnrollmentProfile import update
-        update(path,token)
+        update(path,token,assignment)
 
     if token is None:
         raise Exception("Token is empty, please check os.environ variables")
     else:
-        run_update(opts.path,token)
+        run_update(opts.path,token,opts.u)
 
 if __name__ == "__main__":
     start()

@@ -14,15 +14,16 @@ token : str
 """
 
 import json
-import requests
 import os
 import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .get_add_assignments import get_assignments
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfigurations"
+app_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 ## Get all App Configuration policies and save them in specified path
 def savebackup(path,output,token):
@@ -30,12 +31,28 @@ def savebackup(path,output,token):
     data = makeapirequest(endpoint,token)
 
     for profile in data['value']:
+        pid = profile['id']
         remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
         for k in remove_keys:
             profile.pop(k, None)
+
+        ## Get name and type of app on App Configuration Profile
+        app_dict = {}
+        for app_id in profile['targetedMobileApps']:
+            app_data = makeapirequest(app_endpoint + "/" + app_id,token)
+            if app_data:
+                app_dict['appName'] = app_data['displayName']
+                app_dict['type'] = app_data['@odata.type']
+        
+        if app_dict:
+            profile.pop('targetedMobileApps')
+            profile['targetedMobileApps'] = app_dict
+        
         print("Backing up App Configuration: " + profile['displayName'])
         if os.path.exists(configpath)==False:
             os.mkdir(configpath)
+
+        get_assignments(endpoint,profile,pid,token)
         
         ## Get filename without illegal characters
         fname = clean_filename(profile['displayName'])        

@@ -19,6 +19,7 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .get_add_assignments import get_assignments
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSettings/"
@@ -32,6 +33,7 @@ def savebackup(path,output,token):
         profile_data = makeapirequest(endpoint + profile['id'] + '/enrollmentProfiles',token)
         for p in profile_data['value']:
             p_data = makeapirequest(endpoint + profile['id'] + '/enrollmentProfiles/' + p['id'],token)
+            pid = p_data['id']
             remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','isDefault'}
             for k in remove_keys:
                 p_data.pop(k, None)

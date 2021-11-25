@@ -15,14 +15,17 @@ import json
 import os
 import base64
 import yaml
-from .graph_request import makeapirequest,makeapirequestPatch
+
+from .graph_request import makeapirequest,makeapirequestPatch,makeapirequestPost
+from .get_add_assignments import add_assignment
 
 from deepdiff import DeepDiff
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts"
+assignment_endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
 
-def update(path,token):
+def update(path,token,assignment=False):
 
     ## Set Shell scritp path
     configpath = path+"/"+"Scripts/Shell"
@@ -32,6 +35,9 @@ def update(path,token):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
             if os.path.isdir(file):
+                continue
+            # If file is .DS_Store, skip
+            if filename == ".DS_Store":
                 continue
 
             ## Check which format the file is saved as then open file, load data and set query parameter           
@@ -45,11 +51,18 @@ def update(path,token):
                         repo_data = json.load(f)
                         q_param = {"$filter":"displayName eq " + "'" + repo_data['displayName'] + "'"}
 
+                    ## Create object to pass in to assignment function
+                    assign_obj = {}
+                    if "assignments" in repo_data:
+                        assign_obj['assignments'] = repo_data['assignments']
+                    repo_data.pop('assignments', None)
+
                     ## Get Shell script with query parameter
                     mem_shellScript = makeapirequest(endpoint,token,q_param)
 
                     ## If Shell script exists, continue
                     if mem_shellScript['value']:
+                        print("-" * 90)
                         q_param = None
                         ## Get Shell script details
                         mem_data = makeapirequest(endpoint + "/" + mem_shellScript['value'][0]['id'],token,q_param)
@@ -58,6 +71,10 @@ def update(path,token):
                         remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
                         for k in remove_keys:
                             mem_data.pop(k, None)
+
+                        ## Check if assignment needs updating and apply chanages
+                        if assignment == True:
+                            add_assignment(endpoint,assign_obj,pid,token,script=True,extra_endpoint=assignment_endpoint)
 
                         ## Check if script data is saved and read the file
                         if os.path.exists(configpath + "/Script Data/" + repo_data['fileName']):
@@ -81,3 +98,12 @@ def update(path,token):
                                 makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data)
                             else:
                                 print('No difference found for Shell script: ' + repo_data['displayName'])
+
+                    ## If Shell script does not exist, create it and assign
+                    else:
+                        print("-" * 90)
+                        print("Shell script not found, creating script: " + repo_data['displayName'])
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
+                        add_assignment(assignment_endpoint,assign_obj,post_request['id'],token,script=True)
+                        print("Shell script created with id: " + post_request['id'])

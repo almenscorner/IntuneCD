@@ -15,14 +15,16 @@ import json
 import os
 import yaml
 import glob
+
 from .graph_request import makeapirequest,makeapirequestPost
+from .get_add_assignments import add_assignment
 
 from deepdiff import DeepDiff
 
 ## Set MS Graph base endpoint
 baseEndpoint = "https://graph.microsoft.com/beta/deviceManagement"
 
-def update(path,token):
+def update(path,token,assignment=False):
 
     ## Set Intent path
     configpath = path+"/"+"Management Intents/"
@@ -31,6 +33,10 @@ def update(path,token):
         ## Set glob pattern
         pattern = configpath + "*/*"
         for filename in glob.glob(pattern, recursive=True):
+
+            # If file is .DS_Store, skip
+            if filename == ".DS_Store":
+                continue
 
             ## Check which format the file is saved as then open file, load data and set query parameter
             with open(filename) as f:
@@ -44,17 +50,28 @@ def update(path,token):
                         repo_data = json.load(f)
                         q_param = {"$filter":"displayName eq " + "'" + repo_data['displayName'] + "'"}
 
+                    ## Create object to pass in to assignment function
+                    assign_obj = {}
+                    if "assignments" in repo_data:
+                        assign_obj['assignments'] = repo_data['assignments']
+                    repo_data.pop('assignments', None)
+
                     ## Get Intent with query parameter
                     mem_data = makeapirequest(baseEndpoint + "/intents",token,q_param)
 
                     ## If Intent exists, continue
                     if mem_data['value']:
+                        print("-" * 90)
                         print("Checking if Intent: " + repo_data['displayName'] + " has any upates")
                         ## Get Intent template
                         intent_template = makeapirequest(baseEndpoint + "/templates" + "/" + mem_data['value'][0]['templateId'],token)     
                         configpath = path+"/"+"Management Intents/" + intent_template['displayName'] + "/"
                         ## Get Intent categories
                         intent_template_categories = makeapirequest(baseEndpoint + "/templates" + "/" + mem_data['value'][0]['templateId'] + "/categories",token)
+
+                        ## Check if assignment needs updating and apply chanages
+                        if assignment == True:
+                            add_assignment(baseEndpoint + "/intents",assign_obj,mem_data['value'][0]['id'],token,status_code=204)
 
                         ## Create dict for Intent settings
                         settings_delta = {}
@@ -91,3 +108,14 @@ def update(path,token):
                                 request_data = json.dumps(settings)
                                 q_param=None
                                 makeapirequestPost(baseEndpoint + "/intents/" + mem_data['value'][0]['id'] + "/updateSettings",token,q_param,request_data,status_code=204)
+                    
+                    ## If Intent does not exist, create it and assign
+                    else:
+                        print("-" * 90)
+                        print("Intent not found, creating Intent: " + repo_data['displayName'])
+                        template_id = repo_data['templateId']
+                        repo_data.pop('templateId')
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(baseEndpoint + "/templates/" + template_id + "/createInstance",token,q_param=None,jdata=request_json)
+                        add_assignment(baseEndpoint + "/intents",assign_obj,post_request['id'],token,status_code=204)
+                        print("Intent created with id: " + post_request['id'])

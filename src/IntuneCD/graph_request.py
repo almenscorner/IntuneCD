@@ -21,6 +21,10 @@ def makeapirequest(endpoint,token,q_param=None):
                 json_data['value'].append(record['value'][count])
                 count += 1
         return(json_data)
+    elif response.status_code == 404:
+        print("Resource not found in Microsoft Graph: " + endpoint)
+    elif (("assignmentFilters" in endpoint) and ("FeatureNotEnabled" in response.text)):
+        print("Assignment filters not enabled in tenant, skipping")
     else:
         raise Exception('Request failed with ',response.status_code,' - ',
             response.text)
@@ -50,7 +54,11 @@ def makeapirequestPost(patchEndpoint,token,q_param=None,jdata=None,status_code=2
     else:
         response = requests.post(patchEndpoint,headers=headers,data=jdata)
     if response.status_code == status_code:
-        pass
+        if response.text:
+            json_data = json.loads(response.text)
+            return json_data
+        else:
+            pass
     else:
         raise Exception('Request failed with ',response.status_code,' - ',
             response.text)

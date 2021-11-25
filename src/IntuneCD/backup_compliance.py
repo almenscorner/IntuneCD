@@ -19,6 +19,7 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .get_add_assignments import get_assignments
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePolicies"
@@ -26,15 +27,27 @@ endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePo
 ## Get all Compliance policies and save them in specified path
 def savebackup(path,output,token):
     configpath = path+"/"+"Compliance Policies/Policies/"
-    data = makeapirequest(endpoint,token)
+    q_param = {"$expand":"scheduledActionsForRule($expand=scheduledActionConfigurations)"}
+    data = makeapirequest(endpoint,token,q_param)
 
     for policy in data['value']:
         print("Backing up compliance policy: " + policy['displayName'])
-        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
+
+        pid = policy['id']
+        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','@odata.context','scheduledActionConfigurations@odata.context','scheduledActionsForRule@odata.context'}
         for k in remove_keys:
             policy.pop(k, None)
+            for rule in policy['scheduledActionsForRule']:
+                rule.pop(k, None)
+            if policy['scheduledActionsForRule']:
+                for scheduled_config in policy['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
+                    scheduled_config.pop(k, None)
+
         if os.path.exists(configpath)==False:
             os.makedirs(configpath)
+
+        ## Get assignments of Compliance Policy
+        get_assignments(endpoint,policy,pid,token)
 
         ## Get filename without illegal characters
         fname = clean_filename(policy['displayName'])

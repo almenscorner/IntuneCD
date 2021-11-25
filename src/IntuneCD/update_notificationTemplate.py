@@ -14,7 +14,8 @@ token : str
 import json
 import os
 import yaml
-from .graph_request import makeapirequest,makeapirequestPatch
+
+from .graph_request import makeapirequest,makeapirequestPatch,makeapirequestPost
 
 from deepdiff import DeepDiff
 
@@ -31,6 +32,9 @@ def update(path,token):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
             if os.path.isdir(file):
+                continue
+            # If file is .DS_Store, skip
+            if filename == ".DS_Store":
                 continue
 
             ## Check which format the file is saved as then open file, load data and set query parameter
@@ -50,6 +54,7 @@ def update(path,token):
 
                     ## If Notification Template exists, continue
                     if mem_data['value']:
+                        print("-" * 90)
                         ## Get Notification Template data from Intune
                         mem_template_data = makeapirequest(endpoint + "/" + mem_data['value'][0]['id'],token)
                         ## Get Notification Template message data from Intune
@@ -86,8 +91,25 @@ def update(path,token):
                             if diff:
                                 print("Updating Message Template locale: " + mem_locale['locale'] + " for " + mem_template_data['displayName'] + ", values changed")
                                 print(*diff.items(), sep='\n')
+                                repo_locale.pop('isDefault', None)
                                 request_data = json.dumps(repo_locale)
                                 q_param = None
                                 makeapirequestPatch(endpoint + "/" + mem_template_data['id'] + "/" + "localizedNotificationMessages" + "/" + mem_locale['id'],token,q_param,request_data)
                             else:
                                 print("No difference in locale " + mem_locale['locale'] + " found for Message Teamplate: " + mem_template_data['displayName'])
+
+                    ## If Powershell script does not exist, create it and assign
+                    else:
+                        print("-" * 90)
+                        print("Notification template not found, creating template: " + repo_data['displayName'])
+                        template = {
+                            "brandingOptions": repo_data['brandingOptions'],
+                            "displayName": repo_data['displayName'],
+                            "roleScopeTagIds": repo_data['roleScopeTagIds']
+                        }
+                        template_request_json = json.dumps(template)
+                        template_post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=template_request_json,status_code=200)
+                        for locale in repo_data['localizedNotificationMessages']:
+                            locale_request_json = json.dumps(locale)
+                            makeapirequestPost(endpoint + "/" + template_post_request['id'] + "/localizedNotificationMessages",token,q_param=None,jdata=locale_request_json,status_code=200)
+                        print("Notification template created with id: " + template_post_request['id'])

@@ -39,6 +39,9 @@ def update(path,token):
                 # If path is Directory, skip
                 if os.path.isdir(file):
                     continue
+                # If file is .DS_Store, skip
+                if filename == ".DS_Store":
+                    continue
 
                 ## Check which format the file is saved as then open file, load data and set query parameter
                 with open(file) as f:               
@@ -57,6 +60,7 @@ def update(path,token):
 
                         ## If Apple Enrollment Profile exists, continue
                         if profile_data['value']:
+                            print("-" * 90)
                             pid = profile_data['value'][0]['id']
                             ## Remove keys before using DeepDiff
                             remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
