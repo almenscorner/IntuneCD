@@ -91,6 +91,7 @@ def update(path,token):
                             if diff:
                                 print("Updating Message Template locale: " + mem_locale['locale'] + " for " + mem_template_data['displayName'] + ", values changed")
                                 print(*diff.items(), sep='\n')
+                                repo_locale.pop('isDefault', None)
                                 request_data = json.dumps(repo_locale)
                                 q_param = None
                                 makeapirequestPatch(endpoint + "/" + mem_template_data['id'] + "/" + "localizedNotificationMessages" + "/" + mem_locale['id'],token,q_param,request_data)
