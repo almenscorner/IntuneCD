@@ -89,7 +89,7 @@ def update(path,token,assignment=False):
                                 print("Updating Intent settings: " + repo_setting['definitionId'] + ", values changed:")
                                 print(*diff.items(), sep='\n')
                                 ## Create dict that we will use as the request json
-                                if repo_setting['@odata.type'] == '#microsoft.graph.deviceManagementComplexSettingInstance':
+                                if "value" not in repo_setting:
                                     type = "valueJson"
                                     value = repo_setting['valueJson']
                                 else:

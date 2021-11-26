@@ -12,6 +12,8 @@ The main function is to back up configurations from Intune to a Git repositry fr
 
 The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
+## Whats new in 1.0.5
+- Bug fix where the tool was not able to identify the correct value format on management intents when updating values
 ## Whats new in 1.0.4
 - Backup of assignments
 - Update of assignments on existing configurations
