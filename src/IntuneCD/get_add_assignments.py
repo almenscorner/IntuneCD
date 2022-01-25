@@ -33,6 +33,7 @@ extra_endpoint : str
 """
 
 import json
+from os import remove
 from .graph_request import makeapirequest,makeapirequestPost
 
 ## Set MS Graph endpoint
@@ -57,7 +58,7 @@ def get_assignments(endpoint,get_object,objectID,token,extra_endpoint=None):
                     assignment['target']['groupName'] = group_name['displayName']
             current_assignments.append(assignment)
             get_object['assignments'] = current_assignments
-            return current_assignments
+        return current_assignments
 
 def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=None,wap=False,script=False,extra_endpoint=None):
     ## Add assignment if assignments key exists
@@ -66,6 +67,8 @@ def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=
         ## If groupName, search for group
         request_data = {}
         assign = []
+        new_assignments = []
+        remove_assignments = []
         ## Check if object has assignments assigned
         if extra_endpoint == None:
             curr_assignment = get_assignments(endpoint,add_object,objectID,token)
@@ -75,22 +78,33 @@ def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=
         if curr_assignment:
             curr_assignment_list = [value for elem in curr_assignment
                       for value in elem['target'].values()]
-            for assignment in repo_assignments:
-                if "groupName" in assignment['target']:
-                    if assignment['target']['groupName'] not in curr_assignment_list:
+            if repo_assignments != curr_assignment:
+                for assignment in repo_assignments:
+                    if "groupName" in assignment['target']:
+                        if assignment['target']['groupName'] not in curr_assignment_list:
+                            new_assignments.append(assignment)
                         group_q_param = {"$filter":"displayName eq " + "'" + assignment['target']['groupName'] + "'"}
                         group_data = makeapirequest(group_endpoint,token,group_q_param)
                         if group_data['value']:
                             assignment['target'].pop('groupName')
                             assignment['target']['groupId'] = group_data['value'][0]['id']
                             assign.append(assignment)
-                elif assignment['target']['@odata.type'] not in curr_assignment_list:
-                    assign.append(assignment)
+                    elif assignment['target']['@odata.type'] not in curr_assignment_list:
+                        new_assignments.append(assignment)
+                    else:
+                        assign.append(assignment)
+                for assignment in curr_assignment_list:
+                    if assignment not in repo_assignments:
+                        remove_assignments.append(assignment)
                 ## If missing assignments, add them
                 if assign:
-                    print("Updating assignment for: " + objectID + " with assignment(s):")
-                    print(assign, sep='\n')
-                    
+                    if new_assignments:
+                        print("Updating assignment for: " + objectID + " with assignment(s):")
+                        print(new_assignments, sep='\n')
+                    if remove_assignments:
+                        print("Updating assignment for: " + objectID + " ,removing assignment(s):")
+                        print(remove_assignments, sep='\n')
+
                     if ((extra_url == None) and (wap == False) and (script == False)):
                         request_data['assignments'] = assign
                         request_json = json.dumps(request_data)
@@ -103,7 +117,6 @@ def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=
                     elif script == True:
                             request_data['deviceManagementScriptAssignments'] = assign
                             request_json = json.dumps(request_data)
-                            print(request_json)
                             makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json)
                     else:
                         request_data['assignments'] = assign
