@@ -15,6 +15,7 @@ The package can also be run standalone outside of a pipeline, or in one to only 
 ## Whats new in 1.0.6
 - Added documentation module to create a markdown document with information from the backup files
 - Bug fix where only one assignment was included in the backup. The tool now successfully backup/updates all assignments and removes assignments that is no longer in the backup files
+- Filters are now included when updating assignments, if a filter has been added in DEV and it exists in PROD, it will be added to the configuration when using -u
 ## Whats new in 1.0.5
 - Bug fix where the tool was not able to identify the correct value format on management intents when updating values
 ## Whats new in 1.0.4
