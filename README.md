@@ -6,12 +6,16 @@
 
 # IntuneCD tool
 
-IntuneCD or, Intune Continuous Delivery as it stands for is a Python package that is used to backup data from Intune and update configurations in Intune. It was created with running it from a pipeline in mind. Using this approach we get complete history of which configurations has been changed and what setting has been changed.
+IntuneCD or, Intune Continuous Delivery as it stands for is a Python package that is used to backup and update configurations in Intune. It was created with running it from a pipeline in mind. Using this approach we get complete history of which configurations has been changed and what setting has been changed.
 
 The main function is to back up configurations from Intune to a Git repositry from a DEV environment and if any configurations has changed, push them to PROD Intune environment.
 
 The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
+## Whats new in 1.0.6
+- Added documentation module to create a markdown document with information from the backup files
+- Bug fix where only one assignment was included in the backup. The tool now successfully backup/updates all assignments and removes assignments that is no longer in the backup files
+- Filters are now included when updating assignments, if a filter has been added in DEV and it exists in PROD, it will be added to the configuration when using -u
 ## Whats new in 1.0.5
 - Bug fix where the tool was not able to identify the correct value format on management intents when updating values
 ## Whats new in 1.0.4
@@ -140,7 +144,7 @@ If you just want to backup you can get away with only Read permission!
 You have two options, using a pipeline or running it locally. Let's have a look at both.
 
 ## Parameters
-To see which parameters you have to prove just type: IntuneCD-startbackup --help or IntuneCD-startupdate --help
+To see which parameters you have to prove just type: IntuneCD-startbackup --help, IntuneCD-startupdate --help or IntuneCD-startdocumentation --help
 
 Options:
   * -h, --help  show this help message and exit
@@ -299,6 +303,22 @@ steps:
     CLIENT_ID: $(CLIENT_ID)
     CLIENT_SECRET: $(CLIENT_SECRET)
   displayName: Run update
+```
+
+## Run documentation locally
+To create a markdown document from the backup files, run this command
+```python
+IntuneCD-startdocumentation -p /path/to/backup/directory -o /path/to/create/markdown.md -t nameoftenant
+```
+
+## Run documentation in a pipeline
+This step should be added to the backup pipeline to make sure the markdown document is updated when configurations changes. By default it writes to the README.md file in the repo, you can change this with the -o option
+
+```yaml
+- script: IntuneCD-startdocumentation -t $(TENANT_NAME)
+  env:
+    REPO_DIR: $(REPO_DIR)
+  displayName: Run IntuneCD documentation
 ```
 
 ## Good to know
