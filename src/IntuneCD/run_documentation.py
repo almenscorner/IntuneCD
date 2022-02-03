@@ -36,6 +36,9 @@ def start ():
         # Create or clear markdown file
         md_file(outpath)
 
+        # Document Apple Push Notification
+        document_configs(f'{configpath}/Apple Push Notification',outpath,'Apple Push Notification')
+
         # Document App Configuration
         document_configs(f'{configpath}/App Configuration',outpath,'App Configuration')
 

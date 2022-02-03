@@ -59,6 +59,9 @@ def start():
 
     def run_backup(path,output,token):
 
+        from .backup_apns import savebackup
+        savebackup(path,output,token)
+
         from .backup_appConfiguration import savebackup
         savebackup(path,output,token)
 
