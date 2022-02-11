@@ -51,6 +51,9 @@ def start ():
         # Message Templates
         document_configs(f'{configpath}/Compliance Policies/Message Templates',outpath,'Message Templates')
 
+        # Managed Google Play
+        document_configs(f'{configpath}/Managed Google Play',outpath,'Managed Google Play')
+
         # Document Intents
         document_management_intents(f'{configpath}/Management Intents/',outpath,'Management Intents')
 
