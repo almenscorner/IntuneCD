@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from distutils.command.config import config
 import os
 from datetime import datetime
 from .documentation_functions import document_configs,document_management_intents,md_file
@@ -36,11 +37,15 @@ def start ():
         # Create or clear markdown file
         md_file(outpath)
 
-        # Document Apple Push Notification
-        document_configs(f'{configpath}/Apple Push Notification',outpath,'Apple Push Notification')
 
         # Document App Configuration
         document_configs(f'{configpath}/App Configuration',outpath,'App Configuration')
+
+        # Document Apple Push Notification
+        document_configs(f'{configpath}/Apple Push Notification',outpath,'Apple Push Notification')
+
+        # Document Apple VPP Tokens
+        document_configs(f'{configpath}/Apple VPP Tokens',outpath,'Apple VPP Tokens')
 
         # Document profiles
         document_configs(f'{configpath}/Device Configurations',outpath,'Configuration Profiles')
