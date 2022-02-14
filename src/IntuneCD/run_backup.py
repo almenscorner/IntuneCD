@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import imp
 import os
 from .get_authparams import getAuth
 
@@ -58,6 +59,9 @@ def start():
     token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="DEV")
 
     def run_backup(path,output,token):
+
+        from .backup_applications import savebackup
+        savebackup(path,output,token)
 
         from .backup_apns import savebackup
         savebackup(path,output,token)
