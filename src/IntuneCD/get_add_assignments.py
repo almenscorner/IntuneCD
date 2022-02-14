@@ -59,9 +59,10 @@ def get_assignments(endpoint,get_object,objectID,token,extra_endpoint=None):
                     assignment['target']['groupName'] = group_name['displayName']
             current_assignments.append(assignment)
             if assignment['target']['deviceAndAppManagementAssignmentFilterId']:
-                filter_name = makeapirequest(filter_endpoint + "/" + assignment['target']['deviceAndAppManagementAssignmentFilterId'],token,q_param)
-                if filter_name:
-                    assignment['target']['deviceAndAppManagementAssignmentFilterId'] = filter_name['displayName']
+                if assignment['target']['deviceAndAppManagementAssignmentFilterId'] != "00000000-0000-0000-0000-000000000000":
+                    filter_name = makeapirequest(filter_endpoint + "/" + assignment['target']['deviceAndAppManagementAssignmentFilterId'],token,q_param)
+                    if filter_name:
+                        assignment['target']['deviceAndAppManagementAssignmentFilterId'] = filter_name['displayName']
             get_object['assignments'] = current_assignments
         return current_assignments
 
