@@ -33,10 +33,10 @@ def savebackup(path,output,token):
     for pr in data['value']:
         if "Microsoft" not in pr['publisher']:
             pr_details = makeapirequest(f"{endpoint}/{pr['id']}",token)
-            pr_id = pr['id']
-            remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
+            pr_id = pr_details['id']
+            remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','isGlobalScript','highestAvailableVersion'}
             for k in remove_keys:
-                pr.pop(k, None)
+                pr_details.pop(k, None)
             
             print(f"Backing up Proactive Remediation: {pr['displayName']}")
             if os.path.exists(configpath)==False:
