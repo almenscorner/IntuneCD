@@ -37,6 +37,17 @@ def start ():
         # Create or clear markdown file
         md_file(outpath)
 
+        # Document Applications
+        document_configs(f'{configpath}/Applications/iOS',outpath,'iOS Applications')
+
+        # Document Applications
+        document_configs(f'{configpath}/Applications/macOS',outpath,'macOS Applications')
+
+        # Document Applications
+        document_configs(f'{configpath}/Applications/Android',outpath,'Android Applications')
+
+        # Document Applications
+        document_configs(f'{configpath}/Applications/Windows',outpath,'Windows Applications')
 
         # Document App Configuration
         document_configs(f'{configpath}/App Configuration',outpath,'App Configuration')
