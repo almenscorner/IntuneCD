@@ -80,6 +80,9 @@ def start():
         from .backup_configurationPolicies import savebackup
         savebackup(path,output,token)
 
+        from .backup_vppTokens import savebackup
+        savebackup(path,output,token)
+
         from .backup_managedGPlay import savebackup
         savebackup(path,output,token)
 
