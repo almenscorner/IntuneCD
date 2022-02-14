@@ -28,6 +28,8 @@ wap : bool
     Set to True if updating assignment for Windows Autopilot
 script : bool
     Set to True if updating assignment for Device Management scripts
+proactive_remediation : bool
+    Set to True if updating assignment for Proactive Remediations
 extra_endpoint : str
     Used if endpoint differs from assignment endpoint
 """
@@ -66,7 +68,7 @@ def get_assignments(endpoint,get_object,objectID,token,extra_endpoint=None):
             get_object['assignments'] = current_assignments
         return current_assignments
 
-def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=None,wap=False,script=False,extra_endpoint=None):
+def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=None,wap=False,script=False,proactive_remediation=False,extra_endpoint=None):
     ## Add assignment if assignments key exists
     if "assignments" in add_object:
         repo_assignments = add_object['assignments']
@@ -162,7 +164,7 @@ def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=
                 print("No assignment found for: " + objectID + " adding assignment(s):")
                 print(assign, sep='\n')
 
-                if ((extra_url == None) and (wap == False) and (script == False)):
+                if ((extra_url == None) and (wap == False) and (script == False) and (proactive_remediation == False)):
                     request_data['assignments'] = assign
                     request_json = json.dumps(request_data)
                     makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json,status_code=status_code)
@@ -175,6 +177,10 @@ def add_assignment(endpoint,add_object,objectID,token,status_code=200,extra_url=
                         request_data['deviceManagementScriptAssignments'] = assign
                         request_json = json.dumps(request_data)
                         makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json)
+                elif proactive_remediation == True:
+                    request_data['deviceHealthScriptAssignments'] = assign
+                    request_json = json.dumps(request_data)
+                    makeapirequestPost(endpoint + "/" + objectID + "/assign",token,q_param=None,jdata=request_json,status_code=status_code)
                 else:
                     request_data['assignments'] = assign
                     request_json = json.dumps(request_data)
