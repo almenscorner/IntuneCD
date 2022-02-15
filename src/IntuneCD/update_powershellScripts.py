@@ -15,8 +15,9 @@ import json
 import os
 import base64
 import yaml
+import re
 
-from .graph_request import makeapirequest,makeapirequestPatch,makeapirequestPost
+from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
 from .get_add_assignments import add_assignment
 
 from deepdiff import DeepDiff
@@ -24,12 +25,13 @@ from deepdiff import DeepDiff
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
 
-def update(path,token,assignment=False):
+
+def update(path, token, assignment=False):
 
     ## Set Powershell script path
     configpath = path+"/"+"Scripts/Powershell"
     ## If Powershell script path exists, continue
-    if os.path.exists(configpath)==True:
+    if os.path.exists(configpath) == True:
         for filename in os.listdir(configpath):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
@@ -44,11 +46,12 @@ def update(path,token,assignment=False):
                     if filename.endswith(".yaml"):
                         data = json.dumps(yaml.safe_load(f))
                         repo_data = json.loads(data)
-                        q_param = {"$filter":"displayName eq " + "'" + repo_data['displayName'] + "'"}
+                        q_param = {"$filter": "displayName eq " +
+                            "'" + repo_data['displayName'] + "'"}
                     elif filename.endswith(".json"):
                         f = open(file)
                         repo_data = json.load(f)
-                        q_param = {"$filter":"displayName eq " + "'" + repo_data['displayName'] + "'"}
+                        q_param = {"$filter": "displayName eq " + "'" + repo_data['displayName'] + "'"}
 
                     ## Create object to pass in to assignment function
                     assign_obj = {}
@@ -57,52 +60,66 @@ def update(path,token,assignment=False):
                     repo_data.pop('assignments', None)
 
                     ## Get Powershell script with query parameter
-                    mem_powershellScript = makeapirequest(endpoint,token,q_param)
+                    mem_powershellScript = makeapirequest(endpoint, token,q_param)
 
                     ## If Powershell script exists, continue
                     if mem_powershellScript['value']:
                         print("-" * 90)
                         q_param = None
                         ## Get Powershell script details
-                        mem_data = makeapirequest(endpoint + "/" + mem_powershellScript['value'][0]['id'],token,q_param)
+                        mem_data = makeapirequest(endpoint + "/" + mem_powershellScript['value'][0]['id'], token,q_param)
                         pid = mem_data['id']
                         ## Remove keys before using DeepDiff
-                        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
+                        remove_keys = {'id', 'createdDateTime','version','lastModifiedDateTime'}
                         for k in remove_keys:
                             mem_data.pop(k, None)
 
                         ## Check if assignment needs updating and apply chanages
                         if assignment == True:
-                            add_assignment(endpoint,assign_obj,pid,token,script=True)
+                            add_assignment(endpoint, assign_obj,pid,token,script=True)
 
                         ## Check if script data is saved and read the file
                         if os.path.exists(configpath + "/Script Data/" + repo_data['fileName']):
                             with open(configpath + "/Script Data/" + repo_data['fileName'], 'r') as f:
                                 repo_payload_config = f.read()
 
-                            mem_payload_config = base64.b64decode(mem_data['scriptContent']).decode('utf-8')
+                            mem_payload_config = base64.b64decode(
+                                mem_data['scriptContent']).decode('utf-8')
 
-                            pdiff = DeepDiff(mem_payload_config, repo_payload_config, ignore_order=True).get('values_changed',{})
-                            cdiff = DeepDiff(mem_data, repo_data, ignore_order=True, exclude_paths="root['scriptContent']").get('values_changed',{})
+                            pdiff = DeepDiff(mem_payload_config, repo_payload_config, ignore_order=True).get('values_changed', {})
+                            cdiff = DeepDiff(mem_data, repo_data, ignore_order=True, exclude_paths="root['scriptContent']").get('values_changed', {})
 
                             ## If any changed values are found, push them to Intune
                             if pdiff or cdiff:
-                                print("Updating Powershell script: " + repo_data['displayName'] + ", values changed:")
+                                if cdiff:
+                                    print("Updating Powershell script: " + \
+                                          repo_data['displayName'] + ", values changed:")
+                                    for key, value in cdiff.items():
+                                        setting = re.search(
+                                            "\[(.*)\]", key).group(1)
+                                        new_val = value['new_value']
+                                        old_val = value['old_value']
+                                        print(
+                                            f"Setting: {setting}, New Value: {new_val}, Old Value: {old_val}")
                                 if pdiff:
-                                    print("Script changed, check commit history for change details")
-                                print(*cdiff.items(), sep='\n')
-                                powershell_bytes = repo_payload_config.encode('utf-8')
-                                repo_data['scriptContent'] = base64.b64encode(powershell_bytes).decode('utf-8')
+                                    print(
+                                        "Script changed, check commit history for change details")
+                                powershell_bytes = repo_payload_config.encode(
+                                    'utf-8')
+                                repo_data['scriptContent'] = base64.b64encode(
+                                    powershell_bytes).decode('utf-8')
                                 request_data = json.dumps(repo_data)
-                                makeapirequestPatch(endpoint + "/" + pid,token,q_param,request_data)
+                                makeapirequestPatch(endpoint + "/" + pid, token,q_param,request_data)
                             else:
-                                print('No difference found for Powershell script: ' + repo_data['displayName'])
+                                print(
+                                    'No difference found for Powershell script: ' + repo_data['displayName'])
 
                     ## If Powershell script does not exist, create it and assign
                     else:
                         print("-" * 90)
-                        print("Powershell script not found, creating script: " + repo_data['displayName'])
+                        print(
+                            "Powershell script not found, creating script: " + repo_data['displayName'])
                         request_json = json.dumps(repo_data)
-                        post_request = makeapirequestPost(endpoint,token,q_param=None,jdata=request_json,status_code=201)
-                        add_assignment(endpoint,assign_obj,post_request['id'],token,script=True)
+                        post_request = makeapirequestPost(endpoint, token,q_param=None,jdata=request_json,status_code=201)
+                        add_assignment(endpoint, assign_obj,post_request['id'],token,script=True)
                         print("Powershell script created with id: " + post_request['id'])
