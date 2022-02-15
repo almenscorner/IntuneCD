@@ -59,6 +59,9 @@ def start():
     token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="DEV")
 
     def run_backup(path,output,token):
+    
+        from .backup_proactiveRemediation import savebackup
+        savebackup(path,output,token)
 
         from .backup_applications import savebackup
         savebackup(path,output,token)
@@ -98,6 +101,9 @@ def start():
 
         from .backup_powershellScripts import savebackup
         savebackup(path,output,token)
+
+        #from .backup_proactiveRemediation import savebackup
+        #savebackup(path,output,token)
 
         from .backup_profiles import savebackup
         savebackup(path,output,token)
