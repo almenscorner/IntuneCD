@@ -114,9 +114,10 @@ def clean_list(data):
             values.append(string)
 
         elif type(item) is str:
-            string = (item[:200] + '...') if len(item) > 75 else item
-            string = remove_characters(string)
-
+            if len(item) > 200:
+                string = f'<details><summary>Click to expand...</summary>{item}</details>'
+            else:
+                string = item
             values.append(string)
 
         else:
