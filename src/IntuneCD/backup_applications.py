@@ -16,15 +16,25 @@ token : str
 import json
 import os
 import yaml
+import re
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .get_add_assignments import get_assignments
-from .match_wildcard import isMatching
 
 ## Set MS Graph endpoint
 q_param = {"$filter":"(microsoft.graph.managedApp/appAvailability) eq null or (microsoft.graph.managedApp/appAvailability) eq 'lineOfBusiness' or isAssigned eq true"}
 endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
+
+## Function to match platform from @odata.type
+def match (platform,input) -> bool:
+    string = f'.*{platform}.*$'
+    pattern = re.compile(string)
+    match =  pattern.match(input, re.IGNORECASE)
+    if match:
+        return True
+    else:
+        return False
 
 ## Get all applications and save them in specified path
 def savebackup(path,output,token):
@@ -48,21 +58,20 @@ def savebackup(path,output,token):
             app_name = app['displayName']+'_'+str(app['@odata.type'].split('.')[2])
 
         ## Get application platform
-        if isMatching(str(app['@odata.type']).lower(),'*ios*') is True:
+        if match('ios',str(app['@odata.type']).lower()) is True:
             platform = 'iOS'
-        if isMatching(str(app['@odata.type']).lower(),'*macos*') is True:
+        if match('macos',str(app['@odata.type']).lower()) is True:
             platform = 'macOS'
-        if isMatching(str(app['@odata.type']).lower(),'*android*') is True:
+        if match('android',str(app['@odata.type']).lower()) is True:
             platform = 'Android'
-        if isMatching(str(app['@odata.type']).lower(),'*windows*') is True:
+        if match('windows',str(app['@odata.type']).lower()) is True:
             platform = 'Windows'
 
-        print(f'Backing up Application: {app_name}')
+        print(f"Backing up Application: {app['displayName']}")
         if os.path.exists(f'{configpath}/{platform}')==False:
             os.makedirs(f'{configpath}/{platform}')
 
         get_assignments(endpoint,app,app_id,token)
-        
         ## Get filename without illegal characters
         fname = clean_filename(app_name)
         ## Save Applications as JSON or YAML depending on configured value in "-o"
