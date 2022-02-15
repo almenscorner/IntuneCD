@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import imp
 import os
 from .get_authparams import getAuth
 
@@ -55,6 +56,9 @@ def start():
     token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="PROD")   
 
     def run_update(path,token,assignment):
+
+        from .update_proactiveRemediation import update
+        update(path,token,assignment)
 
         from .update_appConfiguration import update
         update(path,token,assignment)
