@@ -59,35 +59,38 @@ def start():
     token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="DEV")
 
     def run_backup(path,output,token):
-    
-        from .backup_proactiveRemediation import savebackup
-        savebackup(path,output,token)
-
-        from .backup_applications import savebackup
-        savebackup(path,output,token)
-
-        from .backup_apns import savebackup
-        savebackup(path,output,token)
 
         from .backup_appConfiguration import savebackup
-        savebackup(path,output,token)
-
-        from .backup_assignmentFilters import savebackup
         savebackup(path,output,token)
 
         from .backup_AppProtection import savebackup
         savebackup(path,output,token)
 
-        from .backup_appleEnrollmentProfile import savebackup
+        from .backup_apns import savebackup
+        savebackup(path,output,token)
+
+        from .backup_vppTokens import savebackup
+        savebackup(path,output,token)
+
+        from .backup_applications import savebackup
         savebackup(path,output,token)
 
         from .backup_compliance import savebackup
         savebackup(path,output,token)
 
-        from .backup_configurationPolicies import savebackup
+        from .backup_notificationTemplate import savebackup
         savebackup(path,output,token)
 
-        from .backup_vppTokens import savebackup
+        from .backup_profiles import savebackup
+        savebackup(path,output,token)
+
+        from .backup_appleEnrollmentProfile import savebackup
+        savebackup(path,output,token)
+
+        from .backup_windowsEnrollmentProfile import savebackup
+        savebackup(path,output,token)
+
+        from .backup_assignmentFilters import savebackup
         savebackup(path,output,token)
 
         from .backup_managedGPlay import savebackup
@@ -96,22 +99,16 @@ def start():
         from .backup_managementIntents import savebackup
         savebackup(path,output,token)
 
-        from .backup_notificationTemplate import savebackup
+        from .backup_proactiveRemediation import savebackup
         savebackup(path,output,token)
 
         from .backup_powershellScripts import savebackup
         savebackup(path,output,token)
 
-        #from .backup_proactiveRemediation import savebackup
-        #savebackup(path,output,token)
-
-        from .backup_profiles import savebackup
-        savebackup(path,output,token)
-
         from .backup_shellScripts import savebackup
         savebackup(path,output,token)
 
-        from .backup_windowsEnrollmentProfile import savebackup
+        from .backup_configurationPolicies import savebackup
         savebackup(path,output,token)
 
 
