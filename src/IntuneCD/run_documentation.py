@@ -37,6 +37,18 @@ def start ():
         # Create or clear markdown file
         md_file(outpath)
 
+        # Document App Configuration
+        document_configs(f'{configpath}/App Configuration',outpath,'App Configuration')
+
+        # Document App Protection
+        document_configs(f'{configpath}/App Protection',outpath,'App Protection')
+
+        # Document Apple Push Notification
+        document_configs(f'{configpath}/Apple Push Notification',outpath,'Apple Push Notification')
+
+        # Document Apple VPP Tokens
+        document_configs(f'{configpath}/Apple VPP Tokens',outpath,'Apple VPP Tokens')
+
         # Document Applications
         document_configs(f'{configpath}/Applications/iOS',outpath,'iOS Applications')
 
@@ -49,41 +61,14 @@ def start ():
         # Document Applications
         document_configs(f'{configpath}/Applications/Windows',outpath,'Windows Applications')
 
-        # Document App Configuration
-        document_configs(f'{configpath}/App Configuration',outpath,'App Configuration')
-
-        # Document Apple Push Notification
-        document_configs(f'{configpath}/Apple Push Notification',outpath,'Apple Push Notification')
-
-        # Document Apple VPP Tokens
-        document_configs(f'{configpath}/Apple VPP Tokens',outpath,'Apple VPP Tokens')
-
-        # Document profiles
-        document_configs(f'{configpath}/Device Configurations',outpath,'Configuration Profiles')
-
         # Document compliance
         document_configs(f'{configpath}/Compliance Policies/Policies',outpath,'Compliance Policies')
 
         # Message Templates
         document_configs(f'{configpath}/Compliance Policies/Message Templates',outpath,'Message Templates')
 
-        # Managed Google Play
-        document_configs(f'{configpath}/Managed Google Play',outpath,'Managed Google Play')
-
-        # Document Intents
-        document_management_intents(f'{configpath}/Management Intents/',outpath,'Management Intents')
-
-        # Document Settings Catalog
-        document_configs(f'{configpath}/Settings Catalog',outpath,'Settings Catalog')
-
-        # Document Shell Scripts
-        document_configs(f'{configpath}/Scripts/Shell',outpath,'Shell Scripts')
-
-        # Document Powershell Scripts
-        document_configs(f'{configpath}/Scripts/Powershell',outpath,'Powershell Scripts')
-
-        # Document Proactive Remediations
-        document_configs(f'{configpath}/Proactive Remediations',outpath,'Proactive Remediations')
+        # Document profiles
+        document_configs(f'{configpath}/Device Configurations',outpath,'Configuration Profiles')
 
         # Document Apple Enrollment Profiles
         document_configs(f'{configpath}/Enrollment Profiles/Apple',outpath,'Apple Enrollment Profiles')
@@ -93,6 +78,24 @@ def start ():
 
         # Document filters
         document_configs(f'{configpath}/Filters',outpath,'Filters')
+
+        # Managed Google Play
+        document_configs(f'{configpath}/Managed Google Play',outpath,'Managed Google Play')
+
+        # Document Intents
+        document_management_intents(f'{configpath}/Management Intents/',outpath,'Management Intents')
+
+        # Document Proactive Remediations
+        document_configs(f'{configpath}/Proactive Remediations',outpath,'Proactive Remediations')
+
+        # Document Shell Scripts
+        document_configs(f'{configpath}/Scripts/Shell',outpath,'Shell Scripts')
+
+        # Document Powershell Scripts
+        document_configs(f'{configpath}/Scripts/Powershell',outpath,'Powershell Scripts')
+
+        # Document Settings Catalog
+        document_configs(f'{configpath}/Settings Catalog',outpath,'Settings Catalog')
 
         document = markdown_toclify(input_file=outpath,back_to_top=True,exclude_h=[3])
         with open(outpath, 'w') as doc:
