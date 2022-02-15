@@ -25,28 +25,33 @@ from .get_add_assignments import get_assignments
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDeploymentProfiles"
 
 ## Get all Windows Enrollment Profiles and save them in specified path
-def savebackup(path,output,token):
+
+
+def savebackup(path, output, token):
     configpath = path+"/"+"Enrollment Profiles/Windows/"
-    data = makeapirequest(endpoint,token)
+    data = makeapirequest(endpoint, token)
 
     for profile in data['value']:
         pid = profile['id']
-        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime'}
+        remove_keys = {'id', 'createdDateTime',
+                       'version', 'lastModifiedDateTime'}
         for k in remove_keys:
             profile.pop(k, None)
-        print("Backing up Autopilot enrollment profile: " + profile['displayName'])
-        if os.path.exists(configpath)==False:
+        print("Backing up Autopilot enrollment profile: " +
+              profile['displayName'])
+        if os.path.exists(configpath) == False:
             os.makedirs(configpath)
 
         ## Check if assignment needs updating and apply chanages
-        get_assignments(endpoint,profile,pid,token)
+        get_assignments(endpoint, profile, pid, token)
 
         ## Get filename without illegal characters
         fname = clean_filename(profile['displayName'])
         ## Save Windows Enrollment Profile as JSON or YAML depending on configured value in "-o"
         if output != "json":
-            with open(configpath+fname+".yaml",'w') as yamlFile:
-                yaml.dump(profile, yamlFile, sort_keys=False, default_flow_style=False)
+            with open(configpath+fname+".yaml", 'w') as yamlFile:
+                yaml.dump(profile, yamlFile, sort_keys=False,
+                          default_flow_style=False)
         else:
-            with open(configpath+fname+".json",'w') as jsonFile:
+            with open(configpath+fname+".json", 'w') as jsonFile:
                 json.dump(profile, jsonFile, indent=10)

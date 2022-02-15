@@ -24,24 +24,27 @@ from .graph_request import makeapirequest
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/applePushNotificationCertificate"
 
 ## Get APNs information and save in specified path
-def savebackup(path,output,token):
+
+
+def savebackup(path, output, token):
     configpath = path+"/"+"Apple Push Notification/"
-    data = makeapirequest(endpoint,token)
+    data = makeapirequest(endpoint, token)
 
     if data:
-        remove_keys = {'id','version','topicIdentifier','certificate'}
+        remove_keys = {'id', 'version', 'topicIdentifier', 'certificate'}
         for k in remove_keys:
             data.pop(k, None)
         print("Backing up Apple Push Notification: " + data['appleIdentifier'])
-        if os.path.exists(configpath)==False:
+        if os.path.exists(configpath) == False:
             os.mkdir(configpath)
 
         ## Get filename without illegal characters
         fname = clean_filename(data['appleIdentifier'])
         ## Save APNs as JSON or YAML depending on configured value in "-o"
         if output != "json":
-            with open(configpath+fname+".yaml",'w') as yamlFile:
-                yaml.dump(data, yamlFile, sort_keys=False, default_flow_style=False)
+            with open(configpath+fname+".yaml", 'w') as yamlFile:
+                yaml.dump(data, yamlFile, sort_keys=False,
+                          default_flow_style=False)
         else:
-            with open(configpath+fname+".json",'w') as jsonFile:
+            with open(configpath+fname+".json", 'w') as jsonFile:
                 json.dump(data, jsonFile, indent=10)

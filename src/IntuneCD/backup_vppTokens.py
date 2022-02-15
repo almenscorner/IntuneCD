@@ -25,19 +25,21 @@ endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/vppTokens"
 
 ## Get all VPP tokens and save them in specified path
 
-def savebackup(path,output,token):
+
+def savebackup(path, output, token):
     configpath = f'{path}/Apple VPP Tokens/'
-    data = makeapirequest(endpoint,token)
+    data = makeapirequest(endpoint, token)
 
     for vpp_token in data['value']:
         token_name = vpp_token['displayName']
-        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','token','lastSyncDateTime'}
+        remove_keys = {'id', 'createdDateTime', 'version',
+                       'lastModifiedDateTime', 'token', 'lastSyncDateTime'}
         for k in remove_keys:
             vpp_token.pop(k, None)
 
         print(f'Backing up VPP token: {token_name}')
 
-        if os.path.exists(configpath)==False:
+        if os.path.exists(configpath) == False:
             os.makedirs(configpath)
 
         ## Get filename without illegal characters
@@ -45,8 +47,9 @@ def savebackup(path,output,token):
 
         ## Save token as JSON or YAML depending on configured value in "-o"
         if output != "json":
-            with open(f'{configpath}{fname}.yaml','w') as yamlFile:
-                yaml.dump(vpp_token,yamlFile, sort_keys=False, default_flow_style=False)
+            with open(f'{configpath}{fname}.yaml', 'w') as yamlFile:
+                yaml.dump(vpp_token, yamlFile, sort_keys=False,
+                          default_flow_style=False)
         else:
-            with open(f'{configpath}{fname}.json','w') as jsonFile:
+            with open(f'{configpath}{fname}.json', 'w') as jsonFile:
                 json.dump(vpp_token, jsonFile, indent=10)

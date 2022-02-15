@@ -19,23 +19,26 @@ import json
 import os
 import glob
 
+
 def md_file(outpath):
     if os.path.exists(f'{outpath}') == False:
         open(outpath, 'w+').close()
     else:
         open(outpath, 'w').close()
 
+
 def write_table(data):
     writer = MarkdownTableWriter(
-        headers=['setting','value'],
+        headers=['setting', 'value'],
         value_matrix=data
     )
 
     return writer
 
+
 def assignment_table(data):
 
-    def write_assignment_table(data,headers):
+    def write_assignment_table(data, headers):
         writer = MarkdownTableWriter(
             headers=headers,
             value_matrix=data
@@ -58,22 +61,23 @@ def assignment_table(data):
                 target = assignment['target']['groupName']
             if "intent" in assignment:
                 intent = assignment['intent']
-                headers = ['intent','target','filter type','filter id']
+                headers = ['intent', 'target', 'filter type', 'filter id']
             else:
-                headers = ['target','filter type','filter id']
+                headers = ['target', 'filter type', 'filter id']
             if intent:
-                assignment_list.append([intent,\
-                                        target,\
-                                        assignment['target']['deviceAndAppManagementAssignmentFilterType'],\
+                assignment_list.append([intent,
+                                        target,
+                                        assignment['target']['deviceAndAppManagementAssignmentFilterType'],
                                         assignment['target']['deviceAndAppManagementAssignmentFilterId']])
             else:
-                assignment_list.append([target,\
-                                        assignment['target']['deviceAndAppManagementAssignmentFilterType'],\
+                assignment_list.append([target,
+                                        assignment['target']['deviceAndAppManagementAssignmentFilterType'],
                                         assignment['target']['deviceAndAppManagementAssignmentFilterId']])
 
-            table = write_assignment_table(assignment_list,headers)
+            table = write_assignment_table(assignment_list, headers)
 
     return table
+
 
 def remove_characters(string):
     remove_chars = '#@}{]["'
@@ -82,11 +86,12 @@ def remove_characters(string):
 
     return string
 
+
 def clean_list(data):
     values = []
     liststr = ","
     for item in data:
-        string=""
+        string = ""
         if type(item) is list:
             for i in item:
                 if type(i) is str:
@@ -119,9 +124,10 @@ def clean_list(data):
 
     return values
 
-def document_configs(configpath,outpath,header):
+
+def document_configs(configpath, outpath, header):
     ## If configurations path exists, continue
-    if os.path.exists(configpath)==True:
+    if os.path.exists(configpath) == True:
         with open(outpath, 'a') as md:
             md.write('# '+header+'\n')
 
@@ -133,7 +139,7 @@ def document_configs(configpath,outpath,header):
             # If file is .DS_Store, skip
             if filename == ".DS_Store":
                 continue
-            
+
             ## Check which format the file is saved as then open file, load data and set query parameter
             with open(filename) as f:
                     if filename.endswith(".yaml"):
@@ -156,8 +162,8 @@ def document_configs(configpath,outpath,header):
 
                     # Write configuration markdown table
                     config_table_list = []
-                    for key,value in zip(repo_data.keys(),clean_list(repo_data.values())):
-                        config_table_list.append([key,value])
+                    for key, value in zip(repo_data.keys(),clean_list(repo_data.values())):
+                        config_table_list.append([key, value])
                     config_table = write_table(config_table_list)
 
                     # Write data to file
@@ -173,9 +179,9 @@ def document_configs(configpath,outpath,header):
                             md.write(str(assignments_table)+'\n')
                         md.write(str(config_table)+'\n')
 
-def document_management_intents(configpath,outpath,header):
+def document_management_intents(configpath, outpath,header):
     ## If configurations path exists, continue
-    if os.path.exists(configpath)==True:
+    if os.path.exists(configpath) ==True:
         with open(outpath, 'a') as md:
             md.write('# '+header+'\n')
 
@@ -187,7 +193,7 @@ def document_management_intents(configpath,outpath,header):
             # If file is .DS_Store, skip
             if filename == ".DS_Store":
                 continue
-            
+
             ## Check which format the file is saved as then open file, load data and set query parameter
             with open(filename) as f:
                     if filename.endswith(".yaml"):
@@ -202,10 +208,10 @@ def document_management_intents(configpath,outpath,header):
                     assignments_table = assignment_table(repo_data)
                     repo_data.pop('assignments', None)
 
-                    intent_settings_list=[]
+                    intent_settings_list = []
 
                     for setting in repo_data['settingsDelta']:
-                        intent_settings_list.append([setting['definitionId'].split("_")[1],\
+                        intent_settings_list.append([setting['definitionId'].split("_")[1],
                                                     str(remove_characters(setting['valueJson']))])
 
                     repo_data.pop('settingsDelta')
@@ -218,8 +224,8 @@ def document_management_intents(configpath,outpath,header):
 
                     intent_table_list = []
 
-                    for key,value in zip(repo_data.keys(),clean_list(repo_data.values())):
-                        intent_table_list.append([key,value])
+                    for key, value in zip(repo_data.keys(),clean_list(repo_data.values())):
+                        intent_table_list.append([key, value])
 
                     table = intent_table_list + intent_settings_list
 
