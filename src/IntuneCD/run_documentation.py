@@ -82,6 +82,9 @@ def start ():
         # Document Powershell Scripts
         document_configs(f'{configpath}/Scripts/Powershell',outpath,'Powershell Scripts')
 
+        # Document Proactive Remediations
+        document_configs(f'{configpath}/Proactive Remediations',outpath,'Proactive Remediations')
+
         # Document Apple Enrollment Profiles
         document_configs(f'{configpath}/Enrollment Profiles/Apple',outpath,'Apple Enrollment Profiles')
 
