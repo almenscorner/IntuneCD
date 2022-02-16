@@ -70,28 +70,30 @@ def savebackup(path, output, token):
                     json.dump(profile, jsonFile, indent=10)
 
         ## If Device Configuration is custom Win10 and the OMA settings are encrypted, get them in plain text
-        elif profile['@odata.type'] == "#microsoft.graph.windows10CustomConfiguration" and profile['omaSettings'][0]['isEncrypted'] == True:
+        elif profile['@odata.type'] == "#microsoft.graph.windows10CustomConfiguration":
+            if profile['omaSettings']:
+                if profile['omaSettings'][0]['isEncrypted'] is True:
 
-            omas = []
-            for setting in profile['omaSettings']:
-                if setting['isEncrypted'] == True:
-                    decoded_oma = {}
-                    oma_value = makeapirequest(
-                        endpoint + "/" + pid + "/getOmaSettingPlainTextValue(secretReferenceValueId='" + setting['secretReferenceValueId'] + "')", token)
-                    decoded_oma['@odata.type'] = setting['@odata.type']
-                    decoded_oma['displayName'] = setting['displayName']
-                    decoded_oma['description'] = setting['description']
-                    decoded_oma['omaUri'] = setting['omaUri']
-                    decoded_oma['value'] = oma_value
-                    decoded_oma['isEncrypted'] = False
-                    decoded_oma['secretReferenceValueId'] = None
-                    decoded_omas = decoded_oma
-                    omas.append(decoded_omas)
-                elif setting['isEncrypted'] == False:
-                    omas.append(setting)
+                    omas = []
+                    for setting in profile['omaSettings']:
+                        if setting['isEncrypted'] == True:
+                            decoded_oma = {}
+                            oma_value = makeapirequest(
+                                endpoint + "/" + pid + "/getOmaSettingPlainTextValue(secretReferenceValueId='" + setting['secretReferenceValueId'] + "')", token)
+                            decoded_oma['@odata.type'] = setting['@odata.type']
+                            decoded_oma['displayName'] = setting['displayName']
+                            decoded_oma['description'] = setting['description']
+                            decoded_oma['omaUri'] = setting['omaUri']
+                            decoded_oma['value'] = oma_value
+                            decoded_oma['isEncrypted'] = False
+                            decoded_oma['secretReferenceValueId'] = None
+                            decoded_omas = decoded_oma
+                            omas.append(decoded_omas)
+                        elif setting['isEncrypted'] == False:
+                            omas.append(setting)
 
-            profile.pop('omaSettings')
-            profile['omaSettings'] = omas
+                    profile.pop('omaSettings')
+                    profile['omaSettings'] = omas
 
             ## Save Device Configuration as JSON or YAML depending on configured value in "-o"
             if output != "json":
