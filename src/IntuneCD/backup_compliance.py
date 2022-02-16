@@ -25,16 +25,20 @@ from .get_add_assignments import get_assignments
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePolicies"
 
 ## Get all Compliance policies and save them in specified path
-def savebackup(path,output,token):
+
+
+def savebackup(path, output, token):
     configpath = path+"/"+"Compliance Policies/Policies/"
-    q_param = {"$expand":"scheduledActionsForRule($expand=scheduledActionConfigurations)"}
-    data = makeapirequest(endpoint,token,q_param)
+    q_param = {
+        "$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"}
+    data = makeapirequest(endpoint, token, q_param)
 
     for policy in data['value']:
         print("Backing up compliance policy: " + policy['displayName'])
 
         pid = policy['id']
-        remove_keys = {'id','createdDateTime','version','lastModifiedDateTime','@odata.context','scheduledActionConfigurations@odata.context','scheduledActionsForRule@odata.context'}
+        remove_keys = {'id', 'createdDateTime', 'version', 'lastModifiedDateTime', '@odata.context',
+                       'scheduledActionConfigurations@odata.context', 'scheduledActionsForRule@odata.context'}
         for k in remove_keys:
             policy.pop(k, None)
             for rule in policy['scheduledActionsForRule']:
@@ -43,18 +47,19 @@ def savebackup(path,output,token):
                 for scheduled_config in policy['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
                     scheduled_config.pop(k, None)
 
-        if os.path.exists(configpath)==False:
+        if os.path.exists(configpath) == False:
             os.makedirs(configpath)
 
         ## Get assignments of Compliance Policy
-        get_assignments(endpoint,policy,pid,token)
+        get_assignments(endpoint, policy, pid, token)
 
         ## Get filename without illegal characters
         fname = clean_filename(policy['displayName'])
         ## Save Compliance policy as JSON or YAML depending on configured value in "-o"
         if output != "json":
-            with open(configpath+fname+".yaml",'w') as yamlFile:
-                yaml.dump(policy, yamlFile, sort_keys=False, default_flow_style=False)
+            with open(configpath+fname+".yaml", 'w') as yamlFile:
+                yaml.dump(policy, yamlFile, sort_keys=False,
+                          default_flow_style=False)
         else:
-            with open(configpath+fname+".json",'w') as jsonFile:
+            with open(configpath+fname+".json", 'w') as jsonFile:
                 json.dump(policy, jsonFile, indent=10)

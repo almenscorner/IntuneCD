@@ -2,7 +2,7 @@
 [![Downloads](https://pepy.tech/badge/intunecd/month)](https://pepy.tech/project/intunecd)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/IntuneCD?style=flat-square)
 ![PyPI](https://img.shields.io/pypi/v/IntuneCD?style=flat-square)
-![Maintenance](https://img.shields.io/maintenance/yes/2021?style=flat-square)
+![Maintenance](https://img.shields.io/maintenance/yes/2022?style=flat-square)
 
 # IntuneCD tool
 
@@ -12,19 +12,22 @@ The main function is to back up configurations from Intune to a Git repositry fr
 
 The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
+## Whats new in 1.0.7
+- Added backup and documentation of Apple Push Notification configuration
+- Added backup and documentation of Apple Volume Purchase Program tokens
+- Added backup and documentation of Applications
+- Added backup and documentation of Managed Google Play Configuration
+- Added backup and documentation of Partner Connections (Compliance, Management and Remote Assistance)
+- Added backup, documentation and update module for Proactive Remediations
+- Added a new option to the documentation module, '-i', which lets you configure your own introduction that will be displayed at the top
+- Changed documentation to display a collapsible view of long strings, now you can see the whole script payload for example
+- Improved console output when changes are detected, instead of writing the full path to the key, old output: `Setting: 'PayloadContent'][0]['PayloadContent']['corp.sap.privileges']['Forced'][0]['mcx_preference_settings']['ReasonMinLength', New Value: 15, Old Value: 20`, new output: `Setting: 'ReasonMinLength', New Value: 15, Old Value: 20`
 ## Whats new in 1.0.6
 - Added documentation module to create a markdown document with information from the backup files
 - Bug fix where only one assignment was included in the backup. The tool now successfully backup/updates all assignments and removes assignments that is no longer in the backup files
 - Filters are now included when updating assignments, if a filter has been added in DEV and it exists in PROD, it will be added to the configuration when using -u
 ## Whats new in 1.0.5
 - Bug fix where the tool was not able to identify the correct value format on management intents when updating values
-## Whats new in 1.0.4
-- Backup of assignments
-- Update of assignments on existing configurations
-- Creation of configurations if they cannot be found by the script
-- For compliance, all rules are now backed up and can be updated
-
-:eyes: **Note** that since this version includes assignments, additional API permissions are needed. Refer to the required permissions below.
 
 ## Install this package
 ```python
@@ -37,9 +40,13 @@ pip install IntuneCD --upgrade
 ```
 
 ## What is backed up?
+- Apple Push Notification
+- Apple Volume Purchase Program tokens
 - Application Configuration Policies
     - Including assignments
 - Application Protection Policies
+    - Including assignments
+- Applications
     - Including assignments
 - Compliance Policies
     - Including assignments
@@ -57,10 +64,17 @@ pip install IntuneCD --upgrade
     - Disk Encryption
     - Firewall
     - Endpoint Detection and Response
-    - Attach Surface Reduction
+    - Attack Surface Reduction
     - Account Protection
 - Filters
+- Managed Google Play
 - Notification Templates
+- Proactive Remediations
+    - Including assignments
+- Partner Connections
+    - Compliance
+    - Management
+    - Remote Assistance
 - Scripts
     - Including assignments
     - Powershell
@@ -69,7 +83,7 @@ pip install IntuneCD --upgrade
     - Including assignments
 
 ## What can be updated?
-Well... all of the above ;)
+Well... most of the above ;)
 
 - Application Configuration Policies
     - Including assignments
@@ -91,10 +105,12 @@ Well... all of the above ;)
     - Disk Encryption
     - Firewall
     - Endpoint Detection and Response
-    - Attach Surface Reduction
+    - Attack Surface Reduction
     - Account Protection
 - Filters
 - Notification Templates
+- Proactive Remediations
+    - Including assignments
 - Scripts
     - Including assignments
     - Powershell
@@ -121,10 +137,12 @@ If the configuration the script is looking for cannot be found, it will create i
     - Disk Encryption
     - Firewall
     - Endpoint Detection and Response
-    - Attach Surface Reduction
+    - Attack Surface Reduction
     - Account Protection
 - Filters
 - Notification Templates
+- Proactive Remediations
+    - Including assignments
 - Scripts
     - Including assignments
     - Powershell
@@ -138,13 +156,13 @@ If the configuration the script is looking for cannot be found, it will create i
 - DeviceManagementServiceConfig.ReadWrite.All
 - Group.Read.All
 
-If you just want to backup you can get away with only Read permission!
+If you just want to backup you can get away with only Read permission (except for DeviceManagementConfiguration)!
 
 ## How do I use it?
 You have two options, using a pipeline or running it locally. Let's have a look at both.
 
 ## Parameters
-To see which parameters you have to prove just type: IntuneCD-startbackup --help, IntuneCD-startupdate --help or IntuneCD-startdocumentation --help
+To see which parameters you have to provide just type: IntuneCD-startbackup --help, IntuneCD-startupdate --help or IntuneCD-startdocumentation --help
 
 Options:
   * -h, --help  show this help message and exit
@@ -308,14 +326,14 @@ steps:
 ## Run documentation locally
 To create a markdown document from the backup files, run this command
 ```python
-IntuneCD-startdocumentation -p /path/to/backup/directory -o /path/to/create/markdown.md -t nameoftenant
+IntuneCD-startdocumentation -p /path/to/backup/directory -o /path/to/create/markdown.md -t nameoftenant -i 'This is a demo introduction'
 ```
 
 ## Run documentation in a pipeline
 This step should be added to the backup pipeline to make sure the markdown document is updated when configurations changes. By default it writes to the README.md file in the repo, you can change this with the -o option
 
 ```yaml
-- script: IntuneCD-startdocumentation -t $(TENANT_NAME)
+- script: IntuneCD-startdocumentation -t $(TENANT_NAME) -i 'This is a demo introduction'
   env:
     REPO_DIR: $(REPO_DIR)
   displayName: Run IntuneCD documentation
