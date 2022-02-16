@@ -21,6 +21,7 @@ The package can also be run standalone outside of a pipeline, or in one to only 
 - Added backup, documentation and update module for Proactive Remediations
 - Added a new option to the documentation module, '-i', which lets you configure your own introduction that will be displayed at the top
 - Changed documentation to display a collapsible view of long strings, now you can see the whole script payload for example
+- Improved console output when changes are detected, instead of writing the full path to the key, old output: `Setting: 'PayloadContent'][0]['PayloadContent']['corp.sap.privileges']['Forced'][0]['mcx_preference_settings']['ReasonMinLength', New Value: 15, Old Value: 20`, new output: `Setting: 'ReasonMinLength', New Value: 15, Old Value: 20`
 ## Whats new in 1.0.6
 - Added documentation module to create a markdown document with information from the backup files
 - Bug fix where only one assignment was included in the backup. The tool now successfully backup/updates all assignments and removes assignments that is no longer in the backup files
