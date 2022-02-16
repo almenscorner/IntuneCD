@@ -162,7 +162,7 @@ If you just want to backup you can get away with only Read permission (except fo
 You have two options, using a pipeline or running it locally. Let's have a look at both.
 
 ## Parameters
-To see which parameters you have to prove just type: IntuneCD-startbackup --help, IntuneCD-startupdate --help or IntuneCD-startdocumentation --help
+To see which parameters you have to provide just type: IntuneCD-startbackup --help, IntuneCD-startupdate --help or IntuneCD-startdocumentation --help
 
 Options:
   * -h, --help  show this help message and exit
