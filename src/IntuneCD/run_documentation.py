@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from distutils.command.config import config
+from email.policy import default
 import os
 from datetime import datetime
 from .documentation_functions import document_configs,document_management_intents,md_file
@@ -26,6 +26,11 @@ def start ():
         '-t', '--tenantname',
         help = 'Name of the tenant'
     )
+    parser.add_option(
+        '-i', '--intro',
+        help = 'Introduction that will be added to the top of the document',
+        default = 'This document contains documentation of all configurations exported by the IntuneCD tool'
+    )
 
     (opts, _) = parser.parse_args()
 
@@ -49,16 +54,16 @@ def start ():
         # Document Apple VPP Tokens
         document_configs(f'{configpath}/Apple VPP Tokens',outpath,'Apple VPP Tokens')
 
-        # Document Applications
+        # Document iOS Applications
         document_configs(f'{configpath}/Applications/iOS',outpath,'iOS Applications')
 
-        # Document Applications
+        # Document macOS Applications
         document_configs(f'{configpath}/Applications/macOS',outpath,'macOS Applications')
 
-        # Document Applications
+        # Document Android Applications
         document_configs(f'{configpath}/Applications/Android',outpath,'Android Applications')
 
-        # Document Applications
+        # Document Windows Applications
         document_configs(f'{configpath}/Applications/Windows',outpath,'Windows Applications')
 
         # Document compliance
@@ -85,6 +90,9 @@ def start ():
         # Document Intents
         document_management_intents(f'{configpath}/Management Intents/',outpath,'Management Intents')
 
+        #Document Partner Connections
+        document_configs(f'{configpath}/Partner Connections/',outpath,'Partner Connections')
+
         # Document Proactive Remediations
         document_configs(f'{configpath}/Proactive Remediations',outpath,'Proactive Remediations')
 
@@ -100,7 +108,7 @@ def start ():
         document = markdown_toclify(input_file=outpath,back_to_top=True,exclude_h=[3])
         with open(outpath, 'w') as doc:
             l1='# MEM Documentation \n\n'
-            l2='This document contains documentation of all configurations exported by the IntuneCD tool \n\n'
+            l2=f'{opts.intro} \n\n'
             l3=f'**Tenant:** {tenantname} \n\n'
             l4=f'**Document updated on:** {current_date} \n\n'
             doc.writelines([l1,l2,l3,l4,document])
