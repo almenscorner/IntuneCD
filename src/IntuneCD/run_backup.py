@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import imp
 import os
 from .get_authparams import getAuth
 
@@ -97,6 +96,15 @@ def start():
         savebackup(path,output,token)
 
         from .backup_managementIntents import savebackup
+        savebackup(path,output,token)
+
+        from .backup_compliancePartner import savebackup
+        savebackup(path,output,token)
+
+        from .backup_managementPartner import savebackup
+        savebackup(path,output,token)
+
+        from .backup_remoteAssistancePartner import savebackup
         savebackup(path,output,token)
 
         from .backup_proactiveRemediation import savebackup
