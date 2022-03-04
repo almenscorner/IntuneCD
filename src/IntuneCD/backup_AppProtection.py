@@ -19,53 +19,41 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .get_add_assignments import get_assignments
+from .graph_batch import batch_assignment, get_object_assignment
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/managedAppPolicies"
 
 ## Get all App Protection policies and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = path+"/"+"App Protection/"
     data = makeapirequest(endpoint, token)
+
+    assignment_responses = batch_assignment(data,f'deviceAppManagement/','/assignments',token,app_protection=True)
 
     ## If profile is ManagedAppConfiguration, skip to next
     for profile in data['value']:
         if profile['@odata.type'] == "#microsoft.graph.targetedManagedAppConfiguration":
             continue
 
-        pid = profile['id']
+        assignments = get_object_assignment(profile['id'],assignment_responses)
+        if assignments:
+            profile['assignments'] = assignments
+        
         remove_keys = {'id', 'createdDateTime', 'version',
                        'lastModifiedDateTime', 'deployedAppCount', 'isAssigned'}
         for k in remove_keys:
             profile.pop(k, None)
+
         print("Backing up App Protection: " + profile['displayName'])
         if os.path.exists(configpath) == False:
             os.mkdir(configpath)
 
-        if profile['@odata.type'] == "#microsoft.graph.iosManagedAppProtection":
-            platform = "ios"
-        elif profile['@odata.type'] == "#microsoft.graph.androidManagedAppProtection":
-            platform = "android"
-        elif profile['@odata.type'] == "#microsoft.graph.windowsManagedAppProtection":
-            platform = "windows"
-        elif profile['@odata.type'] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
-            platform = "mdmWindowsInformationProtectionPolicies"
-        elif profile['@odata.type'] == "#microsoft.graph.targetedManagedAppConfiguration":
-            platform = None
-
-        if platform == "mdmWindowsInformationProtectionPolicies":
-            platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform
+        if 'targetedAppManagementLevels' in profile:
+            fname = clean_filename(f"{profile['displayName']}_{profile['targetedAppManagementLevels']}")
         else:
-            platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + \
-                platform + "ManagedAppProtections"
+            fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
 
-        get_assignments(platform_endpoint, profile, pid, token)
-
-        ## Get filename without illegal characters
-        fname = clean_filename(profile['displayName'])
         ## Save App Protection as JSON or YAML depending on configured value in "-o"
         if output != "json":
             with open(configpath+fname+".yaml", 'w') as yamlFile:
