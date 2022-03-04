@@ -124,6 +124,7 @@ def update(path, token, assignment=False):
                                         repo_payload_config)
                                     repo_data['payload'] = str(base64.b64encode(payload), 'utf-8')
                                     request_data = json.dumps(repo_data)
+                                    q_param = None
                                     makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data,status_code=204)
                                 else:
                                     print(
@@ -189,6 +190,7 @@ def update(path, token, assignment=False):
 
                             if repo_omas:
                                 request_data = json.dumps(repo_data)
+                                q_param = None
                                 makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data,status_code=204)
 
                         ## If Device Configuration is not custom, compare the values
@@ -207,6 +209,7 @@ def update(path, token, assignment=False):
                                     print(
                                         f"Setting: {setting}, New Value: {new_val}, Old Value: {old_val}")
                                 request_data = json.dumps(repo_data)
+                                q_param = None
                                 makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data,status_code=204)
                             else:
                                 print('No difference found for profile: ' + \
