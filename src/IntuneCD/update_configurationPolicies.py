@@ -89,6 +89,7 @@ def update(path, token, assignment=False):
                                 print(
                                     f"New Value: {new_val}, Old Value: {old_val}")
                             request_data = json.dumps(repo_data)
+                            q_param = None
                             makeapirequestPut(endpoint + "/" + data['value']['id'], token,q_param,request_data,status_code=204)
                         else:
                             print(
