@@ -93,6 +93,7 @@ def update(path, token, assignment=False):
                             else:
                                 repo_data['managementServiceAppId'] = ""
                             request_data = json.dumps(repo_data)
+                            q_param = None
                             makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data)
                         else:
                             print(
