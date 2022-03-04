@@ -24,8 +24,6 @@ from .graph_request import makeapirequest
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/androidManagedStoreAccountEnterpriseSettings"
 
 ## Get Managed Google Play information and save in specified path
-
-
 def savebackup(path, output, token):
     configpath = f'{path}/Managed Google Play/'
     data = makeapirequest(endpoint, token)
