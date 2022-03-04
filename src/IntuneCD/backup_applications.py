@@ -20,7 +20,7 @@ import re
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .get_add_assignments import get_assignments
+from .graph_batch import batch_assignment, get_object_assignment
 
 ## Set MS Graph endpoint
 q_param = {"$filter":"(microsoft.graph.managedApp/appAvailability) eq null or (microsoft.graph.managedApp/appAvailability) eq 'lineOfBusiness' or isAssigned eq true"}
@@ -39,11 +39,17 @@ def match (platform,input) -> bool:
 ## Get all applications and save them in specified path
 def savebackup(path,output,token):
     configpath = f'{path}/Applications/'
+
     data = makeapirequest(endpoint,token,q_param)
+    assignment_responses = batch_assignment(data,f'deviceAppManagement/mobileApps/','/assignments',token)
 
     for app in data['value']:
-        app_id = app['id']
+        app_name = ""
         platform = ""
+        assignments = get_object_assignment(app['id'],assignment_responses)
+        if assignments:
+            app['assignments'] = assignments
+
         remove_keys={'id','createdDateTime','version','lastModifiedDateTime','description'}
         for k in remove_keys:
             app.pop(k, None)
@@ -53,7 +59,15 @@ def savebackup(path,output,token):
             app_name = app['displayName']+'_iOSVppApp_'+str(app['vppTokenAppleId'].split('@')[0])
         elif app['@odata.type'] == '#microsoft.graph.macOsVppApp':
             app_name = app['displayName']+'_macOSVppApp_'+str(app['vppTokenAppleId'].split('@')[0])
-        ## If app is not VPP, only add the app type to the name
+        ## If app type is Win32 or MSI, add version to the name as multiple versions can exist
+        elif app['@odata.type'] == '#microsoft.graph.win32LobApp':
+            if app['displayVersion'] is None:
+                app_name = app['displayName']+'_Win32'
+            else:
+                app_name = app['displayName']+'_Win32_'+str(app['displayVersion']).replace('.','_')
+        elif app['@odata.type'] == '#microsoft.graph.windowsMobileMSI':
+            app_name = app['displayName']+'_WinMSI_'+str(app['productVersion']).replace('.','_')
+        ## If app is not VPP, Win32 or MSI only add the app type to the name
         else:
             app_name = app['displayName']+'_'+str(app['@odata.type'].split('.')[2])
 
@@ -66,12 +80,19 @@ def savebackup(path,output,token):
             platform = 'Android'
         if match('windows',str(app['@odata.type']).lower()) is True:
             platform = 'Windows'
+        if match('microsoft',str(app['@odata.type']).lower()) is True:
+            platform = 'Windows'
+        if match('win32',str(app['@odata.type']).lower()) is True:
+            platform = 'Windows'
+        if match('office',str(app['@odata.type']).lower()) is True:
+            platform = 'Office Suite'        
+        if app['@odata.type'] == '#microsoft.graph.webApp':
+            platform = 'Web App'
 
         print(f"Backing up Application: {app['displayName']}")
         if os.path.exists(f'{configpath}/{platform}')==False:
             os.makedirs(f'{configpath}/{platform}')
 
-        get_assignments(endpoint,app,app_id,token)
         ## Get filename without illegal characters
         fname = clean_filename(app_name)
         ## Save Applications as JSON or YAML depending on configured value in "-o"
