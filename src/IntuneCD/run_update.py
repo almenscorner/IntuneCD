@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-import imp
 import os
-from .get_authparams import getAuth
 
+from .get_authparams import getAuth
 from optparse import OptionParser
 
 REPO_DIR = os.environ.get("REPO_DIR")
@@ -33,6 +32,7 @@ def start():
     )
     parser.add_option(
         "-u",
+        help = "When this parameter is set, assignments are updated for all configurations",
         action = "store_true"
     )
 
@@ -53,7 +53,7 @@ def start():
         func = switcher.get(argument, "nothing")
         return func()
 
-    token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="PROD")   
+    token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="PROD")
 
     def run_update(path,token,assignment):
 
