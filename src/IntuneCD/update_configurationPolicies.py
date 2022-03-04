@@ -14,11 +14,10 @@ token : str
 import json
 import os
 import yaml
-import re
 
 from .graph_request import makeapirequest, makeapirequestPut, makeapirequestPost
-from .get_add_assignments import add_assignment
-
+from .graph_batch import batch_assignment, get_object_assignment
+from .update_assignment import update_assignment, post_assignment_update
 from deepdiff import DeepDiff
 
 ## Set MS Graph endpoint
@@ -31,6 +30,11 @@ def update(path, token, assignment=False):
     configpath = path+"/"+"Settings Catalog/"
 
     if os.path.exists(configpath) == True:
+        ## Get configurations policies
+        mem_data = makeapirequest(endpoint, token)
+        ## Get current assignments
+        mem_assignments = batch_assignment(mem_data,'deviceManagement/configurationPolicies/','/assignments',token)
+
         for filename in os.listdir(configpath):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
@@ -46,35 +50,32 @@ def update(path, token, assignment=False):
                     if filename.endswith(".yaml"):
                         data = json.dumps(yaml.safe_load(f))
                         repo_data = json.loads(data)
-                        q_param = {"$filter": "name eq " + "'" + name + "'"}
 
                     elif filename.endswith(".json"):
                         f = open(file)
                         repo_data = json.load(f)
-                        q_param = {"$filter": "name eq " + "'" + name + "'"}
 
                     ## Create object to pass in to assignment function
                     assign_obj = {}
                     if "assignments" in repo_data:
-                        assign_obj['assignments'] = repo_data['assignments']
+                        assign_obj = repo_data['assignments']
                     repo_data.pop('assignments', None)
 
-                    # Get Filter with query parameter
-                    mem_data = makeapirequest(endpoint, token,q_param)
+                    data = {'value':''}
+                    if mem_data['value']:
+                        for val in mem_data['value']:
+                            if repo_data['name'] == val['name']:
+                                data['value'] = val
 
                     ## If Filter exists, continue
-                    if mem_data['value']:
+                    if data['value']:
                         print("-" * 90)
                         ## Get Filter data from Intune
-                        mem_policy_data = makeapirequest(endpoint + "/" + mem_data['value'][0]['id'], token)
+                        mem_policy_data = makeapirequest(endpoint + "/" + data['value']['id'], token)
                         ## Get Filter settings from Intune
-                        mem_policy_settings = makeapirequest(endpoint + "/" + mem_data['value'][0]['id'] + "/settings", token)
+                        mem_policy_settings = makeapirequest(endpoint + "/" + data['value']['id'] + "/settings", token)
                         ## Add settings to the data dictionary
                         mem_policy_data['settings'] = mem_policy_settings['value']
-
-                        ## Check if assignment needs updating and apply chanages
-                        if assignment == True:
-                            add_assignment(endpoint, assign_obj,mem_data['value'][0]['id'],token)
 
                         diff = DeepDiff(mem_policy_data, repo_data, ignore_order=True).get('values_changed', {})
 
@@ -88,10 +89,18 @@ def update(path, token, assignment=False):
                                 print(
                                     f"New Value: {new_val}, Old Value: {old_val}")
                             request_data = json.dumps(repo_data)
-                            makeapirequestPut(endpoint + "/" + mem_data['value'][0]['id'], token,q_param,request_data,status_code=204)
+                            makeapirequestPut(endpoint + "/" + data['value']['id'], token,q_param,request_data,status_code=204)
                         else:
                             print(
                                 'No difference found for Settings Catalog policy: ' + name)
+
+                        if assignment == True:
+                            mem_assign_obj = get_object_assignment(data['value']['id'],mem_assignments)
+                            update = update_assignment(assign_obj,mem_assign_obj,token)
+                            if update is not None:
+                                request_data = {}
+                                request_data['assignments'] = update
+                                post_assignment_update(request_data,data['value']['id'],'deviceManagement/configurationPolicies','assign',token)
 
                     ## If Configuration Policy does not exist, create it and assign
                     else:
@@ -101,5 +110,10 @@ def update(path, token, assignment=False):
                         repo_data.pop('settingCount', None)
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(endpoint, token,q_param=None,jdata=request_json,status_code=201)
-                        add_assignment(endpoint, assign_obj,post_request['id'],token)
+                        mem_assign_obj = []
+                        assignment = update_assignment(assign_obj,mem_assign_obj,token)
+                        if assignment is not None:
+                            request_data = {}
+                            request_data['assignments'] = assignment
+                            post_assignment_update(request_data,post_request['id'],'deviceManagement/configurationPolicies','assign',token)
                         print("Configuration Policy created with id: " + post_request['id'])
