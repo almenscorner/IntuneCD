@@ -18,8 +18,8 @@ import yaml
 import re
 
 from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
-from .get_add_assignments import add_assignment
-
+from .graph_batch import batch_assignment, get_object_assignment
+from .update_assignment import update_assignment, post_assignment_update
 from deepdiff import DeepDiff
 
 ## Set MS Graph endpoint
@@ -32,6 +32,11 @@ def update(path, token, assignment=False):
     configpath = path+"/"+"Scripts/Powershell"
     ## If Powershell script path exists, continue
     if os.path.exists(configpath) == True:
+        ## Get scripts
+        mem_powershellScript = makeapirequest(endpoint, token)
+        ## Get current assignment
+        mem_assignments = batch_assignment(mem_powershellScript,'deviceManagement/deviceManagementScripts/','/assignments',token)
+
         for filename in os.listdir(configpath):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
@@ -46,37 +51,33 @@ def update(path, token, assignment=False):
                     if filename.endswith(".yaml"):
                         data = json.dumps(yaml.safe_load(f))
                         repo_data = json.loads(data)
-                        q_param = {"$filter": "displayName eq " +
-                            "'" + repo_data['displayName'] + "'"}
+                        
                     elif filename.endswith(".json"):
                         f = open(file)
                         repo_data = json.load(f)
-                        q_param = {"$filter": "displayName eq " + "'" + repo_data['displayName'] + "'"}
 
                     ## Create object to pass in to assignment function
                     assign_obj = {}
                     if "assignments" in repo_data:
-                        assign_obj['assignments'] = repo_data['assignments']
+                        assign_obj = repo_data['assignments']
                     repo_data.pop('assignments', None)
 
-                    ## Get Powershell script with query parameter
-                    mem_powershellScript = makeapirequest(endpoint, token,q_param)
+                    data = {'value':''}
+                    if mem_powershellScript['value']:
+                        for val in mem_powershellScript['value']:
+                            if repo_data['displayName'] == val['displayName']:
+                                data['value'] = val
 
                     ## If Powershell script exists, continue
-                    if mem_powershellScript['value']:
+                    if data['value']:
                         print("-" * 90)
-                        q_param = None
                         ## Get Powershell script details
-                        mem_data = makeapirequest(endpoint + "/" + mem_powershellScript['value'][0]['id'], token,q_param)
-                        pid = mem_data['id']
+                        mem_data = makeapirequest(endpoint + "/" + data['value']['id'], token)
+                        mem_id = mem_data['id']
                         ## Remove keys before using DeepDiff
                         remove_keys = {'id', 'createdDateTime','version','lastModifiedDateTime'}
                         for k in remove_keys:
                             mem_data.pop(k, None)
-
-                        ## Check if assignment needs updating and apply chanages
-                        if assignment == True:
-                            add_assignment(endpoint, assign_obj,pid,token,script=True)
 
                         ## Check if script data is saved and read the file
                         if os.path.exists(configpath + "/Script Data/" + repo_data['fileName']):
@@ -109,10 +110,18 @@ def update(path, token, assignment=False):
                                 repo_data['scriptContent'] = base64.b64encode(
                                     powershell_bytes).decode('utf-8')
                                 request_data = json.dumps(repo_data)
-                                makeapirequestPatch(endpoint + "/" + pid, token,q_param,request_data)
+                                makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data)
                             else:
                                 print(
                                     'No difference found for Powershell script: ' + repo_data['displayName'])
+
+                        if assignment == True:
+                            mem_assign_obj = get_object_assignment(mem_id,mem_assignments)
+                            update = update_assignment(assign_obj,mem_assign_obj,token)
+                            if update is not None:
+                                request_data = {}
+                                request_data['deviceManagementScriptAssignments'] = update
+                                post_assignment_update(request_data,mem_id,'deviceManagement/deviceManagementScripts','assign',token)
 
                     ## If Powershell script does not exist, create it and assign
                     else:
@@ -121,5 +130,10 @@ def update(path, token, assignment=False):
                             "Powershell script not found, creating script: " + repo_data['displayName'])
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(endpoint, token,q_param=None,jdata=request_json,status_code=201)
-                        add_assignment(endpoint, assign_obj,post_request['id'],token,script=True)
+                        mem_assign_obj = []
+                        assignment = update_assignment(assign_obj,mem_assign_obj,token)
+                        if assignment is not None:
+                            request_data = {}
+                            request_data['deviceManagementScriptAssignments'] = assignment
+                            post_assignment_update(request_data,post_request['id'],'deviceManagement/deviceManagementScripts','assign',token)
                         print("Powershell script created with id: " + post_request['id'])
