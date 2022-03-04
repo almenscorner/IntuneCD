@@ -24,8 +24,6 @@ from .graph_request import makeapirequest
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/assignmentFilters"
 
 ## Get all Filters and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = path+"/"+"Filters/"
     data = makeapirequest(endpoint, token)
