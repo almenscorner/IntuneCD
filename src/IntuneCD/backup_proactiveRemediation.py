@@ -20,36 +20,40 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .get_add_assignments import get_assignments
+from .graph_batch import batch_assignment, get_object_assignment, batch_request
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScripts"
 
 ## Get all Proactive Remediations and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = f'{path}/Proactive Remediations/'
     data = makeapirequest(endpoint, token)
+    pr_ids = []
+    for script in data['value']:
+        pr_ids.append(script['id'])
 
-    for pr in data['value']:
-        if "Microsoft" not in pr['publisher']:
-            pr_details = makeapirequest(f"{endpoint}/{pr['id']}", token)
-            pr_id = pr_details['id']
+    assignment_responses = batch_assignment(data,f'deviceManagement/deviceHealthScripts/','/assignments',token)
+    pr_data_responses = batch_request(pr_ids,f'deviceManagement/deviceHealthScripts/','',token)
+
+    for pr_details in pr_data_responses:
+        if "Microsoft" not in pr_details['publisher']:
+            
+            assignments = get_object_assignment(pr_details['id'],assignment_responses)
+            if assignments:
+                pr_details['assignments'] = assignments
+                
             remove_keys = {'id', 'createdDateTime', 'version',
                            'lastModifiedDateTime', 'isGlobalScript', 'highestAvailableVersion'}
             for k in remove_keys:
                 pr_details.pop(k, None)
 
-            print(f"Backing up Proactive Remediation: {pr['displayName']}")
+            print(f"Backing up Proactive Remediation: {pr_details['displayName']}")
             if os.path.exists(configpath) == False:
                 os.makedirs(configpath)
 
             ## Get filename without illegal characters
             fname = clean_filename(pr_details['displayName'])
-
-            ## Get assignments of Proactive Remediation
-            get_assignments(endpoint, pr_details, pr_id, token)
 
             ## Save Proactive Remediation as JSON or YAML depending on configured value in "-o"
             if output != 'json':
