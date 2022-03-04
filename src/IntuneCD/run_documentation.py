@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from email.policy import default
 import os
 from datetime import datetime
 from .documentation_functions import document_configs,document_management_intents,md_file
@@ -65,6 +64,12 @@ def start ():
 
         # Document Windows Applications
         document_configs(f'{configpath}/Applications/Windows',outpath,'Windows Applications')
+
+        # Document Web Apps
+        document_configs(f'{configpath}/Applications/Web App',outpath,'Web Applications')
+
+        # Document Office Suite apps
+        document_configs(f'{configpath}/Applications/Office Suite',outpath,'Office Suite Applications')
 
         # Document compliance
         document_configs(f'{configpath}/Compliance Policies/Policies',outpath,'Compliance Policies')
