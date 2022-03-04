@@ -103,7 +103,8 @@ def update(path, token, assignment=False):
                                 print(
                                     f"Setting: {setting}, New Value: {new_val}, Old Value: {old_val}")
                             request_data = json.dumps(repo_data)
-                            makeapirequestPatch(f'{endpoint}deviceAppManagement/{platform}/{mem_id}', token,q_param,request_data,status_code=204)
+                            q_param = None
+                            makeapirequestPatch(f'{endpoint}{platform}/{mem_id}', token,q_param,request_data,status_code=204)
                         else:
                             print(
                                 'No difference found for App protection: ' + repo_data['displayName'])
