@@ -34,7 +34,6 @@ def savebackup(path, output, token):
         else:
             print("Backing up Remote Assistance Partner: " + partner['displayName'])
 
-            pid = partner['id']
             remove_keys = {'id', 'createdDateTime', 'version', 'lastModifiedDateTime'}
             for k in remove_keys:
                 partner.pop(k, None)
