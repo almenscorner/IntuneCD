@@ -19,20 +19,23 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .get_add_assignments import get_assignments
+from .graph_batch import batch_assignment,get_object_assignment
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDeploymentProfiles"
 
 ## Get all Windows Enrollment Profiles and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = path+"/"+"Enrollment Profiles/Windows/"
     data = makeapirequest(endpoint, token)
 
+    assignment_responses = batch_assignment(data,'deviceManagement/windowsAutopilotDeploymentProfiles/','/assignments',token)
+
     for profile in data['value']:
-        pid = profile['id']
+        assignments = get_object_assignment(profile['id'],assignment_responses)
+        if assignments:
+            profile['assignments'] = assignments
+        
         remove_keys = {'id', 'createdDateTime',
                        'version', 'lastModifiedDateTime'}
         for k in remove_keys:
@@ -41,9 +44,6 @@ def savebackup(path, output, token):
               profile['displayName'])
         if os.path.exists(configpath) == False:
             os.makedirs(configpath)
-
-        ## Check if assignment needs updating and apply chanages
-        get_assignments(endpoint, profile, pid, token)
 
         ## Get filename without illegal characters
         fname = clean_filename(profile['displayName'])
