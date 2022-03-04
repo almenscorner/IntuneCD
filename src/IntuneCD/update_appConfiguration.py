@@ -17,8 +17,8 @@ import yaml
 import re
 
 from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
-from .get_add_assignments import add_assignment
-
+from .graph_batch import batch_assignment, get_object_assignment
+from .update_assignment import update_assignment, post_assignment_update
 from deepdiff import DeepDiff
 
 ## Set MS Graph endpoint
@@ -32,6 +32,13 @@ def update(path, token, assignment=False):
     configpath = path+"/"+"App Configuration/"
     ## If App Configuration path exists, continue
     if os.path.exists(configpath) == True:
+
+        ## Get App Configurations
+        mem_data = makeapirequest(endpoint, token)
+        ## Get current assignments
+        mem_assignments = batch_assignment(
+            mem_data, 'deviceAppManagement/mobileAppConfigurations/', '/assignments', token)
+
         for filename in os.listdir(configpath):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
@@ -46,38 +53,35 @@ def update(path, token, assignment=False):
                     if filename.endswith(".yaml"):
                         data = json.dumps(yaml.safe_load(f))
                         repo_data = json.loads(data)
-                        q_param = {"$filter": "displayName eq " +
-                                   "'" + repo_data['displayName'] + "'"}
+                        
                     elif filename.endswith(".json"):
                         f = open(file)
                         repo_data = json.load(f)
-                        q_param = {"$filter": "displayName eq " + \
-                            "'" + repo_data['displayName'] + "'"}
 
                     ## Create object to pass in to assignment function
                     assign_obj = {}
                     if "assignments" in repo_data:
-                        assign_obj['assignments'] = repo_data['assignments']
+                        assign_obj = repo_data['assignments']
                     repo_data.pop('assignments', None)
 
-                    ## Get App Configuration with query parameter
-                    mem_data = makeapirequest(endpoint, token, q_param)
-
                     ## If App Configuration exists, continue
+                    data = {'value': ''}
                     if mem_data['value']:
+                        for val in mem_data['value']:
+                            if repo_data['@odata.type'] == val['@odata.type'] and \
+                               repo_data['displayName'] == val['displayName']:
+                                data['value'] = val
+
+                    if data['value']:
                         print("-" * 90)
-                        pid = mem_data['value'][0]['id']
+                        mem_id = data['value']['id']
                         ## Remove keys before using DeepDiff
-                        remove_keys = {'id', 'createdDateTime', 'version','lastModifiedDateTime'}
+                        remove_keys = {'id', 'createdDateTime', 'version', 'lastModifiedDateTime'}
                         for k in remove_keys:
-                            mem_data['value'][0].pop(k, None)
+                            data['value'].pop(k, None)
                         repo_data.pop('targetedMobileApps', None)
 
-                        ## Check if assignment needs updating and apply chanages
-                        if assignment == True:
-                            add_assignment(endpoint, assign_obj, pid,token,extra_url="/microsoft.graph.managedDeviceMobileAppConfiguration")
-
-                        diff = DeepDiff(mem_data['value'][0], repo_data, ignore_order=True).get(
+                        diff = DeepDiff(data['value'], repo_data, ignore_order=True).get(
                             'values_changed', {})
 
                         ## If any changed values are found, push them to Intune
@@ -85,16 +89,26 @@ def update(path, token, assignment=False):
                             print("Updating App configuration: " +
                                   repo_data['displayName'] + ", values changed:")
                             for key, value in diff.items():
-                                setting = re.search("\[(.*)\]", key).group(1).split("[")[-1]
+                                setting = re.search(
+                                    "\[(.*)\]", key).group(1).split("[")[-1]
                                 new_val = value['new_value']
                                 old_val = value['old_value']
                                 print(
                                     f"Setting: {setting}, New Value: {new_val}, Old Value: {old_val}")
                             request_data = json.dumps(repo_data)
-                            makeapirequestPatch(endpoint + "/" + pid, token, q_param,request_data,status_code=204)
+                            makeapirequestPatch(endpoint + "/" + mem_id, token, q_param, request_data,status_code=204)
                         else:
                             print(
                                 'No difference found for App configuration: ' + repo_data['displayName'])
+
+                        if assignment == True:
+                            mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
+                            update = update_assignment(assign_obj, mem_assign_obj,token)
+                            if update is not None:
+                                request_data = {}
+                                request_data['assignments'] = update
+                                post_assignment_update(request_data, mem_id,'deviceAppManagement/mobileAppConfigurations/',
+                                                        '/microsoft.graph.managedDeviceMobileAppConfiguration/assign',token)
 
                     ## If App Configuration does not exist, create it and assign
                     else:
@@ -106,7 +120,8 @@ def update(path, token, assignment=False):
                         if repo_data['targetedMobileApps']:
                             q_param = {"$filter": "(isof(" + "'"+str(repo_data['targetedMobileApps']['type']).replace('#', '') + "'" + '))',
                                        "$search": repo_data['targetedMobileApps']['appName']}
-                            app_request = makeapirequest(app_endpoint, token, q_param)
+                            app_request = makeapirequest(
+                                app_endpoint, token, q_param)
                             if app_request['value']:
                                 app_ids = app_request['value'][0]['id']
                         ## If the app could be found and matches type and name in backup, continue to create
@@ -114,8 +129,14 @@ def update(path, token, assignment=False):
                             repo_data.pop('targetedMobileApps')
                             repo_data['targetedMobileApps'] = [app_ids]
                             request_json = json.dumps(repo_data)
-                            post_request = makeapirequestPost(endpoint, token, q_param=None,jdata=request_json,status_code=201)
-                            add_assignment(endpoint, assign_obj, post_request['id'],token,extra_url="/microsoft.graph.managedDeviceMobileAppConfiguration")
+                            post_request = makeapirequestPost(endpoint, token, q_param=None, jdata=request_json,status_code=201)
+                            mem_assign_obj = []
+                            assignment = update_assignment(assign_obj, mem_assign_obj,token)
+                            if assignment is not None:
+                                request_data = {}
+                                request_data['assignments'] = assignment
+                                post_assignment_update(request_data, post_request['id'],'deviceAppManagement/mobileAppConfigurations/',
+                                                        '/microsoft.graph.managedDeviceMobileAppConfiguration/assign',token)
                             print("App Configuration created with id: " +
                                   post_request['id'])
                         else:
