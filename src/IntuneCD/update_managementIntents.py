@@ -17,8 +17,8 @@ import yaml
 import glob
 
 from .graph_request import makeapirequest, makeapirequestPost
-from .get_add_assignments import add_assignment
-
+from .graph_batch import batch_intents, batch_assignment, get_object_assignment
+from .update_assignment import update_assignment,post_assignment_update
 from deepdiff import DeepDiff
 
 ## Set MS Graph base endpoint
@@ -31,6 +31,12 @@ def update(path, token, assignment=False):
     configpath = path+"/"+"Management Intents/"
     ## If Intents path exists, continue
     if os.path.exists(configpath) == True:
+        ## Get intents
+        intents = makeapirequest(baseEndpoint + "/intents", token)
+        intent_responses = batch_intents(intents,token)
+        ## Get current assignment
+        mem_assignments = batch_assignment(intents,'deviceManagement/intents/','/assignments',token)
+
         ## Set glob pattern
         pattern = configpath + "*/*"
         for filename in glob.glob(pattern, recursive=True):
@@ -44,54 +50,41 @@ def update(path, token, assignment=False):
                     if filename.endswith(".yaml"):
                         data = json.dumps(yaml.safe_load(f))
                         repo_data = json.loads(data)
-                        q_param = {"$filter": "displayName eq " +
-                            "'" + repo_data['displayName'] + "'"}
 
                     elif filename.endswith(".json"):
                         f = open(filename)
                         repo_data = json.load(f)
-                        q_param = {"$filter": "displayName eq " + "'" + repo_data['displayName'] + "'"}
 
                     ## Create object to pass in to assignment function
                     assign_obj = {}
                     if "assignments" in repo_data:
-                        assign_obj['assignments'] = repo_data['assignments']
+                        assign_obj = repo_data['assignments']
                     repo_data.pop('assignments', None)
 
-                    ## Get Intent with query parameter
-                    mem_data = makeapirequest(baseEndpoint + "/intents", token,q_param)
+                    mem_data = {}
+                    for intent in intent_responses['value']:
+                        if repo_data['displayName'] == intent['displayName'] and \
+                        repo_data['templateId'] == intent['templateId']:
+                            mem_data = intent
 
                     ## If Intent exists, continue
-                    if mem_data['value']:
+                    if mem_data:
                         print("-" * 90)
                         print("Checking if Intent: " + \
                               repo_data['displayName'] + " has any upates")
-                        ## Get Intent template
-                        intent_template = makeapirequest(baseEndpoint + "/templates" + "/" + mem_data['value'][0]['templateId'], token)     
-                        configpath = path+"/"+"Management Intents/" + \
-                            intent_template['displayName'] + "/"
-                        ## Get Intent categories
-                        intent_template_categories = makeapirequest(baseEndpoint + "/templates" + "/" + mem_data['value'][0]['templateId'] + "/categories", token)
-
-                        ## Check if assignment needs updating and apply chanages
-                        if assignment == True:
-                            add_assignment(baseEndpoint + "/intents", assign_obj,mem_data['value'][0]['id'],token,status_code=204)
-
-                        ## Create dict for Intent settings
-                        settings_delta = {}
-                        ## Get settings for each category and add to dict
-                        for intent_category in intent_template_categories['value']:
-                            intent_settings = makeapirequest(baseEndpoint + "/intents" + "/" + mem_data['value'][0]['id'] + "/categories" + "/" + intent_category['id'] + "/settings", token)
-                            settings_delta = intent_settings['value']
 
                         ## Compare category settings from Intune with JSON/YAML
-                        for mem_setting, repo_setting in zip(settings_delta, repo_data['settingsDelta']):
+                        for mem_setting, repo_setting in zip(mem_data['settingsDelta'], repo_data['settingsDelta']):
+
+                            mem_setting_id = mem_setting['id']
+                            mem_setting.pop('id', None)
+
                             diff = DeepDiff(mem_setting, repo_setting, ignore_order=True).get('values_changed', {})
 
                             ## If any changed values are found, push them to Intune
                             if diff:
                                 print("Updating Intent settings: " + \
-                                      repo_setting['definitionId'] + ", values changed:")
+                                      repo_setting['definitionId'].split("_")[1] + ", values changed:")
                                 for key, value in diff.items():
                                     new_val = value['new_value']
                                     old_val = value['old_value']
@@ -107,7 +100,7 @@ def update(path, token, assignment=False):
                                 settings = {
                                     "settings": [
                                         {
-                                            "id": mem_setting['id'],
+                                            "id": mem_setting_id,
                                             "definitionId": repo_setting['definitionId'],
                                             "@odata.type": repo_setting['@odata.type'],
                                             type: value
@@ -116,7 +109,15 @@ def update(path, token, assignment=False):
                                 }
                                 request_data = json.dumps(settings)
                                 q_param = None
-                                makeapirequestPost(baseEndpoint + "/intents/" + mem_data['value'][0]['id'] + "/updateSettings", token,q_param,request_data,status_code=204)
+                                makeapirequestPost(baseEndpoint + "/intents/" + mem_data['id'] + "/updateSettings", token,q_param,request_data,status_code=204)
+
+                        if assignment == True:
+                            mem_assign_obj = get_object_assignment(mem_data['id'],mem_assignments)
+                            update = update_assignment(assign_obj,mem_assign_obj,token)
+                            if update is not None:
+                                request_data = {}
+                                request_data['assignments'] = update
+                                post_assignment_update(request_data,mem_data['id'],'deviceManagement/intents','assign',token,status_code=204)
 
                     ## If Intent does not exist, create it and assign
                     else:
@@ -127,5 +128,10 @@ def update(path, token, assignment=False):
                         repo_data.pop('templateId')
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(baseEndpoint + "/templates/" + template_id + "/createInstance", token,q_param=None,jdata=request_json)
-                        add_assignment(baseEndpoint + "/intents", assign_obj,post_request['id'],token,status_code=204)
+                        mem_assign_obj = []
+                        assignment = update_assignment(assign_obj,mem_assign_obj,token)
+                        if assignment is not None:
+                            request_data = {}
+                            request_data['assignments'] = assignment
+                            post_assignment_update(request_data,post_request['id'],'deviceManagement/intents','assign',token,status_code=204)
                         print("Intent created with id: " + post_request['id'])
