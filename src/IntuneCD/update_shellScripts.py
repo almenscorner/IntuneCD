@@ -93,9 +93,8 @@ def update(path, token, assignment=False):
 
                             ## If any changed values are found, push them to Intune
                             if pdiff or cdiff:
+                                print("Updating Shell script: " + repo_data['displayName'] + ", values changed:")
                                 if cdiff:
-                                    print(
-                                        "Updating Shell script: " + repo_data['displayName'] + ", values changed:")
                                     for key, value in cdiff.items():
                                         setting = re.search(
                                             "\[(.*)\]", key).group(1)
@@ -111,6 +110,7 @@ def update(path, token, assignment=False):
                                 repo_data['scriptContent'] = base64.b64encode(
                                     shell_bytes).decode('utf-8')
                                 request_data = json.dumps(repo_data)
+                                q_param = None
                                 makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data)
                             else:
                                 print(
