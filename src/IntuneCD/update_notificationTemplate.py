@@ -29,6 +29,10 @@ def update(path, token):
     configpath = path+"/"+"Compliance Policies/Message Templates/"
     ## If Notification Template path exists, continue
     if os.path.exists(configpath) == True:
+
+        ## Get notification templates
+        mem_data = makeapirequest(endpoint, token)
+
         for filename in os.listdir(configpath):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
@@ -43,24 +47,24 @@ def update(path, token):
                     if filename.endswith(".yaml"):
                         data = json.dumps(yaml.safe_load(f))
                         repo_data = json.loads(data)
-                        q_param = {"$filter": "displayName eq " +
-                            "'" + repo_data['displayName'] + "'"}
 
                     elif filename.endswith(".json"):
                         f = open(file)
                         repo_data = json.load(f)
                         q_param = {"$filter": "displayName eq " + "'" + repo_data['displayName'] + "'"}
 
-                    ## Get Notification Template with query parameter
-                    mem_data = makeapirequest(endpoint, token,q_param)
+                    data = {'value':''}
+                    if mem_data['value']:
+                        for val in mem_data['value']:
+                            if repo_data['displayName'] == val['displayName']:
+                                data['value'] = val
 
                     ## If Notification Template exists, continue
-                    if mem_data['value']:
+                    if data['value']:
                         print("-" * 90)
                         ## Get Notification Template data from Intune
-                        mem_template_data = makeapirequest(endpoint + "/" + mem_data['value'][0]['id'], token)
-                        ## Get Notification Template message data from Intune
-                        mem_template_localized = makeapirequest(endpoint + "/" + mem_data['value'][0]['id'] + "?$expand=localizedNotificationMessages", token)
+                        q_param = "?$expand=localizedNotificationMessages"
+                        mem_template_data = makeapirequest(endpoint + "/" + data['value']['id'],token,q_param)
                         ## Create dict to compare Intune data with JSON/YAML data
                         repo_template_data = {
                             "displayName": repo_data['displayName'],
@@ -83,7 +87,7 @@ def update(path, token):
                                   mem_template_data['displayName'])
 
                         ## Check each configured locale on the Notification Template for changes
-                        for mem_locale, repo_locale in zip(mem_template_localized['localizedNotificationMessages'], repo_data['localizedNotificationMessages']):
+                        for mem_locale, repo_locale in zip(mem_template_data['localizedNotificationMessages'], repo_data['localizedNotificationMessages']):
                             del mem_locale['lastModifiedDateTime']
                             remove_keys = (
                                 'lastModifiedDateTime', 'id', 'locale')

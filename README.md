@@ -4,6 +4,8 @@
 ![PyPI](https://img.shields.io/pypi/v/IntuneCD?style=flat-square)
 ![Maintenance](https://img.shields.io/maintenance/yes/2022?style=flat-square)
 
+![IntuneCDlogo2](https://user-images.githubusercontent.com/78877636/156755733-b66a4381-9a9a-4663-9d27-e55a1281e1fa.png)
+
 # IntuneCD tool
 
 IntuneCD or, Intune Continuous Delivery as it stands for is a Python package that is used to backup and update configurations in Intune. It was created with running it from a pipeline in mind. Using this approach we get complete history of which configurations has been changed and what setting has been changed.
@@ -11,6 +13,24 @@ IntuneCD or, Intune Continuous Delivery as it stands for is a Python package tha
 The main function is to back up configurations from Intune to a Git repositry from a DEV environment and if any configurations has changed, push them to PROD Intune environment.
 
 The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
+
+## Whats new in 1.0.8
+Main focus for this release has been to improve the performance as large setups can take a while to backup/update. With these enhancements, I was able to cut the run time by 80% in most cases
+
+- Added module to use MS Graph batching to get assignments instead on getting them for each configuration individually
+- General code clean up
+- Added new module for getting and updating assignments, the old one was quite messy
+- For some configurations, additional information is appended to the filename, this is because there might be configurations with the same name
+    - App Configurations (appends odata type)
+    - App Protections (appends management type for ios/android and odata type for windows)
+    - Applications (for Windows it now appends the app type e.g. Win32 and version)
+    - Compliance (appends odata type)
+    - Profiles (appends odata type)
+- All configurations are now requested from the start and matched in script with displayName and/or odata type instead of requesting each configuration based on displayName
+- Management intents are now batched using the new batching module
+- Assignments are now batched using the new batching module
+- If 504 or 502 is encounterd while getting configurations, the tool will now try again to get the configuration
+- For Windows apps in documentation, detection scripts etc will now have a "Click to expand..." instead of showing the whole script
 
 ## Whats new in 1.0.7
 - Added backup and documentation of Apple Push Notification configuration
@@ -26,8 +46,6 @@ The package can also be run standalone outside of a pipeline, or in one to only 
 - Added documentation module to create a markdown document with information from the backup files
 - Bug fix where only one assignment was included in the backup. The tool now successfully backup/updates all assignments and removes assignments that is no longer in the backup files
 - Filters are now included when updating assignments, if a filter has been added in DEV and it exists in PROD, it will be added to the configuration when using -u
-## Whats new in 1.0.5
-- Bug fix where the tool was not able to identify the correct value format on management intents when updating values
 
 ## Install this package
 ```python
@@ -164,7 +182,7 @@ You have two options, using a pipeline or running it locally. Let's have a look 
 ## Parameters
 To see which parameters you have to provide just type: IntuneCD-startbackup --help, IntuneCD-startupdate --help or IntuneCD-startdocumentation --help
 
-Options:
+Example options:
   * -h, --help  show this help message and exit
   * -o OUTPUT, --output=OUTPUT
     * The format backups will be saved as, valid options are
@@ -266,8 +284,8 @@ steps:
   displayName: Install IntuneCD
 
 - script: |
-      git config --global user.name "autopkgpipeline"
-      git config --global user.email "autopkgpipeline@azuredevops.local"
+      git config --global user.name "devopspipeline"
+      git config --global user.email "devopspipeline@azuredevops.local"
   displayName: Configure Git
 
 - script: IntuneCD-startbackup -m 1 -o yaml
@@ -340,7 +358,7 @@ This step should be added to the backup pipeline to make sure the markdown docum
 ```
 
 ## Good to know
-When this tool tries to update configurations, it filters or searches for the displayname. Therefore the displayname from DEV must match in PROD.
+When this tool tries to update configurations, it matches the displayname. Therefore the displayname from DEV must match in PROD.
 
 ## Current known limitations
 Updating Windows Update Rings configurations is currently not supported, the tool can however create update rings if they don't exist.

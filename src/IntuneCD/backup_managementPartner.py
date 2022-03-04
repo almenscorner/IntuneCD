@@ -33,8 +33,7 @@ def savebackup(path, output, token):
             continue
         else:
             print("Backing up Management Partner: " + partner['displayName'])
-
-            pid = partner['id']
+            
             remove_keys = {'id', 'createdDateTime', 'version', 'lastModifiedDateTime'}
             for k in remove_keys:
                 partner.pop(k, None)

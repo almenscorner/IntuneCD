@@ -24,8 +24,6 @@ from .graph_request import makeapirequest
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/applePushNotificationCertificate"
 
 ## Get APNs information and save in specified path
-
-
 def savebackup(path, output, token):
     configpath = path+"/"+"Apple Push Notification/"
     data = makeapirequest(endpoint, token)

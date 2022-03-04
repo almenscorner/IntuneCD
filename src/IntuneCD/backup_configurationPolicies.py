@@ -19,17 +19,21 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .get_add_assignments import get_assignments
+from .graph_batch import batch_assignment, get_object_assignment, batch_request, get_object_details
 
 ## Set MS Graph base endpoint
 baseEndpoint = "https://graph.microsoft.com/beta/deviceManagement"
 
 ## Get all Configuration Policies and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = path+"/"+"Settings Catalog/"
     policies = makeapirequest(baseEndpoint + "/configurationPolicies", token)
+    policy_ids = []
+    for policy in policies['value']:
+        policy_ids.append(policy['id'])
+
+    assignment_responses = batch_assignment(policies,f'deviceManagement/configurationPolicies/','/assignments',token)
+    policy_settings_batch = batch_request(policy_ids,'deviceManagement/configurationPolicies/','/settings',token)
 
     for policy in policies['value']:
         name = policy['name']
@@ -37,20 +41,19 @@ def savebackup(path, output, token):
         if os.path.exists(configpath) == False:
             os.mkdir(configpath)
 
-        ## Get all settings for the policy and add them to the dict
-        policy_settings = makeapirequest(
-            baseEndpoint + "/configurationPolicies" + "/" + policy['id'] + "/settings", token)
-        policy['settings'] = policy_settings['value']
+        settings = get_object_details(policy['id'],policy_settings_batch)
 
-        pid = policy['id']
+        if settings:
+            policy['settings'] = settings
+
+        assignments = get_object_assignment(policy['id'],assignment_responses)
+        if assignments:
+            policy['assignments'] = assignments
+
         remove_keys = {'id', 'createdDateTime',
                        'version', 'lastModifiedDateTime'}
         for k in remove_keys:
             policy.pop(k, None)
-
-        ## Get assignments of Device Configuration
-        get_assignments(baseEndpoint + "/configurationPolicies",
-                        policy, pid, token)
 
         ## Get filename without illegal characters
         fname = clean_filename(name)

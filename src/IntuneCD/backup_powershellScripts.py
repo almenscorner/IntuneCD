@@ -20,20 +20,27 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .get_add_assignments import get_assignments
+from .graph_batch import batch_assignment, get_object_assignment, batch_request
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts/"
 
 ## Get all Powershell scripts and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = path+"/"+"Scripts/Powershell/"
     data = makeapirequest(endpoint, token)
-
+    script_ids = []
     for script in data['value']:
-        script_data = makeapirequest(endpoint + script['id'], token)
+        script_ids.append(script['id'])
+
+    assignment_responses = batch_assignment(data,f'deviceManagement/intents/','/assignments',token)
+    script_data_responses = batch_request(script_ids,f'deviceManagement/deviceManagementScripts/','',token)
+
+    for script_data in script_data_responses:
+        assignments = get_object_assignment(script_data['id'],assignment_responses)
+        if assignments:
+            script_data['assignments'] = assignments
+
         remove_keys = {'id', 'createdDateTime',
                        'version', 'lastModifiedDateTime'}
         for k in remove_keys:
@@ -42,9 +49,6 @@ def savebackup(path, output, token):
         print("Backing up Powershell script: " + script_data['displayName'])
         if os.path.exists(configpath) == False:
             os.makedirs(configpath)
-
-        ## Get assignments of Device Configuration
-        get_assignments(endpoint, script_data, script['id'], token)
 
         ## Get filename without illegal characters
         fname = clean_filename(script_data['displayName'])

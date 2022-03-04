@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import os
-from .get_authparams import getAuth
 
+from .get_authparams import getAuth
 from optparse import OptionParser
 
 REPO_DIR = os.environ.get("REPO_DIR")

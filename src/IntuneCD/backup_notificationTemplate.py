@@ -24,8 +24,6 @@ from .graph_request import makeapirequest
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
 
 ## Get all Notification Templates and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = path+"/"+"Compliance Policies/Message Templates/"
     q_param = "?$expand=localizedNotificationMessages"

@@ -17,12 +17,12 @@ import yaml
 import re
 
 from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
-from .get_add_assignments import add_assignment
-
+from .graph_batch import batch_assignment,get_object_assignment
+from .update_assignment import update_assignment,post_assignment_update
 from deepdiff import DeepDiff
 
 ## Set MS Graph endpoint
-endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/managedAppPolicies"
+endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/"
 
 
 def update(path, token, assignment=False):
@@ -31,6 +31,12 @@ def update(path, token, assignment=False):
     configpath = path+"/"+"App Protection/"
     ## If App Configuration path exists, continue
     if os.path.exists(configpath) == True:
+
+        ## Get App Protections
+        mem_data = makeapirequest(f'{endpoint}managedAppPolicies', token)
+        ## Get current assignments
+        mem_assignments = batch_assignment(mem_data,'deviceAppManagement/','/assignments',token,app_protection=True)
+
         for filename in os.listdir(configpath):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
@@ -45,54 +51,46 @@ def update(path, token, assignment=False):
                     if filename.endswith(".yaml"):
                         data = json.dumps(yaml.safe_load(f))
                         repo_data = json.loads(data)
-                        q_param = {"$filter": "displayName eq " +
-                            "'" + repo_data['displayName'] + "'"}
-
+                        
                     elif filename.endswith(".json"):
                         f = open(file)
                         repo_data = json.load(f)
-                        q_param = {"$filter": "displayName eq " + "'" + repo_data['displayName'] + "'"}
 
                     ## Create object to pass in to assignment function
                     assign_obj = {}
                     if "assignments" in repo_data:
-                        assign_obj['assignments'] = repo_data['assignments']
+                        assign_obj = repo_data['assignments']
                     repo_data.pop('assignments', None)
 
-                    if repo_data['@odata.type'] == "#microsoft.graph.iosManagedAppProtection":
-                        platform = "ios"
-                    elif repo_data['@odata.type'] == "#microsoft.graph.androidManagedAppProtection":
-                        platform = "android"
-                    elif repo_data['@odata.type'] == "#microsoft.graph.windowsManagedAppProtection":
-                        platform = "windows"
-                    elif repo_data['@odata.type'] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
-                        platform = "mdmWindowsInformationProtectionPolicies"
-                    elif repo_data['@odata.type'] == "#microsoft.graph.windowsInformationProtectionPolicy":
-                        platform = "windowsInformationProtectionPolicies"
-
-                    if ((platform == "mdmWindowsInformationProtectionPolicies") or (platform == "windowsInformationProtectionPolicies")):
-                        platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + platform
-                    else:
-                        platform_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/" + \
-                            platform + "ManagedAppProtections"
-
-                    ## Get App Protection with query parameter
-                    mem_data = makeapirequest(endpoint, token,q_param)
-
                     ## If App Protection exists, continue
+                    data = {'value':''}
                     if mem_data['value']:
+                        for val in mem_data['value']:
+                            if 'targetedAppManagementLevels' in val and 'targetedAppManagementLevels' in repo_data:
+                                if repo_data['targetedAppManagementLevels'] == val['targetedAppManagementLevels'] and \
+                                    repo_data['displayName'] == val['displayName']:
+                                    data['value'] = val
+                            elif repo_data['@odata.type'] == val['@odata.type'] and \
+                                repo_data['displayName'] == val['displayName']:
+                                data['value'] = val
+                                
+                    if data['value']:
                         print("-" * 90)
-                        pid = mem_data['value'][0]['id']
+                        mem_id = data['value']['id']
+                        platform=""
                         # Remove keys before using DeepDiff
                         remove_keys = {'id', 'createdDateTime','version','lastModifiedDateTime'}
                         for k in remove_keys:
-                            mem_data['value'][0].pop(k, None)
+                            data['value'].pop(k, None)
 
-                        ## Check if assignment needs updating and apply chanages
-                        if assignment == True:
-                            add_assignment(platform_endpoint, assign_obj,pid,token,status_code=204)
+                        if repo_data['@odata.type'] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
+                            platform = "mdmWindowsInformationProtectionPolicies"
+                        elif repo_data['@odata.type'] == "#microsoft.graph.windowsInformationProtectionPolicy":
+                            platform = "windowsInformationProtectionPolicies"
+                        else:
+                            platform = f"{str(repo_data['@odata.type']).split('.')[2]}s"
 
-                        diff = DeepDiff(mem_data['value'][0], repo_data, ignore_order=True).get('values_changed', {})
+                        diff = DeepDiff(data['value'], repo_data, ignore_order=True).get('values_changed', {})
 
                         ## If any changed values are found, push them to Intune
                         if diff:
@@ -105,10 +103,19 @@ def update(path, token, assignment=False):
                                 print(
                                     f"Setting: {setting}, New Value: {new_val}, Old Value: {old_val}")
                             request_data = json.dumps(repo_data)
-                            makeapirequestPatch(platform_endpoint + "/" + pid, token,q_param,request_data,status_code=204)
+                            q_param = None
+                            makeapirequestPatch(f'{endpoint}{platform}/{mem_id}', token,q_param,request_data,status_code=204)
                         else:
                             print(
                                 'No difference found for App protection: ' + repo_data['displayName'])
+
+                        if assignment == True:
+                            mem_assign_obj = get_object_assignment(mem_id,mem_assignments)
+                            update = update_assignment(assign_obj,mem_assign_obj,token)
+                            if update is not None:
+                                request_data = {}
+                                request_data['assignments'] = update
+                                post_assignment_update(request_data,mem_id,f'deviceAppManagement/{platform}','assign',token,status_code=204)
 
                     ## If App Protection does not exist, create it and assign
                     else:
@@ -116,6 +123,11 @@ def update(path, token, assignment=False):
                         print("App Protection not found, creating policy: " + \
                               repo_data['displayName'])
                         request_json = json.dumps(repo_data)
-                        post_request = makeapirequestPost(endpoint, token,q_param=None,jdata=request_json,status_code=201)
-                        add_assignment(platform_endpoint, assign_obj,post_request['id'],token,status_code=204)
+                        post_request = makeapirequestPost(f'{endpoint}managedAppPolicies', token,q_param=None,jdata=request_json,status_code=201)
+                        mem_assign_obj = []
+                        assignment = update_assignment(assign_obj,mem_assign_obj,token)
+                        if assignment is not None:
+                            request_data = {}
+                            request_data['assignments'] = assignment
+                            post_assignment_update(request_data,post_request['id'],f'deviceAppManagement/{platform}','assign',token,status_code=204)
                         print("App Protection created with id: " + post_request['id'])

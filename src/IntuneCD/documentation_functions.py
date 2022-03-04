@@ -13,19 +13,18 @@ header : str
     Header of the configuration being documented
 """
 
-from pytablewriter import MarkdownTableWriter
 import yaml
 import json
 import os
 import glob
 
+from pytablewriter import MarkdownTableWriter
 
 def md_file(outpath):
     if os.path.exists(f'{outpath}') == False:
         open(outpath, 'w+').close()
     else:
         open(outpath, 'w').close()
-
 
 def write_table(data):
     writer = MarkdownTableWriter(
@@ -34,7 +33,6 @@ def write_table(data):
     )
 
     return writer
-
 
 def assignment_table(data):
 
@@ -61,9 +59,9 @@ def assignment_table(data):
                 target = assignment['target']['groupName']
             if "intent" in assignment:
                 intent = assignment['intent']
-                headers = ['intent', 'target', 'filter type', 'filter id']
+                headers = ['intent', 'target', 'filter type', 'filter name']
             else:
-                headers = ['target', 'filter type', 'filter id']
+                headers = ['target', 'filter type', 'filter name']
             if intent:
                 assignment_list.append([intent,
                                         target,
@@ -78,14 +76,12 @@ def assignment_table(data):
 
     return table
 
-
 def remove_characters(string):
     remove_chars = '#@}{]["'
     for char in remove_chars:
         string = string.replace(char, "")
 
     return string
-
 
 def clean_list(data):
     values = []
@@ -98,10 +94,12 @@ def clean_list(data):
                     if i.isdigit():
                         string = i
                 if type(i) is list:
-                    for i in item:
                         string = i+liststr
                         string = remove_characters(string)
                 if type(i) is dict:
+                    for k, v in i.items():
+                        if type(v) is str and len(v) > 200:
+                            i[k] = f'<details><summary>Click to expand...</summary>{v}</details>'
                     string = json.dumps(i)
                     string = remove_characters(string)
 
@@ -124,7 +122,6 @@ def clean_list(data):
             values.append(item)
 
     return values
-
 
 def document_configs(configpath, outpath, header):
     ## If configurations path exists, continue

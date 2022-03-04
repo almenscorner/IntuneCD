@@ -20,24 +20,30 @@ import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .get_add_assignments import get_assignments
+from .graph_batch import batch_assignment, get_object_assignment, batch_request
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/"
 assignment_endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
 
 ## Get all Shell scripts and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = path+"/"+"Scripts/Shell/"
     data = makeapirequest(endpoint, token)
-
+    script_ids = []
     for script in data['value']:
-        script_data = makeapirequest(endpoint + script['id'], token)
+        script_ids.append(script['id'])
+
+    assignment_responses = batch_assignment(data,f'deviceManagement/deviceManagementScripts/','/assignments',token)
+    script_data_responses = batch_request(script_ids,f'deviceManagement/deviceShellScripts/','',token)
+
+    for script_data in script_data_responses:
+        assignments = get_object_assignment(script_data['id'],assignment_responses)
+        if assignments:
+            script_data['assignments'] = assignments
+
         remove_keys = {'id', 'createdDateTime',
                        'version', 'lastModifiedDateTime'}
-        sid = script_data['id']
         for k in remove_keys:
             script_data.pop(k, None)
 
@@ -47,9 +53,6 @@ def savebackup(path, output, token):
 
         ## Get filename without illegal characters
         fname = clean_filename(script_data['displayName'])
-
-        ## Get assignments of Device Configuration
-        get_assignments(assignment_endpoint, script_data, sid, token)
 
         ## Save Shell script as JSON or YAML depending on configured value in "-o"
         if output != "json":
