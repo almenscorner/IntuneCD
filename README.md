@@ -26,9 +26,9 @@ Main focus for this release has been to improve the performance as large setups 
     - Applications (for Windows it now appends the app type e.g. Win32 and version)
     - Compliance (appends odata type)
     - Profiles (appends odata type)
-- All configurations are now requested from the start and matched in script with displayName and/or odata type
-- Management intents are batched
-- Assignments are batched
+- All configurations are now requested from the start and matched in script with displayName and/or odata type instead of requesting each configuration based on displayName
+- Management intents are now batched using the new batching module
+- Assignments are now batched using the new batching module
 - If 504 or 502 is encounterd while getting configurations, the tool will now try again to get the configuration
 - For Windows apps in documentation, detection scripts etc will now have a "Click to expand..." instead of showing the whole script
 
