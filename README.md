@@ -4,7 +4,7 @@
 ![PyPI](https://img.shields.io/pypi/v/IntuneCD?style=flat-square)
 ![Maintenance](https://img.shields.io/maintenance/yes/2022?style=flat-square)
 
-![IntuneCDlogo](https://user-images.githubusercontent.com/78877636/156753314-56857a4a-cec3-4ae7-9424-03a659c9f9ae.png)
+![IntuneCDlogo2](https://user-images.githubusercontent.com/78877636/156753989-2bcedd1e-7bc8-40f1-b5da-32713b0d2fb1.png)
 
 # IntuneCD tool
 
