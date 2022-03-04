@@ -124,6 +124,7 @@ def update(path, token, assignment=False):
                                 repo_data['remediationScriptContent'] = base64.b64encode(
                                     remediation_bytes).decode('utf-8')
                                 request_data = json.dumps(repo_data)
+                                q_param = None
                                 makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data)
                             else:
                                 print(
