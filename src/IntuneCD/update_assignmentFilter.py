@@ -29,6 +29,9 @@ def update(path, token):
     configpath = path+"/"+"Filters"
     ## If App Configuration path exists, continue
     if os.path.exists(configpath) == True:
+        ## get all filters
+        mem_data = makeapirequest(endpoint, token)
+
         for filename in os.listdir(configpath):
             file = os.path.join(configpath, filename)
             # If path is Directory, skip
@@ -47,9 +50,7 @@ def update(path, token):
                     elif filename.endswith(".json"):
                         f = open(file)
                         repo_data = json.load(f)
-
-                    ## Get Filter with query parameter
-                    mem_data = makeapirequest(endpoint, token)
+                  
                     filter_value = {}
 
                     ## If Filter exists, continue
@@ -57,6 +58,7 @@ def update(path, token):
                         for val in mem_data['value']:
                             if repo_data['displayName'] == val['displayName']:
                                 filter_value = val
+
                     if filter_value:
                         print("-" * 90)
                         filter_id = filter_value['id']
