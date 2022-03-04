@@ -2,7 +2,6 @@
 
 """
 This module updates all App Configuration polices in Intune if the configuration in Intune differs from the JSON/YAML file.
-
 Parameters
 ----------
 path : str
@@ -15,13 +14,12 @@ import json
 import os
 import yaml
 import re
-from .graph_request import makeapirequest, makeapirequestPatch
 
+from .graph_request import makeapirequest, makeapirequestPatch
 from deepdiff import DeepDiff
 
 ## Set MS Graph endpoint
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSettings/"
-
 
 def update(path, token):
 
