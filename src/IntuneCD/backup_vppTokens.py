@@ -24,8 +24,6 @@ from .graph_request import makeapirequest
 endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/vppTokens"
 
 ## Get all VPP tokens and save them in specified path
-
-
 def savebackup(path, output, token):
     configpath = f'{path}/Apple VPP Tokens/'
     data = makeapirequest(endpoint, token)
