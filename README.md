@@ -4,6 +4,8 @@
 ![PyPI](https://img.shields.io/pypi/v/IntuneCD?style=flat-square)
 ![Maintenance](https://img.shields.io/maintenance/yes/2022?style=flat-square)
 
+![IntuneCDlogo](https://user-images.githubusercontent.com/78877636/156753314-56857a4a-cec3-4ae7-9424-03a659c9f9ae.png)
+
 # IntuneCD tool
 
 IntuneCD or, Intune Continuous Delivery as it stands for is a Python package that is used to backup and update configurations in Intune. It was created with running it from a pipeline in mind. Using this approach we get complete history of which configurations has been changed and what setting has been changed.
