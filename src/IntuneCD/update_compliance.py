@@ -103,6 +103,7 @@ def update(path, token, assignment=False):
                             scheduled_actions = repo_data['scheduledActionsForRule']
                             repo_data.pop('scheduledActionsForRule', None)
                             request_data = json.dumps(repo_data)
+                            q_param = None
                             makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data,status_code=204)
                             repo_data['scheduledActionsForRule'] = scheduled_actions
 
@@ -129,6 +130,7 @@ def update(path, token, assignment=False):
                                     ]
                                 }
                                 request_json = json.dumps(request_data)
+                                q_param = None
                                 makeapirequestPost(endpoint + "/" + mem_id + "/scheduleActionsForRules", token,q_param,request_json)
                             else:
                                 print('No difference in rules found for Compliance policy: ' + repo_data['displayName'])
