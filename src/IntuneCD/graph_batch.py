@@ -151,6 +151,8 @@ def batch_intents(data, token) -> dict:
     base_url = 'deviceManagement'
     template_ids = []
     settings_id = []
+    categories_responses = []
+    settings_responses = []
     intent_values = {'value': []}
 
     ## Get each template ID

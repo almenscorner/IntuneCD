@@ -26,7 +26,7 @@ baseEndpoint = "https://graph.microsoft.com/beta/deviceManagement"
 template_endpoint = "https://graph.microsoft.com/beta/deviceManagement/templates"
 
 ## Get all Intents and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, exclude, token):
     configpath = path+"/"+"Management Intents/"
     intents = makeapirequest(baseEndpoint + "/intents", token)
     templates = makeapirequest(template_endpoint,token)
@@ -47,10 +47,10 @@ def savebackup(path, output, token):
             if os.path.exists(configpath) == False:
                 os.makedirs(configpath)
 
-            #get_batch_assignment(intent_value,assignment_responses)
-            assignments = get_object_assignment(intent_value['id'],assignment_responses)
-            if assignments:
-                intent_value['assignments'] = assignments
+            if "assignments" not in exclude:
+                assignments = get_object_assignment(intent_value['id'],assignment_responses)
+                if assignments:
+                    intent_value['assignments'] = assignments
 
             for setting in intent_value['settingsDelta']:
                 setting.pop('id',None)

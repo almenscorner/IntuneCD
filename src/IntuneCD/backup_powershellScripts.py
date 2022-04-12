@@ -26,7 +26,7 @@ from .graph_batch import batch_assignment, get_object_assignment, batch_request
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts/"
 
 ## Get all Powershell scripts and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, exclude, token):
     configpath = path+"/"+"Scripts/Powershell/"
     data = makeapirequest(endpoint, token)
     script_ids = []
@@ -37,9 +37,10 @@ def savebackup(path, output, token):
     script_data_responses = batch_request(script_ids,f'deviceManagement/deviceManagementScripts/','',token)
 
     for script_data in script_data_responses:
-        assignments = get_object_assignment(script_data['id'],assignment_responses)
-        if assignments:
-            script_data['assignments'] = assignments
+        if "assignments" not in exclude:
+            assignments = get_object_assignment(script_data['id'],assignment_responses)
+            if assignments:
+                script_data['assignments'] = assignments
 
         remove_keys = {'id', 'createdDateTime',
                        'version', 'lastModifiedDateTime'}

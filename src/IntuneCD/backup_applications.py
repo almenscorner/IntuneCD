@@ -37,7 +37,7 @@ def match (platform,input) -> bool:
         return False
 
 ## Get all applications and save them in specified path
-def savebackup(path,output,token):
+def savebackup(path,output,exclude,token):
     configpath = f'{path}/Applications/'
 
     data = makeapirequest(endpoint,token,q_param)
@@ -46,9 +46,11 @@ def savebackup(path,output,token):
     for app in data['value']:
         app_name = ""
         platform = ""
-        assignments = get_object_assignment(app['id'],assignment_responses)
-        if assignments:
-            app['assignments'] = assignments
+
+        if "assignments" not in exclude:
+            assignments = get_object_assignment(app['id'],assignment_responses)
+            if assignments:
+                app['assignments'] = assignments
 
         remove_keys={'id','createdDateTime','version','lastModifiedDateTime','description'}
         for k in remove_keys:

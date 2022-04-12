@@ -25,7 +25,7 @@ from .graph_batch import batch_assignment, get_object_assignment
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePolicies"
 
 ## Get all Compliance policies and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, exclude, token):
     configpath = path+"/"+"Compliance Policies/Policies/"
     q_param = {
         "$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"}
@@ -36,9 +36,10 @@ def savebackup(path, output, token):
     for policy in data['value']:
         print("Backing up compliance policy: " + policy['displayName'])
 
-        assignments = get_object_assignment(policy['id'],assignment_responses)
-        if assignments:
-            policy['assignments'] = assignments
+        if "assignments" not in exclude:
+            assignments = get_object_assignment(policy['id'],assignment_responses)
+            if assignments:
+                policy['assignments'] = assignments
 
         remove_keys = {'id', 'createdDateTime', 'version', 'lastModifiedDateTime', '@odata.context',
                        'scheduledActionConfigurations@odata.context', 'scheduledActionsForRule@odata.context'}

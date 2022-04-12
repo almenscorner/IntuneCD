@@ -37,6 +37,11 @@ def start():
                 "params:DEV_TENANT_NAME, DEV_CLIENT_ID, DEV_CLIENT_SECRET when run in devtoprod"),
         type=str
     )
+    parser.add_option(
+        "-e", "--exclude",
+        help = "List of objects to exclude from the backup, separated by commas. Currently supported objects are: assignments",
+        type = str
+    )
 
     (opts, _) = parser.parse_args()
 
@@ -57,13 +62,13 @@ def start():
 
     token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="DEV")
 
-    def run_backup(path,output,token):
+    def run_backup(path,output,exclude,token):
 
         from .backup_appConfiguration import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_AppProtection import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_apns import savebackup
         savebackup(path,output,token)
@@ -72,22 +77,22 @@ def start():
         savebackup(path,output,token)
 
         from .backup_applications import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_compliance import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_notificationTemplate import savebackup
         savebackup(path,output,token)
 
         from .backup_profiles import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_appleEnrollmentProfile import savebackup
         savebackup(path,output,token)
 
         from .backup_windowsEnrollmentProfile import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_assignmentFilters import savebackup
         savebackup(path,output,token)
@@ -96,7 +101,7 @@ def start():
         savebackup(path,output,token)
 
         from .backup_managementIntents import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_compliancePartner import savebackup
         savebackup(path,output,token)
@@ -108,23 +113,27 @@ def start():
         savebackup(path,output,token)
 
         from .backup_proactiveRemediation import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_powershellScripts import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_shellScripts import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
         from .backup_configurationPolicies import savebackup
-        savebackup(path,output,token)
+        savebackup(path,output,exclude,token)
 
 
     if opts.output == 'json' or opts.output == 'yaml':
         if token is None:
             raise Exception("Token is empty, please check os.environ variables")
         else:
-            run_backup(opts.path,opts.output,token)
+            if opts.exclude:
+                exclude = opts.exclude.split(",")
+            else:
+                exclude = []
+            run_backup(opts.path,opts.output,exclude,token)
 
     else:
         print('Please enter a valid output format, json or yaml') 

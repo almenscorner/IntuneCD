@@ -25,16 +25,17 @@ from .graph_batch import batch_assignment,get_object_assignment
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDeploymentProfiles"
 
 ## Get all Windows Enrollment Profiles and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, exclude, token):
     configpath = path+"/"+"Enrollment Profiles/Windows/"
     data = makeapirequest(endpoint, token)
 
     assignment_responses = batch_assignment(data,'deviceManagement/windowsAutopilotDeploymentProfiles/','/assignments',token)
 
     for profile in data['value']:
-        assignments = get_object_assignment(profile['id'],assignment_responses)
-        if assignments:
-            profile['assignments'] = assignments
+        if "assignments" not in exclude:
+            assignments = get_object_assignment(profile['id'],assignment_responses)
+            if assignments:
+                profile['assignments'] = assignments
         
         remove_keys = {'id', 'createdDateTime',
                        'version', 'lastModifiedDateTime'}
