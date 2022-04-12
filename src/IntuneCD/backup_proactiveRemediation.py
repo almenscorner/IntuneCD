@@ -26,7 +26,7 @@ from .graph_batch import batch_assignment, get_object_assignment, batch_request
 endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScripts"
 
 ## Get all Proactive Remediations and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, exclude, token):
     configpath = f'{path}/Proactive Remediations/'
     data = makeapirequest(endpoint, token)
     pr_ids = []
@@ -39,9 +39,10 @@ def savebackup(path, output, token):
     for pr_details in pr_data_responses:
         if "Microsoft" not in pr_details['publisher']:
             
-            assignments = get_object_assignment(pr_details['id'],assignment_responses)
-            if assignments:
-                pr_details['assignments'] = assignments
+            if "assignments" not in exclude:
+                assignments = get_object_assignment(pr_details['id'],assignment_responses)
+                if assignments:
+                    pr_details['assignments'] = assignments
                 
             remove_keys = {'id', 'createdDateTime', 'version',
                            'lastModifiedDateTime', 'isGlobalScript', 'highestAvailableVersion'}
