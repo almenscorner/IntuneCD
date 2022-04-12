@@ -36,7 +36,7 @@ def match (platform,input) -> bool:
         return False
 
 ## Get all Device Configurations and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, exclude, token):
 
     configpath = path+"/"+"Device Configurations/"
     data = makeapirequest(endpoint, token)
@@ -44,10 +44,10 @@ def savebackup(path, output, token):
     assignment_responses = batch_assignment(data,f'deviceManagement/deviceConfigurations/','/assignments',token)
 
     for profile in data['value']:
-        #get_batch_assignment(profile,assignment_responses)
-        assignments = get_object_assignment(profile['id'],assignment_responses)
-        if assignments:
-            profile['assignments'] = assignments   
+        if "assignments" not in exclude:
+            assignments = get_object_assignment(profile['id'],assignment_responses)
+            if assignments:
+                profile['assignments'] = assignments   
 
         pid = profile['id']
         remove_keys = {'id', 'createdDateTime', 'version',
