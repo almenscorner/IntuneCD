@@ -14,6 +14,10 @@ The main function is to back up configurations from Intune to a Git repositry fr
 
 The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
+## Whats new in 1.0.9
+- Bug fix where the script exited with "local variable referenced before assignment" if a management intent does not exist
+- Added a new parameter to let you exclude assignments from backups. To exclude assignments from backup, you can now use `-e assignments` when running IntuneCD-startbackup.
+
 ## Whats new in 1.0.8
 Main focus for this release has been to improve the performance as large setups can take a while to backup/update. With these enhancements, I was able to cut the run time by 80% in most cases
 
@@ -42,10 +46,6 @@ Main focus for this release has been to improve the performance as large setups 
 - Added a new option to the documentation module, '-i', which lets you configure your own introduction that will be displayed at the top
 - Changed documentation to display a collapsible view of long strings, now you can see the whole script payload for example
 - Improved console output when changes are detected, instead of writing the full path to the key, old output: `Setting: 'PayloadContent'][0]['PayloadContent']['corp.sap.privileges']['Forced'][0]['mcx_preference_settings']['ReasonMinLength', New Value: 15, Old Value: 20`, new output: `Setting: 'ReasonMinLength', New Value: 15, Old Value: 20`
-## Whats new in 1.0.6
-- Added documentation module to create a markdown document with information from the backup files
-- Bug fix where only one assignment was included in the backup. The tool now successfully backup/updates all assignments and removes assignments that is no longer in the backup files
-- Filters are now included when updating assignments, if a filter has been added in DEV and it exists in PROD, it will be added to the configuration when using -u
 
 ## Install this package
 ```python
