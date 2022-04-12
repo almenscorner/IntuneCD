@@ -26,16 +26,17 @@ endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfig
 app_endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 ## Get all App Configuration policies and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, exclude, token):
     configpath = path+"/"+"App Configuration/"
     data = makeapirequest(endpoint, token)
 
     assignment_responses = batch_assignment(data,f'deviceAppManagement/mobileAppConfigurations/','/assignments',token)
 
     for profile in data['value']:
-        assignments = get_object_assignment(profile['id'],assignment_responses)
-        if assignments:
-            profile['assignments'] = assignments
+        if "assignments" not in exclude:
+            assignments = get_object_assignment(profile['id'],assignment_responses)
+            if assignments:
+                profile['assignments'] = assignments
             
         remove_keys = {'id', 'createdDateTime',
                        'version', 'lastModifiedDateTime'}
