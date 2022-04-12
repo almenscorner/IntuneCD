@@ -25,7 +25,7 @@ from .graph_batch import batch_assignment, get_object_assignment, batch_request,
 baseEndpoint = "https://graph.microsoft.com/beta/deviceManagement"
 
 ## Get all Configuration Policies and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, exclude, token):
     configpath = path+"/"+"Settings Catalog/"
     policies = makeapirequest(baseEndpoint + "/configurationPolicies", token)
     policy_ids = []
@@ -46,9 +46,10 @@ def savebackup(path, output, token):
         if settings:
             policy['settings'] = settings
 
-        assignments = get_object_assignment(policy['id'],assignment_responses)
-        if assignments:
-            policy['assignments'] = assignments
+        if "assignments" not in exclude:
+            assignments = get_object_assignment(policy['id'],assignment_responses)
+            if assignments:
+                policy['assignments'] = assignments
 
         remove_keys = {'id', 'createdDateTime',
                        'version', 'lastModifiedDateTime'}
