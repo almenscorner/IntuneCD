@@ -56,6 +56,14 @@ def update(path, token, assignment=False):
                         f = open(file)
                         repo_data = json.load(f)
 
+                    if repo_data:
+                        if repo_data['@odata.type'] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
+                            platform = "mdmWindowsInformationProtectionPolicies"
+                        elif repo_data['@odata.type'] == "#microsoft.graph.windowsInformationProtectionPolicy":
+                            platform = "windowsInformationProtectionPolicies"
+                        else:
+                            platform = f"{str(repo_data['@odata.type']).split('.')[2]}s"
+
                     ## Create object to pass in to assignment function
                     assign_obj = {}
                     if "assignments" in repo_data:
@@ -82,13 +90,6 @@ def update(path, token, assignment=False):
                         remove_keys = {'id', 'createdDateTime','version','lastModifiedDateTime'}
                         for k in remove_keys:
                             data['value'].pop(k, None)
-
-                        if repo_data['@odata.type'] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
-                            platform = "mdmWindowsInformationProtectionPolicies"
-                        elif repo_data['@odata.type'] == "#microsoft.graph.windowsInformationProtectionPolicy":
-                            platform = "windowsInformationProtectionPolicies"
-                        else:
-                            platform = f"{str(repo_data['@odata.type']).split('.')[2]}s"
 
                         diff = DeepDiff(data['value'], repo_data, ignore_order=True).get('values_changed', {})
 
