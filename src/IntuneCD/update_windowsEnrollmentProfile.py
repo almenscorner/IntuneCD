@@ -118,6 +118,6 @@ def update(path, token, assignment=False):
                         assignment = update_assignment(assign_obj,mem_assign_obj,token)
                         if assignment is not None:
                             request_data = {}
-                            request_data['target'] = assignment
-                            post_assignment_update(request_data,post_request['id'],'deviceManagement/windowsAutopilotDeploymentProfiles','assign',token,status_code=201)
+                            request_data['target'] = assignment[0]['target']
+                            post_assignment_update(request_data,post_request['id'],'deviceManagement/windowsAutopilotDeploymentProfiles','assignments',token,status_code=201)
                         print("Autopilot profile created with id: " + post_request['id'])
