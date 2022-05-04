@@ -14,6 +14,12 @@ The main function is to back up configurations from Intune to a Git repositry fr
 
 The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
+## Whats new in 1.1.0
+- Bug fix for App Protection policies not being able to be created in a tenant to tenant scenario
+- Bug fix for Configuration Profiles not being able to update assignment in a tenant to tenant scenario
+- Bug fix for Windows Autopilot profiles not being able to update assignment in a tenant to tenant scenario
+- Bug fix for assignment updates where updating assignments when creating new configurations were not possible if the group does not exist
+
 ## Whats new in 1.0.9
 - Bug fix where the script exited with "local variable referenced before assignment" if a management intent does not exist
 - Added a new parameter to let you exclude assignments from backups. To exclude assignments from backup, you can now use `-e assignments` when running IntuneCD-startbackup.
@@ -35,17 +41,6 @@ Main focus for this release has been to improve the performance as large setups 
 - Assignments are now batched using the new batching module
 - If 504 or 502 is encounterd while getting configurations, the tool will now try again to get the configuration
 - For Windows apps in documentation, detection scripts etc will now have a "Click to expand..." instead of showing the whole script
-
-## Whats new in 1.0.7
-- Added backup and documentation of Apple Push Notification configuration
-- Added backup and documentation of Apple Volume Purchase Program tokens
-- Added backup and documentation of Applications
-- Added backup and documentation of Managed Google Play Configuration
-- Added backup and documentation of Partner Connections (Compliance, Management and Remote Assistance)
-- Added backup, documentation and update module for Proactive Remediations
-- Added a new option to the documentation module, '-i', which lets you configure your own introduction that will be displayed at the top
-- Changed documentation to display a collapsible view of long strings, now you can see the whole script payload for example
-- Improved console output when changes are detected, instead of writing the full path to the key, old output: `Setting: 'PayloadContent'][0]['PayloadContent']['corp.sap.privileges']['Forced'][0]['mcx_preference_settings']['ReasonMinLength', New Value: 15, Old Value: 20`, new output: `Setting: 'ReasonMinLength', New Value: 15, Old Value: 20`
 
 ## Install this package
 ```python
