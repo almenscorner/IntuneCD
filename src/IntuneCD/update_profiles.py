@@ -252,6 +252,6 @@ def update(path, token, assignment=False):
                         assignment = update_assignment(assign_obj,mem_assign_obj,token)
                         if assignment is not None:
                             request_data = {}
-                            request_data['deviceHealthScriptAssignments'] = assignment
+                            request_data['assignments'] = assignment
                             post_assignment_update(request_data,post_request['id'],'deviceManagement/deviceConfigurations','assign',token)
                         print("Profile created with id: " + post_request['id'])
