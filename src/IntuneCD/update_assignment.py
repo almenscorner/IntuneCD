@@ -69,6 +69,7 @@ def update_assignment(repo,mem,token) -> list:
 
     diff = DeepDiff(mem,repo,ignore_order=True)
     added = diff.get('iterable_item_added', {})
+    update = False
 
     if diff:
         for val in repo:
@@ -91,16 +92,22 @@ def update_assignment(repo,mem,token) -> list:
                 if val['target']['deviceAndAppManagementAssignmentFilterId'] is None:
                     val['target'].pop('deviceAndAppManagementAssignmentFilterId')
                     val['target'].pop('deviceAndAppManagementAssignmentFilterType')
-                    
-        ## Print added assignments
-        if added:
-            print('Updating assignments, added assignments:')
-            updates = get_added_removed(added)
-            for update in updates:
-                print(update)
-            return repo
-        else:
-            return None
+
+        for val in repo:
+            if 'groupId' in val['target'] or '#microsoft.graph.allDevicesAssignmentTarget' in val['target']['@odata.type'] \
+            or '#microsoft.graph.allLicensedUsersAssignmentTarget' in val['target']['@odata.type']:
+                update = True
+
+        if update is True:
+            ## Print added assignments
+            if added:
+                print('Updating assignments, added assignments:')
+                updates = get_added_removed(added)
+                for update in updates:
+                    print(update)
+                return repo
+            else:
+                return None
 
 def post_assignment_update(object,id,url,extra_url,token,status_code=200):
     request_json = json.dumps(object)
