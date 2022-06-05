@@ -14,6 +14,12 @@ The main function is to back up configurations from Intune to a Git repositry fr
 
 The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
+## Whats new in 1.1.1
+- Adding ability to split documentation into categories using `-s Y` in `intunecd-startdocumentation`
+- Adding ability to set max length of output in documentation using `-m {int_value}` in `intunecd-startdocumentation`
+- Adding backup and documentation of Group Policy Configurations
+- Adding retry if 503 is encountred during a graph call
+
 ## Whats new in 1.1.0
 - Bug fix for App Protection policies not being able to be created in a tenant to tenant scenario
 - Bug fix for Configuration Profiles not being able to update assignment in a tenant to tenant scenario
