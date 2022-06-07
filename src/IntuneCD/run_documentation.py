@@ -91,6 +91,9 @@ def start ():
         # Document profiles
         document_configs(f'{configpath}/Device Configurations',outpath,'Configuration Profiles',maxlength,split)
 
+        # Document Group Policy Configurations
+        document_configs(f'{configpath}/Group Policy Configurations',outpath,'Group Policy Configurations',maxlength,split)
+
         # Document Apple Enrollment Profiles
         document_configs(f'{configpath}/Enrollment Profiles/Apple',outpath,'Apple Enrollment Profiles',maxlength,split)
 
