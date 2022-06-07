@@ -28,7 +28,7 @@ endpoint = "https://graph.microsoft.com/beta/deviceManagement/groupPolicyConfigu
 ## Get all Group Policy Configurations and save them in specified path
 def savebackup(path, output, exclude, token):
 
-    configpath = path+"/"+"Device Configurations/"
+    configpath = path+"/"+"Group Policy Configurations/"
     data = makeapirequest(endpoint, token)
 
     assignment_responses = batch_assignment(data,f'deviceManagement/groupPolicyConfigurations/','/assignments',token)
