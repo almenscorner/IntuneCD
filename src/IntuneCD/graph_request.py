@@ -15,9 +15,9 @@ def makeapirequest(endpoint,token,q_param=None):
             response = requests.get(endpoint,headers=headers)
     else:
         response = requests.get(endpoint,headers=headers)
-        if response.status_code == 504 or response.status_code == 502:
-            print('Ran into issues with Graph request, waiting 5 seconds and trying again...')
-            time.sleep(5)
+        if response.status_code == 504 or response.status_code == 502 or response.status_code == 503:
+            print('Ran into issues with Graph request, waiting 10 seconds and trying again...')
+            time.sleep(10)
             response = requests.get(endpoint,headers=headers)
     if response.status_code == 200:
         json_data = json.loads(response.text)

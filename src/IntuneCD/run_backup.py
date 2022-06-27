@@ -88,6 +88,9 @@ def start():
         from .backup_profiles import savebackup
         savebackup(path,output,exclude,token)
 
+        from .backup_groupPolicyConfiguration import savebackup
+        savebackup(path,output,exclude,token)
+
         from .backup_appleEnrollmentProfile import savebackup
         savebackup(path,output,token)
 

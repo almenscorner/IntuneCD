@@ -8,23 +8,29 @@
 
 # IntuneCD tool
 
-IntuneCD or, Intune Continuous Delivery as it stands for is a Python package that is used to backup and update configurations in Intune. It was created with running it from a pipeline in mind. Using this approach we get complete history of which configurations has been changed and what setting has been changed.
+IntuneCD or, Intune Continuous Delivery as it stands for is a Python package that is used to back up and update configurations in Intune. It was created with running it from a pipeline in mind. Using this approach we get complete history of which configurations have been changed and what setting has been changed.
 
-The main function is to back up configurations from Intune to a Git repositry from a DEV environment and if any configurations has changed, push them to PROD Intune environment.
+The main function is to back up configurations from Intune to a Git repository from a DEV environment and if any configurations has changed, push them to PROD Intune environment.
 
-The package can also be run standalone outside of a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
+The package can also be run standalone outside a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
-## Whats new in 1.1.0
-- Bug fix for App Protection policies not being able to be created in a tenant to tenant scenario
-- Bug fix for Configuration Profiles not being able to update assignment in a tenant to tenant scenario
-- Bug fix for Windows Autopilot profiles not being able to update assignment in a tenant to tenant scenario
-- Bug fix for assignment updates where updating assignments when creating new configurations were not possible if the group does not exist
+## What's new in 1.1.1
+- Added ability to split documentation into categories using `-s Y` in `intunecd-startdocumentation`
+- Added ability to set max length of output in documentation using `-m {int_value}` in `intunecd-startdocumentation`
+- Added backup and documentation of Group Policy Configurations
+- Added retry if 503 is encountered during a graph call
 
-## Whats new in 1.0.9
-- Bug fix where the script exited with "local variable referenced before assignment" if a management intent does not exist
+## What's new in 1.1.0
+- Bugfix for App Protection policies not being able to be created in a tenant to tenant scenario
+- Bugfix for Configuration Profiles not being able to update assignment in a tenant to tenant scenario
+- Bugfix for Windows Autopilot profiles not being able to update assignment in a tenant to tenant scenario
+- Bugfix for assignment updates where updating assignments when creating new configurations were not possible if the group does not exist
+
+## What's new in 1.0.9
+- Bugfix where the script exited with "local variable referenced before assignment" if a management intent does not exist
 - Added a new parameter to let you exclude assignments from backups. To exclude assignments from backup, you can now use `-e assignments` when running IntuneCD-startbackup.
 
-## Whats new in 1.0.8
+## What's new in 1.0.8
 Main focus for this release has been to improve the performance as large setups can take a while to backup/update. With these enhancements, I was able to cut the run time by 80% in most cases
 
 - Added module to use MS Graph batching to get assignments instead on getting them for each configuration individually
@@ -39,7 +45,7 @@ Main focus for this release has been to improve the performance as large setups 
 - All configurations are now requested from the start and matched in script with displayName and/or odata type instead of requesting each configuration based on displayName
 - Management intents are now batched using the new batching module
 - Assignments are now batched using the new batching module
-- If 504 or 502 is encounterd while getting configurations, the tool will now try again to get the configuration
+- If 504 or 502 is encountered while getting configurations, the tool will now try again to get the configuration
 - For Windows apps in documentation, detection scripts etc will now have a "Click to expand..." instead of showing the whole script
 
 ## Install this package
@@ -169,7 +175,7 @@ If the configuration the script is looking for cannot be found, it will create i
 - DeviceManagementServiceConfig.ReadWrite.All
 - Group.Read.All
 
-If you just want to backup you can get away with only Read permission (except for DeviceManagementConfiguration)!
+If you just want to back up you can get away with only Read permission (except for DeviceManagementConfiguration)!
 
 ## How do I use it?
 You have two options, using a pipeline or running it locally. Let's have a look at both.
@@ -337,7 +343,7 @@ steps:
 ```
 
 ## Run documentation locally
-To create a markdown document from the backup files, run this command
+To create a Markdown document from the backup files, run this command
 ```python
 IntuneCD-startdocumentation -p /path/to/backup/directory -o /path/to/create/markdown.md -t nameoftenant -i 'This is a demo introduction'
 ```
@@ -353,7 +359,7 @@ This step should be added to the backup pipeline to make sure the markdown docum
 ```
 
 ## Good to know
-When this tool tries to update configurations, it matches the displayname. Therefore the displayname from DEV must match in PROD.
+When this tool tries to update configurations, it matches the display name. Therefore, the display name from DEV must match in PROD.
 
 ## Current known limitations
 Updating Windows Update Rings configurations is currently not supported, the tool can however create update rings if they don't exist.
