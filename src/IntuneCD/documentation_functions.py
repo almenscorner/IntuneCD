@@ -13,6 +13,8 @@ header : str
     Header of the configuration being documented
 """
 
+from posixpath import split
+from traceback import print_tb
 import yaml
 import json
 import os
@@ -123,14 +125,20 @@ def clean_list(data):
 
     return values
 
-def document_configs(configpath, outpath, header):
+def document_configs(configpath, outpath, header, max_length, split):
+
     ## If configurations path exists, continue
     if os.path.exists(configpath) == True:
+        if split == True:
+            outpath = configpath + "/" + header + ".md"
+            md_file(outpath)
         with open(outpath, 'a') as md:
             md.write('# '+header+'\n')
 
         pattern = configpath + "*/*"
         for filename in glob.glob(pattern, recursive=True):
+            if filename.endswith(".md"):
+                continue
             ## If path is Directory, skip
             if os.path.isdir(filename):
                 continue
@@ -161,6 +169,9 @@ def document_configs(configpath, outpath, header):
                     # Write configuration markdown table
                     config_table_list = []
                     for key, value in zip(repo_data.keys(),clean_list(repo_data.values())):
+                        if max_length:
+                            if value and type(value) == str and len(value) > max_length:
+                                value = "Value too long to display"
                         config_table_list.append([key, value])
                     config_table = write_table(config_table_list)
 
@@ -177,9 +188,12 @@ def document_configs(configpath, outpath, header):
                             md.write(str(assignments_table)+'\n')
                         md.write(str(config_table)+'\n')
 
-def document_management_intents(configpath, outpath,header):
+def document_management_intents(configpath, outpath,header,split):
     ## If configurations path exists, continue
     if os.path.exists(configpath) ==True:
+        if split == True:
+            outpath = configpath + "/" + header + ".md"
+            md_file(outpath)
         with open(outpath, 'a') as md:
             md.write('# '+header+'\n')
 
@@ -240,3 +254,11 @@ def document_management_intents(configpath, outpath,header):
                             md.write('### Assignments \n')
                             md.write(str(assignments_table)+'\n')
                         md.write(str(config_table)+'\n')
+
+def get_md_files():
+    md_files = []
+    patterns = ["*/*.md","*/*/*.md","*/*/*/*.md"]
+    for pattern in patterns:
+        for filename in glob.glob(pattern, recursive=True):
+            md_files.append(f'./{filename}')
+    return md_files
