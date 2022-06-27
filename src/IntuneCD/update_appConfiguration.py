@@ -47,6 +47,9 @@ def update(path, token, assignment=False):
             # If file is .DS_Store, skip
             if filename == ".DS_Store":
                 continue
+            # If file is .md, skip
+            if filename.endswith(".md"):
+                continue
 
             ## Check which format the file is saved as then open file, load data and set query parameter
             with open(file) as f:
