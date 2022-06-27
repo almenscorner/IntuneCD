@@ -13,8 +13,6 @@ header : str
     Header of the configuration being documented
 """
 
-from posixpath import split
-from traceback import print_tb
 import yaml
 import json
 import os
