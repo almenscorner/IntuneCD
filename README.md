@@ -58,116 +58,30 @@ pip install IntuneCD
 pip install IntuneCD --upgrade
 ```
 
-## What is backed up?
-- Apple Push Notification
-- Apple Volume Purchase Program tokens
-- Application Configuration Policies
-    - Including assignments
-- Application Protection Policies
-    - Including assignments
-- Applications
-    - Including assignments
-- Compliance Policies
-    - Including assignments
-- Device Configurations
-    - Including assignments
-    - For custom macOS and iOS configurations, mobileconfigs are backed up
-- Enrollment profiles
-    - Apple Business Manager
-    - Windows Autopilot
-        - Including assignments
-- Endpoint Security
-    - Including assignments
-    - Security Baselines
-    - Antivirus
-    - Disk Encryption
-    - Firewall
-    - Endpoint Detection and Response
-    - Attack Surface Reduction
-    - Account Protection
-- Filters
-- Managed Google Play
-- Notification Templates
-- Proactive Remediations
-    - Including assignments
-- Partner Connections
-    - Compliance
-    - Management
-    - Remote Assistance
-- Scripts
-    - Including assignments
-    - Powershell
-    - Shell
-- Settings Catalog Policies
-    - Including assignments
+## What is backed up, updated, created and documented?
+| Payload                              |   Back up   | Update | Document |   Create    | Notes                                                                                                                                                     |
+|--------------------------------------|:-----------:|:------:|:--------:|:-----------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Apple Push Notification              |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Apple Volume Purchase Program tokens |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Application Configuration Policies   |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Application Protection Policies      |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           | 
+| Applications                         |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Compliance Policies                  |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Device Configurations                |   :tada:    | :tada: |  :tada:  |   :tada:    | For custom macOS and iOS configurations,</br>mobileconfigs are backed up                                                                                  |
+| Group Policy Configurations          |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Enrollment profiles                  | :tada: [^1] | :tada: |  :tada:  | :tada: [^2] |                                                                                                                                                           |
+| Endpoint Security                    |   :tada:    | :tada: |  :tada:  |   :tada:    | Security Baselines</br>Antivirus</br>Disk Encryption</br>Firewall</br>Endpoint Detection and Response</br>Attack Surface Reduction</br>Account Protection |
+| Filters                              |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Managed Google Play                  |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Notification Templates               |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Proactive Remediations               |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Partner Connections                  |   :tada:    |        |  :tada:  |             | Compliance</br>Management</br>Remote Assistance                                                                                                           |
+| Shell Scripts                        |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Powershell Scripts                   |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Settings Catalog Policies            |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
 
-## What can be updated?
-Well... most of the above ;)
-
-- Application Configuration Policies
-    - Including assignments
-- Application Protection Policies
-    - Including assignments
-- Compliance Policies
-    - Including assignments
-- Device Configurations
-    - Including assignments
-    - Including custom macOS/iOS .mobileconfigs and custom Windows profiles
-- Enrollment profiles
-    - Apple Business Manager
-    - Windows Autopilot
-        - Including assignments
-- Endpoint Security
-    - Including assignments
-    - Security Baselines
-    - Antivirus
-    - Disk Encryption
-    - Firewall
-    - Endpoint Detection and Response
-    - Attack Surface Reduction
-    - Account Protection
-- Filters
-- Notification Templates
-- Proactive Remediations
-    - Including assignments
-- Scripts
-    - Including assignments
-    - Powershell
-    - Shell
-- Settings Catalog Policies
-    - Including assignments
-
-## What can be created?
-If the configuration the script is looking for cannot be found, it will create it. Supported configurations for creation are:
-
-- Application Configuration Policies
-    - Including assignments
-- Application Protection Policies
-    - Including assignments
-- Compliance Policies
-    - Including assignments
-- Device Configurations
-    - Including assignments
-    - Including custom macOS/iOS .mobileconfigs and custom Windows profiles
-- Endpoint Security
-    - Including assignments
-    - Security Baselines
-    - Antivirus
-    - Disk Encryption
-    - Firewall
-    - Endpoint Detection and Response
-    - Attack Surface Reduction
-    - Account Protection
-- Filters
-- Notification Templates
-- Proactive Remediations
-    - Including assignments
-- Scripts
-    - Including assignments
-    - Powershell
-    - Shell
-- Settings Catalog Policies
-    - Including assignments
+[^1]: Only Apple Business Manager and Windows Autopilot profiles are backed up.
+[^2]: Only Windows Autopilot profiles are created.
 
 ## Required Azure AD application Graph API permissions
 - DeviceManagementApps.ReadWrite.All
