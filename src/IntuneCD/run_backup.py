@@ -1,145 +1,235 @@
 #!/usr/bin/env python3
 
-import os
+"""
+This module contains the functions to run the backup.
+"""
 
+import os
+import sys
+import base64
+import argparse
+
+from io import StringIO
 from .get_authparams import getAuth
-from optparse import OptionParser
+from .update_frontend import update_frontend
 
 REPO_DIR = os.environ.get("REPO_DIR")
 
-def start():
 
-    parser = OptionParser(description="Save backup of Intune configurations")
-    parser.add_option(
-        "-o", "--output", 
+def start():
+    parser = argparse.ArgumentParser(
+        description="Save backup of Intune configurations")
+    parser.add_argument(
+        "-o",
+        "--output",
         help='The format backups will be saved as, valid options are json or yaml. Default is json',
         type=str,
-        default = "json",
+        default="json",
     )
-    parser.add_option(
-        "-p", "--path", 
+    parser.add_argument(
+        "-p",
+        "--path",
         help='The path to which the configurations will be saved. Default value is $(Build.SourcesDirectory)',
         type=str,
-        default = REPO_DIR,
+        default=REPO_DIR,
     )
-    parser.add_option(
-        "-m", "--mode",
-        help = ("The mode in which the script is run, 0 = devtoprod (backup from dev -> update to prod) "
-                "uses os.environ DEV_TENANT_NAME, DEV_CLIENT_ID, DEV_CLIENT_SECRET, "
-                "1 = standalone (backup from prod) uses os.environ TENANT_NAME, CLIENT_ID, CLIENT_SECRET"),
+    parser.add_argument(
+        "-m",
+        "--mode",
+        help=(
+            "The mode in which the script is run, 0 = devtoprod (backup from dev -> update to prod) "
+            "uses os.environ DEV_TENANT_NAME, DEV_CLIENT_ID, DEV_CLIENT_SECRET, "
+            "1 = standalone (backup from prod) uses os.environ TENANT_NAME, CLIENT_ID, CLIENT_SECRET"),
         type=int,
-        default = 0
-    )
-    parser.add_option(
-        "-a", "--localauth",
-        help=("When this paramater is set, provide a path to a local dict file containing the following keys: "
-                "params:TENANT_NAME, CLIENT_ID, CLIENT_SECRET when run in standalone mode and "
-                "params:DEV_TENANT_NAME, DEV_CLIENT_ID, DEV_CLIENT_SECRET when run in devtoprod"),
-        type=str
-    )
-    parser.add_option(
-        "-e", "--exclude",
-        help = "List of objects to exclude from the backup, separated by commas. Currently supported objects are: assignments",
-        type = str
-    )
+        default=0)
+    parser.add_argument(
+        "-a",
+        "--localauth",
+        help=(
+            "When this paramater is set, provide a path to a local dict file containing the following keys: "
+            "params:TENANT_NAME, CLIENT_ID, CLIENT_SECRET when run in standalone mode and "
+            "params:DEV_TENANT_NAME, DEV_CLIENT_ID, DEV_CLIENT_SECRET when run in devtoprod"),
+        type=str)
+    parser.add_argument(
+        "-e",
+        "--exclude",
+        help="List of objects to exclude from the backup, separated by space.",
+        choices=[
+            "assignments",
+            "AppConfigurations",
+            "AppProtection",
+            "APNs",
+            "VPP",
+            "Applications",
+            "Compliance",
+            "NotificationTemplate",
+            "Profiles",
+            "GPOConfigurations",
+            "AppleEnrollmentProfile",
+            "WindowsEnrollmentProfile",
+            "Filters",
+            "ManagedGooglePlay",
+            "Intents",
+            "CompliancePartner",
+            "ManagementPartner",
+            "RemoteAssistancePartner",
+            "ProactiveRemediation",
+            "PowershellScripts",
+            "ShellScripts",
+            "ConfigurationPolicies"],
+        nargs='+')
+    parser.add_argument(
+        "-f",
+        "--frontend",
+        help="Set the frontend URL to update with configuration count and backup stream",
+        type=str)
 
-    (opts, _) = parser.parse_args()
+    args = parser.parse_args()
 
     def devtoprod():
         return "devtoprod"
- 
+
     def standalone():
         return "standalone"
- 
+
     switcher = {
         0: devtoprod,
         1: standalone
     }
- 
+
     def selected_mode(argument):
         func = switcher.get(argument, "nothing")
         return func()
 
-    token = getAuth(selected_mode(opts.mode),opts.localauth,tenant="DEV")
+    token = getAuth(selected_mode(args.mode), args.localauth, tenant="DEV")
 
-    def run_backup(path,output,exclude,token):
+    def run_backup(path, output, exclude, token):
 
-        from .backup_appConfiguration import savebackup
-        savebackup(path,output,exclude,token)
+        config_count = 0
 
-        from .backup_AppProtection import savebackup
-        savebackup(path,output,exclude,token)
+        if "AppConfigurations" not in exclude:
+            from .backup_appConfiguration import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_apns import savebackup
-        savebackup(path,output,token)
+        if "AppProtection" not in exclude:
+            from .backup_AppProtection import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_vppTokens import savebackup
-        savebackup(path,output,token)
+        if "APNs" not in exclude:
+            from .backup_apns import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_applications import savebackup
-        savebackup(path,output,exclude,token)
+        if "VPP" not in exclude:
+            from .backup_vppTokens import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_compliance import savebackup
-        savebackup(path,output,exclude,token)
+        if "Applications" not in exclude:
+            from .backup_applications import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_notificationTemplate import savebackup
-        savebackup(path,output,token)
+        if "Compliance" not in exclude:
+            from .backup_compliance import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_profiles import savebackup
-        savebackup(path,output,exclude,token)
+        if "NotificationTemplate" not in exclude:
+            from .backup_notificationTemplate import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_groupPolicyConfiguration import savebackup
-        savebackup(path,output,exclude,token)
+        if "Profiles" not in exclude:
+            from .backup_profiles import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_appleEnrollmentProfile import savebackup
-        savebackup(path,output,token)
+        if "GPOConfigurations" not in exclude:
+            from .backup_groupPolicyConfiguration import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_windowsEnrollmentProfile import savebackup
-        savebackup(path,output,exclude,token)
+        if "AppleEnrollmentProfile" not in exclude:
+            from .backup_appleEnrollmentProfile import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_assignmentFilters import savebackup
-        savebackup(path,output,token)
+        if "WindowsEnrollmentProfile" not in exclude:
+            from .backup_windowsEnrollmentProfile import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_managedGPlay import savebackup
-        savebackup(path,output,token)
+        if "Filters" not in exclude:
+            from .backup_assignmentFilters import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_managementIntents import savebackup
-        savebackup(path,output,exclude,token)
+        if "ManagedGooglePlay" not in exclude:
+            from .backup_managedGPlay import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_compliancePartner import savebackup
-        savebackup(path,output,token)
+        if "Intents" not in exclude:
+            from .backup_managementIntents import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_managementPartner import savebackup
-        savebackup(path,output,token)
+        if "CompliancePartner" not in exclude:
+            from .backup_compliancePartner import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_remoteAssistancePartner import savebackup
-        savebackup(path,output,token)
+        if "ManagementPartner" not in exclude:
+            from .backup_managementPartner import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_proactiveRemediation import savebackup
-        savebackup(path,output,exclude,token)
+        if "RemoteAssistancePartner" not in exclude:
+            from .backup_remoteAssistancePartner import savebackup
+            config_count += savebackup(path, output, token)
 
-        from .backup_powershellScripts import savebackup
-        savebackup(path,output,exclude,token)
+        if "ProactiveRemediation" not in exclude:
+            from .backup_proactiveRemediation import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_shellScripts import savebackup
-        savebackup(path,output,exclude,token)
+        if "PowershellScripts" not in exclude:
+            from .backup_powershellScripts import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-        from .backup_configurationPolicies import savebackup
-        savebackup(path,output,exclude,token)
+        if "ShellScripts" not in exclude:
+            from .backup_shellScripts import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
+        if "ConfigurationPolicies" not in exclude:
+            from .backup_configurationPolicies import savebackup
+            config_count += savebackup(path, output, exclude, token)
 
-    if opts.output == 'json' or opts.output == 'yaml':
+        return config_count
+
+    if args.output == 'json' or args.output == 'yaml':
         if token is None:
-            raise Exception("Token is empty, please check os.environ variables")
+            raise Exception(
+                "Token is empty, please check os.environ variables")
+
+        if args.exclude:
+            exclude = args.exclude
         else:
-            if opts.exclude:
-                exclude = opts.exclude.split(",")
-            else:
-                exclude = []
-            run_backup(opts.path,opts.output,exclude,token)
+            exclude = []
+
+        if args.frontend:
+
+            old_stdout = sys.stdout
+            sys.stdout = feedstdout = StringIO()
+            count = run_backup(args.path, args.output, exclude, token)
+            sys.stdout = old_stdout
+            feed_bytes = feedstdout.getvalue().encode("utf-8")
+            out = base64.b64encode(feed_bytes).decode("utf-8")
+
+            body = {
+                "type": "config_count",
+                "config_count": count
+            }
+            update_frontend(f'{args.frontend}/api/overview/summary', body)
+
+            body = {
+                "type": "backup",
+                "feed": out
+            }
+            update_frontend(f'{args.frontend}/api/feed/update', body)
+
+        else:
+            run_backup(args.path, args.output, exclude, token)
 
     else:
-        print('Please enter a valid output format, json or yaml') 
+        print('Please enter a valid output format, json or yaml')
+
 
 if __name__ == "__main__":
     start()
