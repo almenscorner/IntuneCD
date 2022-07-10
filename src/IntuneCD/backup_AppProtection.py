@@ -2,64 +2,63 @@
 
 """
 This module backs up all App Protection Polices in Intune.
-
-Parameters
-----------
-path : str
-    The path to save the backup to
-output : str
-    The format the backup will be saved as
-token : str
-    The token to use for authenticating the request
 """
-
-import json
-import os
-import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment
+from .save_output import save_output
+from .remove_keys import remove_keys
 
-## Set MS Graph endpoint
-endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/managedAppPolicies"
+# Set MS Graph endpoint
+ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/managedAppPolicies"
 
-## Get all App Protection policies and save them in specified path
+
+# Get all App Protection policies and save them in specified path
 def savebackup(path, output, exclude, token):
-    configpath = path+"/"+"App Protection/"
-    data = makeapirequest(endpoint, token)
+    """
+    Saves all App Protection policies in Intune to a JSON or YAML file.
 
-    assignment_responses = batch_assignment(data,f'deviceAppManagement/','/assignments',token,app_protection=True)
+    :param path: Path to save the backup to
+    :param output: Format the backup will be saved as
+    :param token: Token to use for authenticating the request
+    """
+    config_count = 0
+    configpath = path + "/" + "App Protection/"
+    data = makeapirequest(ENDPOINT, token)
 
-    ## If profile is ManagedAppConfiguration, skip to next
+    assignment_responses = batch_assignment(
+        data,
+        'deviceAppManagement/',
+        '/assignments',
+        token,
+        app_protection=True)
+
+    # If profile is ManagedAppConfiguration, skip to next
     for profile in data['value']:
+        config_count += 1
         if profile['@odata.type'] == "#microsoft.graph.targetedManagedAppConfiguration":
             continue
-        
+
         if "assignments" not in exclude:
-            assignments = get_object_assignment(profile['id'],assignment_responses)
+            assignments = get_object_assignment(
+                profile['id'], assignment_responses)
             if assignments:
                 profile['assignments'] = assignments
-        
-        remove_keys = {'id', 'createdDateTime', 'version',
-                       'lastModifiedDateTime', 'deployedAppCount', 'isAssigned'}
-        for k in remove_keys:
-            profile.pop(k, None)
+
+        profile = remove_keys(profile)
 
         print("Backing up App Protection: " + profile['displayName'])
-        if os.path.exists(configpath) == False:
-            os.mkdir(configpath)
 
         if 'targetedAppManagementLevels' in profile:
-            fname = clean_filename(f"{profile['displayName']}_{profile['targetedAppManagementLevels']}")
+            fname = clean_filename(
+                f"{profile['displayName']}_{profile['targetedAppManagementLevels']}")
         else:
-            fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
+            fname = clean_filename(
+                f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
 
-        ## Save App Protection as JSON or YAML depending on configured value in "-o"
-        if output != "json":
-            with open(configpath+fname+".yaml", 'w') as yamlFile:
-                yaml.dump(profile, yamlFile, sort_keys=False,
-                          default_flow_style=False)
-        else:
-            with open(configpath+fname+".json", 'w') as jsonFile:
-                json.dump(profile, jsonFile, indent=10)
+        # Save App Protection as JSON or YAML depending on configured value in
+        # "-o"
+        save_output(output, configpath, fname, profile)
+
+    return config_count
