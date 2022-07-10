@@ -18,3 +18,5 @@ share/python-wheels/
 *.egg
 MANIFEST
 .idea/
+__pycache__/
+.pytest_cache/
