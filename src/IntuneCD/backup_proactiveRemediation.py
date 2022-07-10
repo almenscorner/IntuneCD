@@ -1,82 +1,85 @@
 #!/usr/bin/env python3
 
 """
-This module backs up all Proactive Remediations in Intune.
-
-Parameters
-----------
-path : str
-    The path to save the backup to
-output : str
-    The format the backup will be saved as
-token : str
-    The token to use for authenticating the request
+This module backs up all Proactive Remediation in Intune.
 """
 
-import json
 import os
 import base64
-import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment, batch_request
+from .save_output import save_output
+from .remove_keys import remove_keys
 
-## Set MS Graph endpoint
-endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScripts"
+# Set MS Graph endpoint
+ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScripts"
 
-## Get all Proactive Remediations and save them in specified path
+
+# Get all Proactive Remediation and save them in specified path
 def savebackup(path, output, exclude, token):
+    """
+    Saves all Proactive Remediation in Intune to a JSON or YAML file and script files.
+
+    :param path: Path to save the backup to
+    :param output: Format the backup will be saved as
+    :param exclude: If "assignments" is in the list, it will not back up the assignments
+    :param token: Token to use for authenticating the request
+    """
+
+    config_count = 0
     configpath = f'{path}/Proactive Remediations/'
-    data = makeapirequest(endpoint, token)
+    data = makeapirequest(ENDPOINT, token)
     pr_ids = []
     for script in data['value']:
         pr_ids.append(script['id'])
 
-    assignment_responses = batch_assignment(data,f'deviceManagement/deviceHealthScripts/','/assignments',token)
-    pr_data_responses = batch_request(pr_ids,f'deviceManagement/deviceHealthScripts/','',token)
+    assignment_responses = batch_assignment(
+        data, 'deviceManagement/deviceHealthScripts/', '/assignments', token)
+    pr_data_responses = batch_request(
+        pr_ids, 'deviceManagement/deviceHealthScripts/', '', token)
 
     for pr_details in pr_data_responses:
+        config_count += 1
         if "Microsoft" not in pr_details['publisher']:
-            
+
             if "assignments" not in exclude:
-                assignments = get_object_assignment(pr_details['id'],assignment_responses)
+                assignments = get_object_assignment(
+                    pr_details['id'], assignment_responses)
                 if assignments:
                     pr_details['assignments'] = assignments
-                
-            remove_keys = {'id', 'createdDateTime', 'version',
-                           'lastModifiedDateTime', 'isGlobalScript', 'highestAvailableVersion'}
-            for k in remove_keys:
-                pr_details.pop(k, None)
 
-            print(f"Backing up Proactive Remediation: {pr_details['displayName']}")
-            if os.path.exists(configpath) == False:
-                os.makedirs(configpath)
+            pr_details = remove_keys(pr_details)
 
-            ## Get filename without illegal characters
+            print(
+                f"Backing up Proactive Remediation: {pr_details['displayName']}")
+
+            # Get filename without illegal characters
             fname = clean_filename(pr_details['displayName'])
 
-            ## Save Proactive Remediation as JSON or YAML depending on configured value in "-o"
-            if output != 'json':
-                with open(f"{configpath}{fname}.yaml", 'w') as yamlFile:
-                    yaml.dump(pr_details, yamlFile, sort_keys=False,
-                              default_flow_style=False)
-            else:
-                with open(f"{configpath}{fname}.json", 'w') as jsonFile:
-                    json.dump(pr_details, jsonFile, indent=10)
+            # Save Proactive Remediation as JSON or YAML depending on
+            # configured value in "-o"
+            save_output(output, configpath, fname, pr_details)
 
-            if os.path.exists(f'{configpath}/Script Data') == False:
+            if not os.path.exists(f'{configpath}/Script Data'):
                 os.makedirs(f'{configpath}/Script Data')
 
-            ## Save detection script to the Script Data folder
+            # Save detection script to the Script Data folder
+            config_count += 1
             decoded = base64.b64decode(
                 pr_details['detectionScriptContent']).decode('utf-8')
             f = open(
-                f"{configpath}/Script Data/{pr_details['displayName']}_DetectionScript.ps1", 'w')
+                f"{configpath}/Script Data/{pr_details['displayName']}_DetectionScript.ps1",
+                'w')
             f.write(decoded)
-            ## Save remediation script to the Script Data folder
+            # Save remediation script to the Script Data folder
+            config_count += 1
             decoded = base64.b64decode(
                 pr_details['remediationScriptContent']).decode('utf-8')
             f = open(
-                f"{configpath}/Script Data/{pr_details['displayName']}_RemediationScript.ps1", 'w')
+                f"{configpath}/Script Data/{pr_details['displayName']}_RemediationScript.ps1",
+                'w')
             f.write(decoded)
+
+    return config_count
