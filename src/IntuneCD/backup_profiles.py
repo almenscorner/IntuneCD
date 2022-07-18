@@ -17,25 +17,6 @@ from .remove_keys import remove_keys
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
 
-
-def match(platform, input) -> bool:
-    """
-    This function matches the platform from the @odata.type.
-
-    :param platform: The platform to match
-    :param input: The OData type
-    :return: False if no match, True if match
-    """
-
-    string = f'.*{platform}.*$'
-    pattern = re.compile(string)
-    match = pattern.match(input, re.IGNORECASE)
-    if match:
-        return True
-    else:
-        return False
-
-
 # Get all Device Configurations and save them in specified path
 def savebackup(path, output, exclude, token):
     """
