@@ -28,10 +28,10 @@ def savebackup(path, output, token):
     data = makeapirequest(ENDPOINT, token)
 
     for partner in data['value']:
-        config_count += 1
         if partner['onboardingStatus'] == "notOnboarded":
             continue
         else:
+            config_count += 1
             print(
                 "Backing up Remote Assistance Partner: " +
                 partner['displayName'])
