@@ -57,7 +57,6 @@ def savebackup(path, output, exclude, token):
         save_output(output, configpath, fname, script_data)
 
         # Save Shell script data to the script data folder
-        config_count += 1
         if not os.path.exists(configpath + "Script Data/"):
             os.makedirs(configpath + "Script Data/")
         decoded = base64.b64decode(
