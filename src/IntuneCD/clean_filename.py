@@ -14,7 +14,7 @@ def clean_filename(filename):
     """
 
     remove_characters = "/\\:*?<>|"
-    if not isinstance(filename, str):
+    if type(filename) != str:
         filename = str(filename)
     for character in remove_characters:
         filename = filename.replace(character, "_")
