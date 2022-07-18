@@ -36,9 +36,10 @@ def savebackup(path, output, exclude, token):
 
     # If profile is ManagedAppConfiguration, skip to next
     for profile in data['value']:
-        config_count += 1
         if profile['@odata.type'] == "#microsoft.graph.targetedManagedAppConfiguration":
             continue
+
+        config_count += 1
 
         if "assignments" not in exclude:
             assignments = get_object_assignment(
