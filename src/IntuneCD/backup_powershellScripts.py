@@ -31,40 +31,40 @@ def savebackup(path, output, exclude, token):
     config_count = 0
     configpath = path + "/" + "Scripts/Powershell/"
     data = makeapirequest(ENDPOINT, token)
-    script_ids = []
-    for script in data['value']:
-        config_count += 1
-        script_ids.append(script['id'])
+    if data['value']:
+        script_ids = []
+        for script in data['value']:
+            script_ids.append(script['id'])
 
-    assignment_responses = batch_assignment(
-        data, 'deviceManagement/intents/', '/assignments', token)
-    script_data_responses = batch_request(
-        script_ids, 'deviceManagement/deviceManagementScripts/', '', token)
+        assignment_responses = batch_assignment(
+            data, 'deviceManagement/intents/', '/assignments', token)
+        script_data_responses = batch_request(
+            script_ids, 'deviceManagement/deviceManagementScripts/', '', token)
 
-    for script_data in script_data_responses:
-        config_count += 1
-        if "assignments" not in exclude:
-            assignments = get_object_assignment(
-                script_data['id'], assignment_responses)
-            if assignments:
-                script_data['assignments'] = assignments
+        for script_data in script_data_responses:
+            config_count += 1
+            if "assignments" not in exclude:
+                assignments = get_object_assignment(
+                    script_data['id'], assignment_responses)
+                if assignments:
+                    script_data['assignments'] = assignments
 
-        script_data = remove_keys(script_data)
+            script_data = remove_keys(script_data)
 
-        print("Backing up Powershell script: " + script_data['displayName'])
+            print("Backing up Powershell script: " + script_data['displayName'])
 
-        # Get filename without illegal characters
-        fname = clean_filename(script_data['displayName'])
-        # Save Powershell script as JSON or YAML depending on configured value
-        # in "-o"
-        save_output(output, configpath, fname, script_data)
+            # Get filename without illegal characters
+            fname = clean_filename(script_data['displayName'])
+            # Save Powershell script as JSON or YAML depending on configured value
+            # in "-o"
+            save_output(output, configpath, fname, script_data)
 
-        # Save Powershell script data to the script data folder
-        if not os.path.exists(configpath + "Script Data/"):
-            os.makedirs(configpath + "Script Data/")
-        decoded = base64.b64decode(
-            script_data['scriptContent']).decode('utf-8')
-        f = open(configpath + "Script Data/" + script_data['fileName'], 'w')
-        f.write(decoded)
+            # Save Powershell script data to the script data folder
+            if not os.path.exists(configpath + "Script Data/"):
+                os.makedirs(configpath + "Script Data/")
+            decoded = base64.b64decode(
+                script_data['scriptContent']).decode('utf-8')
+            f = open(configpath + "Script Data/" + script_data['fileName'], 'w')
+            f.write(decoded)
 
     return config_count
