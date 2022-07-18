@@ -30,38 +30,40 @@ def savebackup(path, output, exclude, token):
     configpath = path + "/" + "App Configuration/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        data, 'deviceAppManagement/mobileAppConfigurations/', '/assignments', token)
+    if data['value']:
 
-    for profile in data['value']:
-        config_count += 1
-        if "assignments" not in exclude:
-            assignments = get_object_assignment(
-                profile['id'], assignment_responses)
-            if assignments:
-                profile['assignments'] = assignments
+        assignment_responses = batch_assignment(
+            data, 'deviceAppManagement/mobileAppConfigurations/', '/assignments', token)
 
-        profile = remove_keys(profile)
+        for profile in data['value']:
+            config_count += 1
+            if "assignments" not in exclude:
+                assignments = get_object_assignment(
+                    profile['id'], assignment_responses)
+                if assignments:
+                    profile['assignments'] = assignments
 
-        # Get name and type of app on App Configuration Profile
-        app_dict = {}
-        for app_id in profile['targetedMobileApps']:
-            app_data = makeapirequest(APP_ENDPOINT + "/" + app_id, token)
-            if app_data:
-                app_dict['appName'] = app_data['displayName']
-                app_dict['type'] = app_data['@odata.type']
+            profile = remove_keys(profile)
 
-        if app_dict:
-            profile.pop('targetedMobileApps')
-            profile['targetedMobileApps'] = app_dict
+            # Get name and type of app on App Configuration Profile
+            app_dict = {}
+            for app_id in profile['targetedMobileApps']:
+                app_data = makeapirequest(APP_ENDPOINT + "/" + app_id, token)
+                if app_data:
+                    app_dict['appName'] = app_data['displayName']
+                    app_dict['type'] = app_data['@odata.type']
 
-        print("Backing up App Configuration: " + profile['displayName'])
+            if app_dict:
+                profile.pop('targetedMobileApps')
+                profile['targetedMobileApps'] = app_dict
 
-        # Get filename without illegal characters
-        fname = clean_filename(
-            f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
-        # Save App Configuration as JSON or YAML depending on configured value
-        # in "-o"
-        save_output(output, configpath, fname, profile)
+            print("Backing up App Configuration: " + profile['displayName'])
+
+            # Get filename without illegal characters
+            fname = clean_filename(
+                f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
+            # Save App Configuration as JSON or YAML depending on configured value
+            # in "-o"
+            save_output(output, configpath, fname, profile)
 
     return config_count
