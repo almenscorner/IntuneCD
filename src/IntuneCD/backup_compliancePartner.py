@@ -28,10 +28,11 @@ def savebackup(path, output, token):
     data = makeapirequest(ENDPOINT, token)
 
     for partner in data['value']:
-        config_count += 1
         if partner['partnerState'] == "unknown":
             continue
+
         else:
+            config_count += 1
             print("Backing up Compliance Partner: " + partner['displayName'])
 
             partner = remove_keys(partner)
