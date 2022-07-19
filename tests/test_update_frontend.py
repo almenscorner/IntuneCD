@@ -1,5 +1,11 @@
-import os
+#!/usr/bin/env python3
+
+"""
+This module tests the update_frontend function.
+"""
+
 import unittest
+
 from unittest import mock
 from unittest.mock import patch
 from src.IntuneCD.update_frontend import update_frontend
@@ -69,6 +75,7 @@ class TestUpdateFrontend(unittest.TestCase):
                               update_frontend,
                               "http://localhost:8080/update",
                               {"configurations": 1})
+
 
 if __name__ == '__main__':
     unittest.main()
