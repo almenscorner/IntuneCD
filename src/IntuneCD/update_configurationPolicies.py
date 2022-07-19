@@ -90,7 +90,8 @@ def update(path, token, assignment=False):
                         print("Updating Settings Catalog policy: " +
                               name + ", values changed:")
                         values = get_diff_output(diff)
-                        print(values)
+                        for value in values:
+                            print(value)
                         request_data = json.dumps(repo_data)
                         q_param = None
                         makeapirequestPut(
