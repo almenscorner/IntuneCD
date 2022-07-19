@@ -41,7 +41,8 @@ class TestBackupProfiles(unittest.TestCase):
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch('src.IntuneCD.backup_profiles.makeapirequest')
+        self.makeapirequest_patch = patch(
+            'src.IntuneCD.backup_profiles.makeapirequest')
         self.makeapirequest = self.makeapirequest_patch.start()
 
     def tearDown(self):
@@ -54,10 +55,10 @@ class TestBackupProfiles(unittest.TestCase):
         """The folders and files should be created and the count should be 2."""
 
         self.makeapirequest.return_value = {'value': [{
-                       "@odata.type": '#microsoft.graph.macOSCustomConfiguration',
-                       "id": "0",
-                       "displayName": "test",
-                       "payload": "SGkgdGhlcmUgcHJldHR5",
+            "@odata.type": '#microsoft.graph.macOSCustomConfiguration',
+            "id": "0",
+            "displayName": "test",
+            "payload": "SGkgdGhlcmUgcHJldHR5",
                        "payloadFileName": "test.mobileconfig"}]}
 
         self.count = savebackup(
@@ -75,11 +76,11 @@ class TestBackupProfiles(unittest.TestCase):
     def test_backup_ios_custom_profile(self):
         """The folders and files should be created and the count should be 2."""
 
-        self.makeapirequest.return_value ={'value': [{
-                       "@odata.type": '#microsoft.graph.iosCustomConfiguration',
-                       "id": "0",
-                       "displayName": "test",
-                       "payload": "SGkgdGhlcmUgcHJldHR5",
+        self.makeapirequest.return_value = {'value': [{
+            "@odata.type": '#microsoft.graph.iosCustomConfiguration',
+            "id": "0",
+            "displayName": "test",
+            "payload": "SGkgdGhlcmUgcHJldHR5",
                        "payloadFileName": "test.mobileconfig"}]}
 
         self.count = savebackup(
@@ -98,17 +99,17 @@ class TestBackupProfiles(unittest.TestCase):
         """The file should be created and the count should be 1."""
 
         self.profile = {'value': [{
-                   "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
-                   "id": "0",
-                   "displayName": "test",
-                   "omaSettings": [{
-                       "isEncrypted": True,
-                       "@odata.type": "#microsoft.graph.windows10OmaSetting",
-                       "secretReferenceValueId": "0",
-                       "omaUri": "test uri",
-                       "displayName": "test",
-                       "description": "",
-                       "value": []}]}]}
+            "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
+            "id": "0",
+            "displayName": "test",
+            "omaSettings": [{
+                "isEncrypted": True,
+                "@odata.type": "#microsoft.graph.windows10OmaSetting",
+                "secretReferenceValueId": "0",
+                "omaUri": "test uri",
+                "displayName": "test",
+                "description": "",
+                "value": []}]}]}
         self.oma_values = {
             '@odata.context': 'https://graph.microsoft.com/beta/$metadata#Edm.String',
             'value': 'password'}
@@ -129,9 +130,9 @@ class TestBackupProfiles(unittest.TestCase):
         """The file should be created and the count should be 1."""
 
         self.makeapirequest.return_value = {'value': [{
-                       "@odata.type": '#microsoft.graph.macOSGeneralDeviceConfiguration',
-                       "id": "0",
-                       "displayName": "test"}]}
+            "@odata.type": '#microsoft.graph.macOSGeneralDeviceConfiguration',
+            "id": "0",
+            "displayName": "test"}]}
 
         self.count = savebackup(
             self.directory.path,
