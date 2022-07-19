@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+"""This module tests updating Proactive Remediation."""
+
 import unittest
 
 from testfixtures import TempDirectory
@@ -104,6 +108,7 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.makeapirequestPost.stop()
 
     def test_update_with_diffs_and_assignment(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
 
         self.repo_data['testvalue'] = "test1"
         self.makeapirequest.side_effect = [
@@ -112,9 +117,11 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_with_detection_script_diff_and_assignment(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
 
         self.mem_data['detectionScriptContent'] = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheQ=="
         self.makeapirequest.side_effect = [
@@ -123,9 +130,11 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_with_detection_script_diff_no_assignment(self):
+        """The count should be 1 and the makeapirequestPatch should be called."""
 
         self.mem_data['detectionScriptContent'] = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheQ=="
         self.makeapirequest.side_effect = [
@@ -134,9 +143,11 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_with_remediation_script_diff_and_assignment(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
 
         self.mem_data['remediationScriptContent'] = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheQ=="
         self.makeapirequest.side_effect = [
@@ -145,9 +156,11 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_with_remediation_script_diff_no_assignment(self):
+        """The count should be 1 and the makeapirequestPatch should be called."""
 
         self.mem_data['remediationScriptContent'] = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheQ=="
         self.makeapirequest.side_effect = [
@@ -156,20 +169,25 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_with_diffs_no_assignment(self):
+        """The count should be 1 and the makeapirequestPatch should be called."""
 
-        self.repo_data['testvalue'] = "test"
+        self.repo_data['testvalue'] = "test1"
         self.makeapirequest.side_effect = [
             self.mem_remediationScript_data, self.mem_data]
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
-        self.assertEqual(self.count, 0)
+        self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_with_no_diffs_and_assignment(self):
+        """The count should be 0, the post_assignment_update should be called,
+         and makeapirequestPatch should not be called."""
 
         self.repo_data['testvalue'] = "test"
         self.makeapirequest.side_effect = [
@@ -178,9 +196,11 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_with_no_diffs_no_assignment(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
 
         self.mem_data['testvalue'] = "test"
         self.makeapirequest.side_effect = [
@@ -189,9 +209,11 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_config_not_found_and_assignment(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPost should be called."""
 
         self.mem_remediationScript_data["value"][0]["displayName"] = "test1"
         self.makeapirequest.return_value = self.mem_remediationScript_data
@@ -201,3 +223,6 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
+if __name__ == '__main__':
+    unittest.main()
