@@ -42,7 +42,8 @@ class TestGraphBatch(unittest.TestCase):
                         'displayName': 'test'}]}]
         self.settings_responses = [
             {
-                '@odata.context': "https://graph.microsoft.com/beta/$metadata#deviceManagement/intents('0')/categories('0')/settings",
+                '@odata.context':
+                    "https://graph.microsoft.com/beta/$metadata#deviceManagement/intents('0')/categories('0')/settings",
                 'value': [
                     {
                         '@odata.type': '#microsoft.graph.deviceManagementBooleanSettingInstance',
@@ -188,7 +189,8 @@ class TestGraphBatch(unittest.TestCase):
         self.id = '0'
         self.response = [
             {
-                '@odata.context': "https://graph.microsoft.com/beta/$metadata#deviceAppManagement/mobileAppConfigurations('0')/assignments",
+                '@odata.context':
+                "https://graph.microsoft.com/beta/$metadata#deviceAppManagement/mobileAppConfigurations('0')/assignments",
                 'value': [
                     {
                         'id': '0',
@@ -207,7 +209,8 @@ class TestGraphBatch(unittest.TestCase):
         self.id = '0'
         self.response = [
             {
-                '@odata.context': "https://graph.microsoft.com/beta/$metadata#deviceAppManagement/mobileAppConfigurations('0')",
+                '@odata.context':
+                "https://graph.microsoft.com/beta/$metadata#deviceAppManagement/mobileAppConfigurations('0')",
                 'value': [{
                     'id': '0',
                     'displayName': 'test',
@@ -238,6 +241,7 @@ class TestGraphBatch(unittest.TestCase):
         self.result = get_object_details(self.id, self.response)
 
         self.assertEqual(self.result, self.expected_result)
+
 
 if __name__ == '__main__':
     unittest.main()
