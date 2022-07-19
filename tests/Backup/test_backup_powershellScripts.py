@@ -42,9 +42,14 @@ class TestBackupPowershellScript(unittest.TestCase):
             'displayName': 'test',
             'fileName': 'test',
             'scriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}
-        self.script_policy_data = {"value": [{"id": "0", "displayName": "test"}]}
-        self.batch_request_data = [{'id': '0', 'displayName': 'test', 'fileName': 'test',
-                          'scriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}]
+        self.script_policy_data = {
+            "value": [{"id": "0", "displayName": "test"}]}
+        self.batch_request_data = [
+            {
+                'id': '0',
+                'displayName': 'test',
+                'fileName': 'test',
+                'scriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}]
 
         self.batch_assignment_patch = patch(
             'src.IntuneCD.backup_powershellScripts.batch_assignment')
@@ -87,7 +92,8 @@ class TestBackupPowershellScript(unittest.TestCase):
             self.saved_data = json.loads(data)
 
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
-        self.assertTrue(Path(f'{self.directory.path}/Scripts/Powershell').exists())
+        self.assertTrue(
+            Path(f'{self.directory.path}/Scripts/Powershell').exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count)
 
@@ -103,7 +109,8 @@ class TestBackupPowershellScript(unittest.TestCase):
         with open(self.saved_path + 'json', 'r') as f:
             self.saved_data = json.load(f)
 
-        self.assertTrue(Path(f'{self.directory.path}/Scripts/Powershell').exists())
+        self.assertTrue(
+            Path(f'{self.directory.path}/Scripts/Powershell').exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count)
 
