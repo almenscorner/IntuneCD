@@ -43,10 +43,15 @@ class TestBackupProactiveRemediation(unittest.TestCase):
             'publisher': 'test',
             'detectionScriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE=',
             'remediationScriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}
-        self.script_policy_data = {"value": [{"id": "0", "displayName": "test"}]}
-        self.batch_request_data = [{'id': '0', 'displayName': 'test', "publisher": "test",
-                          'detectionScriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE=',
-                          'remediationScriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}]
+        self.script_policy_data = {
+            "value": [{"id": "0", "displayName": "test"}]}
+        self.batch_request_data = [
+            {
+                'id': '0',
+                'displayName': 'test',
+                "publisher": "test",
+                'detectionScriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE=',
+                'remediationScriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}]
 
         self.batch_assignment_patch = patch(
             'src.IntuneCD.backup_proactiveRemediation.batch_assignment')
