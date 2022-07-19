@@ -48,7 +48,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         self.directory = TempDirectory()
         self.directory.create()
         self.token = 'token'
-        self.saved_path = f"{self.directory.path}/Enrollment Profiles/apple/test."
+        self.saved_path = f"{self.directory.path}/Enrollment Profiles/Apple/test."
         self.expected_data = {
             '@odata.type': '#microsoft.graph.depMacOSEnrollmentProfile',
             'displayName': 'test',
@@ -75,7 +75,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(Path(f'{self.directory.path}/Enrollment Profiles/apple').exists())
+        self.assertTrue(Path(f'{self.directory.path}/Enrollment Profiles/Apple').exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count)
 
@@ -92,7 +92,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(Path(f'{self.directory.path}/Enrollment Profiles/apple').exists())
+        self.assertTrue(Path(f'{self.directory.path}/Enrollment Profiles/Apple').exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count)
 
