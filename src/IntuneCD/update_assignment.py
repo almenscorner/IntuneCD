@@ -61,7 +61,6 @@ def update_assignment(repo, mem, token) -> list:
     diff = DeepDiff(mem, repo, ignore_order=True)
     added = diff.get('iterable_item_added', {})
     update = False
-
     if diff:
         for val in repo:
             # Request group id based on group name
