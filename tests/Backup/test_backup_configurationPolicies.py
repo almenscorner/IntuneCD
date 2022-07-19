@@ -8,8 +8,8 @@ import unittest
 
 from pathlib import Path
 from unittest.mock import patch
-from src.IntuneCD.backup_configurationPolicies import savebackup
 from testfixtures import TempDirectory
+from src.IntuneCD.backup_configurationPolicies import savebackup
 
 BATCH_REQUEST = [
     {
@@ -117,6 +117,8 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
         self.makeapirequest.stop()
 
     def test_backup_yml(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(
             self.directory.path,
             'yaml',
@@ -127,12 +129,13 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(Path(f'{self.directory.path}/Settings Catalog').exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count)
 
     def test_backup_json(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(
             self.directory.path,
             'json',
@@ -142,13 +145,13 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
         with open(self.saved_path + 'json', 'r') as f:
             self.saved_data = json.load(f)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(Path(f'{self.directory.path}/Settings Catalog').exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count)
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
+
         self.makeapirequest.return_value = {'value': []}
         self.count = savebackup(
             self.directory.path,
@@ -156,3 +159,7 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
             self.exclude,
             self.token)
         self.assertEqual(0, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
