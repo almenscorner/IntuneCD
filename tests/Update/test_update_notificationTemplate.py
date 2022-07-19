@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+"""This module tests updating Notification Templates."""
+
 import unittest
 
 from testfixtures import TempDirectory
@@ -74,6 +78,7 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
         self.makeapirequestPost.stop()
 
     def test_update_with_diffs(self):
+        """The count should be 1 and makeapirequestPatch should be called."""
 
         self.makeapirequest.side_effect = [
             self.mem_data, self.mem_template_data]
@@ -81,9 +86,10 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
 
         self.assertEqual(self.count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
 
-    def test_update_with_multiple_diffs(
-            self):
+    def test_update_with_multiple_diffs(self):
+        """The count should be 2 and makeapirequestPatch should be called."""
 
         self.repo_data['brandingOptions'] = 'test1'
         self.makeapirequest.side_effect = [
@@ -94,8 +100,8 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
         self.assertEqual(self.count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 2)
 
-    def test_update_with_no_diffs(
-            self):
+    def test_update_with_no_diffs(self):
+        """The count should be 0 and makeapirequestPatch should not be called."""
 
         self.mem_template_data['localizedNotificationMessages'][0]['messageTemplate'] = 'test1'
         self.makeapirequest.side_effect = [
@@ -105,11 +111,14 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
 
-    def test_update_config_not_found(
-            self):
+    def test_update_config_not_found(self):
+        """The count should be 0 and makeapirequestPost should be called."""
 
         self.mem_data['value'][0]['displayName'] = 'test1'
         self.count = update(self.directory.path, self.token)
 
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 2)
+
+if __name__ == '__main__':
+    unittest.main()
