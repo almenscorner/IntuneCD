@@ -46,5 +46,6 @@ class TestLoadFile(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_file("file_name.txt", "txt")
 
+
 if __name__ == '__main__':
     unittest.main()
