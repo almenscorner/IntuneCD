@@ -76,6 +76,8 @@ class TestBackupProactiveRemediation(unittest.TestCase):
         self.makeapirequest.stop()
 
     def test_backup_yml(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(
             self.directory.path,
             'yaml',
@@ -86,12 +88,13 @@ class TestBackupProactiveRemediation(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(f'{self.directory.path}/Proactive Remediations')
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(3, self.count)
 
     def test_backup_json(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(
             self.directory.path,
             'json',
@@ -101,36 +104,39 @@ class TestBackupProactiveRemediation(unittest.TestCase):
         with open(self.saved_path + 'json', 'r') as f:
             self.saved_data = json.load(f)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(f'{self.directory.path}/Proactive Remediations')
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(3, self.count)
 
     def test_detection_script_is_created(self):
+        """The folder should be created and a .ps1 file should be created."""
+
         self.count = savebackup(
             self.directory.path,
             'json',
             self.exclude,
             self.token)
 
-        """The folder should be created and a .ps1 file should be created."""
         self.assertTrue(
             f'{self.directory.path}/Proactive Remediations/Script Data')
         self.assertTrue(self.detection_script_path)
 
     def test_remediation_script_is_created(self):
+        """The folder should be created and a .ps1 file should be created."""
+
         self.count = savebackup(
             self.directory.path,
             'json',
             self.exclude,
             self.token)
 
-        """The folder should be created and a .ps1 file should be created."""
         self.assertTrue(
             f'{self.directory.path}/Proactive Remediations/Script Data')
         self.assertTrue(self.remediation_script_path)
 
     def test_publisher_is_microsoft(self):
+        """Microsoft should not be backed up."""
+
         with patch('src.IntuneCD.backup_proactiveRemediation.batch_request',
                    side_effect=[[{'publisher': 'Microsoft'}]]):
             self.count = savebackup(
@@ -138,11 +144,12 @@ class TestBackupProactiveRemediation(unittest.TestCase):
                 'json',
                 self.exclude,
                 self.token)
-        """Microsoft should not be backed up."""
+
         self.assertEqual(0, self.count)
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
+
         with patch('src.IntuneCD.backup_proactiveRemediation.makeapirequest',
                    return_value={'value': []}):
             self.count = savebackup(
@@ -152,3 +159,7 @@ class TestBackupProactiveRemediation(unittest.TestCase):
                 self.token)
         """No data should be backed up."""
         self.assertEqual(0, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
