@@ -130,5 +130,6 @@ class TestUpdateWindowsEnrollmentProfile(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
+
 if __name__ == '__main__':
     unittest.main()
