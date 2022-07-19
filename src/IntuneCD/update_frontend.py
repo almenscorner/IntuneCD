@@ -7,6 +7,7 @@ This module is used to update the IntuneCD frontend.
 import os
 import requests
 
+
 def update_frontend(frontend, data):
     """
     This function updates the frontend with the number of configurations, diff count backup stream and update stream.
