@@ -41,9 +41,14 @@ class TestBackupShellScript(unittest.TestCase):
             'displayName': 'test',
             'fileName': 'test',
             'scriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}
-        self.script_policy_data = {"value": [{"id": "0", "displayName": "test"}]}
-        self.batch_request_data = [{'id': '0', 'displayName': 'test', 'fileName': 'test',
-                          'scriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}]
+        self.script_policy_data = {
+            "value": [{"id": "0", "displayName": "test"}]}
+        self.batch_request_data = [
+            {
+                'id': '0',
+                'displayName': 'test',
+                'fileName': 'test',
+                'scriptContent': 'WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE='}]
 
         self.batch_assignment_patch = patch(
             'src.IntuneCD.backup_shellScripts.batch_assignment')
