@@ -8,8 +8,8 @@ import unittest
 
 from pathlib import Path
 from unittest.mock import patch
-from src.IntuneCD.backup_compliance import savebackup
 from testfixtures import TempDirectory
+from src.IntuneCD.backup_compliance import savebackup
 
 BATCH_ASSIGNMENT = [
     {
@@ -77,6 +77,7 @@ class TestBackupCompliance(unittest.TestCase):
         self.makeapirequest.stop()
 
     def test_backup_yml(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = 'yaml'
         count = savebackup(
@@ -95,6 +96,8 @@ class TestBackupCompliance(unittest.TestCase):
         self.assertEqual(1, count)
 
     def test_backup_json(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         output = 'json'
         count = savebackup(
             self.directory.path,
@@ -112,6 +115,7 @@ class TestBackupCompliance(unittest.TestCase):
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
+
         self.makeapirequest.return_value = {'value': []}
         self.count = savebackup(
             self.directory.path,
@@ -119,3 +123,7 @@ class TestBackupCompliance(unittest.TestCase):
             self.exclude,
             self.token)
         self.assertEqual(0, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
