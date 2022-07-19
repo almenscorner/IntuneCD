@@ -40,7 +40,8 @@ class TestGetDiffOutput(unittest.TestCase):
         self.assertEqual(
             self.output,
             ["Setting: 'cameraBlocked', New Value: True, Old Value: False",
-            "Setting: 'cameraBlocked2', New Value: True, Old Value: False"])
+             "Setting: 'cameraBlocked2', New Value: True, Old Value: False"])
+
 
 if __name__ == '__main__':
     unittest.main()
