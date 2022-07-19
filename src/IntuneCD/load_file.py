@@ -24,6 +24,6 @@ def load_file(filename, file):
         repo_data = json.load(file)
 
     else:
-        raise Exception(f"{filename} is not a valid file type.")
+        raise ValueError(f"{filename} is not a valid file type.")
 
     return repo_data
