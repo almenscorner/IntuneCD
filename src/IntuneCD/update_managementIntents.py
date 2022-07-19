@@ -73,7 +73,7 @@ def update(path, token, assignment=False):
                 if mem_data:
                     print("-" * 90)
                     print("Checking if Intent: " +
-                          repo_data['displayName'] + " has any upates")
+                          repo_data['displayName'] + " has any updates")
 
                     # Compare category settings from Intune with JSON/YAML
                     for mem_setting, repo_setting in zip(
