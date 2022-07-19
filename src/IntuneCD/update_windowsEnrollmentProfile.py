@@ -85,7 +85,8 @@ def update(path, token, assignment=False):
                         print("Updating Windows Enrollment profile: " +
                               repo_data['displayName'] + ", values changed:")
                         values = get_diff_output(diff)
-                        print(values)
+                        for value in values:
+                            print(value)
                         if repo_data['managementServiceAppId']:
                             pass
                         else:
