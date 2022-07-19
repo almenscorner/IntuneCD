@@ -138,7 +138,7 @@ def update(path, token):
                                 " found for Message Template: " +
                                 mem_template_data['displayName'])
 
-                # If Powershell script does not exist, create it and assign
+                # If Notification Template does not exist, create it
                 else:
                     print("-" * 90)
                     print(
