@@ -100,7 +100,7 @@ class TestBackupApplications(unittest.TestCase):
                 '/Applications/macOS/test_macOSVppApp_test.json').exists())
         self.assertEqual(1, self.count)
 
-    def test_backup_win32_lob_app(self):
+    def test_backup_win32_lob_app_and_displayVersion(self):
         """The folder should be created, the file should be created, and the count should be 1."""
 
         self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.win32LobApp'
@@ -121,6 +121,29 @@ class TestBackupApplications(unittest.TestCase):
             Path(
                 self.directory.path +
                 '/Applications/Windows/test_Win32_1_0_0.json').exists())
+        self.assertEqual(1, self.count)
+
+    def test_backup_win32_lob_app_no_displayVersion(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
+
+        self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.win32LobApp'
+        self.app_base_data['value'][0]['displayVersion'] = None
+        self.makeapirequest.return_value = self.app_base_data
+
+        self.count = savebackup(
+            self.directory.path,
+            'json',
+            self.exclude,
+            self.token)
+
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Windows').exists())
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Windows/test_Win32.json').exists())
         self.assertEqual(1, self.count)
 
     def test_backup_msi_app(self):
@@ -144,6 +167,94 @@ class TestBackupApplications(unittest.TestCase):
             Path(
                 self.directory.path +
                 '/Applications/Windows/test_WinMSI_1_0_0.json').exists())
+        self.assertEqual(1, self.count)
+
+    def test_backup_android_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
+
+        self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.androidManagedStoreApp'
+        self.makeapirequest.return_value = self.app_base_data
+
+        self.count = savebackup(
+            self.directory.path,
+            'json',
+            self.exclude,
+            self.token)
+
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Android').exists())
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Android/test_androidManagedStoreApp.json').exists())
+        self.assertEqual(1, self.count)
+
+    def test_backup_microsoft_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
+
+        self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.microsoftApp'
+        self.makeapirequest.return_value = self.app_base_data
+
+        self.count = savebackup(
+            self.directory.path,
+            'json',
+            self.exclude,
+            self.token)
+
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Windows').exists())
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Windows/test_microsoftApp.json').exists())
+        self.assertEqual(1, self.count)
+
+    def test_backup_office_suite_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
+
+        self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.microsoftOfficeSuiteApp'
+        self.makeapirequest.return_value = self.app_base_data
+
+        self.count = savebackup(
+            self.directory.path,
+            'json',
+            self.exclude,
+            self.token)
+
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Office Suite').exists())
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Office Suite/test_microsoftOfficeSuiteApp.json').exists())
+        self.assertEqual(1, self.count)
+
+    def test_backup_web_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
+
+        self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.webApp'
+        self.makeapirequest.return_value = self.app_base_data
+
+        self.count = savebackup(
+            self.directory.path,
+            'json',
+            self.exclude,
+            self.token)
+
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Web App').exists())
+        self.assertTrue(
+            Path(
+                self.directory.path +
+                '/Applications/Web App/test_webApp.json').exists())
         self.assertEqual(1, self.count)
 
     def test_backup_other_app(self):

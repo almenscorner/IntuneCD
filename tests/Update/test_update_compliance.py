@@ -19,6 +19,9 @@ class TestUpdateCompliance(unittest.TestCase):
         self.directory.write(
             "Compliance Policies/Policies/test.json", '{"test": "test"}',
             encoding='utf-8')
+        self.directory.write(
+            "Compliance Policies/Policies/test.txt", 'txt',
+            encoding='utf-8')
         self.token = 'token'
         self.mem_data = {"value": [{"@odata.type": "test",
                                     "id": "0",

@@ -95,7 +95,7 @@ class TestBackupProfiles(unittest.TestCase):
             f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig").exists())
         self.assertEqual(2, self.count)
 
-    def test_backup_windows_custom_profile(self):
+    def test_backup_windows_custom_profile_encrypted(self):
         """The file should be created and the count should be 1."""
 
         self.profile = {'value': [{
@@ -104,6 +104,37 @@ class TestBackupProfiles(unittest.TestCase):
             "displayName": "test",
             "omaSettings": [{
                 "isEncrypted": True,
+                "@odata.type": "#microsoft.graph.windows10OmaSetting",
+                "secretReferenceValueId": "0",
+                "omaUri": "test uri",
+                "displayName": "test",
+                "description": "",
+                "value": []}]}]}
+        self.oma_values = {
+            '@odata.context': 'https://graph.microsoft.com/beta/$metadata#Edm.String',
+            'value': 'password'}
+
+        self.makeapirequest.side_effect = self.profile, self.oma_values
+
+        self.count = savebackup(
+            self.directory.path,
+            'json',
+            self.token,
+            self.exclude)
+
+        self.assertTrue(Path(
+            f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json").exists())
+        self.assertEqual(1, self.count)
+
+    def test_backup_windows_custom_profile_not_encrypted(self):
+        """The file should be created and the count should be 1."""
+
+        self.profile = {'value': [{
+            "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
+            "id": "0",
+            "displayName": "test",
+            "omaSettings": [{
+                "isEncrypted": False,
                 "@odata.type": "#microsoft.graph.windows10OmaSetting",
                 "secretReferenceValueId": "0",
                 "omaUri": "test uri",

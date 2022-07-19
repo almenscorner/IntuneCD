@@ -33,19 +33,14 @@ class TestBackupAppProtection(unittest.TestCase):
         self.token = 'token'
         self.exclude = []
         self.saved_path = f"{self.directory.path}/App Protection/test_iosManagedAppProtection."
-        self.expected_data = {
-            "@odata.type": "#microsoft.graph.iosManagedAppProtection",
-            "displayName": "test",
-            "description": "",
-            "roleScopeTagIds": ["0"],
-            "exemptedAppProtocols": [
-                {
-                    "name": "Default",
-                    "value": "skype;app-settings;calshow;itms;itmss;itms-apps;itms-appss;itms-services;"}],
-            "assignments": [
-                {
-                    "target": {
-                        "groupName": "Group1"}}]}
+        self.saved_targetedAppManagementLevels = f"{self.directory.path}/App Protection/test_test."
+        self.expected_data = {"@odata.type": "#microsoft.graph.iosManagedAppProtection",
+                              "displayName": "test",
+                              "description": "",
+                              "roleScopeTagIds": ["0"],
+                              "exemptedAppProtocols": [{"name": "Default",
+                                                        "value": "skype;app-settings;calshow;itms;itmss;itms-apps;itms-appss;itms-services;"}],
+                              "assignments": [{"target": {"groupName": "Group1"}}]}
         self.app_protection = {
             '@odata.context': 'https://graph.microsoft.com/beta/$metadata#deviceAppManagement/managedAppPolicies',
             'value': [
@@ -126,6 +121,25 @@ class TestBackupAppProtection(unittest.TestCase):
             self.exclude,
             self.token)
         self.assertEqual(0, self.count)
+
+    def test_backup_targetedAppManagementLevels(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.app_protection['value'][0]['targetedAppManagementLevels'] = "test"
+        self.expected_data['targetedAppManagementLevels'] = "test"
+
+        self.count = savebackup(
+            self.directory.path,
+            'json',
+            self.exclude,
+            self.token)
+
+        with open(self.saved_targetedAppManagementLevels + 'json', 'r') as f:
+            self.saved_data = json.load(f)
+
+        self.assertTrue(Path(f'{self.directory.path}/App Protection').exists())
+        self.assertEqual(self.expected_data, self.saved_data)
+        self.assertEqual(1, self.count)
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""

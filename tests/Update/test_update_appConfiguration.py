@@ -19,6 +19,9 @@ class TestUpdateAppConfiguration(unittest.TestCase):
         self.directory.write(
             "App Configuration/test.json", '{"test": "test"}',
             encoding='utf-8')
+        self.directory.write(
+            "App Configuration/test.txt", 'txt',
+            encoding='utf-8')
         self.token = 'token'
         self.mem_data = {"value": [{"@odata.type": "test",
                                     "id": "0",
@@ -130,6 +133,18 @@ class TestUpdateAppConfiguration(unittest.TestCase):
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
+    def test_update_config_not_found_and_app_not_found(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPost should not be called."""
+
+        self.mem_data["value"][0]["displayName"] = "test1"
+        self.repo_data["targetedMobileApps"] = {}
+
+        self.count = update(self.directory.path, self.token, assignment=True)
+
+        self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPost.call_count, 0)
+        self.assertEqual(self.post_assignment_update.call_count, 0)
 
 
 if __name__ == '__main__':

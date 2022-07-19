@@ -25,7 +25,8 @@ class TestUpdatePowershellScripts(unittest.TestCase):
             'You found a secret message, hooray!',
             encoding='utf-8')
         self.token = 'token'
-        self.script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE="
+        self.mem_script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2Us"
+        self.repo_script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE="
         self.mem_powershellScript_data = {
             "value": [
                 {
@@ -33,7 +34,7 @@ class TestUpdatePowershellScripts(unittest.TestCase):
                     "id": "0",
                     "displayName": "test",
                     "testvalue": "test",
-                    "scriptContent": self.script_content,
+                    "scriptContent": self.mem_script_content,
                     "fileName": "test.ps1",
                     "assignments": [
                         {
@@ -43,14 +44,14 @@ class TestUpdatePowershellScripts(unittest.TestCase):
                          "id": "0",
                          "displayName": "test",
                          "testvalue": "test",
-                         "scriptContent": self.script_content,
+                         "scriptContent": self.mem_script_content,
                          "fileName": "test.ps1",
                          "assignments": [{"target": {"groupId": "test"}}]}
         self.repo_data = {"@odata.type": "test",
                           "id": "0",
                           "displayName": "test",
                           "testvalue": "test",
-                          "scriptContent": self.script_content,
+                          "scriptContent": self.repo_script_content,
                           "fileName": "test.ps1",
                           "assignments": [{"target": {"groupId": "test"}}]}
 
@@ -109,7 +110,7 @@ class TestUpdatePowershellScripts(unittest.TestCase):
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
-        self.assertEqual(self.count, 1)
+        self.assertEqual(self.count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
@@ -122,7 +123,7 @@ class TestUpdatePowershellScripts(unittest.TestCase):
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
-        self.assertEqual(self.count, 1)
+        self.assertEqual(self.count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
@@ -131,6 +132,7 @@ class TestUpdatePowershellScripts(unittest.TestCase):
          and makeapirequestPatch should not be called."""
 
         self.mem_data['testvalue'] = "test"
+        self.mem_data['scriptContent'] = self.repo_script_content
         self.makeapirequest.side_effect = [
             self.mem_powershellScript_data, self.mem_data]
 
@@ -144,6 +146,7 @@ class TestUpdatePowershellScripts(unittest.TestCase):
         """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
 
         self.mem_data['testvalue'] = "test"
+        self.mem_data['scriptContent'] = self.repo_script_content
         self.makeapirequest.side_effect = [
             self.mem_powershellScript_data, self.mem_data]
 

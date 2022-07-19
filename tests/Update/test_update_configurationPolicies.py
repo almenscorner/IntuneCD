@@ -19,6 +19,9 @@ class TestUpdateConfigurationPolicies(unittest.TestCase):
         self.directory.write(
             "Settings Catalog/test.json", '{"test": "test"}',
             encoding='utf-8')
+        self.directory.write(
+            "Settings Catalog/test.txt", 'txt',
+            encoding='utf-8')
         self.token = 'token'
         self.mem_data = {"value": [{"@odata.type": "test",
                                     "id": "0",

@@ -95,8 +95,6 @@ def savebackup(path, output, exclude, token):
                             decoded_oma['secretReferenceValueId'] = None
                             decoded_omas = decoded_oma
                             omas.append(decoded_omas)
-                        elif not setting['isEncrypted']:
-                            omas.append(setting)
 
                     profile.pop('omaSettings')
                     profile['omaSettings'] = omas

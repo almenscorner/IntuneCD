@@ -489,6 +489,30 @@ class TestUpdateCompliance(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
+    def test_update_custom_windows_config_not_found_and_assignment(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPost should be called."""
+
+        self.mem_data_base["value"][0]["displayName"] = "test1"
+
+        self.repo_data_base["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
+        self.repo_data_base["omaSettings"] = [{
+            "isEncrypted": True,
+            "@odata.type": "#microsoft.graph.windows10OmaSetting",
+            "secretReferenceValueId": "0",
+            "omaUri": "test uri",
+            "displayName": "test",
+            "description": "",
+            "value": {
+                "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+                "value": "password2"
+            }}]
+
+        self.count = update(self.directory.path, self.token, assignment=False)
+
+        self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPost.call_count, 1)
+        self.assertEqual(self.post_assignment_update.call_count, 1)
+
 
 if __name__ == '__main__':
     unittest.main()

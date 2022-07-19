@@ -265,7 +265,6 @@ def document_management_intents(configpath, outpath, header, split):
                 repo_data.pop('assignments', None)
 
                 intent_settings_list = []
-
                 for setting in repo_data['settingsDelta']:
                     intent_settings_list.append([setting['definitionId'].split("_")[1],
                                                  str(remove_characters(setting['valueJson']))])

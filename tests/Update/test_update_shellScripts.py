@@ -21,20 +21,21 @@ class TestUpdateShellScripts(unittest.TestCase):
             "Scripts/Shell/test.json", '{"test": "test"}',
             encoding='utf-8')
         self.directory.write(
-            "Scripts/Shell/Script Data/test.ps1",
+            "Scripts/Shell/Script Data/test.sh",
             'You found a secret message, hooray!',
             encoding='utf-8')
         self.token = 'token'
-        self.script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE="
-        self.mem_powershellScript_data = {
+        self.mem_script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2Us"
+        self.repo_script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE="
+        self.mem_shellScript_data = {
             "value": [
                 {
                     "@odata.type": "test",
                     "id": "0",
                     "displayName": "test",
                     "testvalue": "test",
-                    "scriptContent": self.script_content,
-                    "fileName": "test.ps1",
+                    "scriptContent": self.mem_script_content,
+                    "fileName": "test.sh",
                     "assignments": [
                         {
                             "target": {
@@ -43,15 +44,15 @@ class TestUpdateShellScripts(unittest.TestCase):
                          "id": "0",
                          "displayName": "test",
                          "testvalue": "test",
-                         "scriptContent": self.script_content,
-                         "fileName": "test.ps1",
+                         "scriptContent": self.mem_script_content,
+                         "fileName": "test.sh",
                          "assignments": [{"target": {"groupId": "test"}}]}
         self.repo_data = {"@odata.type": "test",
                           "id": "0",
                           "displayName": "test",
                           "testvalue": "test",
-                          "scriptContent": self.script_content,
-                          "fileName": "test.ps1",
+                          "scriptContent": self.repo_script_content,
+                          "fileName": "test.sh",
                           "assignments": [{"target": {"groupId": "test"}}]}
 
         self.batch_assignment_patch = patch(
@@ -105,11 +106,11 @@ class TestUpdateShellScripts(unittest.TestCase):
 
         self.repo_data['testvalue'] = "test1"
         self.makeapirequest.side_effect = [
-            self.mem_powershellScript_data, self.mem_data]
+            self.mem_shellScript_data, self.mem_data]
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
-        self.assertEqual(self.count, 1)
+        self.assertEqual(self.count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
@@ -118,11 +119,11 @@ class TestUpdateShellScripts(unittest.TestCase):
 
         self.repo_data['testvalue'] = "test1"
         self.makeapirequest.side_effect = [
-            self.mem_powershellScript_data, self.mem_data]
+            self.mem_shellScript_data, self.mem_data]
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
-        self.assertEqual(self.count, 1)
+        self.assertEqual(self.count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
@@ -131,8 +132,10 @@ class TestUpdateShellScripts(unittest.TestCase):
          and makeapirequestPatch should not be called."""
 
         self.mem_data['testvalue'] = "test"
+        self.mem_data['scriptContent'] = self.repo_script_content
+
         self.makeapirequest.side_effect = [
-            self.mem_powershellScript_data, self.mem_data]
+            self.mem_shellScript_data, self.mem_data]
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
@@ -144,8 +147,10 @@ class TestUpdateShellScripts(unittest.TestCase):
         """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
 
         self.mem_data['testvalue'] = "test"
+        self.mem_data['scriptContent'] = self.repo_script_content
+
         self.makeapirequest.side_effect = [
-            self.mem_powershellScript_data, self.mem_data]
+            self.mem_shellScript_data, self.mem_data]
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
@@ -156,8 +161,8 @@ class TestUpdateShellScripts(unittest.TestCase):
     def test_update_config_not_found_and_assignment(self):
         """The count should be 0, the post_assignment_update and makeapirequestPost should be called."""
 
-        self.mem_powershellScript_data["value"][0]["displayName"] = "test1"
-        self.makeapirequest.return_value = self.mem_powershellScript_data
+        self.mem_shellScript_data["value"][0]["displayName"] = "test1"
+        self.makeapirequest.return_value = self.mem_shellScript_data
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
