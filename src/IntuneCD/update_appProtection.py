@@ -84,7 +84,6 @@ def update(path, token, assignment=False):
                 if data['value']:
                     print("-" * 90)
                     mem_id = data['value']['id']
-                    platform = ""
                     # Remove keys before using DeepDiff
                     data['value'] = remove_keys(data['value'])
 
@@ -103,7 +102,8 @@ def update(path, token, assignment=False):
                             repo_data['displayName'] +
                             ", values changed:")
                         values = get_diff_output(diff)
-                        print(values)
+                        for value in values:
+                            print(value)
                         request_data = json.dumps(repo_data)
                         q_param = None
                         makeapirequestPatch(
