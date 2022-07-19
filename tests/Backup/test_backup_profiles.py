@@ -7,9 +7,8 @@ import unittest
 
 from pathlib import Path
 from unittest.mock import patch
-from src.IntuneCD.backup_profiles import savebackup
 from testfixtures import TempDirectory
-
+from src.IntuneCD.backup_profiles import savebackup
 
 BATCH_ASSIGNMENT = [
     {
@@ -52,6 +51,8 @@ class TestBackupProfiles(unittest.TestCase):
         self.makeapirequest.stop()
 
     def test_backup_macOS_custom_profile(self):
+        """The folders and files should be created and the count should be 2."""
+
         self.makeapirequest.return_value = {'value': [{
                        "@odata.type": '#microsoft.graph.macOSCustomConfiguration',
                        "id": "0",
@@ -72,6 +73,8 @@ class TestBackupProfiles(unittest.TestCase):
         self.assertEqual(2, self.count)
 
     def test_backup_ios_custom_profile(self):
+        """The folders and files should be created and the count should be 2."""
+
         self.makeapirequest.return_value ={'value': [{
                        "@odata.type": '#microsoft.graph.iosCustomConfiguration',
                        "id": "0",
@@ -92,6 +95,8 @@ class TestBackupProfiles(unittest.TestCase):
         self.assertEqual(2, self.count)
 
     def test_backup_windows_custom_profile(self):
+        """The file should be created and the count should be 1."""
+
         self.profile = {'value': [{
                    "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
                    "id": "0",
@@ -121,6 +126,8 @@ class TestBackupProfiles(unittest.TestCase):
         self.assertEqual(1, self.count)
 
     def test_backup_non_custom_profile(self):
+        """The file should be created and the count should be 1."""
+
         self.makeapirequest.return_value = {'value': [{
                        "@odata.type": '#microsoft.graph.macOSGeneralDeviceConfiguration',
                        "id": "0",
@@ -135,3 +142,7 @@ class TestBackupProfiles(unittest.TestCase):
         self.assertTrue(Path(
             f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration.json").exists())
         self.assertEqual(1, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
