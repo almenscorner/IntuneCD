@@ -45,9 +45,12 @@ class TestMatch(unittest.TestCase):
         self.assertTrue(self.result)
 
     def test_match_unknown(self):
-        """The odata type should match the expected value."""
+        """Unkown odata type should return false."""
         self.app = {'@odata.type': '#microsoft.graph.unknown'}
 
         self.result = match('iOS', str(self.app['@odata.type']).lower())
 
         self.assertFalse(self.result)
+
+if __name__ == '__main__':
+    unittest.main()
