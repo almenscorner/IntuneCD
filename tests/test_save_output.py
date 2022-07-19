@@ -57,5 +57,6 @@ class TestSaveOutput(unittest.TestCase):
             self.save = save_output(
                 'invalid', self.path, self.fname, self.data)
 
+
 if __name__ == '__main__':
     unittest.main()
