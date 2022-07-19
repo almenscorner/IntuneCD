@@ -14,6 +14,7 @@ def get_diff_output(data):
     :param data: The data from the diff
     :return: A string with the differences
     """
+    output = []
 
     for key, value in data.items():
         setting = re.search(
@@ -21,4 +22,6 @@ def get_diff_output(data):
         new_val = value['new_value']
         old_val = value['old_value']
 
-    return f"Setting: {setting}, New Value: {new_val}, Old Value: {old_val}"
+        output.append(f"Setting: {setting}, New Value: {new_val}, Old Value: {old_val}")
+
+    return output
