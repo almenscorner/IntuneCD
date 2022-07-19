@@ -101,7 +101,6 @@ def batch_assignment(data, url, extra_url, token, app_protection=False) -> list:
                           for keys, val in val.items() if 'deviceAndAppManagementAssignmentFilterId' in keys if
                           val is not None]
 
-
         # Batch get name of the groups
         if group_ids:
             group_responses = batch_request(
