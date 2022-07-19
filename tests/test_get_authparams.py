@@ -85,21 +85,24 @@ class TestGetAuth(unittest.TestCase):
 
     def test_get_auth_devtoprod_missing_env_dev(
             self, mock_getAuth, mock_obtain_accesstoken):
-        """The auth params should be returned."""
+        """Exception should be raised due to missing env."""
         with patch.dict('os.environ', {'DEV_CLIENT_ID': 'test', 'DEV_CLIENT_SECRET': 'test'}):
             with self.assertRaises(Exception):
                 getAuth('devtoprod', localauth=None, tenant='DEV')
 
     def test_get_auth_devtoprod_missing_env_prod(
             self, mock_getAuth, mock_obtain_accesstoken):
-        """The auth params should be returned."""
+        """Exception should be raised due to missing env."""
         with patch.dict('os.environ', {'PROD_CLIENT_ID': 'test', 'PROD_CLIENT_SECRET': 'test'}):
             with self.assertRaises(Exception):
                 getAuth('devtoprod', localauth=None, tenant='PROD')
 
     def test_get_auth_standalone_missing_env(
             self, mock_getAuth, mock_obtain_accesstoken):
-        """The auth params should be returned."""
+        """Exception should be raised due to missing env."""
         with patch.dict('os.environ', {'CLIENT_ID': 'test', 'CLIENT_SECRET': 'test'}):
             with self.assertRaises(Exception):
                 getAuth('standalone', localauth=None, tenant=None)
+
+if __name__ == '__main__':
+    unittest.main()
