@@ -289,16 +289,16 @@ class TestUpdateCompliance(unittest.TestCase):
 
         self.repo_data_base["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
         self.repo_data_base["omaSettings"] = [{
-                       "isEncrypted": True,
-                       "@odata.type": "#microsoft.graph.windows10OmaSetting",
-                       "secretReferenceValueId": "0",
-                       "omaUri": "test uri",
-                       "displayName": "test",
-                       "description": "",
-                        "value": {
-                            "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
-                            "value": "password2"
-                        }}]
+            "isEncrypted": True,
+            "@odata.type": "#microsoft.graph.windows10OmaSetting",
+            "secretReferenceValueId": "0",
+            "omaUri": "test uri",
+            "displayName": "test",
+            "description": "",
+            "value": {
+                "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+                "value": "password2"
+            }}]
 
         self.makeapirequest.side_effect = self.mem_data_base, self.oma_values
 
@@ -327,16 +327,16 @@ class TestUpdateCompliance(unittest.TestCase):
 
         self.repo_data_base["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
         self.repo_data_base["omaSettings"] = [{
-                       "isEncrypted": True,
-                       "@odata.type": "#microsoft.graph.windows10OmaSetting",
-                       "secretReferenceValueId": "0",
-                       "omaUri": "test uri",
-                       "displayName": "test",
-                       "description": "",
-                        "value": {
-                            "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
-                            "value": "password2"
-                        }}]
+            "isEncrypted": True,
+            "@odata.type": "#microsoft.graph.windows10OmaSetting",
+            "secretReferenceValueId": "0",
+            "omaUri": "test uri",
+            "displayName": "test",
+            "description": "",
+            "value": {
+                "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+                "value": "password2"
+            }}]
 
         self.makeapirequest.side_effect = self.mem_data_base, self.oma_values
 
@@ -366,16 +366,16 @@ class TestUpdateCompliance(unittest.TestCase):
 
         self.repo_data_base["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
         self.repo_data_base["omaSettings"] = [{
-                       "isEncrypted": True,
-                       "@odata.type": "#microsoft.graph.windows10OmaSetting",
-                       "secretReferenceValueId": "0",
-                       "omaUri": "test uri",
-                       "displayName": "test",
-                       "description": "",
-                        "value": {
-                            "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
-                            "value": "password"
-                        }}]
+            "isEncrypted": True,
+            "@odata.type": "#microsoft.graph.windows10OmaSetting",
+            "secretReferenceValueId": "0",
+            "omaUri": "test uri",
+            "displayName": "test",
+            "description": "",
+            "value": {
+                "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+                "value": "password"
+            }}]
 
         self.makeapirequest.side_effect = self.mem_data_base, self.oma_values
 
@@ -404,16 +404,16 @@ class TestUpdateCompliance(unittest.TestCase):
 
         self.repo_data_base["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
         self.repo_data_base["omaSettings"] = [{
-                       "isEncrypted": True,
-                       "@odata.type": "#microsoft.graph.windows10OmaSetting",
-                       "secretReferenceValueId": "0",
-                       "omaUri": "test uri",
-                       "displayName": "test",
-                       "description": "",
-                        "value": {
-                            "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
-                            "value": "password"
-                        }}]
+            "isEncrypted": True,
+            "@odata.type": "#microsoft.graph.windows10OmaSetting",
+            "secretReferenceValueId": "0",
+            "omaUri": "test uri",
+            "displayName": "test",
+            "description": "",
+            "value": {
+                "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+                "value": "password"
+            }}]
 
         self.makeapirequest.side_effect = self.mem_data_base, self.oma_values
 
@@ -488,6 +488,7 @@ class TestUpdateCompliance(unittest.TestCase):
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
 
 if __name__ == '__main__':
     unittest.main()
