@@ -110,6 +110,11 @@ def update(path, token, assignment=False):
                             status_code=204)
                         repo_data['scheduledActionsForRule'] = scheduled_actions
 
+                    else:
+                        print(
+                            'No difference found for Compliance policy: ' +
+                            repo_data['displayName'])
+
                     if repo_data['scheduledActionsForRule']:
                         for mem_rule, repo_rule in zip(
                                 data['value']['scheduledActionsForRule'], repo_data['scheduledActionsForRule']):
@@ -147,10 +152,6 @@ def update(path, token, assignment=False):
                             print(
                                 'No difference in rules found for Compliance policy: ' +
                                 repo_data['displayName'])
-                    else:
-                        print(
-                            'No difference found for Compliance policy: ' +
-                            repo_data['displayName'])
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(
