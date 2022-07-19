@@ -31,6 +31,7 @@ class TestLoadFile(unittest.TestCase):
         self.directory.cleanup()
 
     def test_load_file(self):
+        """Yaml and json files should be returned."""
         with open(self.yaml_file) as f:
             self.yaml = load_file(self.yaml_name, f)
 
@@ -41,5 +42,9 @@ class TestLoadFile(unittest.TestCase):
         self.assertIsNotNone(self.json)
 
     def test_load_file_invalid_format(self):
+        """Invalid file formats should raise an error."""
         with self.assertRaises(ValueError):
             load_file("file_name.txt", "txt")
+
+if __name__ == '__main__':
+    unittest.main()
