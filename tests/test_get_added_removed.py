@@ -28,5 +28,6 @@ class TestCleanFilename(unittest.TestCase):
             result,
             ['intent: apply, Filter ID: 1234, Filter Type: device, target: All Devices'])
 
+
 if __name__ == '__main__':
     unittest.main()
