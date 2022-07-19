@@ -27,3 +27,6 @@ class TestCleanFilename(unittest.TestCase):
         result = clean_filename(self.filename)
 
         self.assertEqual(result, "['test_file_name', 'test_file_name']")
+
+if __name__ == '__main__':
+    unittest.main()
