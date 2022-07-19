@@ -7,8 +7,8 @@ import yaml
 import unittest
 
 from unittest.mock import patch
-from src.IntuneCD.backup_windowsEnrollmentProfile import savebackup
 from testfixtures import TempDirectory
+from src.IntuneCD.backup_windowsEnrollmentProfile import savebackup
 
 BATCH_ASSIGNMENT = [
     {
@@ -60,6 +60,7 @@ class TestBackupWindowsEnrollmentProfile(unittest.TestCase):
         self.makeapirequest.stop()
 
     def test_backup_yml(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = 'yaml'
         count = savebackup(
@@ -72,12 +73,13 @@ class TestBackupWindowsEnrollmentProfile(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(f'{self.directory.path}/Enrollment Profiles/Windows')
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, count)
 
     def test_backup_json(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         output = 'json'
         count = savebackup(
             self.directory.path,
@@ -88,13 +90,13 @@ class TestBackupWindowsEnrollmentProfile(unittest.TestCase):
         with open(self.saved_path + output, 'r') as f:
             saved_data = json.load(f)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(f'{self.directory.path}/Enrollment Profiles/Windows')
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, count)
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
+
         self.makeapirequest.return_value = {'value': []}
         self.count = savebackup(
             self.directory.path,
@@ -103,3 +105,7 @@ class TestBackupWindowsEnrollmentProfile(unittest.TestCase):
             self.token)
 
         self.assertEqual(0, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
