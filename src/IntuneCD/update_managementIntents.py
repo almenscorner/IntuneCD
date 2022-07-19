@@ -94,7 +94,8 @@ def update(path, token, assignment=False):
                                 repo_setting['definitionId'].split("_")[1] +
                                 ", values changed:")
                             values = get_diff_output(diff)
-                            print(values)
+                            for value in values:
+                                print(value)
                             # Create dict that we will use as the request json
                             if "value" not in repo_setting:
                                 type = "valueJson"
