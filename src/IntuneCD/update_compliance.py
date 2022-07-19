@@ -96,7 +96,8 @@ def update(path, token, assignment=False):
                         print("Updating Compliance policy: " +
                               repo_data['displayName'] + ", values changed:")
                         values = get_diff_output(diff)
-                        print(values)
+                        for value in values:
+                            print(value)
 
                         scheduled_actions = repo_data['scheduledActionsForRule']
                         repo_data.pop('scheduledActionsForRule', None)
@@ -128,7 +129,8 @@ def update(path, token, assignment=False):
                                 repo_data['displayName'] +
                                 ", values changed:")
                             values = get_diff_output(rdiff)
-                            print(values)
+                            for value in values:
+                                print(value)
                             request_data = {
                                 "deviceComplianceScheduledActionForRules": [
                                     {
