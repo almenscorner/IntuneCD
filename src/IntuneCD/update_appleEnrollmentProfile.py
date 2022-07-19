@@ -76,7 +76,8 @@ def update(path, token):
                                 repo_data['displayName'] +
                                 ", values changed:")
                             values = get_diff_output(diff)
-                            print(values)
+                            for val in values:
+                                print(val)
                             request_data = json.dumps(repo_data)
                             q_param = None
                             makeapirequestPatch(
