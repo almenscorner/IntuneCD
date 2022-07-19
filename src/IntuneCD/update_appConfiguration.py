@@ -50,11 +50,11 @@ def update(path, token, assignment=False):
             file = check_file(configpath, filename)
             if file is False:
                 continue
+
             # Check which format the file is saved as then open file, load data
             # and set query parameter
             with open(file) as f:
                 repo_data = load_file(filename, f)
-
                 # Create object to pass in to assignment function
                 assign_obj = {}
                 if "assignments" in repo_data:
@@ -86,7 +86,8 @@ def update(path, token, assignment=False):
                         print("Updating App configuration: " +
                               repo_data['displayName'] + ", values changed:")
                         values = get_diff_output(diff)
-                        print(values)
+                        for value in values:
+                            print(value)
                         request_data = json.dumps(repo_data)
                         q_param = None
                         makeapirequestPatch(
