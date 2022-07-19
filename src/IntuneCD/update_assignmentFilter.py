@@ -67,7 +67,8 @@ def update(path, token):
                         print("Updating Filter: " +
                               repo_data['displayName'] + ", values changed:")
                         values = get_diff_output(diff)
-                        print(values)
+                        for value in values:
+                            print(value)
                         repo_data.pop("platform", None)
                         request_data = json.dumps(repo_data)
                         makeapirequestPatch(
