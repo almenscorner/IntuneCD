@@ -120,5 +120,6 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 2)
 
+
 if __name__ == '__main__':
     unittest.main()
