@@ -22,10 +22,13 @@ def save_output(output, configpath, fname, data):
     if not os.path.exists(configpath):
         os.makedirs(configpath)
 
-    if output != "json":
+    if output == 'yaml':
         with open(configpath + fname + ".yaml", 'w') as yamlFile:
             yaml.dump(data, yamlFile, sort_keys=False,
                       default_flow_style=False)
-    else:
+    elif output == 'json':
         with open(configpath + fname + ".json", 'w') as jsonFile:
             json.dump(data, jsonFile, indent=10)
+
+    else:
+        raise ValueError("Invalid output format")
