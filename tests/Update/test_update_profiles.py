@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+"""This module tests updating Profiles."""
+
 import unittest
 
 from testfixtures import TempDirectory
@@ -85,6 +89,7 @@ class TestUpdateCompliance(unittest.TestCase):
         self.plistlib.stop()
 
     def test_update_custom_macOS_with_diffs_and_assignment(self):
+        """The count should be 2 and the post_assignment_update and makeapirequestPatch should be called."""
 
         self.repo_payload = {'PayloadContent': [{'test': 'test1'}]}
         self.mem_payload = {'PayloadContent': [{'test': 'test'}]}
@@ -102,9 +107,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 2)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_custom_macOS_with_diffs_no_assignment(self):
+        """The count should be 2 and the makeapirequestPatch should be called."""
 
         self.repo_payload = {'PayloadContent': [{'test': 'test1'}]}
         self.mem_payload = {'PayloadContent': [{'test': 'test'}]}
@@ -122,9 +129,12 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 2)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_custom_macOS_with_no_diffs_and_assignment(self):
+        """The count should be 0, the post_assignment_update should be called,
+         and makeapirequestPatch should not be called."""
 
         self.repo_payload = {'PayloadContent': [{'test': 'test'}]}
         self.mem_payload = {'PayloadContent': [{'test': 'test'}]}
@@ -143,9 +153,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_custom_macOS_with_no_diffs_no_assignment(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
 
         self.repo_payload = {'PayloadContent': [{'test': 'test'}]}
         self.mem_payload = {'PayloadContent': [{'test': 'test'}]}
@@ -164,9 +176,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_custom_iOS_with_diffs_and_assignment(self):
+        """The count should be 2 and the post_assignment_update and makeapirequestPatch should be called."""
 
         self.repo_payload = {'PayloadContent': [{'test': 'test1'}]}
         self.mem_payload = {'PayloadContent': [{'test': 'test'}]}
@@ -184,9 +198,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 2)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_custom_iOS_with_diffs_no_assignment(self):
+        """The count should be 1 and the makeapirequestPatch should be called."""
 
         self.repo_payload = {'PayloadContent': [{'test': 'test1'}]}
         self.mem_payload = {'PayloadContent': [{'test': 'test'}]}
@@ -204,9 +220,12 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 2)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_custom_iOS_with_no_diffs_and_assignment(self):
+        """The count should be 0, the post_assignment_update should be called,
+         and makeapirequestPatch should not be called."""
 
         self.repo_payload = {'PayloadContent': [{'test': 'test'}]}
         self.mem_payload = {'PayloadContent': [{'test': 'test'}]}
@@ -225,9 +244,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_custom_iOS_with_no_diffs_no_assignment(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
 
         self.repo_payload = {'PayloadContent': [{'test': 'test'}]}
         self.mem_payload = {'PayloadContent': [{'test': 'test'}]}
@@ -246,9 +267,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_custom_windows_with_diffs_and_assignment(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
 
         self.mem_data_base["value"][0]["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
         self.mem_data_base["value"][0]["omaSettings"] = [{
@@ -282,9 +305,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_custom_windows_with_diffs_no_assignment(self):
+        """The count should be 1 and the makeapirequestPatch should be called."""
 
         self.mem_data_base["value"][0]["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
         self.mem_data_base["value"][0]["omaSettings"] = [{
@@ -318,9 +343,12 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_custom_windows_no_diffs_and_assignment(self):
+        """The count should be 0, the post_assignment_update should be called,
+         and makeapirequestPatch should not be called."""
 
         self.mem_data_base["value"][0]["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
         self.mem_data_base["value"][0]["omaSettings"] = [{
@@ -354,9 +382,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_custom_windows_no_diffs_no_assignment(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
 
         self.mem_data_base["value"][0]["@odata.type"] = "#microsoft.graph.windows10CustomConfiguration"
         self.mem_data_base["value"][0]["omaSettings"] = [{
@@ -390,9 +420,12 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_other_with_diffs_and_assignment(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
+
         self.mem_data_base["value"][0]["@odata.type"] = "#microsoft.graph.macOSConfiguration"
 
         self.repo_data_base["@odata.type"] = "#microsoft.graph.macOSConfiguration"
@@ -400,9 +433,12 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_other_with_diffs_no_assignment(self):
+        """The count should be 1 and the makeapirequestPatch should be called."""
+
         self.mem_data_base["value"][0]["@odata.type"] = "#microsoft.graph.macOSConfiguration"
 
         self.repo_data_base["@odata.type"] = "#microsoft.graph.macOSConfiguration"
@@ -410,9 +446,13 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 1)
+        self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_other_no_diffs_and_assignment(self):
+        """The count should be 0, the post_assignment_update should be called,
+         and makeapirequestPatch should not be called."""
+
         self.mem_data_base["value"][0]["@odata.type"] = "#microsoft.graph.macOSConfiguration"
         self.mem_data_base["value"][0]["testvalue"] = "test1"
 
@@ -421,9 +461,12 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_other_no_diffs_no_assignment(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
+
         self.mem_data_base["value"][0]["@odata.type"] = "#microsoft.graph.macOSConfiguration"
         self.mem_data_base["value"][0]["testvalue"] = "test1"
 
@@ -432,9 +475,11 @@ class TestUpdateCompliance(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=False)
 
         self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_config_not_found_and_assignment(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPost should be called."""
 
         self.mem_data_base["value"][0]["displayName"] = "test1"
 
@@ -443,3 +488,6 @@ class TestUpdateCompliance(unittest.TestCase):
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
+if __name__ == '__main__':
+    unittest.main()
