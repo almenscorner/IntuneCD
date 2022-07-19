@@ -55,7 +55,6 @@ def savebackup(path, output, exclude, token):
             if assignments:
                 profile['assignments'] = assignments
 
-        pid = profile['id']
         profile = remove_keys(profile)
 
         print("Backing up profile: " + profile['displayName'])
