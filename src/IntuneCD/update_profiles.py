@@ -120,11 +120,13 @@ def update(path, token, assignment=False):
                                 if pdiff:
                                     diff_count += 1
                                     values = get_diff_output(pdiff)
-                                    print(values)
+                                    for value in values:
+                                        print(value)
                                 if cdiff:
                                     diff_count += 1
                                     values = get_diff_output(cdiff)
-                                    print(values)
+                                    for value in values:
+                                        print(value)
                                 payload = plistlib.dumps(
                                     repo_payload_config)
                                 repo_data['payload'] = str(
@@ -233,7 +235,8 @@ def update(path, token, assignment=False):
                                 repo_data['displayName'] +
                                 ", values changed:")
                             values = get_diff_output(diff)
-                            print(values)
+                            for value in values:
+                                print(value)
                             request_data = json.dumps(repo_data)
                             q_param = None
                             makeapirequestPatch(
