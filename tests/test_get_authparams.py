@@ -104,5 +104,6 @@ class TestGetAuth(unittest.TestCase):
             with self.assertRaises(Exception):
                 getAuth('standalone', localauth=None, tenant=None)
 
+
 if __name__ == '__main__':
     unittest.main()
