@@ -20,5 +20,6 @@ class TestRemoveKeys(unittest.TestCase):
 
         self.assertEqual(self.dict, {'awesome_key': 'awesome_value'})
 
+
 if __name__ == '__main__':
     unittest.main()
