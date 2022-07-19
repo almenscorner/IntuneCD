@@ -6,7 +6,6 @@ This module backs up Device Configurations in Intune.
 
 import os
 import base64
-import re
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
@@ -16,6 +15,7 @@ from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
+
 
 # Get all Device Configurations and save them in specified path
 def savebackup(path, output, exclude, token):
