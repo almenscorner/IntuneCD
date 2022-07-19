@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+"""This module tests updating Apple Enrollment Profiles."""
+
 import unittest
 
 from testfixtures import TempDirectory
@@ -5,7 +9,7 @@ from unittest.mock import patch
 from src.IntuneCD.update_appleEnrollmentProfile import update
 
 
-class TestUpdateApplEnrollmentProfile(unittest.TestCase):
+class TestUpdateAppleEnrollmentProfile(unittest.TestCase):
     """Test class for update_appleEnrollmentProfile."""
 
     def setUp(self):
@@ -49,14 +53,15 @@ class TestUpdateApplEnrollmentProfile(unittest.TestCase):
         self.makeapirequestPatch_patch.stop()
 
     def test_update_with_diffs(self):
+        """The count should be 1 and makeapirequestPatch should be called."""
 
         self.count = update(self.directory.path, self.token)
 
         self.assertEqual(self.count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
 
-    def test_update_with_multiple_diffs(
-            self):
+    def test_update_with_multiple_diffs(self):
+        """The count should be 1 and makeapirequestPatch should be called."""
 
         self.repo_data['testvalue2'] = 'test2'
         self.mem_data['value'][0]['testvalue'] = 'test'
@@ -67,11 +72,15 @@ class TestUpdateApplEnrollmentProfile(unittest.TestCase):
         self.assertEqual(self.count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
 
-    def test_update_with_no_diffs(
-            self):
+    def test_update_with_no_diffs(self):
+        """The count should be 0 and makeapirequestPatch should not be called."""
 
         self.mem_data['value'][0]['testvalue'] = 'test1'
         self.count = update(self.directory.path, self.token)
 
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
+
+
+if __name__ == '__main__':
+    unittest.main()
