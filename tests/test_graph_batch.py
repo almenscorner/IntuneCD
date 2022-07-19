@@ -1,15 +1,21 @@
 #!/usr/bin/env python3
 
+"""
+This module tests the graph_batch module.
+"""
+
 import unittest
 
 from unittest.mock import patch
 from src.IntuneCD.graph_batch import batch_request, \
-                                     batch_assignment, \
-                                     batch_intents, \
-                                     get_object_assignment, \
-                                     get_object_details
+    batch_assignment, \
+    batch_intents, \
+    get_object_assignment, \
+    get_object_details
+
 
 class TestGraphBatch(unittest.TestCase):
+    """Test class for graph_batch."""
 
     def setUp(self):
         self.token = 'token'
@@ -23,7 +29,8 @@ class TestGraphBatch(unittest.TestCase):
                     'displayName': 'test',
                     'description': '',
                     'roleScopeTagIds': ['0']}]}
-        self.responses = [{'value': [{'target': {'groupId': '0', 'deviceAndAppManagementAssignmentFilterId': '0'}}]}]
+        self.responses = [{'value': [
+            {'target': {'groupId': '0', 'deviceAndAppManagementAssignmentFilterId': '0'}}]}]
         self.group_responses = [{"displayName": "test", "id": "0"}]
         self.filter_responses = [{"displayName": "test", "id": "0"}]
         self.category_responses = [
@@ -44,22 +51,28 @@ class TestGraphBatch(unittest.TestCase):
                         'valueJson': 'null',
                         'value': None}]}]
 
-        self.makeapirequestPost_patch = patch('src.IntuneCD.graph_batch.makeapirequestPost')
+        self.makeapirequestPost_patch = patch(
+            'src.IntuneCD.graph_batch.makeapirequestPost')
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
 
-        self.get_object_details_patch = patch('src.IntuneCD.graph_batch.get_object_details')
+        self.get_object_details_patch = patch(
+            'src.IntuneCD.graph_batch.get_object_details')
         self.get_object_details = self.get_object_details_patch.start()
 
-        self.get_object_assignment_patch = patch('src.IntuneCD.graph_batch.get_object_assignment')
+        self.get_object_assignment_patch = patch(
+            'src.IntuneCD.graph_batch.get_object_assignment')
         self.get_object_assignment = self.get_object_assignment_patch.start()
 
-        self.batch_intents_patch = patch('src.IntuneCD.graph_batch.batch_intents')
+        self.batch_intents_patch = patch(
+            'src.IntuneCD.graph_batch.batch_intents')
         self.batch_intents = self.batch_intents_patch.start()
 
-        self.batch_assignment_patch = patch('src.IntuneCD.graph_batch.batch_assignment')
+        self.batch_assignment_patch = patch(
+            'src.IntuneCD.graph_batch.batch_assignment')
         self.batch_assignment = self.batch_assignment_patch.start()
 
-        self.batch_request_patch = patch('src.IntuneCD.graph_batch.batch_request')
+        self.batch_request_patch = patch(
+            'src.IntuneCD.graph_batch.batch_request')
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.side_effect = self.responses, self.group_responses, self.filter_responses
 
@@ -71,8 +84,8 @@ class TestGraphBatch(unittest.TestCase):
         self.batch_assignment.stop()
         self.batch_request.stop()
 
-
     def test_batch_request(self):
+        """The batch request function should return the expected result."""
 
         self.expected_result = [
             {'odata.count': 1, 'value': [{'id': '0', 'displayName': 'test'}]}]
@@ -84,6 +97,7 @@ class TestGraphBatch(unittest.TestCase):
         self.assertEqual(self.result, self.expected_result)
 
     def test_batch_assignment(self):
+        """The batch assignment function should return the expected result."""
 
         self.expected_result = [{'value': [{'target': {
             'deviceAndAppManagementAssignmentFilterId': 'test', 'groupId': '0', 'groupName': 'test'}}]}]
@@ -92,7 +106,9 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_assignment_appProtection_mdmWindowsInformationProtectionPolicy(self):
+    def test_batch_assignment_appProtection_mdmWindowsInformationProtectionPolicy(
+            self):
+        """The batch assignment function should return the expected result for the platform."""
 
         self.batch_assignment_data = {'value': [
             {'id': '0', '@odata.type': '#microsoft.graph.mdmWindowsInformationProtectionPolicy'}]}
@@ -108,7 +124,9 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_assignment_appProtection_windowsInformationProtectionPolicy(self):
+    def test_batch_assignment_appProtection_windowsInformationProtectionPolicy(
+            self):
+        """The batch assignment function should return the expected result for the platform."""
 
         self.batch_assignment_data = {'value': [
             {'id': '0', '@odata.type': '#microsoft.graph.windowsInformationProtectionPolicy'}]}
@@ -125,6 +143,7 @@ class TestGraphBatch(unittest.TestCase):
         self.assertEqual(self.result, self.expected_result)
 
     def test_batch_assignment_appProtection_iosManagedAppProtection(self):
+        """The batch assignment function should return the expected result for the platform."""
 
         self.batch_assignment_data = {'value': [
             {'id': '0', '@odata.type': '#microsoft.graph.iosManagedAppProtection'}]}
@@ -141,6 +160,7 @@ class TestGraphBatch(unittest.TestCase):
         self.assertEqual(self.result, self.expected_result)
 
     def test_batch_intents(self):
+        """The batch intents function should return the expected result."""
 
         self.batch_request.side_effect = self.category_responses, self.settings_responses
         self.expected_result = {
@@ -163,6 +183,7 @@ class TestGraphBatch(unittest.TestCase):
         self.assertEqual(self.result, self.expected_result)
 
     def test_get_object_assignment(self):
+        """The get object assignment function should return the expected result."""
 
         self.id = '0'
         self.response = [
@@ -181,6 +202,7 @@ class TestGraphBatch(unittest.TestCase):
         self.assertEqual(self.result, self.expected_result)
 
     def test_get_object_details(self):
+        """The get object details function should return the expected result."""
 
         self.id = '0'
         self.response = [
@@ -216,3 +238,6 @@ class TestGraphBatch(unittest.TestCase):
         self.result = get_object_details(self.id, self.response)
 
         self.assertEqual(self.result, self.expected_result)
+
+if __name__ == '__main__':
+    unittest.main()
