@@ -67,6 +67,8 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             mock_data,
             mock_makeapirequest,
             mock_batch_request):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(self.directory.path, 'yaml', self.token)
 
         with open(self.saved_path + 'yaml', 'r') as f:
@@ -82,6 +84,8 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             mock_data,
             mock_makeapirequest,
             mock_batch_request):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(self.directory.path, 'json', self.token)
 
         with open(self.saved_path + 'json', 'r') as f:
@@ -97,6 +101,8 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             mock_data,
             mock_makeapirequest,
             mock_batch_request):
+        """The count should be 0 if no data is returned."""
+
         mock_makeapirequest.return_value = {'value': []}
         self.count = savebackup(self.directory.path, 'json', self.token)
 
