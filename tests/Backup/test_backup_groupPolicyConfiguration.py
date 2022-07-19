@@ -86,6 +86,7 @@ class TestBackupGroupPolicyConfiguration(unittest.TestCase):
         self.makeapirequest.stop()
 
     def test_backup_yml(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
             self.directory.path,
@@ -97,12 +98,13 @@ class TestBackupGroupPolicyConfiguration(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(Path(f'{self.directory.path}/Group Policy Configurations').exists())
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, self.count)
 
     def test_backup_json(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(
             self.directory.path,
             'json',
@@ -112,13 +114,13 @@ class TestBackupGroupPolicyConfiguration(unittest.TestCase):
         with open(self.saved_path + 'json', 'r') as f:
             saved_data = json.load(f)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(Path(f'{self.directory.path}/Group Policy Configurations').exists())
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, self.count)
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
+
         self.makeapirequest.side_effect = [{'value': []}]
         self.count = savebackup(
             self.directory.path,
@@ -127,3 +129,7 @@ class TestBackupGroupPolicyConfiguration(unittest.TestCase):
             self.token)
 
         self.assertEqual(0, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
