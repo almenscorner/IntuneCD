@@ -11,6 +11,7 @@ from unittest.mock import patch
 from testfixtures import TempDirectory
 from src.IntuneCD.backup_notificationTemplate import savebackup
 
+
 def side_effects_makeapirequest():
     """Mock function for makeapirequest."""
 
