@@ -57,6 +57,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.stop()
 
     def test_backup_ios_vpp_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
 
         self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.iosVppApp'
         self.makeapirequest.return_value = self.app_base_data
@@ -67,7 +68,6 @@ class TestBackupApplications(unittest.TestCase):
             self.exclude,
             self.token)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(
             Path(
                 self.directory.path +
@@ -79,6 +79,7 @@ class TestBackupApplications(unittest.TestCase):
         self.assertEqual(1, self.count)
 
     def test_backup_macOS_vpp_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
 
         self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.macOsVppApp'
         self.makeapirequest.return_value = self.app_base_data
@@ -89,7 +90,6 @@ class TestBackupApplications(unittest.TestCase):
             self.exclude,
             self.token)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(
             Path(
                 self.directory.path +
@@ -101,6 +101,7 @@ class TestBackupApplications(unittest.TestCase):
         self.assertEqual(1, self.count)
 
     def test_backup_win32_lob_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
 
         self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.win32LobApp'
         self.app_base_data['value'][0]['displayVersion'] = '1.0.0'
@@ -123,6 +124,7 @@ class TestBackupApplications(unittest.TestCase):
         self.assertEqual(1, self.count)
 
     def test_backup_msi_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
 
         self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.windowsMobileMSI'
         self.app_base_data['value'][0]['productVersion'] = '1.0.0'
@@ -145,6 +147,7 @@ class TestBackupApplications(unittest.TestCase):
         self.assertEqual(1, self.count)
 
     def test_backup_other_app(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
 
         self.app_base_data['value'][0]['@odata.type'] = '#microsoft.graph.macOSother'
         self.makeapirequest.return_value = self.app_base_data
@@ -174,3 +177,7 @@ class TestBackupApplications(unittest.TestCase):
             self.exclude,
             self.token)
         self.assertEqual(0, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
