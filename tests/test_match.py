@@ -52,5 +52,6 @@ class TestMatch(unittest.TestCase):
 
         self.assertFalse(self.result)
 
+
 if __name__ == '__main__':
     unittest.main()
