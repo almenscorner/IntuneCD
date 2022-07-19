@@ -74,6 +74,8 @@ class TestBackupPowershellScript(unittest.TestCase):
         self.makeapirequest.stop()
 
     def test_backup_yml(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(
             self.directory.path,
             'yaml',
@@ -90,6 +92,8 @@ class TestBackupPowershellScript(unittest.TestCase):
         self.assertEqual(1, self.count)
 
     def test_backup_json(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(
             self.directory.path,
             'json',
@@ -99,19 +103,19 @@ class TestBackupPowershellScript(unittest.TestCase):
         with open(self.saved_path + 'json', 'r') as f:
             self.saved_data = json.load(f)
 
-        """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.assertTrue(Path(f'{self.directory.path}/Scripts/Powershell').exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count)
 
     def test_script_is_created(self):
+        """The script data folder should be created and a .ps1 file should be created."""
+
         self.count = savebackup(
             self.directory.path,
             'json',
             self.exclude,
             self.token)
 
-        """The folder should be created and a .ps1 file should be created."""
         self.assertTrue(
             Path(f'{self.directory.path}/Scripts/Powershell/Script Data').exists())
         self.assertTrue(self.script_content_path)
@@ -119,6 +123,7 @@ class TestBackupPowershellScript(unittest.TestCase):
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
+
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
             self.directory.path,
@@ -127,3 +132,7 @@ class TestBackupPowershellScript(unittest.TestCase):
             self.token)
 
         self.assertEqual(0, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
