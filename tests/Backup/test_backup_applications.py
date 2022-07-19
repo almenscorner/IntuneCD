@@ -120,7 +120,7 @@ class TestBackupApplications(unittest.TestCase):
         self.assertTrue(
             Path(
                 self.directory.path +
-                '/Applications/Windows/test_win32_1_0_0.json').exists())
+                '/Applications/Windows/test_Win32_1_0_0.json').exists())
         self.assertEqual(1, self.count)
 
     def test_backup_msi_app(self):
