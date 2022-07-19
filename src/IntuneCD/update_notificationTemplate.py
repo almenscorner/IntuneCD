@@ -80,7 +80,8 @@ def update(path, token):
                             mem_template_data['displayName'] +
                             ", values changed:")
                         values = get_diff_output(diff)
-                        print(values)
+                        for value in values:
+                            print(value)
                         request_data = json.dumps(repo_template_data)
                         q_param = None
                         makeapirequestPatch(
@@ -116,7 +117,8 @@ def update(path, token):
                                 mem_template_data['displayName'] +
                                 ", values changed")
                             values = get_diff_output(diff)
-                            print(values)
+                            for value in values:
+                                print(value)
                             repo_locale.pop('isDefault', None)
                             request_data = json.dumps(repo_locale)
                             q_param = None
