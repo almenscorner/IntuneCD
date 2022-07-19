@@ -8,8 +8,8 @@ import unittest
 
 from pathlib import Path
 from unittest.mock import patch
-from src.IntuneCD.backup_managedGPlay import savebackup
 from testfixtures import TempDirectory
+from src.IntuneCD.backup_managedGPlay import savebackup
 
 MANAGED_GPLAY = {
             "id": "0",
@@ -42,6 +42,8 @@ class TestBackupManagedGPlay(unittest.TestCase):
 
 
     def test_backup_yml(self, mock_data, mock_makeapirequest):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(self.directory.path, 'yaml', self.token)
 
         with open(self.saved_path + 'yaml', 'r') as f:
@@ -53,6 +55,8 @@ class TestBackupManagedGPlay(unittest.TestCase):
         self.assertEqual(1, self.count)
 
     def test_backup_json(self, mock_data, mock_makeapirequest):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
         self.count = savebackup(self.directory.path, 'json', self.token)
 
         with open(self.saved_path + 'json', 'r') as f:
@@ -63,6 +67,12 @@ class TestBackupManagedGPlay(unittest.TestCase):
         self.assertEqual(1, self.count)
 
     def test_backup_with_no_return_data(self, mock_data, mock_makeapirequest):
+        """The count should be 0 if no data is returned."""
+
         mock_data.return_value = None
         self.count = savebackup(self.directory.path, 'json', self.token)
         self.assertEqual(0, self.count)
+
+
+if __name__ == '__main__':
+    unittest.main()
