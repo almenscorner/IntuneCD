@@ -24,9 +24,9 @@ def makeapirequest(endpoint, token, q_param=None):
 
     if q_param is not None:
         response = requests.get(endpoint, headers=headers, params=q_param)
-        if response.status_code == 504 or response.status_code == 502:
+        if response.status_code == 504 or response.status_code == 502 or response.status_code == 503:
             print('Ran into issues with Graph request, waiting 5 seconds and trying again...')
-            time.sleep(5)
+            time.sleep(10)
             response = requests.get(endpoint, headers=headers)
     else:
         response = requests.get(endpoint, headers=headers)
@@ -44,10 +44,12 @@ def makeapirequest(endpoint, token, q_param=None):
             while count < entries:
                 json_data['value'].append(record['value'][count])
                 count += 1
+
         return (json_data)
+
     elif response.status_code == 404:
         print("Resource not found in Microsoft Graph: " + endpoint)
-    elif (("assignmentFilters" in endpoint) and ("FeatureNotEnabled" in response.text)):
+    elif ("assignmentFilters" in endpoint) and ("FeatureNotEnabled" in response.text):
         print("Assignment filters not enabled in tenant, skipping")
     else:
         raise Exception('Request failed with ', response.status_code, ' - ',
