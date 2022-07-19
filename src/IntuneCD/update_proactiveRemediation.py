@@ -123,7 +123,8 @@ def update(path, token, assignment=False):
                             if cdiff:
                                 diff_count += 1
                                 values = get_diff_output(cdiff)
-                                print(values)
+                                for value in values:
+                                    print(value)
                             if ddiff:
                                 diff_count += 1
                                 print(
