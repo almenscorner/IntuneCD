@@ -58,5 +58,6 @@ class TestCheckFile(unittest.TestCase):
         self.check = check_file(self.directory.path, self.d)
         self.assertFalse(self.check)
 
+
 if __name__ == '__main__':
     unittest.main()
