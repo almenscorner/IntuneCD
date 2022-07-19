@@ -11,6 +11,7 @@ def _mock_response(
         content="CONTENT",
         json_data=None,
         raise_for_status=None):
+    """Mock the response on the requests module."""
 
     mock_resp = mock.Mock()
     # mock raise_for_status call w/optional error
@@ -49,22 +50,25 @@ class TestUpdateFrontend(unittest.TestCase):
                     'X-API-Key': 'test'})
 
     def test_update_env_not_configured(self, mock_post, mock_update_frontend):
-        """
-        Test that the update_frontend function is called with the correct parameters.
-        """
+        """If the API_KEY is not configured, the function should raise an exception."""
         with patch.dict("os.environ", {}):
-            self.assertRaises(Exception, update_frontend, "http://localhost:8080/update",
+            self.assertRaises(Exception,
+                              update_frontend,
+                              "http://localhost:8080/update",
                               {"configurations": 1})
 
     def test_update_frontend_error(self, mock_post, mock_update_frontend):
-        """
-        Test that the update_frontend function is called with the correct parameters.
-        """
+        """If the update failed the function should raise an exception."""
 
         self.mock_resp = _mock_response(
             self, status=500, content='Internal Server Error')
         mock_post.return_value = self.mock_resp
 
         with patch.dict("os.environ", {'API_KEY': 'test'}):
-            self.assertRaises(Exception, update_frontend, "http://localhost:8080/update",
+            self.assertRaises(Exception,
+                              update_frontend,
+                              "http://localhost:8080/update",
                               {"configurations": 1})
+
+if __name__ == '__main__':
+    unittest.main()
