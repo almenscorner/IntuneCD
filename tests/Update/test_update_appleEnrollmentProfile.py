@@ -15,12 +15,12 @@ class TestUpdateAppleEnrollmentProfile(unittest.TestCase):
     def setUp(self):
         self.directory = TempDirectory()
         self.directory.create()
-        self.directory.makedir("Enrollment Profiles/apple")
+        self.directory.makedir("Enrollment Profiles/Apple")
         self.directory.write(
-            "Enrollment Profiles/apple/test.json", '{"test": "test"}',
+            "Enrollment Profiles/Apple/test.json", '{"test": "test"}',
             encoding='utf-8')
         self.directory.write(
-            "Enrollment Profiles/apple/test.txt", '{"test": "test"}',
+            "Enrollment Profiles/Apple/test.txt", '{"test": "test"}',
             encoding='utf-8')
         self.token = 'token'
         self.mem_data = {"value": [{"@odata.type": "test",
