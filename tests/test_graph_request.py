@@ -343,5 +343,6 @@ class TestGraphRequestPut(unittest.TestCase):
 
         self.assertEqual(1, mock_patch.call_count)
 
+
 if __name__ == '__main__':
     unittest.main()
