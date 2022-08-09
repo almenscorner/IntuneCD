@@ -19,7 +19,7 @@ def check_file(configpath, filename):
     file = os.path.join(configpath, filename)
     if file.endswith(".yaml"):
         return file
-    elif file.endswith(".json"):
+    if file.endswith(".json"):
         return file
     else:
         return False
