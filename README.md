@@ -22,6 +22,8 @@ The package can also be run standalone outside a pipeline, or in one to only bac
   - Example to exclude in update: `IntuneCD-startupdate -e AppConfigurations Profiles`
 - Added capabilities to update the IntuneCD frontend with data
   - Once the frontend is available all that will be needed to update with data is to add `-f <frontend_url>` to startbackup and startupdate command and set the API key in ENV variables.
+- Added ability to configure title, intro, tenant and updated lines in the documentation using a JSON string, example:
+  - `-j "{\"title\": \"demo\", \"intro\": \"demo\", \"tenant\": \"demo\", \"updated\": \"demo\"}"`  
 - Added unit tests
 - Changed deprecated OptionParser to ArgumentParser
 - Improved the documentation
