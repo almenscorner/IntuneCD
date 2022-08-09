@@ -2,67 +2,69 @@
 
 """
 This module backs up all Configuration Policies in Intune.
-
-Parameters
-----------
-path : str
-    The path to save the backup to
-output : str
-    The format the backup will be saved as
-token : str
-    The token to use for authenticating the request
 """
-
-import json
-import os
-import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment, batch_request, get_object_details
+from .save_output import save_output
+from .remove_keys import remove_keys
 
-## Set MS Graph base endpoint
-baseEndpoint = "https://graph.microsoft.com/beta/deviceManagement"
+# Set MS Graph base endpoint
+BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
-## Get all Configuration Policies and save them in specified path
+
+# Get all Configuration Policies and save them in specified path
 def savebackup(path, output, exclude, token):
-    configpath = path+"/"+"Settings Catalog/"
-    policies = makeapirequest(baseEndpoint + "/configurationPolicies", token)
+    """
+    Saves all Configuration Policies in Intune to a JSON or YAML file.
+
+    :param path: Path to save the backup to
+    :param output: Format the backup will be saved as
+    :param exclude: If "assignments" is in the list, it will not back up the assignments
+    :param token: Token to use for authenticating the request
+    """
+
+    config_count = 0
+    configpath = path + "/" + "Settings Catalog/"
+    policies = makeapirequest(BASE_ENDPOINT + "/configurationPolicies", token)
     policy_ids = []
     for policy in policies['value']:
         policy_ids.append(policy['id'])
 
-    assignment_responses = batch_assignment(policies,f'deviceManagement/configurationPolicies/','/assignments',token)
-    policy_settings_batch = batch_request(policy_ids,'deviceManagement/configurationPolicies/','/settings',token)
+    assignment_responses = batch_assignment(
+        policies,
+        'deviceManagement/configurationPolicies/',
+        '/assignments',
+        token)
+    policy_settings_batch = batch_request(
+        policy_ids,
+        'deviceManagement/configurationPolicies/',
+        '/settings',
+        token)
 
     for policy in policies['value']:
+        config_count += 1
         name = policy['name']
         print("Backing up configuration policy: " + name)
-        if os.path.exists(configpath) == False:
-            os.mkdir(configpath)
 
-        settings = get_object_details(policy['id'],policy_settings_batch)
+        settings = get_object_details(policy['id'], policy_settings_batch)
 
         if settings:
             policy['settings'] = settings
 
         if "assignments" not in exclude:
-            assignments = get_object_assignment(policy['id'],assignment_responses)
+            assignments = get_object_assignment(
+                policy['id'], assignment_responses)
             if assignments:
                 policy['assignments'] = assignments
 
-        remove_keys = {'id', 'createdDateTime',
-                       'version', 'lastModifiedDateTime'}
-        for k in remove_keys:
-            policy.pop(k, None)
+        policy = remove_keys(policy)
 
-        ## Get filename without illegal characters
+        # Get filename without illegal characters
         fname = clean_filename(name)
-        ## Save Configuration Policy as JSON or YAML depending on configured value in "-o"
-        if output != "json":
-            with open(configpath+fname+".yaml", 'w') as yamlFile:
-                yaml.dump(policy, yamlFile, sort_keys=False,
-                          default_flow_style=False)
-        else:
-            with open(configpath+fname+".json", 'w') as jsonFile:
-                json.dump(policy, jsonFile, indent=10)
+        # Save Configuration Policy as JSON or YAML depending on configured
+        # value in "-o"
+        save_output(output, configpath, fname, policy)
+
+    return config_count

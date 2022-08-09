@@ -1,142 +1,170 @@
 #!/usr/bin/env python3
 
 """
-This module updates all Powershell scripts in Intune if the configuration in Intune differs from the JSON/YAML file.
-
-Parameters
-----------
-path : str
-    The path to where the backup is saved
-token : str
-    The token to use for authenticating the request
+This module is used to update all PowerShell scripts in Intune.
 """
 
 import json
 import os
 import base64
-import yaml
-import re
 
+from deepdiff import DeepDiff
 from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
 from .graph_batch import batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
-from deepdiff import DeepDiff
+from .check_file import check_file
+from .load_file import load_file
+from .remove_keys import remove_keys
+from .get_diff_output import get_diff_output
 
-## Set MS Graph endpoint
-endpoint = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
+# Set MS Graph endpoint
+ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
 
 
 def update(path, token, assignment=False):
+    """
+    This function updates all Powershell scripts in Intune if,
+    the configuration in Intune differs from the JSON/YAML file.
 
-    ## Set Powershell script path
-    configpath = path+"/"+"Scripts/Powershell"
-    ## If Powershell script path exists, continue
-    if os.path.exists(configpath) == True:
-        ## Get scripts
-        mem_powershellScript = makeapirequest(endpoint, token)
-        ## Get current assignment
-        mem_assignments = batch_assignment(mem_powershellScript,'deviceManagement/deviceManagementScripts/','/assignments',token)
+    :param path: Path to where the backup is saved
+    :param token: Token to use for authenticating the request
+    :param assignment: Boolean to determine if assignments should be updated
+    """
+
+    diff_count = 0
+    # Set Powershell script path
+    configpath = path + "/" + "Scripts/Powershell"
+    # If Powershell script path exists, continue
+    if os.path.exists(configpath):
+        # Get scripts
+        mem_powershellScript = makeapirequest(ENDPOINT, token)
+        # Get current assignment
+        mem_assignments = batch_assignment(
+            mem_powershellScript,
+            'deviceManagement/deviceManagementScripts/',
+            '/assignments',
+            token)
 
         for filename in os.listdir(configpath):
-            file = os.path.join(configpath, filename)
-            # If path is Directory, skip
-            if os.path.isdir(file):
+            file = check_file(configpath, filename)
+            if file is False:
                 continue
-            # If file is .DS_Store, skip
-            if filename == ".DS_Store":
-                continue
-            # If file is .md, skip
-            if filename.endswith(".md"):
-                continue
-
-            ## Check which format the file is saved as then open file, load data and set query parameter
+            # Check which format the file is saved as then open file, load data
+            # and set query parameter
             with open(file) as f:
-                    if filename.endswith(".yaml"):
-                        data = json.dumps(yaml.safe_load(f))
-                        repo_data = json.loads(data)
-                        
-                    elif filename.endswith(".json"):
-                        f = open(file)
-                        repo_data = json.load(f)
+                repo_data = load_file(filename, f)
 
-                    ## Create object to pass in to assignment function
-                    assign_obj = {}
-                    if "assignments" in repo_data:
-                        assign_obj = repo_data['assignments']
-                    repo_data.pop('assignments', None)
+                # Create object to pass in to assignment function
+                assign_obj = {}
+                if "assignments" in repo_data:
+                    assign_obj = repo_data['assignments']
+                repo_data.pop('assignments', None)
 
-                    data = {'value':''}
-                    if mem_powershellScript['value']:
-                        for val in mem_powershellScript['value']:
-                            if repo_data['displayName'] == val['displayName']:
-                                data['value'] = val
+                data = {'value': ''}
+                if mem_powershellScript['value']:
+                    for val in mem_powershellScript['value']:
+                        if repo_data['displayName'] == val['displayName']:
+                            data['value'] = val
 
-                    ## If Powershell script exists, continue
-                    if data['value']:
-                        print("-" * 90)
-                        ## Get Powershell script details
-                        mem_data = makeapirequest(endpoint + "/" + data['value']['id'], token)
-                        mem_id = mem_data['id']
-                        ## Remove keys before using DeepDiff
-                        remove_keys = {'id', 'createdDateTime','version','lastModifiedDateTime'}
-                        for k in remove_keys:
-                            mem_data.pop(k, None)
+                # If Powershell script exists, continue
+                if data['value']:
+                    print("-" * 90)
+                    # Get Powershell script details
+                    mem_data = makeapirequest(
+                        ENDPOINT + "/" + data['value']['id'], token)
+                    mem_id = mem_data['id']
+                    # Remove keys before using DeepDiff
+                    mem_data = remove_keys(mem_data)
 
-                        ## Check if script data is saved and read the file
-                        if os.path.exists(configpath + "/Script Data/" + repo_data['fileName']):
-                            with open(configpath + "/Script Data/" + repo_data['fileName'], 'r') as f:
-                                repo_payload_config = f.read()
+                    # Check if script data is saved and read the file
+                    if os.path.exists(
+                        configpath +
+                        "/Script Data/" +
+                            repo_data['fileName']):
+                        with open(configpath + "/Script Data/" + repo_data['fileName'], 'r') as f:
+                            repo_payload_config = f.read()
 
-                            mem_payload_config = base64.b64decode(
-                                mem_data['scriptContent']).decode('utf-8')
+                        mem_payload_config = base64.b64decode(
+                            mem_data['scriptContent']).decode('utf-8')
 
-                            pdiff = DeepDiff(mem_payload_config, repo_payload_config, ignore_order=True).get('values_changed', {})
-                            cdiff = DeepDiff(mem_data, repo_data, ignore_order=True, exclude_paths="root['scriptContent']").get('values_changed', {})
+                        pdiff = DeepDiff(
+                            mem_payload_config,
+                            repo_payload_config,
+                            ignore_order=True).get(
+                            'values_changed',
+                            {})
+                        cdiff = DeepDiff(
+                            mem_data,
+                            repo_data,
+                            ignore_order=True,
+                            exclude_paths="root['scriptContent']").get(
+                            'values_changed',
+                            {})
 
-                            ## If any changed values are found, push them to Intune
-                            if pdiff or cdiff:
-                                print("Updating Powershell script: " + repo_data['displayName'] + ", values changed:")
-                                if cdiff:
-                                    for key, value in cdiff.items():
-                                        setting = re.search(
-                                            "\[(.*)\]", key).group(1)
-                                        new_val = value['new_value']
-                                        old_val = value['old_value']
-                                        print(
-                                            f"Setting: {setting}, New Value: {new_val}, Old Value: {old_val}")
-                                if pdiff:
-                                    print(
-                                        "Script changed, check commit history for change details")
-                                powershell_bytes = repo_payload_config.encode(
-                                    'utf-8')
-                                repo_data['scriptContent'] = base64.b64encode(
-                                    powershell_bytes).decode('utf-8')
-                                request_data = json.dumps(repo_data)
-                                q_param = None
-                                makeapirequestPatch(endpoint + "/" + mem_id, token,q_param,request_data)
-                            else:
+                        # If any changed values are found, push them to Intune
+                        if pdiff or cdiff:
+                            print(
+                                "Updating Powershell script: " +
+                                repo_data['displayName'] +
+                                ", values changed:")
+                            if cdiff:
+                                diff_count += 1
+                                values = get_diff_output(cdiff)
+                                for value in values:
+                                    print(value)
+                            if pdiff:
+                                diff_count += 1
                                 print(
-                                    'No difference found for Powershell script: ' + repo_data['displayName'])
+                                    "Script changed, check commit history for change details")
+                            powershell_bytes = repo_payload_config.encode(
+                                'utf-8')
+                            repo_data['scriptContent'] = base64.b64encode(
+                                powershell_bytes).decode('utf-8')
+                            request_data = json.dumps(repo_data)
+                            q_param = None
+                            makeapirequestPatch(
+                                ENDPOINT + "/" + mem_id, token, q_param, request_data)
+                        else:
+                            print(
+                                'No difference found for Powershell script: ' +
+                                repo_data['displayName'])
 
-                        if assignment == True:
-                            mem_assign_obj = get_object_assignment(mem_id,mem_assignments)
-                            update = update_assignment(assign_obj,mem_assign_obj,token)
-                            if update is not None:
-                                request_data = {}
-                                request_data['deviceManagementScriptAssignments'] = update
-                                post_assignment_update(request_data,mem_id,'deviceManagement/deviceManagementScripts','assign',token)
+                    if assignment:
+                        mem_assign_obj = get_object_assignment(
+                            mem_id, mem_assignments)
+                        update = update_assignment(
+                            assign_obj, mem_assign_obj, token)
+                        if update is not None:
+                            request_data = {'deviceManagementScriptAssignments': update}
+                            post_assignment_update(
+                                request_data,
+                                mem_id,
+                                'deviceManagement/deviceManagementScripts',
+                                'assign',
+                                token)
 
-                    ## If Powershell script does not exist, create it and assign
-                    else:
-                        print("-" * 90)
-                        print(
-                            "Powershell script not found, creating script: " + repo_data['displayName'])
-                        request_json = json.dumps(repo_data)
-                        post_request = makeapirequestPost(endpoint, token,q_param=None,jdata=request_json,status_code=201)
-                        mem_assign_obj = []
-                        assignment = update_assignment(assign_obj,mem_assign_obj,token)
-                        if assignment is not None:
-                            request_data = {}
-                            request_data['deviceManagementScriptAssignments'] = assignment
-                            post_assignment_update(request_data,post_request['id'],'deviceManagement/deviceManagementScripts','assign',token)
-                        print("Powershell script created with id: " + post_request['id'])
+                # If Powershell script does not exist, create it and assign
+                else:
+                    print("-" * 90)
+                    print(
+                        "Powershell script not found, creating script: " +
+                        repo_data['displayName'])
+                    request_json = json.dumps(repo_data)
+                    post_request = makeapirequestPost(
+                        ENDPOINT, token, q_param=None, jdata=request_json, status_code=201)
+                    mem_assign_obj = []
+                    assignment = update_assignment(
+                        assign_obj, mem_assign_obj, token)
+                    if assignment is not None:
+                        request_data = {'deviceManagementScriptAssignments': assignment}
+                        post_assignment_update(
+                            request_data,
+                            post_request['id'],
+                            'deviceManagement/deviceManagementScripts',
+                            'assign',
+                            token)
+                    print(
+                        "Powershell script created with id: " +
+                        post_request['id'])
+
+    return diff_count

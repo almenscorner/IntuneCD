@@ -2,59 +2,49 @@
 
 """
 This module backs up all Notification Templates in Intune.
-
-Parameters
-----------
-path : str
-    The path to save the backup to
-output : str
-    The format the backup will be saved as
-token : str
-    The token to use for authenticating the request
 """
-
-import json
-import os
-import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .save_output import save_output
+from .remove_keys import remove_keys
 
-## Set MS Graph endpoint
-endpoint = "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
+# Set MS Graph endpoint
+ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
 
-## Get all Notification Templates and save them in specified path
+
+# Get all Notification Templates and save them in specified path
 def savebackup(path, output, token):
-    configpath = path+"/"+"Compliance Policies/Message Templates/"
+    """
+    Saves all Notification Templates in Intune to a JSON or YAML file.
+
+    :param path: Path to save the backup to
+    :param output: Format the backup will be saved as
+    :param token: Token to use for authenticating the request
+    """
+
+    config_count = 0
+    configpath = path + "/" + "Compliance Policies/Message Templates/"
     q_param = "?$expand=localizedNotificationMessages"
-    data = makeapirequest(endpoint, token, q_param)
+    data = makeapirequest(ENDPOINT, token, q_param)
 
     for template in data['value']:
+        config_count += 1
         print("Backing up Notification message template: " +
               template['displayName'])
         q_param = "?$expand=localizedNotificationMessages"
         template_data = makeapirequest(
-            endpoint + "/" + template['id'], token, q_param)
+            ENDPOINT + "/" + template['id'], token, q_param)
 
-        remove_keys = {'id', 'createdDateTime',
-                       'version', 'lastModifiedDateTime'}
-        for k in remove_keys:
-            template_data.pop(k, None)
+        template_data = remove_keys(template_data)
 
         for locale in template_data['localizedNotificationMessages']:
-            for k in remove_keys:
-                locale.pop(k, None)
+            remove_keys(locale)
 
-        if os.path.exists(configpath) == False:
-            os.makedirs(configpath)
-
-        ## Get filename without illegal characters
+        # Get filename without illegal characters
         fname = clean_filename(template_data['displayName'])
-        ## Save App Condiguration as JSON or YAML depending on configured value in "-o"
-        if output != "json":
-            with open(configpath+fname+".yaml", 'w') as yamlFile:
-                yaml.dump(template_data, yamlFile, sort_keys=False,
-                          default_flow_style=False)
-        else:
-            with open(configpath+fname+".json", 'w') as jsonFile:
-                json.dump(template_data, jsonFile, indent=10)
+        # Save Notification template as JSON or YAML depending on configured
+        # value in "-o"
+        save_output(output, configpath, fname, template_data)
+
+    return config_count

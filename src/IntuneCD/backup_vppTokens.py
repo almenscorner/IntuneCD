@@ -2,52 +2,42 @@
 
 """
 This module backs up all VPP tokens in Intune.
-
-Parameters
-----------
-path : str
-    The path to save the backup to
-output : str
-    The format the backup will be saved as
-token : str
-    The token to use for authenticating the request
 """
-
-import json
-import os
-import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
+from .save_output import save_output
+from .remove_keys import remove_keys
 
-## Set MS Graph endpoint
-endpoint = "https://graph.microsoft.com/beta/deviceAppManagement/vppTokens"
+# Set MS Graph endpoint
+ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/vppTokens"
 
-## Get all VPP tokens and save them in specified path
+
+# Get all VPP tokens and save them in specified path
 def savebackup(path, output, token):
+    """
+    Save all VPP tokens in Intune to a JSON or YAML file.
+
+    :param path: Path to save the backup to
+    :param output: Format the backup will be saved as
+    :param token: Token to use for authenticating the request
+    """
+
+    config_count = 0
     configpath = f'{path}/Apple VPP Tokens/'
-    data = makeapirequest(endpoint, token)
+    data = makeapirequest(ENDPOINT, token)
 
     for vpp_token in data['value']:
+        config_count += 1
         token_name = vpp_token['displayName']
-        remove_keys = {'id', 'createdDateTime', 'version',
-                       'lastModifiedDateTime', 'token', 'lastSyncDateTime'}
-        for k in remove_keys:
-            vpp_token.pop(k, None)
+        vpp_token = remove_keys(vpp_token)
 
         print(f'Backing up VPP token: {token_name}')
 
-        if os.path.exists(configpath) == False:
-            os.makedirs(configpath)
-
-        ## Get filename without illegal characters
+        # Get filename without illegal characters
         fname = clean_filename(token_name)
 
-        ## Save token as JSON or YAML depending on configured value in "-o"
-        if output != "json":
-            with open(f'{configpath}{fname}.yaml', 'w') as yamlFile:
-                yaml.dump(vpp_token, yamlFile, sort_keys=False,
-                          default_flow_style=False)
-        else:
-            with open(f'{configpath}{fname}.json', 'w') as jsonFile:
-                json.dump(vpp_token, jsonFile, indent=10)
+        # Save token as JSON or YAML depending on configured value in "-o"
+        save_output(output, configpath, fname, vpp_token)
+
+    return config_count
