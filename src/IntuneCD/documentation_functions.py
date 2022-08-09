@@ -1,16 +1,7 @@
 #!/usr/bin/env python3
 
 """
-This module contains all functions to create the markdown tables.
-
-Parameters
-----------
-configpath : str
-    The path to where the backup files are saved
-outpath : str
-    The path to save the markdown document to
-header : str
-    Header of the configuration being documented
+This module contains all functions for the documentation.
 """
 
 import yaml
@@ -20,13 +11,27 @@ import glob
 
 from pytablewriter import MarkdownTableWriter
 
+
 def md_file(outpath):
-    if os.path.exists(f'{outpath}') == False:
+    """
+    This function creates the markdown file.
+
+    :param outpath: The path to save the Markdown document to
+    """
+    if not os.path.exists(f'{outpath}'):
         open(outpath, 'w+').close()
     else:
         open(outpath, 'w').close()
 
+
 def write_table(data):
+    """
+    This function creates the markdown table.
+
+    :param data: The data to be written to the table
+    :return: The Markdown table writer
+    """
+
     writer = MarkdownTableWriter(
         headers=['setting', 'value'],
         value_matrix=data
@@ -34,7 +39,14 @@ def write_table(data):
 
     return writer
 
+
 def assignment_table(data):
+    """
+    This function creates the Markdown assignments table.
+
+    :param data: The data to be written to the table
+    :return: The Markdown table writer
+    """
 
     def write_assignment_table(data, headers):
         writer = MarkdownTableWriter(
@@ -76,14 +88,28 @@ def assignment_table(data):
 
     return table
 
+
 def remove_characters(string):
+    """
+    This function removes characters from the string.
+    :param string: The string to be cleaned
+    :return: The cleaned string
+    """
+
     remove_chars = '#@}{]["'
     for char in remove_chars:
         string = string.replace(char, "")
 
     return string
 
+
 def clean_list(data):
+    """
+    This function cleans the list.
+    :param data: The list to be cleaned
+    :return: The cleaned list
+    """
+
     values = []
     liststr = ","
     for item in data:
@@ -94,8 +120,8 @@ def clean_list(data):
                     if i.isdigit():
                         string = i
                 if type(i) is list:
-                        string = i+liststr
-                        string = remove_characters(string)
+                    string = i + liststr
+                    string = remove_characters(string)
                 if type(i) is dict:
                     for k, v in i.items():
                         if type(v) is str and len(v) > 200:
@@ -123,139 +149,164 @@ def clean_list(data):
 
     return values
 
-def document_configs(configpath, outpath, header, max_length, split):
 
-    ## If configurations path exists, continue
-    if os.path.exists(configpath) == True:
-        if split == True:
+def document_configs(configpath, outpath, header, max_length, split):
+    """
+    This function documents the configuration.
+
+    :param configpath: The path to where the backup files are saved
+    :param outpath: The path to save the Markdown document to
+    :param header: Header of the configuration being documented
+    :param max_length: The maximum length of the configuration to write to the Markdown document
+    :param split: Split documentation into multiple files
+    """
+
+    # If configurations path exists, continue
+    if os.path.exists(configpath):
+        if split:
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
         with open(outpath, 'a') as md:
-            md.write('# '+header+'\n')
+            md.write('# ' + header + '\n')
 
         pattern = configpath + "*/*"
         for filename in glob.glob(pattern, recursive=True):
             if filename.endswith(".md"):
                 continue
-            ## If path is Directory, skip
+            # If path is Directory, skip
             if os.path.isdir(filename):
                 continue
             # If file is .DS_Store, skip
             if filename == ".DS_Store":
                 continue
 
-            ## Check which format the file is saved as then open file, load data and set query parameter
+            # Check which format the file is saved as then open file, load data and set query parameter
             with open(filename) as f:
-                    if filename.endswith(".yaml"):
-                        data = json.dumps(yaml.safe_load(f))
-                        repo_data = json.loads(data)
-                    elif filename.endswith(".json"):
-                        f = open(filename)
-                        repo_data = json.load(f)
+                if filename.endswith(".yaml"):
+                    data = json.dumps(yaml.safe_load(f))
+                    repo_data = json.loads(data)
+                elif filename.endswith(".json"):
+                    f = open(filename)
+                    repo_data = json.load(f)
 
-                    # Create assignments table
-                    assignments_table = ""
-                    assignments_table = assignment_table(repo_data)
-                    repo_data.pop('assignments', None)
+                # Create assignments table
+                assignments_table = ""
+                assignments_table = assignment_table(repo_data)
+                repo_data.pop('assignments', None)
 
-                    description = ""
-                    if 'description' in repo_data:
-                        if repo_data['description'] != None:
-                            description = repo_data['description']
-                            repo_data.pop('description')
+                description = ""
+                if 'description' in repo_data:
+                    if repo_data['description'] is not None:
+                        description = repo_data['description']
+                        repo_data.pop('description')
 
-                    # Write configuration markdown table
-                    config_table_list = []
-                    for key, value in zip(repo_data.keys(),clean_list(repo_data.values())):
-                        if max_length:
-                            if value and type(value) == str and len(value) > max_length:
-                                value = "Value too long to display"
-                        config_table_list.append([key, value])
-                    config_table = write_table(config_table_list)
+                # Write configuration Markdown table
+                config_table_list = []
+                for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
+                    if max_length:
+                        if value and type(value) == str and len(value) > max_length:
+                            value = "Value too long to display"
+                    config_table_list.append([key, value])
+                config_table = write_table(config_table_list)
 
-                    # Write data to file
-                    with open(outpath, 'a') as md:
-                        if "displayName" in repo_data:
-                            md.write('## '+repo_data['displayName']+'\n')
-                        if "name" in repo_data:
-                            md.write('## '+repo_data['name']+'\n')
-                        if description:
-                            md.write(f'Description: {description} \n')
-                        if assignments_table:
-                            md.write('### Assignments \n')
-                            md.write(str(assignments_table)+'\n')
-                        md.write(str(config_table)+'\n')
+                # Write data to file
+                with open(outpath, 'a') as md:
+                    if "displayName" in repo_data:
+                        md.write('## ' + repo_data['displayName'] + '\n')
+                    if "name" in repo_data:
+                        md.write('## ' + repo_data['name'] + '\n')
+                    if description:
+                        md.write(f'Description: {description} \n')
+                    if assignments_table:
+                        md.write('### Assignments \n')
+                        md.write(str(assignments_table) + '\n')
+                    md.write(str(config_table) + '\n')
 
-def document_management_intents(configpath, outpath,header,split):
-    ## If configurations path exists, continue
-    if os.path.exists(configpath) ==True:
-        if split == True:
+
+def document_management_intents(configpath, outpath, header, split):
+    """
+    This function documents the management intents.
+
+    :param configpath: The path to where the backup files are saved
+    :param outpath: The path to save the Markdown document to
+    :param header: Header of the configuration being documented
+    :param split: Split documentation into multiple files
+    """
+
+    # If configurations path exists, continue
+    if os.path.exists(configpath):
+        if split:
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
         with open(outpath, 'a') as md:
-            md.write('# '+header+'\n')
+            md.write('# ' + header + '\n')
 
         pattern = configpath + "*/*"
         for filename in glob.glob(pattern, recursive=True):
-            ## If path is Directory, skip
+            # If path is Directory, skip
             if os.path.isdir(filename):
                 continue
             # If file is .DS_Store, skip
             if filename == ".DS_Store":
                 continue
 
-            ## Check which format the file is saved as then open file, load data and set query parameter
+            # Check which format the file is saved as then open file, load data and set query parameter
             with open(filename) as f:
-                    if filename.endswith(".yaml"):
-                        data = json.dumps(yaml.safe_load(f))
-                        repo_data = json.loads(data)
-                    elif filename.endswith(".json"):
-                        f = open(filename)
-                        repo_data = json.load(f)
+                if filename.endswith(".yaml"):
+                    data = json.dumps(yaml.safe_load(f))
+                    repo_data = json.loads(data)
+                elif filename.endswith(".json"):
+                    f = open(filename)
+                    repo_data = json.load(f)
 
-                    # Create assignments table
-                    assignments_table = ""
-                    assignments_table = assignment_table(repo_data)
-                    repo_data.pop('assignments', None)
+                # Create assignments table
+                assignments_table = ""
+                assignments_table = assignment_table(repo_data)
+                repo_data.pop('assignments', None)
 
-                    intent_settings_list = []
+                intent_settings_list = []
+                for setting in repo_data['settingsDelta']:
+                    intent_settings_list.append([setting['definitionId'].split("_")[1],
+                                                 str(remove_characters(setting['valueJson']))])
 
-                    for setting in repo_data['settingsDelta']:
-                        intent_settings_list.append([setting['definitionId'].split("_")[1],
-                                                    str(remove_characters(setting['valueJson']))])
+                repo_data.pop('settingsDelta')
 
-                    repo_data.pop('settingsDelta')
+                description = ""
+                if 'description' in repo_data:
+                    if repo_data['description'] is not None:
+                        description = repo_data['description']
+                        repo_data.pop('description')
 
-                    description = ""
-                    if 'description' in repo_data:
-                        if repo_data['description'] != None:
-                            description = repo_data['description']
-                            repo_data.pop('description')
+                intent_table_list = []
 
-                    intent_table_list = []
+                for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
+                    intent_table_list.append([key, value])
 
-                    for key, value in zip(repo_data.keys(),clean_list(repo_data.values())):
-                        intent_table_list.append([key, value])
+                table = intent_table_list + intent_settings_list
 
-                    table = intent_table_list + intent_settings_list
+                config_table = write_table(table)
+                # Write data to file
+                with open(outpath, 'a') as md:
+                    if "displayName" in repo_data:
+                        md.write('## ' + repo_data['displayName'] + '\n')
+                    if "name" in repo_data:
+                        md.write('## ' + repo_data['name'] + '\n')
+                    if description:
+                        md.write(f'Description: {description} \n')
+                    if assignments_table:
+                        md.write('### Assignments \n')
+                        md.write(str(assignments_table) + '\n')
+                    md.write(str(config_table) + '\n')
 
-                    config_table = write_table(table)
-                    # Write data to file
-                    with open(outpath, 'a') as md:
-                        if "displayName" in repo_data:
-                            md.write('## '+repo_data['displayName']+'\n')
-                        if "name" in repo_data:
-                            md.write('## '+repo_data['name']+'\n')
-                        if description:
-                            md.write(f'Description: {description} \n')
-                        if assignments_table:
-                            md.write('### Assignments \n')
-                            md.write(str(assignments_table)+'\n')
-                        md.write(str(config_table)+'\n')
 
 def get_md_files():
+    """
+    This function gets the Markdown files in the current directory.
+    :return: List of Markdown files
+    """
+
     md_files = []
-    patterns = ["*/*.md","*/*/*.md","*/*/*/*.md"]
+    patterns = ["*/*.md", "*/*/*.md", "*/*/*/*.md"]
     for pattern in patterns:
         for filename in glob.glob(pattern, recursive=True):
             md_files.append(f'./{filename}')

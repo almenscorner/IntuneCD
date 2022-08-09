@@ -3,6 +3,8 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/IntuneCD?style=flat-square)
 ![PyPI](https://img.shields.io/pypi/v/IntuneCD?style=flat-square)
 ![Maintenance](https://img.shields.io/maintenance/yes/2022?style=flat-square)
+![Unit tests](https://github.com/almenscorner/IntuneCD/actions/workflows/unit-test.yml/badge.svg)
+![Publish](https://github.com/almenscorner/IntuneCD/actions/workflows/pypi-publish.yml/badge.svg)
 
 ![IntuneCDlogo2](https://user-images.githubusercontent.com/78877636/156755733-b66a4381-9a9a-4663-9d27-e55a1281e1fa.png)
 
@@ -13,6 +15,19 @@ IntuneCD or, Intune Continuous Delivery as it stands for is a Python package tha
 The main function is to back up configurations from Intune to a Git repository from a DEV environment and if any configurations has changed, push them to PROD Intune environment.
 
 The package can also be run standalone outside a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
+
+## What's new in 1.1.2
+- Added new exclusions for backup and update, it's now possible to exclude certain configurations from backup and update.
+  - Example to exclude in backup: `IntuneCD-startbackup -e assignments AppConfigurations Profiles`
+  - Example to exclude in update: `IntuneCD-startupdate -e AppConfigurations Profiles`
+- Added capabilities to update the IntuneCD frontend with data
+  - Once the frontend is available all that will be needed to update with data is to add `-f <frontend_url>` to startbackup and startupdate command and set the API key in ENV variables.
+- Added ability to configure title, intro, tenant and updated lines in the documentation using a JSON string, example:
+  - `-j "{\"title\": \"demo\", \"intro\": \"demo\", \"tenant\": \"demo\", \"updated\": \"demo\"}"`  
+- Added unit tests
+- Changed deprecated OptionParser to ArgumentParser
+- Improved the documentation
+- Improved overall code readability
 
 ## What's new in 1.1.1
 - Added ability to split documentation into categories using `-s Y` in `intunecd-startdocumentation`
@@ -25,28 +40,6 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 - Bugfix for Configuration Profiles not being able to update assignment in a tenant to tenant scenario
 - Bugfix for Windows Autopilot profiles not being able to update assignment in a tenant to tenant scenario
 - Bugfix for assignment updates where updating assignments when creating new configurations were not possible if the group does not exist
-
-## What's new in 1.0.9
-- Bugfix where the script exited with "local variable referenced before assignment" if a management intent does not exist
-- Added a new parameter to let you exclude assignments from backups. To exclude assignments from backup, you can now use `-e assignments` when running IntuneCD-startbackup.
-
-## What's new in 1.0.8
-Main focus for this release has been to improve the performance as large setups can take a while to backup/update. With these enhancements, I was able to cut the run time by 80% in most cases
-
-- Added module to use MS Graph batching to get assignments instead on getting them for each configuration individually
-- General code clean up
-- Added new module for getting and updating assignments, the old one was quite messy
-- For some configurations, additional information is appended to the filename, this is because there might be configurations with the same name
-    - App Configurations (appends odata type)
-    - App Protections (appends management type for ios/android and odata type for windows)
-    - Applications (for Windows it now appends the app type e.g. Win32 and version)
-    - Compliance (appends odata type)
-    - Profiles (appends odata type)
-- All configurations are now requested from the start and matched in script with displayName and/or odata type instead of requesting each configuration based on displayName
-- Management intents are now batched using the new batching module
-- Assignments are now batched using the new batching module
-- If 504 or 502 is encountered while getting configurations, the tool will now try again to get the configuration
-- For Windows apps in documentation, detection scripts etc will now have a "Click to expand..." instead of showing the whole script
 
 ## Install this package
 ```python

@@ -2,57 +2,56 @@
 
 """
 This module backs up all Apple Enrollment Profiles in Intune.
-
-Parameters
-----------
-path : str
-    The path to save the backup to
-output : str
-    The format the backup will be saved as
-token : str
-    The token to use for authenticating the request
 """
-
-import json
-import os
-import yaml
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .graph_batch import batch_request
+from .save_output import save_output
+from .remove_keys import remove_keys
 
-## Set MS Graph endpoint
-endpoint = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSettings/"
+# Set MS Graph endpoint
+ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSettings/"
 
-## Get all Apple Enrollment Profiles and save them in specified path
+
+# Get all Apple Enrollment Profiles and save them in specified path
 def savebackup(path, output, token):
-    configpath = path+"/"+"Enrollment Profiles/Apple/"
-    data = makeapirequest(endpoint, token)
+    """
+    Saves all Apple Enrollment Profiles in Intune to a JSON or YAML file.
 
-    profile_ids = []
-    for profile in data['value']:
-        profile_ids.append(profile['id'])
+    :param path: Path to save the backup to
+    :param output: Format the backup will be saved as
+    :param token: Token to use for authenticating the request
+    """
 
-    batch_profile_data = batch_request(profile_ids,'deviceManagement/depOnboardingSettings/','/enrollmentProfiles',token)
+    config_count = 0
+    configpath = path + "/" + "Enrollment Profiles/Apple/"
+    data = makeapirequest(ENDPOINT, token)
 
-    for profile in batch_profile_data:
-        for value in profile['value']:
-            remove_keys = {'id', 'createdDateTime', 'version',
-                        'lastModifiedDateTime', 'isDefault'}
-            for k in remove_keys:
-                value.pop(k, None)
+    if data['value']:
+        profile_ids = []
+        for profile in data['value']:
+            profile_ids.append(profile['id'])
 
-            print("Backing up Apple enrollment profile: " + value['displayName'])
-            if os.path.exists(configpath) == False:
-                os.makedirs(configpath)
+        batch_profile_data = batch_request(
+            profile_ids,
+            'deviceManagement/depOnboardingSettings/',
+            '/enrollmentProfiles',
+            token)
 
-            ## Get filename without illegal characters
-            fname = clean_filename(value['displayName'])
-            ## Save Apple Enrollment Pofile as JSON or YAML depending on configured value in "-o"
-            if output != "json":
-                with open(configpath+fname+".yaml", 'w') as yamlFile:
-                    yaml.dump(value, yamlFile, sort_keys=False,
-                            default_flow_style=False)
-            else:
-                with open(configpath+fname+".json", 'w') as jsonFile:
-                    json.dump(value, jsonFile, indent=10)
+        for profile in batch_profile_data:
+            config_count += 1
+            for value in profile['value']:
+                value = remove_keys(value)
+
+                print(
+                    "Backing up Apple enrollment profile: " +
+                    value['displayName'])
+
+                # Get filename without illegal characters
+                fname = clean_filename(value['displayName'])
+                # Save Apple Enrollment Profile as JSON or YAML depending on
+                # configured value in "-o"
+                save_output(output, configpath, fname, value)
+
+    return config_count
