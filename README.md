@@ -41,10 +41,6 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 - Bugfix for Windows Autopilot profiles not being able to update assignment in a tenant to tenant scenario
 - Bugfix for assignment updates where updating assignments when creating new configurations were not possible if the group does not exist
 
-## What's new in 1.0.9
-- Bugfix where the script exited with "local variable referenced before assignment" if a management intent does not exist
-- Added a new parameter to let you exclude assignments from backups. To exclude assignments from backup, you can now use `-e assignments` when running IntuneCD-startbackup.
-
 ## Install this package
 ```python
 pip install IntuneCD
