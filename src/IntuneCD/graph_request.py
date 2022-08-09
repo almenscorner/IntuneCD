@@ -25,7 +25,7 @@ def makeapirequest(endpoint, token, q_param=None):
     if q_param is not None:
         response = requests.get(endpoint, headers=headers, params=q_param)
         if response.status_code == 504 or response.status_code == 502 or response.status_code == 503:
-            print('Ran into issues with Graph request, waiting 5 seconds and trying again...')
+            print('Ran into issues with Graph request, waiting 10 seconds and trying again...')
             time.sleep(10)
             response = requests.get(endpoint, headers=headers)
     else:
