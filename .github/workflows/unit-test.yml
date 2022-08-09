@@ -40,6 +40,7 @@ jobs:
         pytest --cov-report=xml --cov=src/IntuneCD tests/
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
+      if: matrix.python-version == 3.8
       with:
         files: ./coverage.xml
         flags: unittests
