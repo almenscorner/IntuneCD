@@ -31,10 +31,7 @@ def match(platform, input) -> bool:
     string = f'.*{platform}.*$'
     pattern = re.compile(string)
     match = pattern.match(input, re.IGNORECASE)
-    if match:
-        return True
-    else:
-        return False
+    return bool(match)
 
 
 # Get all applications and save them in specified path
@@ -66,6 +63,7 @@ def savebackup(path, output, exclude, token):
                 app['assignments'] = assignments
 
         app = remove_keys(app)
+        app.pop('description', None)
 
         # If app type is VPP, add Apple ID to the name as the app can exist
         # multiple times
