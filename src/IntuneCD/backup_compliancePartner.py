@@ -31,16 +31,15 @@ def savebackup(path, output, token):
         if partner['partnerState'] == "unknown":
             continue
 
-        else:
-            config_count += 1
-            print("Backing up Compliance Partner: " + partner['displayName'])
+        config_count += 1
+        print("Backing up Compliance Partner: " + partner['displayName'])
 
-            partner = remove_keys(partner)
+        partner = remove_keys(partner)
 
-            # Get filename without illegal characters
-            fname = clean_filename(partner['displayName'])
-            # Save Compliance policy as JSON or YAML depending on configured
-            # value in "-o"
-            save_output(output, configpath, fname, partner)
+        # Get filename without illegal characters
+        fname = clean_filename(partner['displayName'])
+        # Save Compliance policy as JSON or YAML depending on configured
+        # value in "-o"
+        save_output(output, configpath, fname, partner)
 
     return config_count
