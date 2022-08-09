@@ -5,6 +5,7 @@ This module contains the functions to run the documentation.
 """
 
 import os
+import json
 import argparse
 
 from datetime import datetime
@@ -36,6 +37,11 @@ def start():
         default='This document contains documentation of all configurations exported by the IntuneCD tool'
     )
     parser.add_argument(
+        '-j', '--jsondata',
+        help='Lets you configure line 1-4 using a JSON string: "{\\"title\\": \\"demo\\", \\"intro\\": \\"demo\\", '
+             '\\"tenant\\": \\"demo\\", \\"updated\\": \\"demo\\"}" '
+    )
+    parser.add_argument(
         '-m', '--maxlength',
         help='Maximum length of the configuration value, values with a higher count will be displayed with "Value '
              'too long to display"',
@@ -49,7 +55,7 @@ def start():
 
     args = parser.parse_args()
 
-    def run_documentation(configpath, outpath, tenantname, maxlength, split):
+    def run_documentation(configpath, outpath, tenantname, jsondata,  maxlength, split):
 
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -136,16 +142,40 @@ def start():
         # Document Settings Catalog
         document_configs(f'{configpath}/Settings Catalog', outpath, 'Settings Catalog', maxlength, split)
 
+        if jsondata:
+            json_dict = json.loads(jsondata)
+            if "title" in json_dict:
+                title = json_dict["title"]
+            else:
+                title = "MEM Documentation"
+            if "intro" in json_dict:
+                intro = json_dict["intro"]
+            else:
+                intro = args.intro
+            if "tenant" in json_dict:
+                tenant = json_dict["tenant"]
+            else:
+                tenant = f'**Tenant:** {tenantname}'
+            if "updated" in json_dict:
+                updated = json_dict["updated"]
+            else:
+                updated = f'**Document updated on:**'
+        else:
+            title = "MEM Documentation"
+            intro = args.intro
+            tenant = f'**Tenant:** {tenantname}'
+            updated = f'**Document updated on:**'
+
         if split:
             files = get_md_files()
             index_md = f'{configpath}/index.md'
             md_file(index_md)
 
             with open(index_md, 'w') as doc:
-                l1 = '# MEM Documentation \n\n'
-                l2 = f'{args.intro} \n\n'
-                l3 = f'**Tenant:** {tenantname} \n\n'
-                l4 = f'**Document updated on:** {current_date} \n\n'
+                l1 = f'# {title} \n\n'
+                l2 = f'{intro} \n\n'
+                l3 = f'{tenant} \n\n'
+                l4 = f'{updated} {current_date} \n\n'
                 l5 = '## File index \n\n'
                 doc.writelines([l1, l2, l3, l4, l5])
                 for file in files:
@@ -154,13 +184,13 @@ def start():
         else:
             document = markdown_toclify(input_file=outpath, back_to_top=True, exclude_h=[3])
             with open(outpath, 'w') as doc:
-                l1 = '# MEM Documentation \n\n'
-                l2 = f'{args.intro} \n\n'
-                l3 = f'**Tenant:** {tenantname} \n\n'
-                l4 = f'**Document updated on:** {current_date} \n\n'
+                l1 = f'# {title} \n\n'
+                l2 = f'{intro} \n\n'
+                l3 = f'{tenant} \n\n'
+                l4 = f'{updated} {current_date} \n\n'
                 doc.writelines([l1, l2, l3, l4, document])
 
-    run_documentation(args.path, args.outpath, args.tenantname, args.maxlength, args.split)
+    run_documentation(args.path, args.outpath, args.tenantname, args.jsondata, args.maxlength, args.split)
 
 
 if __name__ == '__main__':
