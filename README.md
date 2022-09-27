@@ -7,7 +7,7 @@
 ![Publish](https://github.com/almenscorner/IntuneCD/actions/workflows/pypi-publish.yml/badge.svg)
 [![codecov](https://codecov.io/gh/almenscorner/IntuneCD/branch/main/graph/badge.svg?token=SNTOJ0N5MU)](https://codecov.io/gh/almenscorner/IntuneCD)
 
-![IntuneCDlogo2](https://user-images.githubusercontent.com/78877636/156755733-b66a4381-9a9a-4663-9d27-e55a1281e1fa.png)
+![icdlogo](https://user-images.githubusercontent.com/78877636/192514344-ab4e3fd5-8d6a-40d6-a56c-814c0149373f.png)
 
 # IntuneCD tool
 
@@ -16,6 +16,9 @@ IntuneCD or, Intune Continuous Delivery as it stands for is a Python package tha
 The main function is to back up configurations from Intune to a Git repository from a DEV environment and if any configurations has changed, push them to PROD Intune environment.
 
 The package can also be run standalone outside a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
+
+# Exiting news 📣
+The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-frontend)
 
 ## What's new in 1.1.2
 - Added new exclusions for backup and update, it's now possible to exclude certain configurations from backup and update.
