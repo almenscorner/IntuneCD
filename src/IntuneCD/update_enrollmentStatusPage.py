@@ -74,6 +74,26 @@ def update(path, token, assignment=False):
                     # Remove keys before using DeepDiff
                     mem_data['value'][0] = remove_keys(mem_data['value'][0])
 
+                    # Get application ID of configured apps
+                    if 'selectedMobileAppNames' in repo_data:
+                        app_ids = []
+                        
+                        for app in repo_data['selectedMobileAppNames']:
+                            q_param = {
+                            "$filter": f"(isof('{str(app['type']).replace('#','')}'))", 
+                            "$search": '"' + app['name'] + '"'}
+
+                            app_request = makeapirequest(
+                                APP_ENDPOINT, token, q_param)
+                            if app_request['value']:
+                                app_ids.append(app_request['value'][0]['id'])
+
+                        if app_ids:
+                            repo_data.pop('selectedMobileAppNames', None)
+                            repo_data['selectedMobileAppIds'] = app_ids
+                        else:
+                            print("No app found with name: " + app['name'])
+
                     diff = DeepDiff(
                         data['value'],
                         repo_data,
@@ -89,26 +109,6 @@ def update(path, token, assignment=False):
                         values = get_diff_output(diff)
                         for value in values:
                             print(value)
-                        
-                        # Get application ID of configured apps
-                        if 'selectedMobileAppNames' in repo_data:
-                            app_ids = []
-                            
-                            for app in repo_data['selectedMobileAppNames']:
-                                q_param = {
-                                "$filter": f"(isof('{str(app['type']).replace('#','')}'))", 
-                                "$search": '"' + app['name'] + '"'}
-
-                                app_request = makeapirequest(
-                                    APP_ENDPOINT, token, q_param)
-                                if app_request['value']:
-                                    app_ids.append(app_request['value'][0]['id'])
-
-                            if app_ids:
-                                repo_data.pop('selectedMobileAppNames', None)
-                                repo_data['selectedMobileAppIds'] = app_ids
-                            else:
-                                print("No apps found with name: " + app['name'])
 
                         repo_data.pop('priority', None)
 
