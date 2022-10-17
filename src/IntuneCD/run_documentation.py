@@ -118,6 +118,9 @@ def start():
         document_configs(f'{configpath}/Enrollment Profiles/Windows', outpath, 'Windows Enrollment Profiles', maxlength,
                          split)
 
+        # Document Enrollment Status Page profiles
+        document_configs(f'{configpath}/Enrollment Profiles/Windows/ESP', outpath, 'Enrollment Status Page', maxlength, split)
+
         # Document filters
         document_configs(f'{configpath}/Filters', outpath, 'Filters', maxlength, split)
 
