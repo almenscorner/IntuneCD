@@ -67,6 +67,7 @@ def start():
             "GPOConfigurations",
             "AppleEnrollmentProfile",
             "WindowsEnrollmentProfile",
+            "EnrollmentStatusPage",
             "Filters",
             "ManagedGooglePlay",
             "Intents",
@@ -149,6 +150,10 @@ def start():
 
         if "WindowsEnrollmentProfile" not in exclude:
             from .backup_windowsEnrollmentProfile import savebackup
+            config_count += savebackup(path, output, exclude, token)
+
+        if "EnrollmentStatusPage" not in exclude:
+            from .backup_enrollmentStatusPage import savebackup
             config_count += savebackup(path, output, exclude, token)
 
         if "Filters" not in exclude:
