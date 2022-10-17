@@ -86,7 +86,7 @@ def start():
         type=str)
     parser.add_argument(
         "-ap", "--autopilot",
-        help="If set, a record of autopilot devices will be saved"
+        help="If set to True, a record of autopilot devices will be saved"
     )
 
     args = parser.parse_args()
