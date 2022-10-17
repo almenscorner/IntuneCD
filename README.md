@@ -16,6 +16,10 @@ The main function is to back up configurations from Intune to a Git repository f
 
 The package can also be run standalone outside a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
+# What's new in 1.1.3
+- Added backup and update of,
+  - Enrollment Status Page
+
 ## What's new in 1.1.2
 - Added new exclusions for backup and update, it's now possible to exclude certain configurations from backup and update.
   - Example to exclude in backup: `IntuneCD-startbackup -e assignments AppConfigurations Profiles`
@@ -34,12 +38,6 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 - Added ability to set max length of output in documentation using `-m {int_value}` in `intunecd-startdocumentation`
 - Added backup and documentation of Group Policy Configurations
 - Added retry if 503 is encountered during a graph call
-
-## What's new in 1.1.0
-- Bugfix for App Protection policies not being able to be created in a tenant to tenant scenario
-- Bugfix for Configuration Profiles not being able to update assignment in a tenant to tenant scenario
-- Bugfix for Windows Autopilot profiles not being able to update assignment in a tenant to tenant scenario
-- Bugfix for assignment updates where updating assignments when creating new configurations were not possible if the group does not exist
 
 ## Install this package
 ```python
