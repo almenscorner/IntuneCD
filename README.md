@@ -5,8 +5,9 @@
 ![Maintenance](https://img.shields.io/maintenance/yes/2022?style=flat-square)
 ![Unit tests](https://github.com/almenscorner/IntuneCD/actions/workflows/unit-test.yml/badge.svg)
 ![Publish](https://github.com/almenscorner/IntuneCD/actions/workflows/pypi-publish.yml/badge.svg)
+[![codecov](https://codecov.io/gh/almenscorner/IntuneCD/branch/main/graph/badge.svg?token=SNTOJ0N5MU)](https://codecov.io/gh/almenscorner/IntuneCD)
 
-![IntuneCDlogo2](https://user-images.githubusercontent.com/78877636/156755733-b66a4381-9a9a-4663-9d27-e55a1281e1fa.png)
+![icdlogo](https://user-images.githubusercontent.com/78877636/192514344-ab4e3fd5-8d6a-40d6-a56c-814c0149373f.png)
 
 # IntuneCD tool
 
