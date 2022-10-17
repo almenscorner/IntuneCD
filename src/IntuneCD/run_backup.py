@@ -84,6 +84,10 @@ def start():
         "--frontend",
         help="Set the frontend URL to update with configuration count and backup stream",
         type=str)
+    parser.add_argument(
+        "-ap", "--autopilot",
+        help="If set, a record of autopilot devices will be saved"
+    )
 
     args = parser.parse_args()
 
@@ -155,6 +159,10 @@ def start():
         if "EnrollmentStatusPage" not in exclude:
             from .backup_enrollmentStatusPage import savebackup
             config_count += savebackup(path, output, exclude, token)
+        
+        if args.autopilot == "True":
+            from .backup_autopilotDevices import savebackup
+            savebackup(path, output, token)
 
         if "Filters" not in exclude:
             from .backup_assignmentFilters import savebackup
