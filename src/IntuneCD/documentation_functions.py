@@ -170,7 +170,7 @@ def document_configs(configpath, outpath, header, max_length, split):
             md.write('# ' + header + '\n')
 
         pattern = configpath + "*/*"
-        for filename in glob.glob(pattern, recursive=True):
+        for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
             if filename.endswith(".md"):
                 continue
             # If path is Directory, skip
@@ -242,7 +242,7 @@ def document_management_intents(configpath, outpath, header, split):
             md.write('# ' + header + '\n')
 
         pattern = configpath + "*/*"
-        for filename in glob.glob(pattern, recursive=True):
+        for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
             # If path is Directory, skip
             if os.path.isdir(filename):
                 continue
