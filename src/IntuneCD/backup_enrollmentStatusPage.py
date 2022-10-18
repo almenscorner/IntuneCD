@@ -55,8 +55,9 @@ def savebackup(path, output, exclude, token):
                     app_data = makeapirequest(APP_ENDPOINT + "/" + app_id, token)
                     app = {'name': app_data['displayName'], 'type': app_data['@odata.type']}
                     app_names.append(app)
-                profile.pop('selectedMobileAppIds', None)
-                profile['selectedMobileAppNames'] = app_names
+                if app_names:
+                    profile.pop('selectedMobileAppIds', None)
+                    profile['selectedMobileAppNames'] = app_names
 
             print("Backing up Enrollment Status Page: " +
                 profile['displayName'])
