@@ -20,6 +20,11 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exiting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## What's new in 1.1.3
+- Added backup and update of Enrollment Status Page
+- Configurations are now documented in alphabetical order
+- Added the ability to backup all Autopilot devices. To save a record of your Autopilot devices, run the backup with the `-ap True` parameter
+
 ## What's new in 1.1.2
 - Added new exclusions for backup and update, it's now possible to exclude certain configurations from backup and update.
   - Example to exclude in backup: `IntuneCD-startbackup -e assignments AppConfigurations Profiles`
@@ -38,12 +43,6 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 - Added ability to set max length of output in documentation using `-m {int_value}` in `intunecd-startdocumentation`
 - Added backup and documentation of Group Policy Configurations
 - Added retry if 503 is encountered during a graph call
-
-## What's new in 1.1.0
-- Bugfix for App Protection policies not being able to be created in a tenant to tenant scenario
-- Bugfix for Configuration Profiles not being able to update assignment in a tenant to tenant scenario
-- Bugfix for Windows Autopilot profiles not being able to update assignment in a tenant to tenant scenario
-- Bugfix for assignment updates where updating assignments when creating new configurations were not possible if the group does not exist
 
 ## Install this package
 ```python
@@ -67,6 +66,7 @@ pip install IntuneCD --upgrade
 | Device Configurations                |   :tada:    | :tada: |  :tada:  |   :tada:    | For custom macOS and iOS configurations,</br>mobileconfigs are backed up                                                                                  |
 | Group Policy Configurations          |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
 | Enrollment profiles                  | :tada: [^1] | :tada: |  :tada:  | :tada: [^2] |                                                                                                                                                           |
+| Enrollment Status Page               |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
 | Endpoint Security                    |   :tada:    | :tada: |  :tada:  |   :tada:    | Security Baselines</br>Antivirus</br>Disk Encryption</br>Firewall</br>Endpoint Detection and Response</br>Attack Surface Reduction</br>Account Protection |
 | Filters                              |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
 | Managed Google Play                  |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |

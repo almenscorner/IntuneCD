@@ -63,6 +63,7 @@ def start():
             "Profiles",
             "AppleEnrollmentProfile",
             "WindowsEnrollmentProfile",
+            "EnrollmentStatusPage",
             "Filters",
             "Intents",
             "ProactiveRemediation",
@@ -120,6 +121,10 @@ def start():
 
         if "WindowsEnrollmentProfile" not in exclude:
             from .update_windowsEnrollmentProfile import update
+            diff_count += update(path, token, assignment)
+
+        if "EnrollmentStatusPage" not in exclude:
+            from .update_enrollmentStatusPage import update
             diff_count += update(path, token, assignment)
 
         if "Filters" not in exclude:
