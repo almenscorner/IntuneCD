@@ -17,7 +17,7 @@ The main function is to back up configurations from Intune to a Git repository f
 
 The package can also be run standalone outside a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
-# Exiting news 📣
+# Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
 ## What's new in 1.1.3
