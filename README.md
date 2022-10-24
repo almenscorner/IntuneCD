@@ -44,6 +44,11 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 - Added backup and documentation of Group Policy Configurations
 - Added retry if 503 is encountered during a graph call
 
+## I use Powershell, Do I need to learn Python?
+No.
+
+Just install Python and IntuneCD, that's it!
+
 ## Install this package
 ```python
 pip install IntuneCD
