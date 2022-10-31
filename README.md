@@ -17,18 +17,13 @@ The main function is to back up configurations from Intune to a Git repository f
 
 The package can also be run standalone outside a pipeline, or in one to only backup data. Since 1.0.4, configurations are also created if they cannot be found. This means this tool could be used in a tenant to tenant migration scenario as well.
 
-# Exiting news 📣
+# Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
-
-## What's new in 1.1.4
-- Bugfix where filters was not able to be updated with new values
-- Bugfix where notification templates was not able to be updated with new values
-- Update to how management intents are compared for diffs. Before there was a small chance it compared the wrong definitionId
 
 ## What's new in 1.1.3
 - Added backup and update of Enrollment Status Page
 - Configurations are now documented in alphabetical order
-- Added the ability to back up all Autopilot devices. To save a record of your Autopilot devices, run the backup with the `-ap True` parameter
+- Added the ability to backup all Autopilot devices. To save a record of your Autopilot devices, run the backup with the `-ap True` parameter
 
 ## What's new in 1.1.2
 - Added new exclusions for backup and update, it's now possible to exclude certain configurations from backup and update.
@@ -42,6 +37,17 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 - Changed deprecated OptionParser to ArgumentParser
 - Improved the documentation
 - Improved overall code readability
+
+## What's new in 1.1.1
+- Added ability to split documentation into categories using `-s Y` in `intunecd-startdocumentation`
+- Added ability to set max length of output in documentation using `-m {int_value}` in `intunecd-startdocumentation`
+- Added backup and documentation of Group Policy Configurations
+- Added retry if 503 is encountered during a graph call
+
+## I use Powershell, Do I need to learn Python?
+No.
+
+Just install Python and IntuneCD, that's it!
 
 ## Install this package
 ```python

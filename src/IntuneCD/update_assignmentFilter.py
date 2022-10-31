@@ -57,6 +57,9 @@ def update(path, token):
                     filter_id = filter_value['id']
                     filter_value = remove_keys(filter_value)
 
+                    filter_value.pop("payloads", None)
+                    repo_data.pop("payloads", None)
+
                     diff = DeepDiff(
                         filter_value, repo_data, ignore_order=True).get(
                         'values_changed', {})
