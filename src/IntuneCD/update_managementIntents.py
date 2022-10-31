@@ -14,7 +14,6 @@ from .graph_batch import batch_intents, batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
 from .load_file import load_file
 from .get_diff_output import get_diff_output
-from .save_output import save_output
 
 # Set MS Graph base endpoint
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
