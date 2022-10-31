@@ -67,6 +67,7 @@ def update(path, token, assignment=False):
                 for intent in intent_responses['value']:
                     if repo_data['displayName'] == intent['displayName'] and \
                             repo_data['templateId'] == intent['templateId']:
+
                         mem_data = intent
 
                 # If Intent exists, continue
@@ -76,15 +77,15 @@ def update(path, token, assignment=False):
                           repo_data['displayName'] + " has any updates")
 
                     # Compare category settings from Intune with JSON/YAML
-                    for mem_setting, repo_setting in zip(
-                            mem_data['settingsDelta'], repo_data['settingsDelta']):
-
-                        mem_setting_id = mem_setting['id']
-                        mem_setting.pop('id', None)
-
-                        diff = DeepDiff(
-                            mem_setting, repo_setting, ignore_order=True).get(
-                            'values_changed', {})
+                    for repo_setting in repo_data['settingsDelta']:
+                        for mem_setting in mem_data['settingsDelta']:
+                            if 'id' in mem_setting:
+                                mem_setting_id = mem_setting['id']
+                                mem_setting.pop('id', None)
+                            if repo_setting['definitionId'] == mem_setting['definitionId']:
+                                diff = DeepDiff(
+                                    mem_setting, repo_setting, ignore_order=True).get(
+                                    'values_changed', {})
 
                         # If any changed values are found, push them to Intune
                         if diff:
