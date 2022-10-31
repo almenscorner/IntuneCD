@@ -120,6 +120,7 @@ def update(path, token):
                             for value in values:
                                 print(value)
                             repo_locale.pop('isDefault', None)
+                            repo_locale.pop('locale', None)
                             request_data = json.dumps(repo_locale)
                             q_param = None
                             makeapirequestPatch(
