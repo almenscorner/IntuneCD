@@ -106,7 +106,7 @@ class TestDocumentationFunctions(unittest.TestCase):
             "config/test_file_name.json",
             '{"test": "test", "name": "test", "description": "test", "assignments": [{"intent": "apply", "target": {"@odata.type": "#test", "groupName": "test-group", "deviceAndAppManagementAssignmentFilterId": "test-filter", "deviceAndAppManagementAssignmentFilterType": "test"}}]}',
             encoding="utf-8")
-        self.expected_data = '#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter||setting|value||-------|-----||test|test||name|test|'
+        self.expected_data = '#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter||setting|value||-------|-----||Test|test||Name|test|'
 
         document_configs(
             f"{self.directory.path}/config",
