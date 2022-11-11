@@ -77,7 +77,8 @@ def start():
             "ProactiveRemediation",
             "PowershellScripts",
             "ShellScripts",
-            "ConfigurationPolicies"],
+            "ConfigurationPolicies",
+            "ConditionalAccess"],
         nargs='+')
     parser.add_argument(
         "-f",
@@ -203,6 +204,10 @@ def start():
         if "ConfigurationPolicies" not in exclude:
             from .backup_configurationPolicies import savebackup
             config_count += savebackup(path, output, exclude, token)
+
+        if "ConditionalAccess" not in exclude:
+            from .backup_conditionalAccess import savebackup
+            config_count += savebackup(path, output, token)
 
         return config_count
 
