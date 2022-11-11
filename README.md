@@ -41,19 +41,6 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 - Configurations are now documented in alphabetical order
 - Added the ability to back up all Autopilot devices. To save a record of your Autopilot devices, run the backup with the `-ap True` parameter
 
-## What's new in 1.1.2
-- Added new exclusions for backup and update, it's now possible to exclude certain configurations from backup and update.
-  - Example to exclude in backup: `IntuneCD-startbackup -e assignments AppConfigurations Profiles`
-  - Example to exclude in update: `IntuneCD-startupdate -e AppConfigurations Profiles`
-- Added capabilities to update the IntuneCD frontend with data
-  - Once the frontend is available all that will be needed to update with data is to add `-f <frontend_url>` to startbackup and startupdate command and set the API key in ENV variables.
-- Added ability to configure title, intro, tenant and updated lines in the documentation using a JSON string, example:
-  - `-j "{\"title\": \"demo\", \"intro\": \"demo\", \"tenant\": \"demo\", \"updated\": \"demo\"}"`  
-- Added unit tests
-- Changed deprecated OptionParser to ArgumentParser
-- Improved the documentation
-- Improved overall code readability
-
 ## I use Powershell, Do I need to learn Python?
 No.
 
