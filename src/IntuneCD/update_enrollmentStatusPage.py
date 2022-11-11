@@ -6,7 +6,6 @@ This module is used to update all Windows Enrollment Status Page Profiles in Int
 
 import json
 import os
-import urllib.parse
 
 from deepdiff import DeepDiff
 from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
