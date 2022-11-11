@@ -8,6 +8,7 @@ import yaml
 import json
 import os
 import glob
+import re
 
 from pytablewriter import MarkdownTableWriter
 
@@ -34,7 +35,7 @@ def write_table(data):
 
     writer = MarkdownTableWriter(
         headers=['setting', 'value'],
-        value_matrix=data
+        value_matrix=data,
     )
 
     return writer
@@ -203,9 +204,24 @@ def document_configs(configpath, outpath, header, max_length, split):
                 # Write configuration Markdown table
                 config_table_list = []
                 for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
+                    if key == "@odata.type":
+                        key = "Odata type"
+                    else:
+                        key = key[0].upper() + key[1:]
+                        key = re.findall('[A-Z][^A-Z]*', key)
+                        key = ' '.join(key)
                     if max_length:
                         if value and type(value) == str and len(value) > max_length:
                             value = "Value too long to display"
+                    if value and type(value) == str:
+                        if len(value.split(",")) > 1:
+                            vals = []
+                            for v in value.split(','):
+                                v = v.replace(' ', '')
+                                v = f'**{v.replace(":", ":** ")}'
+                                vals.append(v)
+                            value = ",".join(vals)
+                            value = value.replace(',', '<br />')
                     config_table_list.append([key, value])
                 config_table = write_table(config_table_list)
 

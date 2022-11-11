@@ -34,7 +34,8 @@ def remove_keys(data):
         'lastSyncDateTime',
         'isReadOnly',
         'secretReferenceValueId',
-        'isEncrypted'}
+        'isEncrypted',
+        'modifiedDateTime'}
     for k in keys:
         data.pop(k, None)
 
