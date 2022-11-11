@@ -103,6 +103,9 @@ def start():
         document_configs(f'{configpath}/Compliance Policies/Message Templates', outpath, 'Message Templates', maxlength,
                          split)
 
+        # Conditional Access
+        document_configs(f'{configpath}/Conditional Access', outpath, 'Conditional Access', maxlength, split)
+
         # Document profiles
         document_configs(f'{configpath}/Device Configurations', outpath, 'Configuration Profiles', maxlength, split)
 
