@@ -25,7 +25,7 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
   - If a setting within a table cell has multiple entries, they are now separated by a new line instead of just a comma
   - Setting name is now separated, for example, `dataRoamingBlocked` will be `Data Roaming Blocked`
 - Conditional access
-  - Conditional access is now backed up, this means you will have to add additional permissions to the Azure AD App Registration. More information can be found under `Required Azure AD application Graph API permissions`.
+  - Conditional access is now backed up, this means you will have to add additional permissions to the Azure AD App Registration. More information can be found under [Required Azure AD application Graph API permissions](#required-azure-ad-application-graph-api-permissions).
   - If you do not wish to back up/update Conditional access, make sure you add it to exclusions
     - `IntuneCD-startbackup -e ConditionalAccess`
     - `IntuneCD-startupdate -e ConditionalAccess`
@@ -65,7 +65,7 @@ pip install IntuneCD --upgrade
 | Application Protection Policies     |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           | 
 | Applications                        |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
 | Compliance Policies                 |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Conditional Access                  |   :tada:    | :tada: |  :tada   |   :tada:    | Assignments are not updated currently                                                                                                                     |
+| Conditional Access                  |   :tada:    | :tada: |  :tada:  |   :tada:    | Assignments are not updated currently                                                                                                                     |
 | Device Configurations               |   :tada:    | :tada: |  :tada:  |   :tada:    | For custom macOS and iOS configurations,</br>mobileconfigs are backed up                                                                                  |
 | Group Policy Configurations         |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
 | Enrollment profiles                 | :tada: [^1] | :tada: |  :tada:  | :tada: [^2] |                                                                                                                                                           |
