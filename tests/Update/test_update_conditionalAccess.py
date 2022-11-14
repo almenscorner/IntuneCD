@@ -97,6 +97,17 @@ class TestUpdateConditionalAccess(unittest.TestCase):
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
 
+    def test_update_config_no_id(self):
+        """The count should be 0 and makeapirequestPost should not be called."""
+
+        self.mem_data["value"][0].pop('id')
+        self.makeapirequest.return_value = self.mem_data
+
+        self.count = update(self.directory.path, self.token)
+
+        self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPost.call_count, 0)
+
 
 if __name__ == '__main__':
     unittest.main()
