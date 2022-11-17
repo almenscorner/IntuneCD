@@ -69,7 +69,8 @@ def start():
             "ProactiveRemediation",
             "PowershellScripts",
             "ShellScripts",
-            "ConfigurationPolicies"],
+            "ConfigurationPolicies",
+            "ConditionalAccess"],
         nargs='+')
 
     args = parser.parse_args()
@@ -150,6 +151,10 @@ def start():
         if "ConfigurationPolicies" not in exclude:
             from .update_configurationPolicies import update
             diff_count += update(path, token, assignment)
+
+        if "ConditionalAccess" not in exclude:
+            from .update_conditionalAccess import update
+            diff_count += update(path, token)
 
         return diff_count
 

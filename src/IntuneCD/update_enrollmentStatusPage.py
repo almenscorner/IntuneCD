@@ -6,7 +6,6 @@ This module is used to update all Windows Enrollment Status Page Profiles in Int
 
 import json
 import os
-import urllib.parse
 
 from deepdiff import DeepDiff
 from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
@@ -50,8 +49,7 @@ def update(path, token, assignment=False):
             file = check_file(configpath, filename)
             if file is False:
                 continue
-            # Check which format the file is saved as then open file, load data
-            # and set query parameter
+            # Check which format the file is saved as then open file, load data and set query parameter
             with open(file) as f:
                 repo_data = load_file(filename, f)
 

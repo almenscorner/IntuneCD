@@ -20,6 +20,17 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## What's new in 1.2.0
+- Improvements to documentation
+  - If a setting within a table cell has multiple entries, they are now separated by a new line instead of just a comma
+  - Setting name is now separated, for example, `dataRoamingBlocked` will be `Data Roaming Blocked`
+- Conditional access :tada:
+  - Conditional access is now backed up, this means you will **have to add additional permissions to the Azure AD App Registration**. More information can be found under [Required Azure AD application Graph API permissions](#required-azure-ad-application-graph-api-permissions).
+  - If you do not wish to back up/update Conditional access, make sure you add it to exclusions
+    - `IntuneCD-startbackup -e ConditionalAccess`
+    - `IntuneCD-startupdate -e ConditionalAccess`
+  - Assignments are currently not updated, changes to settings on policies are detected however and updated
+
 ## What's new in 1.1.4
 - Bugfix where filters was not able to be updated with new values
 - Bugfix where notification templates was not able to be updated with new values
@@ -28,20 +39,7 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 ## What's new in 1.1.3
 - Added backup and update of Enrollment Status Page
 - Configurations are now documented in alphabetical order
-- Added the ability to backup all Autopilot devices. To save a record of your Autopilot devices, run the backup with the `-ap True` parameter
-
-## What's new in 1.1.2
-- Added new exclusions for backup and update, it's now possible to exclude certain configurations from backup and update.
-  - Example to exclude in backup: `IntuneCD-startbackup -e assignments AppConfigurations Profiles`
-  - Example to exclude in update: `IntuneCD-startupdate -e AppConfigurations Profiles`
-- Added capabilities to update the IntuneCD frontend with data
-  - Once the frontend is available all that will be needed to update with data is to add `-f <frontend_url>` to startbackup and startupdate command and set the API key in ENV variables.
-- Added ability to configure title, intro, tenant and updated lines in the documentation using a JSON string, example:
-  - `-j "{\"title\": \"demo\", \"intro\": \"demo\", \"tenant\": \"demo\", \"updated\": \"demo\"}"`  
-- Added unit tests
-- Changed deprecated OptionParser to ArgumentParser
-- Improved the documentation
-- Improved overall code readability
+- Added the ability to back up all Autopilot devices. To save a record of your Autopilot devices, run the backup with the `-ap True` parameter
 
 ## I use Powershell, Do I need to learn Python?
 No.
@@ -59,27 +57,28 @@ pip install IntuneCD --upgrade
 ```
 
 ## What is backed up, updated, created and documented?
-| Payload                              |   Back up   | Update | Document |   Create    | Notes                                                                                                                                                     |
-|--------------------------------------|:-----------:|:------:|:--------:|:-----------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Apple Push Notification              |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Payload                             |   Back up   | Update | Document |   Create    | Notes                                                                                                                                                     |
+|-------------------------------------|:-----------:|:------:|:--------:|:-----------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Apple Push Notification             |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
 | Apple Volume Purchase Program tokens |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
-| Application Configuration Policies   |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Application Protection Policies      |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           | 
-| Applications                         |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
-| Compliance Policies                  |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Device Configurations                |   :tada:    | :tada: |  :tada:  |   :tada:    | For custom macOS and iOS configurations,</br>mobileconfigs are backed up                                                                                  |
-| Group Policy Configurations          |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
-| Enrollment profiles                  | :tada: [^1] | :tada: |  :tada:  | :tada: [^2] |                                                                                                                                                           |
-| Enrollment Status Page               |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Endpoint Security                    |   :tada:    | :tada: |  :tada:  |   :tada:    | Security Baselines</br>Antivirus</br>Disk Encryption</br>Firewall</br>Endpoint Detection and Response</br>Attack Surface Reduction</br>Account Protection |
-| Filters                              |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Managed Google Play                  |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
-| Notification Templates               |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Proactive Remediations               |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Partner Connections                  |   :tada:    |        |  :tada:  |             | Compliance</br>Management</br>Remote Assistance                                                                                                           |
-| Shell Scripts                        |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Powershell Scripts                   |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
-| Settings Catalog Policies            |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Application Configuration Policies  |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Application Protection Policies     |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           | 
+| Applications                        |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Compliance Policies                 |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Conditional Access                  |   :tada:    | :tada: |  :tada:  |   :tada:    | Assignments are not updated currently                                                                                                                     |
+| Device Configurations               |   :tada:    | :tada: |  :tada:  |   :tada:    | For custom macOS and iOS configurations,</br>mobileconfigs are backed up                                                                                  |
+| Group Policy Configurations         |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Enrollment profiles                 | :tada: [^1] | :tada: |  :tada:  | :tada: [^2] |                                                                                                                                                           |
+| Enrollment Status Page              |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Endpoint Security                   |   :tada:    | :tada: |  :tada:  |   :tada:    | Security Baselines</br>Antivirus</br>Disk Encryption</br>Firewall</br>Endpoint Detection and Response</br>Attack Surface Reduction</br>Account Protection |
+| Filters                             |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Managed Google Play                 |   :tada:    |        |  :tada:  |             |                                                                                                                                                           |
+| Notification Templates              |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Proactive Remediation               |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Partner Connections                 |   :tada:    |        |  :tada:  |             | Compliance</br>Management</br>Remote Assistance                                                                                                           |
+| Shell Scripts                       |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Powershell Scripts                  |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
+| Settings Catalog Policies           |   :tada:    | :tada: |  :tada:  |   :tada:    |                                                                                                                                                           |
 
 [^1]: Only Apple Business Manager and Windows Autopilot profiles are backed up.
 [^2]: Only Windows Autopilot profiles are created.
@@ -89,6 +88,8 @@ pip install IntuneCD --upgrade
 - DeviceManagementConfiguration.ReadWrite.All
 - DeviceManagementServiceConfig.ReadWrite.All
 - Group.Read.All
+- Policy.Read.All
+- Policy.ReadWrite.ConditionalAccess
 
 If you just want to back up you can get away with only Read permission (except for DeviceManagementConfiguration)!
 
