@@ -49,8 +49,7 @@ def update(path, token, assignment=False):
             file = check_file(configpath, filename)
             if file is False:
                 continue
-            # Check which format the file is saved as then open file, load data
-            # and set query parameter
+            # Check which format the file is saved as then open file, load data and set query parameter
             with open(file) as f:
                 repo_data = load_file(filename, f)
 
