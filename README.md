@@ -24,8 +24,8 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 - Improvements to documentation
   - If a setting within a table cell has multiple entries, they are now separated by a new line instead of just a comma
   - Setting name is now separated, for example, `dataRoamingBlocked` will be `Data Roaming Blocked`
-- Conditional access
-  - Conditional access is now backed up, this means you will have to add additional permissions to the Azure AD App Registration. More information can be found under [Required Azure AD application Graph API permissions](#required-azure-ad-application-graph-api-permissions).
+- Conditional access :tada:
+  - Conditional access is now backed up, this means you will **have to add additional permissions to the Azure AD App Registration**. More information can be found under [Required Azure AD application Graph API permissions](#required-azure-ad-application-graph-api-permissions).
   - If you do not wish to back up/update Conditional access, make sure you add it to exclusions
     - `IntuneCD-startbackup -e ConditionalAccess`
     - `IntuneCD-startupdate -e ConditionalAccess`
