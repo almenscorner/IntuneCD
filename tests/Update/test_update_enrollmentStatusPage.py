@@ -123,6 +123,19 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
+    def test_update_with_no_diffs_no_assignment_no_app_id(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
+
+        self.mem_data["value"][0]["testvalue"] = "test1"
+        self.mem_data["value"][0]["selectedMobileAppIds"][0] = "0"
+        self.repo_data.pop('selectedMobileAppNames')
+
+        self.count = update(self.directory.path, self.token, assignment=False)
+
+        self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
+        self.assertEqual(self.post_assignment_update.call_count, 0)
+
     def test_update_config_not_found_and_assignment(self):
         """The count should be 0, the post_assignment_update and makeapirequestPost should be called."""
 
