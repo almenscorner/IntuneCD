@@ -214,11 +214,13 @@ def document_configs(configpath, outpath, header, max_length, split):
                         if value and type(value) == str and len(value) > max_length:
                             value = "Value too long to display"
                     if value and type(value) == str:
+                        comma = re.findall('[:][^:]*', value)
                         if len(value.split(",")) > 1:
                             vals = []
                             for v in value.split(','):
                                 v = v.replace(' ', '')
-                                v = f'**{v.replace(":", ":** ")}'
+                                if comma:
+                                    v = f'**{v.replace(":", ":** ")}'
                                 vals.append(v)
                             value = ",".join(vals)
                             value = value.replace(',', '<br />')
@@ -282,8 +284,25 @@ def document_management_intents(configpath, outpath, header, split):
 
                 intent_settings_list = []
                 for setting in repo_data['settingsDelta']:
-                    intent_settings_list.append([setting['definitionId'].split("_")[1],
-                                                 str(remove_characters(setting['valueJson']))])
+                    setting_definition = setting['definitionId'].split("_")[1]
+                    setting_definition = setting_definition[0].upper() + setting_definition[1:]
+                    setting_definition = re.findall('[A-Z][^A-Z]*', setting_definition)
+                    setting_definition = ' '.join(setting_definition)
+
+                    vals = []
+                    value = str(remove_characters(setting['valueJson']))
+                    comma = re.findall('[:][^:]*', value)
+                    for v in value.split(','):
+                        v = v.replace(' ', '')
+                        if comma:
+                            v = f'**{v.replace(":", ":** ")}'
+                        vals.append(v)
+                    value = ",".join(vals)
+                    value = value.replace(',', '<br />')
+
+
+                    intent_settings_list.append([setting_definition,
+                                                 value])
 
                 repo_data.pop('settingsDelta')
 
@@ -296,6 +315,20 @@ def document_management_intents(configpath, outpath, header, split):
                 intent_table_list = []
 
                 for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
+                    key = key[0].upper() + key[1:]
+                    key = re.findall('[A-Z][^A-Z]*', key)
+                    key = ' '.join(key)
+
+                    if value and type(value) == str:
+                        if len(value.split(",")) > 1:
+                            vals = []
+                            for v in value.split(','):
+                                v = v.replace(' ', '')
+                                v = f'**{v.replace(":", ":** ")}'
+                                vals.append(v)
+                            value = ",".join(vals)
+                            value = value.replace(',', '<br />')
+
                     intent_table_list.append([key, value])
 
                 table = intent_table_list + intent_settings_list
