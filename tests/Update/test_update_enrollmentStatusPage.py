@@ -128,7 +128,8 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
 
         self.mem_data["value"][0]["testvalue"] = "test1"
         self.mem_data["value"][0]["selectedMobileAppIds"][0] = "0"
-        self.repo_data.pop('selectedMobileAppNames')
+
+        self.makeapirequest.side_effect = [self.mem_data, {'value': []}]
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
