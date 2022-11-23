@@ -33,7 +33,8 @@ def savebackup(path, output, token):
             print("Backing up Conditional Access policy: " + policy['displayName'])
 
             policy = makeapirequest(f"{ENDPOINT}/{policy['id']}", token)
-            policy['grantControls'].pop('authenticationStrength@odata.context', None)
+            if policy['grantControls']:
+                policy['grantControls'].pop('authenticationStrength@odata.context', None)
             policy = remove_keys(policy)
 
             # Get filename without illegal characters
