@@ -20,6 +20,9 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## What's new in 1.2.1
+- Bug fix for back up of Conditional Access throwing `AttributeError: 'NoneType' object has no attribute 'pop'` when no `grantControls` were configured.
+
 ## What's new in 1.2.0
 - Improvements to documentation
   - If a setting within a table cell has multiple entries, they are now separated by a new line instead of just a comma
