@@ -28,12 +28,23 @@ def makeapirequest(endpoint, token, q_param=None):
             print('Ran into issues with Graph request, waiting 10 seconds and trying again...')
             time.sleep(10)
             response = requests.get(endpoint, headers=headers)
+        elif response.status_code == 429:
+            print(f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds")
+            while response.status_code == 429:
+                time.sleep(int(response.headers['Retry-After']))
+                response = requests.get(endpoint, headers=headers)   
     else:
         response = requests.get(endpoint, headers=headers)
         if response.status_code == 504 or response.status_code == 502 or response.status_code == 503:
             print('Ran into issues with Graph request, waiting 10 seconds and trying again...')
             time.sleep(10)
             response = requests.get(endpoint, headers=headers)
+        elif response.status_code == 429:
+            print(f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds")
+            while response.status_code == 429:
+                time.sleep(int(response.headers['Retry-After']))
+                response = requests.get(endpoint, headers=headers)            
+
     if response.status_code == 200:
         json_data = json.loads(response.text)
 
