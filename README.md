@@ -20,6 +20,14 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## What's new in 1.2.2
+- Updated the Graph request module to handle `429` responses (throttling). If the response code is `429` the module will re-try the request after the amount of seconds specified in the `Retry-After` section in the response. If `429` is hit again, it will re-try until it succeeds. Example output,
+  ```
+  Hit Graph throttling, trying again after 10 seconds
+  Backing up Conditional Access policy: 19
+  Hit Graph throttling, trying again after 1 seconds
+  ```
+
 ## What's new in 1.2.1
 - Bug fix for back up of Conditional Access throwing `AttributeError: 'NoneType' object has no attribute 'pop'` when no `grantControls` were configured.
 
@@ -38,11 +46,6 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 - Bugfix where filters was not able to be updated with new values
 - Bugfix where notification templates was not able to be updated with new values
 - Update to how management intents are compared for diffs. Before there was a small chance it compared the wrong definitionId
-
-## What's new in 1.1.3
-- Added backup and update of Enrollment Status Page
-- Configurations are now documented in alphabetical order
-- Added the ability to back up all Autopilot devices. To save a record of your Autopilot devices, run the backup with the `-ap True` parameter
 
 ## I use Powershell, Do I need to learn Python?
 No.
