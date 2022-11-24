@@ -16,7 +16,8 @@ def _mock_response(
         status=200,
         content="CONTENT",
         json_data=None,
-        raise_for_status=None):
+        raise_for_status=None,
+        headers={}):
     """Mock the response from the requests library."""
 
     mock_resp = mock.Mock()
@@ -27,6 +28,7 @@ def _mock_response(
     # set status code and content
     mock_resp.status_code = status
     mock_resp.text = content
+    mock_resp.headers = headers
 
     return mock_resp
 
@@ -40,6 +42,35 @@ class TestGraphRequestGet(unittest.TestCase):
     def setUp(self):
         self.token = {"accessToken": "token"}
 
+    def test_makeapirequest_status_429_no_q_param(
+            self, mock_sleep, mock_get, mock_makeapirequest):
+        """The request should be made once and exception should be raised."""
+        with self.assertRaises(Exception):
+            self.mock_resp = _mock_response(
+                self, status=429, content='Too Many equests', headers={'Retry-After': '10'})
+            self.mock_resp2 = _mock_response(
+                self, status=200, content='Success')
+            mock_get.side_effect = self.mock_resp, self.mock_resp2
+            makeapirequest("https://endpoint", self.token)
+
+        self.assertEqual(2, mock_get.call_count)
+
+    def test_makeapirequest_status_429_with_q_param(
+            self, mock_sleep, mock_get, mock_makeapirequest):
+        """The request should be made once and exception should be raised."""
+        with self.assertRaises(Exception):
+            self.mock_resp = _mock_response(
+                self, status=429, content='Too Many Requests', headers={'Retry-After': '10'})
+            self.mock_resp2 = _mock_response(
+                self, status=200, content='Success')
+            mock_get.side_effect = self.mock_resp, self.mock_resp2
+            makeapirequest(
+                "https://endpoint",
+                self.token,
+                q_param="$filter=id eq '0'")
+
+        self.assertEqual(2, mock_get.call_count)
+    
     def test_makeapirequest_no_q_param(
             self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made once and the response should be returned."""
