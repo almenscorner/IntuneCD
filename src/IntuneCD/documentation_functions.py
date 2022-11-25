@@ -151,7 +151,7 @@ def clean_list(data):
     return values
 
 
-def document_configs(configpath, outpath, header, max_length, split):
+def document_configs(configpath, outpath, header, max_length, split, cleanup):
     """
     This function documents the configuration.
 
@@ -204,6 +204,9 @@ def document_configs(configpath, outpath, header, max_length, split):
                 # Write configuration Markdown table
                 config_table_list = []
                 for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
+                    if cleanup:
+                        if not value:
+                            continue
                     if key == "@odata.type":
                         key = "Odata type"
                     else:
