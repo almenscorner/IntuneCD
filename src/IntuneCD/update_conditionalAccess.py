@@ -57,7 +57,8 @@ def update(path, token):
                     print("-" * 90)
 
                     data['value']['conditions'].pop('users', None)
-                    data['value']['grantControls'].pop('authenticationStrength@odata.context', None)
+                    if data['value']['grantControls']:
+                        data['value']['grantControls'].pop('authenticationStrength@odata.context', None)
 
                     mem_id = data['value']['id']
                     # Remove keys before using DeepDiff

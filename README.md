@@ -20,6 +20,10 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## What's new in 1.2.3
+- New option to remove empty table rows from the documentation for a cleaner output. To enable this clean, just include `-c` when running `IntuneCD-startdocumentation`
+- Bug fix where Proactive Remediations were not able to be backed up when containing a "/" in the display name
+
 ## What's new in 1.2.2
 - Updated the Graph request module to handle `429` responses (throttling). If the response code is `429` the module will re-try the request after the amount of seconds specified in the `Retry-After` section in the response. If `429` is hit again, it will re-try until it succeeds. Example output,
   ```
@@ -41,11 +45,6 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
     - `IntuneCD-startbackup -e ConditionalAccess`
     - `IntuneCD-startupdate -e ConditionalAccess`
   - Assignments are currently not updated, changes to settings on policies are detected however and updated
-
-## What's new in 1.1.4
-- Bugfix where filters was not able to be updated with new values
-- Bugfix where notification templates was not able to be updated with new values
-- Update to how management intents are compared for diffs. Before there was a small chance it compared the wrong definitionId
 
 ## I use Powershell, Do I need to learn Python?
 No.
