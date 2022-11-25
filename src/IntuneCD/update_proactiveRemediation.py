@@ -16,6 +16,7 @@ from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
 from .get_diff_output import get_diff_output
+from .clean_filename import clean_filename
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScripts"
@@ -78,8 +79,9 @@ def update(path, token, assignment=False):
                     mem_data = remove_keys(mem_data)
 
                     # Check if script data is saved and read the file
-                    detection_script_name = f"{configpath}/Script Data/{repo_data['displayName']}_DetectionScript.ps1"
-                    remediation_script_name = f"{configpath}/Script Data/{repo_data['displayName']}_RemediationScript.ps1"
+                    fname = clean_filename(repo_data['displayName'])
+                    detection_script_name = f"{configpath}/Script Data/{fname}_DetectionScript.ps1"
+                    remediation_script_name = f"{configpath}/Script Data/{fname}_RemediationScript.ps1"
                     if os.path.exists(detection_script_name) and os.path.exists(
                             remediation_script_name):
                         with open(detection_script_name, 'r') as df:
