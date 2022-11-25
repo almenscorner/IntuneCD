@@ -52,10 +52,15 @@ def start():
         help='Split the documentation into multiple files and create index.md in the configpath directory with a '
              'list of all files',
     )
+    parser.add_argument(
+        '-c', '--cleanup',
+        help='If set, will remove all table rows with an empty value',
+        action='store_true'
+    )
 
     args = parser.parse_args()
 
-    def run_documentation(configpath, outpath, tenantname, jsondata,  maxlength, split):
+    def run_documentation(configpath, outpath, tenantname, jsondata,  maxlength, split, cleanup):
 
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -66,87 +71,87 @@ def start():
             md_file(outpath)
 
         # Document App Configuration
-        document_configs(f'{configpath}/App Configuration', outpath, 'App Configuration', maxlength, split)
+        document_configs(f'{configpath}/App Configuration', outpath, 'App Configuration', maxlength, split, cleanup)
 
         # Document App Protection
-        document_configs(f'{configpath}/App Protection', outpath, 'App Protection', maxlength, split)
+        document_configs(f'{configpath}/App Protection', outpath, 'App Protection', maxlength, split, cleanup)
 
         # Document Apple Push Notification
-        document_configs(f'{configpath}/Apple Push Notification', outpath, 'Apple Push Notification', maxlength, split)
+        document_configs(f'{configpath}/Apple Push Notification', outpath, 'Apple Push Notification', maxlength, split, cleanup)
 
         # Document Apple VPP Tokens
-        document_configs(f'{configpath}/Apple VPP Tokens', outpath, 'Apple VPP Tokens', maxlength, split)
+        document_configs(f'{configpath}/Apple VPP Tokens', outpath, 'Apple VPP Tokens', maxlength, split, cleanup)
 
         # Document iOS Applications
-        document_configs(f'{configpath}/Applications/iOS', outpath, 'iOS Applications', maxlength, split)
+        document_configs(f'{configpath}/Applications/iOS', outpath, 'iOS Applications', maxlength, split, cleanup)
 
         # Document macOS Applications
-        document_configs(f'{configpath}/Applications/macOS', outpath, 'macOS Applications', maxlength, split)
+        document_configs(f'{configpath}/Applications/macOS', outpath, 'macOS Applications', maxlength, split, cleanup)
 
         # Document Android Applications
-        document_configs(f'{configpath}/Applications/Android', outpath, 'Android Applications', maxlength, split)
+        document_configs(f'{configpath}/Applications/Android', outpath, 'Android Applications', maxlength, split, cleanup)
 
         # Document Windows Applications
-        document_configs(f'{configpath}/Applications/Windows', outpath, 'Windows Applications', maxlength, split)
+        document_configs(f'{configpath}/Applications/Windows', outpath, 'Windows Applications', maxlength, split, cleanup)
 
         # Document Web Apps
-        document_configs(f'{configpath}/Applications/Web App', outpath, 'Web Applications', maxlength, split)
+        document_configs(f'{configpath}/Applications/Web App', outpath, 'Web Applications', maxlength, split, cleanup)
 
         # Document Office Suite apps
         document_configs(f'{configpath}/Applications/Office Suite', outpath, 'Office Suite Applications', maxlength,
-                         split)
+                         split, cleanup)
 
         # Document compliance
-        document_configs(f'{configpath}/Compliance Policies/Policies', outpath, 'Compliance Policies', maxlength, split)
+        document_configs(f'{configpath}/Compliance Policies/Policies', outpath, 'Compliance Policies', maxlength, split, cleanup)
 
         # Message Templates
         document_configs(f'{configpath}/Compliance Policies/Message Templates', outpath, 'Message Templates', maxlength,
-                         split)
+                         split, cleanup)
 
         # Conditional Access
-        document_configs(f'{configpath}/Conditional Access', outpath, 'Conditional Access', maxlength, split)
+        document_configs(f'{configpath}/Conditional Access', outpath, 'Conditional Access', maxlength, split, cleanup)
 
         # Document profiles
-        document_configs(f'{configpath}/Device Configurations', outpath, 'Configuration Profiles', maxlength, split)
+        document_configs(f'{configpath}/Device Configurations', outpath, 'Configuration Profiles', maxlength, split, cleanup)
 
         # Document Group Policy Configurations
         document_configs(f'{configpath}/Group Policy Configurations', outpath, 'Group Policy Configurations', maxlength,
-                         split)
+                         split, cleanup)
 
         # Document Apple Enrollment Profiles
         document_configs(f'{configpath}/Enrollment Profiles/Apple', outpath, 'Apple Enrollment Profiles', maxlength,
-                         split)
+                         split, cleanup)
 
         # Document Windows Enrollment Profiles
         document_configs(f'{configpath}/Enrollment Profiles/Windows', outpath, 'Windows Enrollment Profiles', maxlength,
-                         split)
+                         split, cleanup)
 
         # Document Enrollment Status Page profiles
-        document_configs(f'{configpath}/Enrollment Profiles/Windows/ESP', outpath, 'Enrollment Status Page', maxlength, split)
+        document_configs(f'{configpath}/Enrollment Profiles/Windows/ESP', outpath, 'Enrollment Status Page', maxlength, split, cleanup)
 
         # Document filters
-        document_configs(f'{configpath}/Filters', outpath, 'Filters', maxlength, split)
+        document_configs(f'{configpath}/Filters', outpath, 'Filters', maxlength, split, cleanup)
 
         # Managed Google Play
-        document_configs(f'{configpath}/Managed Google Play', outpath, 'Managed Google Play', maxlength, split)
+        document_configs(f'{configpath}/Managed Google Play', outpath, 'Managed Google Play', maxlength, split, cleanup)
 
         # Document Intents
         document_management_intents(f'{configpath}/Management Intents/', outpath, 'Management Intents', split)
 
         # Document Partner Connections
-        document_configs(f'{configpath}/Partner Connections/', outpath, 'Partner Connections', maxlength, split)
+        document_configs(f'{configpath}/Partner Connections/', outpath, 'Partner Connections', maxlength, split, cleanup)
 
         # Document Proactive Remediations
-        document_configs(f'{configpath}/Proactive Remediations', outpath, 'Proactive Remediations', maxlength, split)
+        document_configs(f'{configpath}/Proactive Remediations', outpath, 'Proactive Remediations', maxlength, split, cleanup)
 
         # Document Shell Scripts
-        document_configs(f'{configpath}/Scripts/Shell', outpath, 'Shell Scripts', maxlength, split)
+        document_configs(f'{configpath}/Scripts/Shell', outpath, 'Shell Scripts', maxlength, split, cleanup)
 
         # Document Powershell Scripts
-        document_configs(f'{configpath}/Scripts/Powershell', outpath, 'Powershell Scripts', maxlength, split)
+        document_configs(f'{configpath}/Scripts/Powershell', outpath, 'Powershell Scripts', maxlength, split, cleanup)
 
         # Document Settings Catalog
-        document_configs(f'{configpath}/Settings Catalog', outpath, 'Settings Catalog', maxlength, split)
+        document_configs(f'{configpath}/Settings Catalog', outpath, 'Settings Catalog', maxlength, split, cleanup)
 
         if jsondata:
             json_dict = json.loads(jsondata)
@@ -196,7 +201,7 @@ def start():
                 l4 = f'{updated} {current_date} \n\n'
                 doc.writelines([l1, l2, l3, l4, document])
 
-    run_documentation(args.path, args.outpath, args.tenantname, args.jsondata, args.maxlength, args.split)
+    run_documentation(args.path, args.outpath, args.tenantname, args.jsondata, args.maxlength, args.split, args.cleanup)
 
 
 if __name__ == '__main__':
