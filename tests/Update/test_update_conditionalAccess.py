@@ -108,6 +108,18 @@ class TestUpdateConditionalAccess(unittest.TestCase):
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 0)
 
+    def test_update_config_grantControls(self):
+        """The count should be 0 and makeapirequestPost should not be called."""
+
+        self.repo_data['conditions']['applications']['excludedApplications'] = ['d4ebce55-015a-49b5-a083-c84d1797ae8c']
+        self.mem_data["value"][0]['grantControls'] = {'authenticationStrength@odata.context': 'test'}
+        self.makeapirequest.return_value = self.mem_data
+
+        self.count = update(self.directory.path, self.token)
+
+        self.assertEqual(self.count, 0)
+        self.assertEqual(self.makeapirequestPost.call_count, 0)
+
 
 if __name__ == '__main__':
     unittest.main()
