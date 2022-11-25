@@ -21,7 +21,8 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
 ## What's new in 1.2.3
-- Bug fix where Proactive Remediations were not able to be backed up when containing a "/" in the display name.
+- New option to remove empty table rows from the documentation for a cleaner output. To enable this clean, just include `-c` when running `IntuneCD-startdocumentation`
+- Bug fix where Proactive Remediations were not able to be backed up when containing a "/" in the display name
 
 ## What's new in 1.2.2
 - Updated the Graph request module to handle `429` responses (throttling). If the response code is `429` the module will re-try the request after the amount of seconds specified in the `Retry-After` section in the response. If `429` is hit again, it will re-try until it succeeds. Example output,
