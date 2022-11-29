@@ -8,7 +8,10 @@
 [![codecov](https://codecov.io/gh/almenscorner/IntuneCD/branch/main/graph/badge.svg?token=SNTOJ0N5MU)](https://codecov.io/gh/almenscorner/IntuneCD)
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/78877636/204297420-4b5373a8-4864-4710-a4a5-802ea4ec08d5.png" width="500" height="250">
+  <img src="https://user-images.githubusercontent.com/78877636/204297420-4b5373a8-4864-4710-a4a5-802ea4ec08d5.png#gh-dark-mode-only" width="500" height="250">
+</p>
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/78877636/204501041-a7cc2321-8991-4abb-a622-97f72f19051f.png#gh-light-mode-only" width="500" height="250">
 </p>
 
 IntuneCD or, Intune Continuous Delivery as it stands for is a Python package that is used to back up and update configurations in Intune. It was created with running it from a pipeline in mind. Using this approach we get complete history of which configurations have been changed and what setting has been changed.
