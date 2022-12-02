@@ -116,6 +116,7 @@ def clean_list(data):
     for item in data:
         string = ""
         if type(item) is list:
+            table_string = ""
             for i in item:
                 if type(i) is str:
                     if i.isdigit():
@@ -127,10 +128,13 @@ def clean_list(data):
                     for k, v in i.items():
                         if type(v) is str and len(v) > 200:
                             i[k] = f'<details><summary>Click to expand...</summary>{v}</details>'
+            
                     string = json.dumps(i)
                     string = remove_characters(string)
+                
+                table_string += string+liststr+"<br /> <br />"
 
-            values.append(string)
+            values.append(table_string)
 
         elif type(item) is dict:
             string = json.dumps(item)
@@ -207,15 +211,19 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                     if cleanup:
                         if not value and type(value) != bool:
                             continue
+
                     if key == "@odata.type":
                         key = "Odata type"
+
                     else:
                         key = key[0].upper() + key[1:]
                         key = re.findall('[A-Z][^A-Z]*', key)
                         key = ' '.join(key)
+
                     if max_length:
                         if value and type(value) == str and len(value) > max_length:
                             value = "Value too long to display"
+
                     if value and type(value) == str:
                         comma = re.findall('[:][^:]*', value)
                         if len(value.split(",")) > 1:
@@ -223,11 +231,15 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                             for v in value.split(','):
                                 v = v.replace(' ', '')
                                 if comma:
-                                    v = f'**{v.replace(":", ":** ")}'
+                                    for char in v:
+                                        if char == ":":
+                                            v = f'**{v.replace(":", ":** ")}'
                                 vals.append(v)
                             value = ",".join(vals)
                             value = value.replace(',', '<br />')
+
                     config_table_list.append([key, value])
+
                 config_table = write_table(config_table_list)
 
                 # Write data to file
