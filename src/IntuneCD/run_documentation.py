@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
 
 """
+          ..
+        ....
+       .::::
+      .:::::            ___       _                     ____ ____  
+     .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
+    .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
+   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| | 
+  ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
+        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___ 
+        ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
+        :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
+        ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
+        :::
+        ::
+
 This module contains the functions to run the documentation.
 """
 
@@ -51,6 +66,7 @@ def start():
         '-s', '--split',
         help='Split the documentation into multiple files and create index.md in the configpath directory with a '
              'list of all files',
+        action="store_true"
     )
     parser.add_argument(
         '-c', '--cleanup',
@@ -65,9 +81,7 @@ def start():
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
 
-        if split == 'Y':
-            split = True
-        else:
+        if not split:
             md_file(outpath)
 
         # Document App Configuration
