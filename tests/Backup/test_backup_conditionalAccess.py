@@ -97,7 +97,7 @@ class TestBackupConditionalAccess(unittest.TestCase):
 
         self.makeapirequest.side_effect = [{'value': []}]
         self.count = savebackup(self.directory.path, 'json', self.token)
-        self.assertEqual(None, self.count)
+        self.assertEqual(0, self.count)
 
 
 if __name__ == '__main__':

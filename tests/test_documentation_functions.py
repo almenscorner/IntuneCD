@@ -104,9 +104,9 @@ class TestDocumentationFunctions(unittest.TestCase):
         """The list should be returned."""
         self.directory.write(
             "config/test_file_name.json",
-            '{"test": "test", "name": "test", "description": "test", "testvals": "1,2", "testlist": ["test"], "testdict": [{"test": "test"}], "assignments": [{"intent": "apply", "target": {"@odata.type": "#test", "groupName": "test-group", "deviceAndAppManagementAssignmentFilterId": "test-filter", "deviceAndAppManagementAssignmentFilterType": "test"}}]}',
+            '{"@odata.type": "test", "test": "test", "name": "test", "description": "test", "testvals": "1,2", "testcomma": "test: test", "testbool": false, "testlist": ["test"], "testdict": [{"test": "test"}], "assignments": [{"intent": "apply", "target": {"@odata.type": "#test", "groupName": "test-group", "deviceAndAppManagementAssignmentFilterId": "test-filter", "deviceAndAppManagementAssignmentFilterType": "test"}}]}',
             encoding="utf-8")
-        self.expected_data = '#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter||setting|value||--------|----------||Test|test||Name|test||Testvals|1<br/>2||Testdict|test:test|'
+        self.expected_data = '#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter||setting|value||----------|-------------------------||Odatatype|test||Test|test||Name|test||Testvals|1<br/>2||Testcomma|test:test||Testbool|False||Testlist|Valuetoolongtodisplay||Testdict|Valuetoolongtodisplay|'
 
         document_configs(
             f"{self.directory.path}/config",
