@@ -23,20 +23,15 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## What's new in 1.2.5
+- Additional improvements to documentation
+  - **NOTE:** The split option `-s` has been changed so you only need to include the parameter without anything else. If you are using this option you will have to change it from `-s Y` to `-s`
+  - All items in lists are now included, before some items were left out
+- Bug fix to Conditional Access where the backup failed if no policys exists
+
 ## What's new in 1.2.3
 - New option to remove empty table rows from the documentation for a cleaner output. To enable this clean, just include `-c` when running `IntuneCD-startdocumentation`
 - Bug fix where Proactive Remediations were not able to be backed up when containing a "/" in the display name
-
-## What's new in 1.2.2
-- Updated the Graph request module to handle `429` responses (throttling). If the response code is `429` the module will re-try the request after the amount of seconds specified in the `Retry-After` section in the response. If `429` is hit again, it will re-try until it succeeds. Example output,
-  ```
-  Hit Graph throttling, trying again after 10 seconds
-  Backing up Conditional Access policy: 19
-  Hit Graph throttling, trying again after 1 seconds
-  ```
-
-## What's new in 1.2.1
-- Bug fix for back up of Conditional Access throwing `AttributeError: 'NoneType' object has no attribute 'pop'` when no `grantControls` were configured.
 
 ## What's new in 1.2.0
 - Improvements to documentation
