@@ -43,4 +43,4 @@ def savebackup(path, output, token):
             # value in "-o"
             save_output(output, configpath, fname, policy)
 
-        return config_count
+    return config_count
