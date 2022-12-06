@@ -111,44 +111,84 @@ def clean_list(data):
     :return: The cleaned list
     """
 
-    values = []
-    liststr = ","
-    for item in data:
+    def list_string(data):
         string = ""
-        if type(item) is list:
-            table_string = ""
-            for i in item:
-                if type(i) is str:
-                    if i.isdigit():
-                        string = i
-                if type(i) is list:
-                    string = i + liststr
-                    string = remove_characters(string)
-                if type(i) is dict:
-                    for k, v in i.items():
-                        if type(v) is str and len(v) > 200:
-                            i[k] = f'<details><summary>Click to expand...</summary>{v}</details>'
-            
-                    string = json.dumps(i)
-                    string = remove_characters(string)
-                
-                table_string += string+liststr+"<br /> <br />"
+        liststr = ","
+        table_string = ""
+        string_list = []
+        for i in data:
+            if isinstance(i, str):
+                string_list.append(i)
+            if isinstance(i, list):
+                string = i + liststr
+                string = remove_characters(string)
+            if isinstance(i, dict):
+                for k, v in i.items():
+                    if isinstance(v, str) and len(v) > 200:
+                        i[k] = f'<details><summary>Click to expand...</summary>{v}</details>'
 
-            values.append(table_string)
+                string = json.dumps(i)
+                string = remove_characters(string)
 
-        elif type(item) is dict:
-            string = json.dumps(item)
-            string = remove_characters(string)
+            table_string += string + liststr + "<br /> <br />"
 
-            values.append(string)
+        if string_list:
+            table_string = liststr.join(string_list)
 
-        elif type(item) is str:
-            if len(item) > 200:
-                string = f'<details><summary>Click to expand...</summary>{item}</details>'
-            else:
-                string = item
-            values.append(string)
+        return table_string
 
+    def dict_string(data):
+
+        # if value is a list, separate with a line break and indent
+        for k, v in data.items():
+            if isinstance(v, list):
+                l = []
+                if v:
+                    first = '<br />&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;' + v[0]
+                    for i in v[1:]:
+                        i = "&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;" + i
+                        l.append(i)
+                    l.insert(0, first)
+                    data[k] = l
+            if isinstance(v, dict):
+                # if value is a dict, separate with a line break and indent
+                for k2, v2 in v.items():
+                    if isinstance(v2, list):
+                        l = []
+                        if v2:
+                            first = '<br />&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;' + v2[0]
+                            for i in v2[1:]:
+                                i = "&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;" + i
+                                l.append(i)
+                            l.insert(0, first)
+                            v[k2] = l
+
+        string = json.dumps(data)
+        string = remove_characters(string)
+
+        return string
+
+    def string(data):
+        if len(data) > 200:
+            string = f'<details><summary>Click to expand...</summary>{item}</details>'
+        else:
+            string = item
+
+        return string
+
+    values = []
+
+    for item in data:
+        if isinstance(item, list):
+            values.append(list_string(item))
+        elif isinstance(item, dict):
+            values.append(dict_string(item))
+        elif isinstance(item, str):
+            values.append(string(item))
+        elif isinstance(item, int):
+            values.append(item)
+        elif isinstance(item, bool):
+            values.append(item)
         else:
             values.append(item)
 
@@ -176,13 +216,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
 
         pattern = configpath + "*/*"
         for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
-            if filename.endswith(".md"):
-                continue
-            # If path is Directory, skip
-            if os.path.isdir(filename):
-                continue
-            # If file is .DS_Store, skip
-            if filename == ".DS_Store":
+            if filename.endswith(".md") or os.path.isdir(filename) or filename == ".DS_Store":
                 continue
 
             # Check which format the file is saved as then open file, load data and set query parameter
@@ -209,7 +243,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                 config_table_list = []
                 for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
                     if cleanup:
-                        if not value and type(value) != bool:
+                        if not value and type(value) is not bool:
                             continue
 
                     if key == "@odata.type":
@@ -221,10 +255,10 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                         key = ' '.join(key)
 
                     if max_length:
-                        if value and type(value) == str and len(value) > max_length:
+                        if value and isinstance(value, str) and len(value) > max_length:
                             value = "Value too long to display"
 
-                    if value and type(value) == str:
+                    if value and isinstance(value, str):
                         comma = re.findall('[:][^:]*', value)
                         if len(value.split(",")) > 1:
                             vals = []
@@ -334,7 +368,7 @@ def document_management_intents(configpath, outpath, header, split):
                     key = re.findall('[A-Z][^A-Z]*', key)
                     key = ' '.join(key)
 
-                    if value and type(value) == str:
+                    if value and isinstance(value, str):
                         if len(value.split(",")) > 1:
                             vals = []
                             for v in value.split(','):
