@@ -146,7 +146,7 @@ def batch_intents(data, token) -> dict:
 
     # Get each template ID
     filtered_data = [val for list in data['value']
-                     for key, val in list.items() if 'templateId' in key]
+                     for key, val in list.items() if 'templateId' in key and val is not None]
     template_ids = list(dict.fromkeys(filtered_data))
 
     # Batch get all categories from templates
@@ -157,7 +157,8 @@ def batch_intents(data, token) -> dict:
     # Build ID for requesting settings for each Intent
     if categories_responses:
         for intent in data['value']:
-            settings_ids = [val for list in categories_responses if intent['templateId'] in list['@odata.context']
+            settings_ids = [val for list in categories_responses if intent['templateId'] is not None
+                            and intent['templateId'] in list['@odata.context']
                             for val in list['value'] for keys, val in val.items() if 'id' in keys]
             for setting_id in settings_ids:
                 settings_id.append(f"{intent['id']}/categories/{setting_id}")
