@@ -23,15 +23,15 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## What's new in 1.2.6
+- Documentation improvements
+- Added additional `None` check to the Management Intent batching
+
 ## What's new in 1.2.5
 - Additional improvements to documentation
   - **NOTE:** The split option `-s` has been changed so you only need to include the parameter without anything else. If you are using this option you will have to change it from `-s Y` to `-s`
   - All items in lists are now included, before some items were left out
 - Bug fix to Conditional Access where the backup failed if no policys exists
-
-## What's new in 1.2.3
-- New option to remove empty table rows from the documentation for a cleaner output. To enable this clean, just include `-c` when running `IntuneCD-startdocumentation`
-- Bug fix where Proactive Remediations were not able to be backed up when containing a "/" in the display name
 
 ## What's new in 1.2.0
 - Improvements to documentation
