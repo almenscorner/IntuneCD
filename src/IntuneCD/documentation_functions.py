@@ -106,70 +106,93 @@ def remove_characters(string):
 
 def clean_list(data):
     """
-    This function cleans the list.
-    :param data: The list to be cleaned
-    :return: The cleaned list
+    This function returns a list with strings to be used in a table.
+    :param data: The data to be cleaned
+    :return: The list of strings
     """
 
-    def list_string(data):
+    def list_to_string(l) -> str:
         string = ""
-        liststr = ","
-        table_string = ""
-        string_list = []
-        for i in data:
-            if isinstance(i, str):
-                string_list.append(i)
-            if isinstance(i, list):
-                string = i + liststr
-                string = remove_characters(string)
-            if isinstance(i, dict):
-                for k, v in i.items():
-                    if isinstance(v, str) and len(v) > 200:
-                        i[k] = f'<details><summary>Click to expand...</summary>{v}</details>'
-
-                string = json.dumps(i)
-                string = remove_characters(string)
-
-            table_string += string + liststr + "<br /> <br />"
-
-        if string_list:
-            table_string = liststr.join(string_list)
-
-        return table_string
-
-    def dict_string(data):
-
-        # if value is a list, separate with a line break and indent
-        for k, v in data.items():
-            if isinstance(v, list):
-                l = []
-                if v:
-                    first = '<br />&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;' + v[0]
-                    for i in v[1:]:
-                        i = "&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;" + i
-                        l.append(i)
-                    l.insert(0, first)
-                    data[k] = l
-            if isinstance(v, dict):
-                # if value is a dict, separate with a line break and indent
-                for k2, v2 in v.items():
-                    if isinstance(v2, list):
-                        l = []
-                        if v2:
-                            first = '<br />&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;' + v2[0]
-                            for i in v2[1:]:
-                                i = "&nbsp;&nbsp;&nbsp;&nbsp; - &nbsp;" + i
-                                l.append(i)
-                            l.insert(0, first)
-                            v[k2] = l
-
-        string = json.dumps(data)
-        string = remove_characters(string)
+        for i in l:
+            if isinstance(i, (str, int, bool)):
+                string += f"<li> {i} </li>"
+            elif isinstance(i, dict):
+                string += dict_to_string(i)
+            else:
+                string += i
 
         return string
 
-    def string(data):
-        if len(data) > 200:
+    def dict_to_string(d) -> str:
+        string = ""
+        for key, val in d.items():
+            if isinstance(val, list):
+                string += f"**{key}:** <ul>"
+                string += list_to_string(val)
+                string += "</ul>"
+            elif isinstance(val, dict):
+                string += f"**{key}:** <ul>"
+                for k, v in val.items():
+                    if isinstance(v, list):
+                        string += list_to_string(v)
+                    elif isinstance(v, dict):
+                        for k2, v2 in v.items():
+                            if isinstance(v2, list):
+                                string += f"**{k2}:** <ul>"
+                                string += list_to_string(v2)
+                                string += "</ul>"
+                            elif isinstance(v2, (str, bool, int)):
+                                string += f"**{k2}:** {v2}</br>"
+                            else:
+                                string += f"**{k2}:** {v2}</br>"
+                    else:
+                        string += f"**{k}:** {v}</br>"
+                string += "</ul>"
+            else:
+                string += f"**{key}:** {val}<br/>"
+
+        string += "<br/>"
+
+        return string
+
+    def dict_to_table(d) -> str:
+        string = ""
+        for key, val in d.items():
+            if isinstance(val, list) and val:
+                string += f"**{key}:** <ul>"
+                string += list_to_string(val)
+                string += "</ul>"
+            elif isinstance(val, dict) and val:
+                for k, v in val.items():
+                    if isinstance(v, list) and v:
+                        string += f"{k} <ul>"
+                        string += list_to_string(v)
+                        string += "</ul>"
+                    elif isinstance(v, dict):
+                        string += f"**{k}** <ul>"
+                        string += dict_to_string(v)
+                        string += "</ul>"
+                    else:
+                        string += f"**{k}:** {v}</br>"
+            else:
+                string += f"**{key}:** {val}</br>"
+
+        return string
+
+    def list_string(l) -> str:
+        string = ""
+        for i in l:
+            if isinstance(i, (str, int, bool)):
+                string += f"{i}<br/>"
+            if isinstance(i, list):
+                string += list_to_string(i)
+            if isinstance(i, dict):
+                string += dict_to_string(i)
+
+        return string
+
+    def string(s) -> str:
+        if len(s) > 200:
             string = f'<details><summary>Click to expand...</summary>{item}</details>'
         else:
             string = item
@@ -182,12 +205,10 @@ def clean_list(data):
         if isinstance(item, list):
             values.append(list_string(item))
         elif isinstance(item, dict):
-            values.append(dict_string(item))
+            values.append(dict_to_table(item))
         elif isinstance(item, str):
             values.append(string(item))
-        elif isinstance(item, int):
-            values.append(item)
-        elif isinstance(item, bool):
+        elif isinstance(item, (bool, int)):
             values.append(item)
         else:
             values.append(item)
@@ -257,20 +278,6 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                     if max_length:
                         if value and isinstance(value, str) and len(value) > max_length:
                             value = "Value too long to display"
-
-                    if value and isinstance(value, str):
-                        comma = re.findall('[:][^:]*', value)
-                        if len(value.split(",")) > 1:
-                            vals = []
-                            for v in value.split(','):
-                                v = v.replace(' ', '')
-                                if comma:
-                                    for char in v:
-                                        if char == ":":
-                                            v = f'**{v.replace(":", ":** ")}'
-                                vals.append(v)
-                            value = ",".join(vals)
-                            value = value.replace(',', '<br />')
 
                     config_table_list.append([key, value])
 
@@ -348,7 +355,6 @@ def document_management_intents(configpath, outpath, header, split):
                         vals.append(v)
                     value = ",".join(vals)
                     value = value.replace(',', '<br />')
-
 
                     intent_settings_list.append([setting_definition,
                                                  value])
