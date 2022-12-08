@@ -143,9 +143,9 @@ class TestDocumentationFunctions(unittest.TestCase):
 
     def test_get_md_files(self):
         """The list of md files should be returned."""
-        self.directory.write("Config/test_file_name.md", "md", encoding="utf-8")
+        self.directory.write("config/test_file_name.md", "md", encoding="utf-8")
 
-        md_file(f"{self.directory.path}/Config/test_file_name.md")
+        md_file(f"{self.directory.path}/config/test_file_name.md")
         #get_md_files(f"{self.directory.path}/")
 
         self.expected_list = ['./config/test_file_name.md']
