@@ -403,15 +403,21 @@ def document_management_intents(configpath, outpath, header, split):
                     md.write(str(config_table) + '\n')
 
 
-def get_md_files():
+def get_md_files(configpath):
     """
-    This function gets the Markdown files in the current directory.
+    This function gets the Markdown files in the configpath directory.
     :return: List of Markdown files
     """
 
     md_files = []
     patterns = ["*/*.md", "*/*/*.md", "*/*/*/*.md"]
     for pattern in patterns:
-        for filename in glob.glob(pattern, recursive=True):
-            md_files.append(f'./{filename}')
+        for filename in glob.glob(configpath + pattern, recursive=True):
+            filepath = filename.split("/")
+            configpathname = configpath.split("/")[-1]
+            filepath = filepath[filepath.index(configpathname):]
+            filepath = "/".join(filepath[1:])
+
+            md_files.append(f"./{filepath}")
+
     return md_files
