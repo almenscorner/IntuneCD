@@ -27,9 +27,7 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 - Documentation overhaul
   - The documentation module has been completely overhauled. It is now much easier to read. Below you can see a before and after example,
     - **Before**
-      - id:** 1<br />****settingInstance:** ** odata.type:** ** microsoft.graph.deviceManagementConfigurationChoiceSettingInstance<br />**settingDefinitionId:** com.apple.managedclient.preferences_passwordmonitorallowed<br />**settingInstanceTemplateReference:** null<br />****choiceSettingValue:** ** settingValueTemplateReference:** ** null<br />**value:** com.apple.managedclient.preferences_passwordmonitorallowed_false<br />**children:** <br />
     - **After**
-      - **id:** 1<br/>**settingInstance:** <ul>**@odata.type:** #microsoft.graph.deviceManagementConfigurationChoiceSettingInstance</br>**settingDefinitionId:** com.apple.managedclient.preferences_passwordmonitorallowed</br>**settingInstanceTemplateReference:** None</br>**settingValueTemplateReference:** None</br>**value:** com.apple.managedclient.preferences_passwordmonitorallowed_false</br>**children:** <ul></ul></ul>
 
 ## What's new in 1.2.5
 - Additional improvements to documentation
