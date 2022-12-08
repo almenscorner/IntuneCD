@@ -76,7 +76,7 @@ def start():
 
     args = parser.parse_args()
 
-    def run_documentation(configpath, outpath, tenantname, jsondata,  maxlength, split, cleanup):
+    def run_documentation(configpath, outpath, tenantname, jsondata, maxlength, split, cleanup):
 
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -91,7 +91,8 @@ def start():
         document_configs(f'{configpath}/App Protection', outpath, 'App Protection', maxlength, split, cleanup)
 
         # Document Apple Push Notification
-        document_configs(f'{configpath}/Apple Push Notification', outpath, 'Apple Push Notification', maxlength, split, cleanup)
+        document_configs(f'{configpath}/Apple Push Notification', outpath, 'Apple Push Notification', maxlength, split,
+                         cleanup)
 
         # Document Apple VPP Tokens
         document_configs(f'{configpath}/Apple VPP Tokens', outpath, 'Apple VPP Tokens', maxlength, split, cleanup)
@@ -103,10 +104,12 @@ def start():
         document_configs(f'{configpath}/Applications/macOS', outpath, 'macOS Applications', maxlength, split, cleanup)
 
         # Document Android Applications
-        document_configs(f'{configpath}/Applications/Android', outpath, 'Android Applications', maxlength, split, cleanup)
+        document_configs(f'{configpath}/Applications/Android', outpath, 'Android Applications', maxlength, split,
+                         cleanup)
 
         # Document Windows Applications
-        document_configs(f'{configpath}/Applications/Windows', outpath, 'Windows Applications', maxlength, split, cleanup)
+        document_configs(f'{configpath}/Applications/Windows', outpath, 'Windows Applications', maxlength, split,
+                         cleanup)
 
         # Document Web Apps
         document_configs(f'{configpath}/Applications/Web App', outpath, 'Web Applications', maxlength, split, cleanup)
@@ -116,7 +119,8 @@ def start():
                          split, cleanup)
 
         # Document compliance
-        document_configs(f'{configpath}/Compliance Policies/Policies', outpath, 'Compliance Policies', maxlength, split, cleanup)
+        document_configs(f'{configpath}/Compliance Policies/Policies', outpath, 'Compliance Policies', maxlength, split,
+                         cleanup)
 
         # Message Templates
         document_configs(f'{configpath}/Compliance Policies/Message Templates', outpath, 'Message Templates', maxlength,
@@ -126,7 +130,8 @@ def start():
         document_configs(f'{configpath}/Conditional Access', outpath, 'Conditional Access', maxlength, split, cleanup)
 
         # Document profiles
-        document_configs(f'{configpath}/Device Configurations', outpath, 'Configuration Profiles', maxlength, split, cleanup)
+        document_configs(f'{configpath}/Device Configurations', outpath, 'Configuration Profiles', maxlength, split,
+                         cleanup)
 
         # Document Group Policy Configurations
         document_configs(f'{configpath}/Group Policy Configurations', outpath, 'Group Policy Configurations', maxlength,
@@ -141,7 +146,8 @@ def start():
                          split, cleanup)
 
         # Document Enrollment Status Page profiles
-        document_configs(f'{configpath}/Enrollment Profiles/Windows/ESP', outpath, 'Enrollment Status Page', maxlength, split, cleanup)
+        document_configs(f'{configpath}/Enrollment Profiles/Windows/ESP', outpath, 'Enrollment Status Page', maxlength,
+                         split, cleanup)
 
         # Document filters
         document_configs(f'{configpath}/Filters', outpath, 'Filters', maxlength, split, cleanup)
@@ -153,10 +159,12 @@ def start():
         document_management_intents(f'{configpath}/Management Intents/', outpath, 'Management Intents', split)
 
         # Document Partner Connections
-        document_configs(f'{configpath}/Partner Connections/', outpath, 'Partner Connections', maxlength, split, cleanup)
+        document_configs(f'{configpath}/Partner Connections/', outpath, 'Partner Connections', maxlength, split,
+                         cleanup)
 
         # Document Proactive Remediations
-        document_configs(f'{configpath}/Proactive Remediations', outpath, 'Proactive Remediations', maxlength, split, cleanup)
+        document_configs(f'{configpath}/Proactive Remediations', outpath, 'Proactive Remediations', maxlength, split,
+                         cleanup)
 
         # Document Shell Scripts
         document_configs(f'{configpath}/Scripts/Shell', outpath, 'Shell Scripts', maxlength, split, cleanup)
@@ -192,7 +200,7 @@ def start():
             updated = f'**Document updated on:**'
 
         if split:
-            files = get_md_files()
+            files = get_md_files(configpath)
             index_md = f'{configpath}/index.md'
             md_file(index_md)
 
