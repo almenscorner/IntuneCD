@@ -140,3 +140,14 @@ class TestDocumentationFunctions(unittest.TestCase):
             self.result = ''.join([line.strip() for line in self.data])
 
         self.assertEqual(self.result, self.expected_data)
+
+    def test_get_md_files(self):
+        """The list of md files should be returned."""
+        self.directory.write("Config/test_file_name.md", "md", encoding="utf-8")
+
+        md_file(f"{self.directory.path}/Config/test_file_name.md")
+        #get_md_files(f"{self.directory.path}/")
+
+        self.expected_list = ['./config/test_file_name.md']
+
+        self.assertEqual(get_md_files(self.directory.path), self.expected_list)
