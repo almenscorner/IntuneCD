@@ -23,10 +23,16 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
-## What's new in 1.2.6
-- Documentation improvements
-- Added additional `None` check to the Management Intent batching
-
+## What's new in 1.2.7
+- Documentation overhaul
+  - The documentation module has been completely overhauled. It is now much easier to read. Below you can see a before and after example,
+    - **Before**
+    
+    ![Screenshot 2022-12-08 at 10 28 13](https://user-images.githubusercontent.com/78877636/206411116-bdefbb4c-e485-4529-a86f-4f675845b6ab.png)
+    - **After**
+    
+    ![Screenshot 2022-12-08 at 10 26 18](https://user-images.githubusercontent.com/78877636/206411063-66838684-3511-44dc-8eaf-43aaa0b3cb94.png)
+    
 ## What's new in 1.2.5
 - Additional improvements to documentation
   - **NOTE:** The split option `-s` has been changed so you only need to include the parameter without anything else. If you are using this option you will have to change it from `-s Y` to `-s`

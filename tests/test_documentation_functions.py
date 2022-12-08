@@ -79,7 +79,7 @@ class TestDocumentationFunctions(unittest.TestCase):
     def test_clean_list_list(self):
         """The list should be returned."""
         self.list = [{'teamIdentifier': 'test', 'bundleId': 'test'}]
-        self.expected_list = ['teamIdentifier: test, bundleId: test']
+        self.expected_list = ['**teamIdentifier:** test</br>**bundleId:** test</br>']
         self.result = clean_list(self.list)
 
         self.assertEqual(self.result, self.expected_list)
@@ -104,9 +104,9 @@ class TestDocumentationFunctions(unittest.TestCase):
         """The list should be returned."""
         self.directory.write(
             "config/test_file_name.json",
-            '{"@odata.type": "test", "test": "test", "name": "test", "description": "test", "testvals": "1,2", "testcomma": "test: test", "testbool": false, "testlist": ["test"], "testdict": [{"test": "test"}], "testdict2": {"test": {"testlist": ["a","b","c"]}}, "testdictlist": {"test": ["a","b","c"]}, "assignments": [{"intent": "apply", "target": {"@odata.type": "#test", "groupName": "test-group", "deviceAndAppManagementAssignmentFilterId": "test-filter", "deviceAndAppManagementAssignmentFilterType": "test"}}]}',
+            '{"@odata.type":"test","test":"test","name":"test","description":"test","testvals":"1,2","testbool":false,"testlist":["test"],"testlistdict":[{"test":{"test":{"test":["1"]}}}],"testdict2":{"test":{"test":{"test":["1"]}}},"testdictlist":{"test":["a","b","c"]},"assignments":[{"intent":"apply","target":{"@odata.type":"#test","groupName":"test-group","deviceAndAppManagementAssignmentFilterId":"test-filter","deviceAndAppManagementAssignmentFilterType":"test"}}]}',
             encoding="utf-8")
-        self.expected_data = '#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter||setting|value||------------|------------------------------||Odatatype|test||Test|test||Name|test||Testvals|1<br/>2||Testcomma|test:test||Testbool|False||Testlist|test||Testdict|**test:**test<br/><br/><br/>||Testdict2|Valuetoolongtodisplay||Testdictlist|Valuetoolongtodisplay|'
+        self.expected_data = '#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter||setting|value||------------|-------------------------------------------------------||Odatatype|test||Test|test||Name|test||Testvals|1,2||Testbool|False||Testlist|test<br/>||Testlistdict|**test:**<ul>**test:**<ul><li>1</li></ul></ul><br/>||Testdict2|**test**<ul>**test:**<ul><li>1</li></ul><br/></ul>||Testdictlist|**test:**<ul><li>a</li><li>b</li><li>c</li></ul>|'
 
         document_configs(
             f"{self.directory.path}/config",
@@ -140,3 +140,14 @@ class TestDocumentationFunctions(unittest.TestCase):
             self.result = ''.join([line.strip() for line in self.data])
 
         self.assertEqual(self.result, self.expected_data)
+
+    def test_get_md_files(self):
+        """The list of md files should be returned."""
+        self.directory.write("config/test_file_name.md", "md", encoding="utf-8")
+
+        md_file(f"{self.directory.path}/config/test_file_name.md")
+        #get_md_files(f"{self.directory.path}/")
+
+        self.expected_list = ['./config/test_file_name.md']
+
+        self.assertEqual(get_md_files(self.directory.path), self.expected_list)
