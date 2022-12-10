@@ -9,6 +9,7 @@ import json
 import os
 import glob
 import re
+import platform
 
 from pytablewriter import MarkdownTableWriter
 
@@ -408,13 +409,16 @@ def get_md_files(configpath):
     This function gets the Markdown files in the configpath directory.
     :return: List of Markdown files
     """
-
+    slash = "/"
+    os = platform.uname().system
+    if os == "Windows":
+        slash = "\\"
     md_files = []
     patterns = ["*/*.md", "*/*/*.md", "*/*/*/*.md"]
     for pattern in patterns:
         for filename in glob.glob(configpath + pattern, recursive=True):
-            filepath = filename.split("/")
-            configpathname = configpath.split("/")[-1]
+            filepath = filename.split(slash)
+            configpathname = configpath.split(slash)[-1]
             filepath = filepath[filepath.index(configpathname):]
             filepath = "/".join(filepath[1:])
 
