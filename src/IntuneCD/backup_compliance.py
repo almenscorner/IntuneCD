@@ -44,12 +44,12 @@ def savebackup(path, output, exclude, token):
             if assignments:
                 policy['assignments'] = assignments
 
-            policy = remove_keys(policy)
-            for rule in policy['scheduledActionsForRule']:
-                remove_keys(rule)
-            if policy['scheduledActionsForRule']:
-                for scheduled_config in policy['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
-                    remove_keys(scheduled_config)
+        policy = remove_keys(policy)
+        for rule in policy['scheduledActionsForRule']:
+            remove_keys(rule)
+        if policy['scheduledActionsForRule']:
+            for scheduled_config in policy['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
+                remove_keys(scheduled_config)
 
         # Get filename without illegal characters
         fname = clean_filename(policy['displayName'])
