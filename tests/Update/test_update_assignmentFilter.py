@@ -43,7 +43,7 @@ class TestUpdateAssignmentFilter(unittest.TestCase):
     def test_update_with_diffs(self):
         """The count should be 1 and makeapirequestPatch should be called."""
 
-        self.count = update(self.directory.path, self.token)
+        self.count = update(self.directory.path, self.token, report=False)
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -56,7 +56,7 @@ class TestUpdateAssignmentFilter(unittest.TestCase):
         self.mem_data["value"][0]["testvalue"] = "test"
         self.mem_data["value"][0]["testvalue2"] = "test1"
 
-        self.count = update(self.directory.path, self.token)
+        self.count = update(self.directory.path, self.token, report=False)
 
         self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -66,7 +66,7 @@ class TestUpdateAssignmentFilter(unittest.TestCase):
         """The count should be 0 and makeapirequestPatch should not be called."""
 
         self.mem_data["value"][0]["testvalue"] = "test1"
-        self.count = update(self.directory.path, self.token)
+        self.count = update(self.directory.path, self.token, report=False)
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -76,7 +76,7 @@ class TestUpdateAssignmentFilter(unittest.TestCase):
         """The count should be 0 and makeapirequestPost should be called."""
 
         self.mem_data["value"][0]["displayName"] = "test1"
-        self.count = update(self.directory.path, self.token)
+        self.count = update(self.directory.path, self.token, report=False)
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
