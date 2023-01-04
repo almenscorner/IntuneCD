@@ -29,35 +29,26 @@ def savebackup(path, output, exclude, token):
     configpath = path + "/" + "Settings Catalog/"
     policies = makeapirequest(BASE_ENDPOINT + "/configurationPolicies", token)
     policy_ids = []
-    for policy in policies['value']:
-        policy_ids.append(policy['id'])
+    for policy in policies["value"]:
+        policy_ids.append(policy["id"])
 
-    assignment_responses = batch_assignment(
-        policies,
-        'deviceManagement/configurationPolicies/',
-        '/assignments',
-        token)
-    policy_settings_batch = batch_request(
-        policy_ids,
-        'deviceManagement/configurationPolicies/',
-        '/settings',
-        token)
+    assignment_responses = batch_assignment(policies, "deviceManagement/configurationPolicies/", "/assignments", token)
+    policy_settings_batch = batch_request(policy_ids, "deviceManagement/configurationPolicies/", "/settings", token)
 
-    for policy in policies['value']:
+    for policy in policies["value"]:
         config_count += 1
-        name = policy['name']
+        name = policy["name"]
         print("Backing up configuration policy: " + name)
 
-        settings = get_object_details(policy['id'], policy_settings_batch)
+        settings = get_object_details(policy["id"], policy_settings_batch)
 
         if settings:
-            policy['settings'] = settings
+            policy["settings"] = settings
 
         if "assignments" not in exclude:
-            assignments = get_object_assignment(
-                policy['id'], assignment_responses)
+            assignments = get_object_assignment(policy["id"], assignment_responses)
             if assignments:
-                policy['assignments'] = assignments
+                policy["assignments"] = assignments
 
         policy = remove_keys(policy)
 
