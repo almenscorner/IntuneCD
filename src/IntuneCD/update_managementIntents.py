@@ -19,7 +19,7 @@ from .diff_summary import DiffSummary
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
 
-def update(path, token, assignment=False):
+def update(path, token, assignment=False, report=False):
     """
     This function updates all Endpoint Security configurations (intents) in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -38,7 +38,9 @@ def update(path, token, assignment=False):
         intents = makeapirequest(BASE_ENDPOINT + "/intents", token)
         intent_responses = batch_intents(intents, token)
         # Get current assignment
-        mem_assignments = batch_assignment(intents, "deviceManagement/intents/", "/assignments", token)
+        mem_assignments = batch_assignment(
+            intents, "deviceManagement/intents/", "/assignments", token
+        )
 
         # Set glob pattern
         pattern = configpath + "*/*"
@@ -64,14 +66,21 @@ def update(path, token, assignment=False):
 
                 mem_data = {}
                 for intent in intent_responses["value"]:
-                    if repo_data["displayName"] == intent["displayName"] and repo_data["templateId"] == intent["templateId"]:
+                    if (
+                        repo_data["displayName"] == intent["displayName"]
+                        and repo_data["templateId"] == intent["templateId"]
+                    ):
 
                         mem_data = intent
 
                 # If Intent exists, continue
                 if mem_data:
                     print("-" * 90)
-                    print("Checking if Intent: " + repo_data["displayName"] + " has any updates")
+                    print(
+                        "Checking if Intent: "
+                        + repo_data["displayName"]
+                        + " has any updates"
+                    )
 
                     # Compare category settings from Intune with JSON/YAML
                     for repo_setting in repo_data["settingsDelta"]:
@@ -79,11 +88,16 @@ def update(path, token, assignment=False):
                             if "id" in mem_setting:
                                 mem_setting_id = mem_setting["id"]
                                 mem_setting.pop("id", None)
-                            if repo_setting["definitionId"] == mem_setting["definitionId"]:
-                                diff = DeepDiff(mem_setting, repo_setting, ignore_order=True).get("values_changed", {})
+                            if (
+                                repo_setting["definitionId"]
+                                == mem_setting["definitionId"]
+                            ):
+                                diff = DeepDiff(
+                                    mem_setting, repo_setting, ignore_order=True
+                                ).get("values_changed", {})
 
                         # If any changed values are found, push them to Intune
-                        if diff:
+                        if diff and report is False:
                             # Create dict that we will use as the request json
                             if "value" not in repo_setting:
                                 type = "valueJson"
@@ -104,7 +118,10 @@ def update(path, token, assignment=False):
                             request_data = json.dumps(settings)
                             q_param = None
                             makeapirequestPost(
-                                BASE_ENDPOINT + "/intents/" + mem_data["id"] + "/updateSettings",
+                                BASE_ENDPOINT
+                                + "/intents/"
+                                + mem_data["id"]
+                                + "/updateSettings",
                                 token,
                                 q_param,
                                 request_data,
@@ -121,7 +138,9 @@ def update(path, token, assignment=False):
                         diff_summary.append(diff_intent)
 
                     if assignment:
-                        mem_assign_obj = get_object_assignment(mem_data["id"], mem_assignments)
+                        mem_assign_obj = get_object_assignment(
+                            mem_data["id"], mem_assignments
+                        )
                         update = update_assignment(assign_obj, mem_assign_obj, token)
                         if update is not None:
                             request_data = {"assignments": update}
@@ -137,28 +156,36 @@ def update(path, token, assignment=False):
                 # If Intent does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print("Intent not found, creating Intent: " + repo_data["displayName"])
-                    template_id = repo_data["templateId"]
-                    repo_data.pop("templateId")
-                    request_json = json.dumps(repo_data)
-                    post_request = makeapirequestPost(
-                        BASE_ENDPOINT + "/templates/" + template_id + "/createInstance",
-                        token,
-                        q_param=None,
-                        jdata=request_json,
+                    print(
+                        "Intent not found, creating Intent: " + repo_data["displayName"]
                     )
-                    mem_assign_obj = []
-                    assignment = update_assignment(assign_obj, mem_assign_obj, token)
-                    if assignment is not None:
-                        request_data = {"assignments": assignment}
-                        post_assignment_update(
-                            request_data,
-                            post_request["id"],
-                            "deviceManagement/intents",
-                            "assign",
+                    if report is False:
+                        template_id = repo_data["templateId"]
+                        repo_data.pop("templateId")
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(
+                            BASE_ENDPOINT
+                            + "/templates/"
+                            + template_id
+                            + "/createInstance",
                             token,
-                            status_code=204,
+                            q_param=None,
+                            jdata=request_json,
                         )
-                    print("Intent created with id: " + post_request["id"])
+                        mem_assign_obj = []
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token
+                        )
+                        if assignment is not None:
+                            request_data = {"assignments": assignment}
+                            post_assignment_update(
+                                request_data,
+                                post_request["id"],
+                                "deviceManagement/intents",
+                                "assign",
+                                token,
+                                status_code=204,
+                            )
+                        print("Intent created with id: " + post_request["id"])
 
     return diff_summary
