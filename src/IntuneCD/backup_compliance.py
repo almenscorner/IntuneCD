@@ -27,34 +27,31 @@ def savebackup(path, output, exclude, token):
 
     config_count = 0
     configpath = path + "/" + "Compliance Policies/Policies/"
-    q_param = {
-        "$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"}
+    q_param = {"$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"}
     data = makeapirequest(ENDPOINT, token, q_param)
 
-    assignment_responses = batch_assignment(
-        data, 'deviceManagement/deviceCompliancePolicies/', '/assignments', token)
+    assignment_responses = batch_assignment(data, "deviceManagement/deviceCompliancePolicies/", "/assignments", token)
 
-    for policy in data['value']:
+    for policy in data["value"]:
         config_count += 1
-        print("Backing up compliance policy: " + policy['displayName'])
+        print("Backing up compliance policy: " + policy["displayName"])
 
         if "assignments" not in exclude:
-            assignments = get_object_assignment(
-                policy['id'], assignment_responses)
+            assignments = get_object_assignment(policy["id"], assignment_responses)
             if assignments:
-                policy['assignments'] = assignments
+                policy["assignments"] = assignments
 
         policy = remove_keys(policy)
-        for rule in policy['scheduledActionsForRule']:
+        for rule in policy["scheduledActionsForRule"]:
             remove_keys(rule)
-        if policy['scheduledActionsForRule']:
-            for scheduled_config in policy['scheduledActionsForRule'][0]['scheduledActionConfigurations']:
+        if policy["scheduledActionsForRule"]:
+            for scheduled_config in policy["scheduledActionsForRule"][0]["scheduledActionConfigurations"]:
                 remove_keys(scheduled_config)
 
         # Get filename without illegal characters
-        fname = clean_filename(policy['displayName'])
+        fname = clean_filename(policy["displayName"])
         # Save Compliance policy as JSON or YAML depending on configured value
         # in "-o"
-        save_output(output, configpath, f'{fname}_' + str(policy['@odata.type'].split('.')[2]), policy)
+        save_output(output, configpath, f"{fname}_" + str(policy["@odata.type"].split(".")[2]), policy)
 
     return config_count
