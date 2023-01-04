@@ -28,28 +28,24 @@ def savebackup(path, output, token):
     configpath = path + "/" + "Enrollment Profiles/Apple/"
     data = makeapirequest(ENDPOINT, token)
 
-    if data['value']:
+    if data["value"]:
         profile_ids = []
-        for profile in data['value']:
-            profile_ids.append(profile['id'])
+        for profile in data["value"]:
+            profile_ids.append(profile["id"])
 
         batch_profile_data = batch_request(
-            profile_ids,
-            'deviceManagement/depOnboardingSettings/',
-            '/enrollmentProfiles',
-            token)
+            profile_ids, "deviceManagement/depOnboardingSettings/", "/enrollmentProfiles", token
+        )
 
         for profile in batch_profile_data:
             config_count += 1
-            for value in profile['value']:
+            for value in profile["value"]:
                 value = remove_keys(value)
 
-                print(
-                    "Backing up Apple enrollment profile: " +
-                    value['displayName'])
+                print("Backing up Apple enrollment profile: " + value["displayName"])
 
                 # Get filename without illegal characters
-                fname = clean_filename(value['displayName'])
+                fname = clean_filename(value["displayName"])
                 # Save Apple Enrollment Profile as JSON or YAML depending on
                 # configured value in "-o"
                 save_output(output, configpath, fname, value)
