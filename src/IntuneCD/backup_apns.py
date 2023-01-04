@@ -31,10 +31,10 @@ def savebackup(path, output, token):
     if data:
         config_count += 1
         data = remove_keys(data)
-        print("Backing up Apple Push Notification: " + data['appleIdentifier'])
+        print("Backing up Apple Push Notification: " + data["appleIdentifier"])
 
         # Get filename without illegal characters
-        fname = clean_filename(data['appleIdentifier'])
+        fname = clean_filename(data["appleIdentifier"])
         # Save APNs as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, data)
 
