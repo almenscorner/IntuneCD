@@ -33,7 +33,9 @@ REPO_DIR = os.environ.get("REPO_DIR")
 
 
 def start():
-    parser = argparse.ArgumentParser(description="Update Intune configurations with values from backup")
+    parser = argparse.ArgumentParser(
+        description="Update Intune configurations with values from backup"
+    )
     parser.add_argument(
         "-p",
         "--path",
@@ -95,6 +97,12 @@ def start():
         ],
         nargs="+",
     )
+    parser.add_argument(
+        "-r",
+        "--report",
+        help="When this parameter is set, no updates are pushed to Intune but the change summary is pushed to the frontend",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
@@ -112,7 +120,7 @@ def start():
 
     token = getAuth(selected_mode(args.mode), args.localauth, tenant="PROD")
 
-    def run_update(path, token, assignment, exclude):
+    def run_update(path, token, assignment, exclude, report):
 
         diff_count = 0
         diff_summary = []
@@ -120,77 +128,77 @@ def start():
         if "AppConfigurations" not in exclude:
             from .update_appConfiguration import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "AppProtection" not in exclude:
             from .update_appProtection import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "Compliance" not in exclude:
             from .update_compliance import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "NotificationTemplate" not in exclude:
             from .update_notificationTemplate import update
 
-            diff_summary.append(update(path, token))
+            diff_summary.append(update(path, token, report))
 
         if "Profiles" not in exclude:
             from .update_profiles import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "AppleEnrollmentProfile" not in exclude:
             from .update_appleEnrollmentProfile import update
 
-            diff_summary.append(update(path, token))
+            diff_summary.append(update(path, token, report))
 
         if "WindowsEnrollmentProfile" not in exclude:
             from .update_windowsEnrollmentProfile import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "EnrollmentStatusPage" not in exclude:
             from .update_enrollmentStatusPage import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "Filters" not in exclude:
             from .update_assignmentFilter import update
 
-            diff_summary.append(update(path, token))
+            diff_summary.append(update(path, token, report))
 
         if "Intents" not in exclude:
             from .update_managementIntents import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "ProactiveRemediation" not in exclude:
             from .update_proactiveRemediation import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "PowershellScripts" not in exclude:
             from .update_powershellScripts import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "ShellScripts" not in exclude:
             from .update_shellScripts import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "ConfigurationPolicies" not in exclude:
             from .update_configurationPolicies import update
 
-            diff_summary.append(update(path, token, assignment))
+            diff_summary.append(update(path, token, assignment, report))
 
         if "ConditionalAccess" not in exclude:
             from .update_conditionalAccess import update
 
-            diff_count += update(path, token)
+            diff_count += update(path, token, report)
 
         for sum in diff_summary:
             for config in sum:
@@ -207,11 +215,14 @@ def start():
         else:
             exclude = []
 
+        if args.report:
+            print("***Running in report mode, no updates will be pushed to Intune***")
+
         if args.frontend:
 
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
-            summary = run_update(args.path, token, args.u, exclude)
+            summary = run_update(args.path, token, args.u, exclude, args.report)
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
             out = base64.b64encode(feed_bytes).decode("utf-8")
@@ -237,7 +248,7 @@ def start():
                 update_frontend(f"{args.frontend}/api/changes/summary", body)
 
         else:
-            run_update(args.path, token, args.u, exclude)
+            run_update(args.path, token, args.u, exclude, args.report)
 
 
 if __name__ == "__main__":
