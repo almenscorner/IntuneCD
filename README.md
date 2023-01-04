@@ -23,6 +23,10 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## What's new in 1.3.0
+- New summary of changes, instead of just a count, a summary of the changes with old and new values are sent to the front end
+- Report mode, if you want to send a summary of changes to the front end without actually updating the configuration in Intune, you can activate report mode when running the update using `-r` -> `IntuneCD-startupdate -r`
+
 ## What's new in 1.2.7
 - Documentation overhaul
   - The documentation module has been completely overhauled. It is now much easier to read. Below you can see a before and after example,
@@ -38,17 +42,6 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
   - **NOTE:** The split option `-s` has been changed so you only need to include the parameter without anything else. If you are using this option you will have to change it from `-s Y` to `-s`
   - All items in lists are now included, before some items were left out
 - Bug fix to Conditional Access where the backup failed if no policys exists
-
-## What's new in 1.2.0
-- Improvements to documentation
-  - If a setting within a table cell has multiple entries, they are now separated by a new line instead of just a comma
-  - Setting name is now separated, for example, `dataRoamingBlocked` will be `Data Roaming Blocked`
-- Conditional access :tada:
-  - Conditional access is now backed up, this means you will **have to add additional permissions to the Azure AD App Registration**. More information can be found under [Required Azure AD application Graph API permissions](#required-azure-ad-application-graph-api-permissions).
-  - If you do not wish to back up/update Conditional access, make sure you add it to exclusions
-    - `IntuneCD-startbackup -e ConditionalAccess`
-    - `IntuneCD-startupdate -e ConditionalAccess`
-  - Assignments are currently not updated, changes to settings on policies are detected however and updated
 
 ## I use Powershell, Do I need to learn Python?
 No.
