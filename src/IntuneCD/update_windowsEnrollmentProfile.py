@@ -20,7 +20,7 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDeploymentProfiles"
 
 
-def update(path, token, assignment=False):
+def update(path, token, assignment=False, report=False):
     """
     This function updates all Windows Enrollment Profiles in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -73,17 +73,21 @@ def update(path, token, assignment=False):
                     # Remove keys before using DeepDiff
                     mem_data["value"][0] = remove_keys(mem_data["value"][0])
 
-                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
                     # If any changed values are found, push them to Intune
-                    if diff:
+                    if diff and report is False:
                         if repo_data["managementServiceAppId"]:
                             pass
                         else:
                             repo_data["managementServiceAppId"] = ""
                         request_data = json.dumps(repo_data)
                         q_param = None
-                        makeapirequestPatch(ENDPOINT + "/" + mem_id, token, q_param, request_data)
+                        makeapirequestPatch(
+                            ENDPOINT + "/" + mem_id, token, q_param, request_data
+                        )
 
                     diff_profile = DiffSummary(
                         data=diff,
@@ -110,27 +114,35 @@ def update(path, token, assignment=False):
                 # If Autopilot profile does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print("Autopilot profile not found, creating profile: " + repo_data["displayName"])
-                    request_json = json.dumps(repo_data)
-                    post_request = makeapirequestPost(
-                        ENDPOINT,
-                        token,
-                        q_param=None,
-                        jdata=request_json,
-                        status_code=201,
+                    print(
+                        "Autopilot profile not found, creating profile: "
+                        + repo_data["displayName"]
                     )
-                    mem_assign_obj = []
-                    assignment = update_assignment(assign_obj, mem_assign_obj, token)
-                    if assignment is not None:
-                        request_data = {"target": assignment[0]["target"]}
-                        post_assignment_update(
-                            request_data,
-                            post_request["id"],
-                            "deviceManagement/windowsAutopilotDeploymentProfiles",
-                            "assignments",
+                    if report is False:
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(
+                            ENDPOINT,
                             token,
+                            q_param=None,
+                            jdata=request_json,
                             status_code=201,
                         )
-                    print("Autopilot profile created with id: " + post_request["id"])
+                        mem_assign_obj = []
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token
+                        )
+                        if assignment is not None:
+                            request_data = {"target": assignment[0]["target"]}
+                            post_assignment_update(
+                                request_data,
+                                post_request["id"],
+                                "deviceManagement/windowsAutopilotDeploymentProfiles",
+                                "assignments",
+                                token,
+                                status_code=201,
+                            )
+                        print(
+                            "Autopilot profile created with id: " + post_request["id"]
+                        )
 
     return diff_summary
