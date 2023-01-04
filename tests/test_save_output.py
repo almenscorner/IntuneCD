@@ -30,33 +30,28 @@ class TestSaveOutput(unittest.TestCase):
 
     def test_save_output_json(self, mock_save_output):
         """The file created by the function should have the expected contents."""
-        self.save = save_output('json', self.path, self.fname, self.data)
+        self.save = save_output("json", self.path, self.fname, self.data)
 
-        with open(self.path + self.fname + ".json", 'r') as f:
+        with open(self.path + self.fname + ".json", "r") as f:
             self.json = json.load(f)
 
-        self.assertEqual(
-            self.json['test_content'],
-            self.expected_data['test_content'])
+        self.assertEqual(self.json["test_content"], self.expected_data["test_content"])
 
     def test_save_output_yaml(self, mock_save_output):
         """The file created by the function should have the expected contents."""
-        self.save = save_output('yaml', self.path, self.fname, self.data)
+        self.save = save_output("yaml", self.path, self.fname, self.data)
 
-        with open(self.path + self.fname + ".yaml", 'r') as f:
+        with open(self.path + self.fname + ".yaml", "r") as f:
             data = json.dumps(yaml.safe_load(f))
             self.yaml = json.loads(data)
 
-        self.assertEqual(
-            self.yaml['test_content'],
-            self.expected_data['test_content'])
+        self.assertEqual(self.yaml["test_content"], self.expected_data["test_content"])
 
     def test_save_output_invalid_format(self, mock_save_output):
         """The function should raise an error if the format is invalid."""
         with self.assertRaises(ValueError):
-            self.save = save_output(
-                'invalid', self.path, self.fname, self.data)
+            self.save = save_output("invalid", self.path, self.fname, self.data)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

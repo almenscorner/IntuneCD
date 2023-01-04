@@ -18,9 +18,8 @@ def obtain_accesstoken(TENANT_NAME, CLIENT_ID, CLIENT_SECRET, resource):
     :return: The access token
     """
 
-    auth_context = AuthenticationContext('https://login.microsoftonline.com/' +
-                                         TENANT_NAME)
+    auth_context = AuthenticationContext("https://login.microsoftonline.com/" + TENANT_NAME)
     token = auth_context.acquire_token_with_client_credentials(
-        resource=resource, client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET)
+        resource=resource, client_id=CLIENT_ID, client_secret=CLIENT_SECRET
+    )
     return token

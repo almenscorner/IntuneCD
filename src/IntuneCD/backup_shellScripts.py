@@ -33,25 +33,25 @@ def savebackup(path, output, exclude, token):
     configpath = path + "/" + "Scripts/Shell/"
     data = makeapirequest(ENDPOINT, token)
     script_ids = []
-    for script in data['value']:
-        script_ids.append(script['id'])
+    for script in data["value"]:
+        script_ids.append(script["id"])
 
-    assignment_responses = batch_assignment(data, 'deviceManagement/deviceManagementScripts/', '/assignments', token)
-    script_data_responses = batch_request(script_ids, 'deviceManagement/deviceShellScripts/', '', token)
+    assignment_responses = batch_assignment(data, "deviceManagement/deviceManagementScripts/", "/assignments", token)
+    script_data_responses = batch_request(script_ids, "deviceManagement/deviceShellScripts/", "", token)
 
     for script_data in script_data_responses:
         config_count += 1
         if "assignments" not in exclude:
-            assignments = get_object_assignment(script_data['id'], assignment_responses)
+            assignments = get_object_assignment(script_data["id"], assignment_responses)
             if assignments:
-                script_data['assignments'] = assignments
+                script_data["assignments"] = assignments
 
         script_data = remove_keys(script_data)
 
-        print("Backing up Shell script: " + script_data['displayName'])
+        print("Backing up Shell script: " + script_data["displayName"])
 
         # Get filename without illegal characters
-        fname = clean_filename(script_data['displayName'])
+        fname = clean_filename(script_data["displayName"])
 
         # Save Shell script as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, script_data)
@@ -59,9 +59,8 @@ def savebackup(path, output, exclude, token):
         # Save Shell script data to the script data folder
         if not os.path.exists(configpath + "Script Data/"):
             os.makedirs(configpath + "Script Data/")
-        decoded = base64.b64decode(
-            script_data['scriptContent']).decode('utf-8')
-        f = open(configpath + "Script Data/" + script_data['fileName'], 'w')
+        decoded = base64.b64decode(script_data["scriptContent"]).decode("utf-8")
+        f = open(configpath + "Script Data/" + script_data["fileName"], "w")
         f.write(decoded)
 
     return config_count

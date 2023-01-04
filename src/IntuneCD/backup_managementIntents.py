@@ -30,34 +30,31 @@ def savebackup(path, output, exclude, token):
     intents = makeapirequest(BASE_ENDPOINT + "/intents", token)
     templates = makeapirequest(TEMPLATE_ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        intents, 'deviceManagement/intents/', '/assignments', token)
+    assignment_responses = batch_assignment(intents, "deviceManagement/intents/", "/assignments", token)
     intent_responses = batch_intents(intents, token)
 
     if intent_responses:
-        for intent_value in intent_responses['value']:
+        for intent_value in intent_responses["value"]:
             config_count += 1
-            print("Backing up Intent: " + intent_value['displayName'])
+            print("Backing up Intent: " + intent_value["displayName"])
 
-            for template in templates['value']:
-                if intent_value['templateId'] == template['id']:
-                    template_type = template['displayName']
+            for template in templates["value"]:
+                if intent_value["templateId"] == template["id"]:
+                    template_type = template["displayName"]
 
-            configpath = path + "/" + "Management Intents/" + \
-                template_type + "/"
+            configpath = path + "/" + "Management Intents/" + template_type + "/"
 
             if "assignments" not in exclude:
-                assignments = get_object_assignment(
-                    intent_value['id'], assignment_responses)
+                assignments = get_object_assignment(intent_value["id"], assignment_responses)
                 if assignments:
-                    intent_value['assignments'] = assignments
+                    intent_value["assignments"] = assignments
 
-            for setting in intent_value['settingsDelta']:
-                setting.pop('id', None)
-            intent_value.pop('id', None)
+            for setting in intent_value["settingsDelta"]:
+                setting.pop("id", None)
+            intent_value.pop("id", None)
 
             # Get filename without illegal characters
-            fname = clean_filename(intent_value['displayName'])
+            fname = clean_filename(intent_value["displayName"])
             # Save Intent as JSON or YAML depending on configured value in "-o"
             save_output(output, configpath, fname, intent_value)
 

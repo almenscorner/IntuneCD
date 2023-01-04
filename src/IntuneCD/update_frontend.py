@@ -21,7 +21,7 @@ def update_frontend(frontend, data):
         raise Exception("API_KEY environment variable is not set")
 
     else:
-        headers = {'X-API-Key': API_KEY}
+        headers = {"X-API-Key": API_KEY}
         response = requests.post(frontend, json=data, headers=headers)
 
         if response.status_code != 200:

@@ -16,56 +16,54 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
         self.directory = TempDirectory()
         self.directory.create()
         self.directory.makedir("Enrollment Profiles/Windows/ESP")
-        self.directory.write(
-            "Enrollment Profiles/Windows/ESP/test.json", '{"test": "test"}',
-            encoding='utf-8')
-        self.token = 'token'
-        self.app_ids = {'value': [{'id': "0"}]}
-        self.mem_data = {"value": [{"@odata.type": "test",
-                                    "id": "0",
-                                    "displayName": "test",
-                                    "testvalue": "test",
-                                    "selectedMobileAppIds": ["1"],
-                                    "assignments": [{"target": {"groupId": "test"}}]}]}
-        self.repo_data = {"@odata.type": "test",
-                          "id": "0",
-                          "displayName": "test",
-                          "testvalue": "test1",
-                          "selectedMobileAppNames": [{'name': 'app1', 'type': '#graph.mobileApp'}],
-                          "assignments": [{"target": {"groupName": "test1"}}]}
+        self.directory.write("Enrollment Profiles/Windows/ESP/test.json", '{"test": "test"}', encoding="utf-8")
+        self.token = "token"
+        self.app_ids = {"value": [{"id": "0"}]}
+        self.mem_data = {
+            "value": [
+                {
+                    "@odata.type": "test",
+                    "id": "0",
+                    "displayName": "test",
+                    "testvalue": "test",
+                    "selectedMobileAppIds": ["1"],
+                    "assignments": [{"target": {"groupId": "test"}}],
+                }
+            ]
+        }
+        self.repo_data = {
+            "@odata.type": "test",
+            "id": "0",
+            "displayName": "test",
+            "testvalue": "test1",
+            "selectedMobileAppNames": [{"name": "app1", "type": "#graph.mobileApp"}],
+            "assignments": [{"target": {"groupName": "test1"}}],
+        }
 
-        self.batch_assignment_patch = patch(
-            'src.IntuneCD.update_enrollmentStatusPage.batch_assignment')
+        self.batch_assignment_patch = patch("src.IntuneCD.update_enrollmentStatusPage.batch_assignment")
         self.batch_assignment = self.batch_assignment_patch.start()
 
-        self.object_assignment_patch = patch(
-            'src.IntuneCD.update_enrollmentStatusPage.get_object_assignment')
+        self.object_assignment_patch = patch("src.IntuneCD.update_enrollmentStatusPage.get_object_assignment")
         self.object_assignment = self.object_assignment_patch.start()
 
-        self.makeapirequest_patch = patch(
-            'src.IntuneCD.update_enrollmentStatusPage.makeapirequest')
+        self.makeapirequest_patch = patch("src.IntuneCD.update_enrollmentStatusPage.makeapirequest")
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = self.mem_data, self.app_ids
 
-        self.update_assignment_patch = patch(
-            'src.IntuneCD.update_enrollmentStatusPage.update_assignment')
+        self.update_assignment_patch = patch("src.IntuneCD.update_enrollmentStatusPage.update_assignment")
         self.update_assignment = self.update_assignment_patch.start()
 
-        self.load_file_patch = patch(
-            'src.IntuneCD.update_enrollmentStatusPage.load_file')
+        self.load_file_patch = patch("src.IntuneCD.update_enrollmentStatusPage.load_file")
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
-        self.post_assignment_update_patch = patch(
-            'src.IntuneCD.update_enrollmentStatusPage.post_assignment_update')
+        self.post_assignment_update_patch = patch("src.IntuneCD.update_enrollmentStatusPage.post_assignment_update")
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
-        self.makeapirequestPatch_patch = patch(
-            'src.IntuneCD.update_enrollmentStatusPage.makeapirequestPatch')
+        self.makeapirequestPatch_patch = patch("src.IntuneCD.update_enrollmentStatusPage.makeapirequestPatch")
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
-        self.makeapirequestPost_patch = patch(
-            'src.IntuneCD.update_enrollmentStatusPage.makeapirequestPost')
+        self.makeapirequestPost_patch = patch("src.IntuneCD.update_enrollmentStatusPage.makeapirequestPost")
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
@@ -85,7 +83,7 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
-        self.assertEqual(self.count, 1)
+        self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
@@ -94,20 +92,20 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
-        self.assertEqual(self.count, 1)
+        self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_with_no_diffs_and_assignment(self):
         """The count should be 0, the post_assignment_update should be called,
-         and makeapirequestPatch should not be called."""
+        and makeapirequestPatch should not be called."""
 
         self.mem_data["value"][0]["testvalue"] = "test1"
         self.mem_data["value"][0]["selectedMobileAppIds"][0] = "0"
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
-        self.assertEqual(self.count, 0)
+        self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
@@ -119,7 +117,7 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
-        self.assertEqual(self.count, 0)
+        self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
@@ -129,11 +127,11 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
         self.mem_data["value"][0]["testvalue"] = "test1"
         self.mem_data["value"][0]["selectedMobileAppIds"][0] = "0"
 
-        self.makeapirequest.side_effect = [self.mem_data, {'value': []}]
+        self.makeapirequest.side_effect = [self.mem_data, {"value": []}]
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
-        self.assertEqual(self.count, 0)
+        self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
@@ -144,10 +142,10 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
-        self.assertEqual(self.count, 0)
+        self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

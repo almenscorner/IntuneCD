@@ -24,15 +24,15 @@ def savebackup(path, output, token):
     """
 
     config_count = 0
-    configpath = f'{path}/Apple VPP Tokens/'
+    configpath = f"{path}/Apple VPP Tokens/"
     data = makeapirequest(ENDPOINT, token)
 
-    for vpp_token in data['value']:
+    for vpp_token in data["value"]:
         config_count += 1
-        token_name = vpp_token['displayName']
+        token_name = vpp_token["displayName"]
         vpp_token = remove_keys(vpp_token)
 
-        print(f'Backing up VPP token: {token_name}')
+        print(f"Backing up VPP token: {token_name}")
 
         # Get filename without illegal characters
         fname = clean_filename(token_name)

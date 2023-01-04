@@ -24,17 +24,16 @@ def savebackup(path, output, token):
     """
 
     config_count = 0
-    configpath = f'{path}/Managed Google Play/'
+    configpath = f"{path}/Managed Google Play/"
     data = makeapirequest(ENDPOINT, token)
 
     if data:
         config_count += 1
         data = remove_keys(data)
-        print("Backing up Managed Google Play: " +
-              data['ownerUserPrincipalName'])
+        print("Backing up Managed Google Play: " + data["ownerUserPrincipalName"])
 
         # Get filename without illegal characters
-        fname = clean_filename(data['ownerUserPrincipalName'])
+        fname = clean_filename(data["ownerUserPrincipalName"])
         # Save Managed Google Play as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, data)

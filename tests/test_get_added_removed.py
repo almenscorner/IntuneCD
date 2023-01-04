@@ -15,19 +15,20 @@ class TestCleanFilename(unittest.TestCase):
     def test_get_added_removed(self):
         """The list of added and removed should be returned."""
         self.object = {
-            'assignments': {
-                'intent': 'apply',
-                'target': {
-                    '@odata.type': '#microsoft.graph.allDevicesAssignmentTarget',
-                    'deviceAndAppManagementAssignmentFilterId': "1234",
-                    'deviceAndAppManagementAssignmentFilterType': 'device'}}}
+            "assignments": {
+                "intent": "apply",
+                "target": {
+                    "@odata.type": "#microsoft.graph.allDevicesAssignmentTarget",
+                    "deviceAndAppManagementAssignmentFilterId": "1234",
+                    "deviceAndAppManagementAssignmentFilterType": "device",
+                },
+            }
+        }
 
         result = get_added_removed(self.object)
 
-        self.assertEqual(
-            result,
-            ['intent: apply, Filter ID: 1234, Filter Type: device, target: All Devices'])
+        self.assertEqual(result, ["intent: apply, Filter ID: 1234, Filter Type: device, target: All Devices"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

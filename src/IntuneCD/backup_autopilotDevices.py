@@ -26,10 +26,10 @@ def savebackup(path, output, token):
     configpath = path + "/" + "Autopilot Devices/"
     data = makeapirequest(ENDPOINT, token)
 
-    for device in data['value']:
+    for device in data["value"]:
 
         # Get filename without illegal characters
-        fname = clean_filename(device['id'])
+        fname = clean_filename(device["id"])
         # Save Autopilot device as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, device)

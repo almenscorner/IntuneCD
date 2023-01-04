@@ -28,21 +28,19 @@ def savebackup(path, output, token):
     q_param = "?$expand=localizedNotificationMessages"
     data = makeapirequest(ENDPOINT, token, q_param)
 
-    for template in data['value']:
+    for template in data["value"]:
         config_count += 1
-        print("Backing up Notification message template: " +
-              template['displayName'])
+        print("Backing up Notification message template: " + template["displayName"])
         q_param = "?$expand=localizedNotificationMessages"
-        template_data = makeapirequest(
-            ENDPOINT + "/" + template['id'], token, q_param)
+        template_data = makeapirequest(ENDPOINT + "/" + template["id"], token, q_param)
 
         template_data = remove_keys(template_data)
 
-        for locale in template_data['localizedNotificationMessages']:
+        for locale in template_data["localizedNotificationMessages"]:
             remove_keys(locale)
 
         # Get filename without illegal characters
-        fname = clean_filename(template_data['displayName'])
+        fname = clean_filename(template_data["displayName"])
         # Save Notification template as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, template_data)

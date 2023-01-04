@@ -27,18 +27,18 @@ def savebackup(path, output, token):
     configpath = path + "/" + "Conditional Access/"
     data = makeapirequest(ENDPOINT, token)
 
-    if data['value']:
-        for policy in data['value']:
+    if data["value"]:
+        for policy in data["value"]:
             config_count += 1
-            print("Backing up Conditional Access policy: " + policy['displayName'])
+            print("Backing up Conditional Access policy: " + policy["displayName"])
 
             policy = makeapirequest(f"{ENDPOINT}/{policy['id']}", token)
-            if policy['grantControls']:
-                policy['grantControls'].pop('authenticationStrength@odata.context', None)
+            if policy["grantControls"]:
+                policy["grantControls"].pop("authenticationStrength@odata.context", None)
             policy = remove_keys(policy)
 
             # Get filename without illegal characters
-            fname = clean_filename(policy['displayName'])
+            fname = clean_filename(policy["displayName"])
             # Save Conditional Access as JSON or YAML depending on configured
             # value in "-o"
             save_output(output, configpath, fname, policy)
