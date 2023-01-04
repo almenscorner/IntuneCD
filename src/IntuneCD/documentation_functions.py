@@ -20,10 +20,10 @@ def md_file(outpath):
 
     :param outpath: The path to save the Markdown document to
     """
-    if not os.path.exists(f'{outpath}'):
-        open(outpath, 'w+').close()
+    if not os.path.exists(f"{outpath}"):
+        open(outpath, "w+").close()
     else:
-        open(outpath, 'w').close()
+        open(outpath, "w").close()
 
 
 def write_table(data):
@@ -35,7 +35,7 @@ def write_table(data):
     """
 
     writer = MarkdownTableWriter(
-        headers=['setting', 'value'],
+        headers=["setting", "value"],
         value_matrix=data,
     )
 
@@ -51,40 +51,45 @@ def assignment_table(data):
     """
 
     def write_assignment_table(data, headers):
-        writer = MarkdownTableWriter(
-            headers=headers,
-            value_matrix=data
-        )
+        writer = MarkdownTableWriter(headers=headers, value_matrix=data)
 
         return writer
 
     table = ""
     if "assignments" in data:
-        assignments = data['assignments']
+        assignments = data["assignments"]
         assignment_list = []
         target = ""
         intent = ""
         for assignment in assignments:
-            if assignment['target']['@odata.type'] == "#microsoft.graph.allDevicesAssignmentTarget":
+            if assignment["target"]["@odata.type"] == "#microsoft.graph.allDevicesAssignmentTarget":
                 target = "All Devices"
-            if assignment['target']['@odata.type'] == "#microsoft.graph.allLicensedUsersAssignmentTarget":
+            if assignment["target"]["@odata.type"] == "#microsoft.graph.allLicensedUsersAssignmentTarget":
                 target = "All Users"
-            if 'groupName' in assignment['target']:
-                target = assignment['target']['groupName']
+            if "groupName" in assignment["target"]:
+                target = assignment["target"]["groupName"]
             if "intent" in assignment:
-                intent = assignment['intent']
-                headers = ['intent', 'target', 'filter type', 'filter name']
+                intent = assignment["intent"]
+                headers = ["intent", "target", "filter type", "filter name"]
             else:
-                headers = ['target', 'filter type', 'filter name']
+                headers = ["target", "filter type", "filter name"]
             if intent:
-                assignment_list.append([intent,
-                                        target,
-                                        assignment['target']['deviceAndAppManagementAssignmentFilterType'],
-                                        assignment['target']['deviceAndAppManagementAssignmentFilterId']])
+                assignment_list.append(
+                    [
+                        intent,
+                        target,
+                        assignment["target"]["deviceAndAppManagementAssignmentFilterType"],
+                        assignment["target"]["deviceAndAppManagementAssignmentFilterId"],
+                    ]
+                )
             else:
-                assignment_list.append([target,
-                                        assignment['target']['deviceAndAppManagementAssignmentFilterType'],
-                                        assignment['target']['deviceAndAppManagementAssignmentFilterId']])
+                assignment_list.append(
+                    [
+                        target,
+                        assignment["target"]["deviceAndAppManagementAssignmentFilterType"],
+                        assignment["target"]["deviceAndAppManagementAssignmentFilterId"],
+                    ]
+                )
 
             table = write_assignment_table(assignment_list, headers)
 
@@ -194,7 +199,7 @@ def clean_list(data):
 
     def string(s) -> str:
         if len(s) > 200:
-            string = f'<details><summary>Click to expand...</summary>{item}</details>'
+            string = f"<details><summary>Click to expand...</summary>{item}</details>"
         else:
             string = item
 
@@ -226,6 +231,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
     :param header: Header of the configuration being documented
     :param max_length: The maximum length of the configuration to write to the Markdown document
     :param split: Split documentation into multiple files
+    :param cleanup: Remove empty values from documentation
     """
 
     # If configurations path exists, continue
@@ -233,8 +239,8 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
         if split:
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
-        with open(outpath, 'a') as md:
-            md.write('# ' + header + '\n')
+        with open(outpath, "a") as md:
+            md.write("# " + header + "\n")
 
         pattern = configpath + "*/*"
         for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
@@ -253,13 +259,13 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                 # Create assignments table
                 assignments_table = ""
                 assignments_table = assignment_table(repo_data)
-                repo_data.pop('assignments', None)
+                repo_data.pop("assignments", None)
 
                 description = ""
-                if 'description' in repo_data:
-                    if repo_data['description'] is not None:
-                        description = repo_data['description']
-                        repo_data.pop('description')
+                if "description" in repo_data:
+                    if repo_data["description"] is not None:
+                        description = repo_data["description"]
+                        repo_data.pop("description")
 
                 # Write configuration Markdown table
                 config_table_list = []
@@ -273,8 +279,8 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
 
                     else:
                         key = key[0].upper() + key[1:]
-                        key = re.findall('[A-Z][^A-Z]*', key)
-                        key = ' '.join(key)
+                        key = re.findall("[A-Z][^A-Z]*", key)
+                        key = " ".join(key)
 
                     if max_length:
                         if value and isinstance(value, str) and len(value) > max_length:
@@ -285,17 +291,17 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                 config_table = write_table(config_table_list)
 
                 # Write data to file
-                with open(outpath, 'a') as md:
+                with open(outpath, "a") as md:
                     if "displayName" in repo_data:
-                        md.write('## ' + repo_data['displayName'] + '\n')
+                        md.write("## " + repo_data["displayName"] + "\n")
                     if "name" in repo_data:
-                        md.write('## ' + repo_data['name'] + '\n')
+                        md.write("## " + repo_data["name"] + "\n")
                     if description:
-                        md.write(f'Description: {description} \n')
+                        md.write(f"Description: {description} \n")
                     if assignments_table:
-                        md.write('### Assignments \n')
-                        md.write(str(assignments_table) + '\n')
-                    md.write(str(config_table) + '\n')
+                        md.write("### Assignments \n")
+                        md.write(str(assignments_table) + "\n")
+                    md.write(str(config_table) + "\n")
 
 
 def document_management_intents(configpath, outpath, header, split):
@@ -313,8 +319,8 @@ def document_management_intents(configpath, outpath, header, split):
         if split:
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
-        with open(outpath, 'a') as md:
-            md.write('# ' + header + '\n')
+        with open(outpath, "a") as md:
+            md.write("# " + header + "\n")
 
         pattern = configpath + "*/*"
         for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
@@ -337,53 +343,52 @@ def document_management_intents(configpath, outpath, header, split):
                 # Create assignments table
                 assignments_table = ""
                 assignments_table = assignment_table(repo_data)
-                repo_data.pop('assignments', None)
+                repo_data.pop("assignments", None)
 
                 intent_settings_list = []
-                for setting in repo_data['settingsDelta']:
-                    setting_definition = setting['definitionId'].split("_")[1]
+                for setting in repo_data["settingsDelta"]:
+                    setting_definition = setting["definitionId"].split("_")[1]
                     setting_definition = setting_definition[0].upper() + setting_definition[1:]
-                    setting_definition = re.findall('[A-Z][^A-Z]*', setting_definition)
-                    setting_definition = ' '.join(setting_definition)
+                    setting_definition = re.findall("[A-Z][^A-Z]*", setting_definition)
+                    setting_definition = " ".join(setting_definition)
 
                     vals = []
-                    value = str(remove_characters(setting['valueJson']))
-                    comma = re.findall('[:][^:]*', value)
-                    for v in value.split(','):
-                        v = v.replace(' ', '')
+                    value = str(remove_characters(setting["valueJson"]))
+                    comma = re.findall("[:][^:]*", value)
+                    for v in value.split(","):
+                        v = v.replace(" ", "")
                         if comma:
                             v = f'**{v.replace(":", ":** ")}'
                         vals.append(v)
                     value = ",".join(vals)
-                    value = value.replace(',', '<br />')
+                    value = value.replace(",", "<br />")
 
-                    intent_settings_list.append([setting_definition,
-                                                 value])
+                    intent_settings_list.append([setting_definition, value])
 
-                repo_data.pop('settingsDelta')
+                repo_data.pop("settingsDelta")
 
                 description = ""
-                if 'description' in repo_data:
-                    if repo_data['description'] is not None:
-                        description = repo_data['description']
-                        repo_data.pop('description')
+                if "description" in repo_data:
+                    if repo_data["description"] is not None:
+                        description = repo_data["description"]
+                        repo_data.pop("description")
 
                 intent_table_list = []
 
                 for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
                     key = key[0].upper() + key[1:]
-                    key = re.findall('[A-Z][^A-Z]*', key)
-                    key = ' '.join(key)
+                    key = re.findall("[A-Z][^A-Z]*", key)
+                    key = " ".join(key)
 
                     if value and isinstance(value, str):
                         if len(value.split(",")) > 1:
                             vals = []
-                            for v in value.split(','):
-                                v = v.replace(' ', '')
+                            for v in value.split(","):
+                                v = v.replace(" ", "")
                                 v = f'**{v.replace(":", ":** ")}'
                                 vals.append(v)
                             value = ",".join(vals)
-                            value = value.replace(',', '<br />')
+                            value = value.replace(",", "<br />")
 
                     intent_table_list.append([key, value])
 
@@ -391,17 +396,17 @@ def document_management_intents(configpath, outpath, header, split):
 
                 config_table = write_table(table)
                 # Write data to file
-                with open(outpath, 'a') as md:
+                with open(outpath, "a") as md:
                     if "displayName" in repo_data:
-                        md.write('## ' + repo_data['displayName'] + '\n')
+                        md.write("## " + repo_data["displayName"] + "\n")
                     if "name" in repo_data:
-                        md.write('## ' + repo_data['name'] + '\n')
+                        md.write("## " + repo_data["name"] + "\n")
                     if description:
-                        md.write(f'Description: {description} \n')
+                        md.write(f"Description: {description} \n")
                     if assignments_table:
-                        md.write('### Assignments \n')
-                        md.write(str(assignments_table) + '\n')
-                    md.write(str(config_table) + '\n')
+                        md.write("### Assignments \n")
+                        md.write(str(assignments_table) + "\n")
+                    md.write(str(config_table) + "\n")
 
 
 def get_md_files(configpath):
@@ -419,7 +424,7 @@ def get_md_files(configpath):
         for filename in glob.glob(configpath + pattern, recursive=True):
             filepath = filename.split(slash)
             configpathname = configpath.split(slash)[-1]
-            filepath = filepath[filepath.index(configpathname):]
+            filepath = filepath[filepath.index(configpathname) :]
             filepath = "/".join(filepath[1:])
 
             md_files.append(f"./{filepath}")
