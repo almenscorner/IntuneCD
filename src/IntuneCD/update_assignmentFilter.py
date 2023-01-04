@@ -12,7 +12,7 @@ from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPo
 from .remove_keys import remove_keys
 from .load_file import load_file
 from .check_file import check_file
-from .get_diff_output import get_diff_output
+from .diff_summary import DiffSummary
 
 
 # Set MS Graph endpoint
@@ -27,7 +27,7 @@ def update(path, token):
     :param token: Token to use for authenticating the request
     """
 
-    diff_count = 0
+    diff_summary = []
     # Set Filters path
     configpath = path + "/" + "Filters"
     # If App Configuration path exists, continue
@@ -47,53 +47,52 @@ def update(path, token):
                 filter_value = {}
 
                 # If Filter exists, continue
-                if mem_data['value']:
-                    for val in mem_data['value']:
-                        if repo_data['displayName'] == val['displayName']:
+                if mem_data["value"]:
+                    for val in mem_data["value"]:
+                        if repo_data["displayName"] == val["displayName"]:
                             filter_value = val
 
                 if filter_value:
                     print("-" * 90)
-                    filter_id = filter_value['id']
+                    filter_id = filter_value["id"]
                     filter_value = remove_keys(filter_value)
 
                     filter_value.pop("payloads", None)
                     repo_data.pop("payloads", None)
 
-                    diff = DeepDiff(
-                        filter_value, repo_data, ignore_order=True).get(
-                        'values_changed', {})
+                    diff = DeepDiff(filter_value, repo_data, ignore_order=True).get("values_changed", {})
 
                     # If any changed values are found, push them to Intune
                     if diff:
-                        diff_count += 1
-                        print("Updating Filter: " +
-                              repo_data['displayName'] + ", values changed:")
-                        values = get_diff_output(diff)
-                        for value in values:
-                            print(value)
                         repo_data.pop("platform", None)
                         request_data = json.dumps(repo_data)
                         makeapirequestPatch(
                             ENDPOINT + "/" + filter_id,
                             token,
                             q_param=None,
-                            jdata=request_data)
-                    else:
-                        print('No difference found for Filter: ' +
-                              repo_data['displayName'])
+                            jdata=request_data,
+                        )
+
+                    diff_config = DiffSummary(
+                        data=diff,
+                        name=repo_data["displayName"],
+                        type="Filter",
+                    )
+
+                    diff_summary.append(diff_config)
 
                 # If Filter does not exist, create it
                 else:
                     print("-" * 90)
-                    print(
-                        "Assignment filter not found, creating filter: " +
-                        repo_data['displayName'])
+                    print("Assignment filter not found, creating filter: " + repo_data["displayName"])
                     request_json = json.dumps(repo_data)
                     post_request = makeapirequestPost(
-                        ENDPOINT, token, q_param=None, jdata=request_json, status_code=201)
-                    print(
-                        "Assignment filter created with id: " +
-                        post_request['id'])
+                        ENDPOINT,
+                        token,
+                        q_param=None,
+                        jdata=request_json,
+                        status_code=201,
+                    )
+                    print("Assignment filter created with id: " + post_request["id"])
 
-    return diff_count
+    return diff_summary
