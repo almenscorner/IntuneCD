@@ -21,7 +21,7 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePolicies"
 
 
-def update(path, token, assignment=False):
+def update(path, token, assignment=False, report=False):
     """
     This function updates all Compliance Polices in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -37,7 +37,9 @@ def update(path, token, assignment=False):
     # If App Configuration path exists, continue
     if os.path.exists(configpath):
         # Get compliance policies
-        q_param = {"expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"}
+        q_param = {
+            "expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"
+        }
         mem_data = makeapirequest(ENDPOINT, token, q_param)
         # Get current assignments
         mem_assignments = batch_assignment(
@@ -66,7 +68,10 @@ def update(path, token, assignment=False):
                 data = {"value": ""}
                 if mem_data["value"]:
                     for val in mem_data["value"]:
-                        if repo_data["@odata.type"] == val["@odata.type"] and repo_data["displayName"] == val["displayName"]:
+                        if (
+                            repo_data["@odata.type"] == val["@odata.type"]
+                            and repo_data["displayName"] == val["displayName"]
+                        ):
                             data["value"] = val
 
                 if data["value"]:
@@ -77,7 +82,9 @@ def update(path, token, assignment=False):
                     if data["value"]["scheduledActionsForRule"]:
                         for rule in data["value"]["scheduledActionsForRule"]:
                             remove_keys(rule)
-                        for scheduled_config in data["value"]["scheduledActionsForRule"][0]["scheduledActionConfigurations"]:
+                        for scheduled_config in data["value"][
+                            "scheduledActionsForRule"
+                        ][0]["scheduledActionConfigurations"]:
                             remove_keys(scheduled_config)
 
                     diff = DeepDiff(
@@ -88,7 +95,7 @@ def update(path, token, assignment=False):
                     ).get("values_changed", {})
 
                     # If any changed values are found, push them to Intune
-                    if diff:
+                    if diff and report is False:
                         scheduled_actions = repo_data["scheduledActionsForRule"]
                         repo_data.pop("scheduledActionsForRule", None)
                         request_data = json.dumps(repo_data)
@@ -115,16 +122,18 @@ def update(path, token, assignment=False):
                             data["value"]["scheduledActionsForRule"],
                             repo_data["scheduledActionsForRule"],
                         ):
-                            rdiff = DeepDiff(mem_rule, repo_rule, ignore_order=True).get("values_changed", {})
+                            rdiff = DeepDiff(
+                                mem_rule, repo_rule, ignore_order=True
+                            ).get("values_changed", {})
 
-                        if rdiff:
+                        if rdiff and report is False:
                             request_data = {
                                 "deviceComplianceScheduledActionForRules": [
                                     {
                                         "ruleName": "PasswordRequired",
-                                        "scheduledActionConfigurations": repo_data["scheduledActionsForRule"][0][
-                                            "scheduledActionConfigurations"
-                                        ],
+                                        "scheduledActionConfigurations": repo_data[
+                                            "scheduledActionsForRule"
+                                        ][0]["scheduledActionConfigurations"],
                                     }
                                 ]
                             }
@@ -163,26 +172,34 @@ def update(path, token, assignment=False):
                 # If Compliance Policy does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print("Compliance Policy not found, creating Policy: " + repo_data["displayName"])
-                    request_json = json.dumps(repo_data)
-                    post_request = makeapirequestPost(
-                        ENDPOINT,
-                        token,
-                        q_param=None,
-                        jdata=request_json,
-                        status_code=201,
+                    print(
+                        "Compliance Policy not found, creating Policy: "
+                        + repo_data["displayName"]
                     )
-                    mem_assign_obj = []
-                    assignment = update_assignment(assign_obj, mem_assign_obj, token)
-                    if assignment is not None:
-                        request_data = {"assignments": assignment}
-                        post_assignment_update(
-                            request_data,
-                            post_request["id"],
-                            "deviceManagement/deviceCompliancePolicies",
-                            "assign",
+                    if report is False:
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(
+                            ENDPOINT,
                             token,
+                            q_param=None,
+                            jdata=request_json,
+                            status_code=201,
                         )
-                    print("Compliance Policy created with id: " + post_request["id"])
+                        mem_assign_obj = []
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token
+                        )
+                        if assignment is not None:
+                            request_data = {"assignments": assignment}
+                            post_assignment_update(
+                                request_data,
+                                post_request["id"],
+                                "deviceManagement/deviceCompliancePolicies",
+                                "assign",
+                                token,
+                            )
+                        print(
+                            "Compliance Policy created with id: " + post_request["id"]
+                        )
 
     return diff_summary
