@@ -15,10 +15,12 @@ from .remove_keys import remove_keys
 from .diff_summary import DiffSummary
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
+)
 
 
-def update(path, token):
+def update(path, token, report):
     """
     This function updates all Notification Templates in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -56,7 +58,9 @@ def update(path, token):
                     print("-" * 90)
                     # Get Notification Template data from Intune
                     q_param = "?$expand=localizedNotificationMessages"
-                    mem_template_data = makeapirequest(ENDPOINT + "/" + data["value"]["id"], token, q_param)
+                    mem_template_data = makeapirequest(
+                        ENDPOINT + "/" + data["value"]["id"], token, q_param
+                    )
                     # Create dict to compare Intune data with JSON/YAML data
                     repo_template_data = {
                         "displayName": repo_data["displayName"],
@@ -64,10 +68,12 @@ def update(path, token):
                         "roleScopeTagIds": repo_data["roleScopeTagIds"],
                     }
 
-                    diff = DeepDiff(mem_template_data, repo_template_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(
+                        mem_template_data, repo_template_data, ignore_order=True
+                    ).get("values_changed", {})
 
                     # If any changed values are found, push them to Intune
-                    if diff:
+                    if diff and report is False:
                         request_data = json.dumps(repo_template_data)
                         q_param = None
                         makeapirequestPatch(
@@ -92,10 +98,12 @@ def update(path, token):
                         del mem_locale["lastModifiedDateTime"]
                         repo_locale = remove_keys(repo_locale)
 
-                        diff = DeepDiff(mem_locale, repo_locale, ignore_order=True).get("values_changed", {})
+                        diff = DeepDiff(mem_locale, repo_locale, ignore_order=True).get(
+                            "values_changed", {}
+                        )
 
                         # If any changed values are found, push them to Intune
-                        if diff:
+                        if diff and report is False:
                             repo_locale.pop("isDefault", None)
                             repo_locale.pop("locale", None)
                             request_data = json.dumps(repo_locale)
@@ -127,29 +135,39 @@ def update(path, token):
                 # If Notification Template does not exist, create it
                 else:
                     print("-" * 90)
-                    print("Notification template not found, creating template: " + repo_data["displayName"])
-                    template = {
-                        "brandingOptions": repo_data["brandingOptions"],
-                        "displayName": repo_data["displayName"],
-                        "roleScopeTagIds": repo_data["roleScopeTagIds"],
-                    }
-                    template_request_json = json.dumps(template)
-                    template_post_request = makeapirequestPost(
-                        ENDPOINT,
-                        token,
-                        q_param=None,
-                        jdata=template_request_json,
-                        status_code=200,
+                    print(
+                        "Notification template not found, creating template: "
+                        + repo_data["displayName"]
                     )
-                    for locale in repo_data["localizedNotificationMessages"]:
-                        locale_request_json = json.dumps(locale)
-                        makeapirequestPost(
-                            ENDPOINT + "/" + template_post_request["id"] + "/localizedNotificationMessages",
+                    if report is False:
+                        template = {
+                            "brandingOptions": repo_data["brandingOptions"],
+                            "displayName": repo_data["displayName"],
+                            "roleScopeTagIds": repo_data["roleScopeTagIds"],
+                        }
+                        template_request_json = json.dumps(template)
+                        template_post_request = makeapirequestPost(
+                            ENDPOINT,
                             token,
                             q_param=None,
-                            jdata=locale_request_json,
+                            jdata=template_request_json,
                             status_code=200,
                         )
-                    print("Notification template created with id: " + template_post_request["id"])
+                        for locale in repo_data["localizedNotificationMessages"]:
+                            locale_request_json = json.dumps(locale)
+                            makeapirequestPost(
+                                ENDPOINT
+                                + "/"
+                                + template_post_request["id"]
+                                + "/localizedNotificationMessages",
+                                token,
+                                q_param=None,
+                                jdata=locale_request_json,
+                                status_code=200,
+                            )
+                        print(
+                            "Notification template created with id: "
+                            + template_post_request["id"]
+                        )
 
     return diff_summary
