@@ -19,7 +19,7 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/assignmentFilters"
 
 
-def update(path, token):
+def update(path, token, report):
     """
     This function updates all Filters in Intune if the configuration in Intune differs from the JSON/YAML file.
 
@@ -60,10 +60,12 @@ def update(path, token):
                     filter_value.pop("payloads", None)
                     repo_data.pop("payloads", None)
 
-                    diff = DeepDiff(filter_value, repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(filter_value, repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
                     # If any changed values are found, push them to Intune
-                    if diff:
+                    if diff and report is False:
                         repo_data.pop("platform", None)
                         request_data = json.dumps(repo_data)
                         makeapirequestPatch(
@@ -84,15 +86,21 @@ def update(path, token):
                 # If Filter does not exist, create it
                 else:
                     print("-" * 90)
-                    print("Assignment filter not found, creating filter: " + repo_data["displayName"])
-                    request_json = json.dumps(repo_data)
-                    post_request = makeapirequestPost(
-                        ENDPOINT,
-                        token,
-                        q_param=None,
-                        jdata=request_json,
-                        status_code=201,
+                    print(
+                        "Assignment filter not found, creating filter: "
+                        + repo_data["displayName"]
                     )
-                    print("Assignment filter created with id: " + post_request["id"])
+                    if report is False:
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(
+                            ENDPOINT,
+                            token,
+                            q_param=None,
+                            jdata=request_json,
+                            status_code=201,
+                        )
+                        print(
+                            "Assignment filter created with id: " + post_request["id"]
+                        )
 
     return diff_summary
