@@ -30,40 +30,34 @@ def savebackup(path, output, exclude, token):
     configpath = path + "/" + "Enrollment Profiles/Windows/ESP/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        data,
-        'deviceManagement/deviceEnrollmentConfigurations/',
-        '/assignments',
-        token)
+    assignment_responses = batch_assignment(data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token)
 
-    for profile in data['value']:
-        if profile['@odata.type'] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration":
+    for profile in data["value"]:
+        if profile["@odata.type"] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration":
             config_count += 1
             if "assignments" not in exclude:
-                assignments = get_object_assignment(
-                    profile['id'], assignment_responses)
+                assignments = get_object_assignment(profile["id"], assignment_responses)
                 if assignments:
-                    profile['assignments'] = assignments
+                    profile["assignments"] = assignments
 
             profile = remove_keys(profile)
 
             # If the profile contains apps, get the name of the app
-            if 'selectedMobileAppIds' in profile:
-                app_ids = profile['selectedMobileAppIds']
+            if "selectedMobileAppIds" in profile:
+                app_ids = profile["selectedMobileAppIds"]
                 app_names = []
                 for app_id in app_ids:
                     app_data = makeapirequest(APP_ENDPOINT + "/" + app_id, token)
-                    app = {'name': app_data['displayName'], 'type': app_data['@odata.type']}
+                    app = {"name": app_data["displayName"], "type": app_data["@odata.type"]}
                     app_names.append(app)
                 if app_names:
-                    profile.pop('selectedMobileAppIds', None)
-                    profile['selectedMobileAppNames'] = app_names
+                    profile.pop("selectedMobileAppIds", None)
+                    profile["selectedMobileAppNames"] = app_names
 
-            print("Backing up Enrollment Status Page: " +
-                profile['displayName'])
+            print("Backing up Enrollment Status Page: " + profile["displayName"])
 
             # Get filename without illegal characters
-            fname = clean_filename(profile['displayName'])
+            fname = clean_filename(profile["displayName"])
             # Save Windows Enrollment Profile as JSON or YAML depending on
             # configured value in "-o"
             save_output(output, configpath, fname, profile)
