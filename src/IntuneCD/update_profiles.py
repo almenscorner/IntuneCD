@@ -22,7 +22,7 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
 
 
-def update(path, token, assignment=False):
+def update(path, token, assignment=False, report=False):
     """
     This function updates all Device Configurations in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -40,7 +40,9 @@ def update(path, token, assignment=False):
         # Get profiles
         mem_data = makeapirequest(ENDPOINT, token)
         # Get current assignment
-        mem_assignments = batch_assignment(mem_data, "deviceManagement/deviceConfigurations/", "/assignments", token)
+        mem_assignments = batch_assignment(
+            mem_data, "deviceManagement/deviceConfigurations/", "/assignments", token
+        )
 
         for filename in os.listdir(configpath):
             file = check_file(configpath, filename)
@@ -59,11 +61,17 @@ def update(path, token, assignment=False):
                 data = {"value": ""}
                 if mem_data["value"]:
                     # Updating Windows update rings is currently not supported
-                    if repo_data["@odata.type"] == "#microsoft.graph.windowsUpdateForBusinessConfiguration":
+                    if (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.windowsUpdateForBusinessConfiguration"
+                    ):
                         continue
 
                     for val in mem_data["value"]:
-                        if repo_data["@odata.type"] == val["@odata.type"] and repo_data["displayName"] == val["displayName"]:
+                        if (
+                            repo_data["@odata.type"] == val["@odata.type"]
+                            and repo_data["displayName"] == val["displayName"]
+                        ):
                             data["value"] = val
 
                 if data["value"]:
@@ -75,17 +83,27 @@ def update(path, token, assignment=False):
 
                     # If Device Configuration is custom macOS or iOS, compare
                     # the .mobileconfig
-                    if (repo_data["@odata.type"] == "#microsoft.graph.macOSCustomConfiguration") or (
-                        repo_data["@odata.type"] == "#microsoft.graph.iosCustomConfiguration"
+                    if (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.macOSCustomConfiguration"
+                    ) or (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.iosCustomConfiguration"
                     ):
-                        if os.path.exists(configpath + "mobileconfig/" + repo_data["payloadFileName"]):
+                        if os.path.exists(
+                            configpath + "mobileconfig/" + repo_data["payloadFileName"]
+                        ):
                             with open(
-                                configpath + "mobileconfig/" + repo_data["payloadFileName"],
+                                configpath
+                                + "mobileconfig/"
+                                + repo_data["payloadFileName"],
                                 "rb",
                             ) as f:
                                 repo_payload_config = plistlib.load(f)
 
-                            decoded = base64.b64decode(data["value"]["payload"]).decode("utf-8")
+                            decoded = base64.b64decode(data["value"]["payload"]).decode(
+                                "utf-8"
+                            )
                             f = open(configpath + "temp.mobileconfig", "w")
                             f.write(decoded)
                             with open(configpath + "temp.mobileconfig", "rb") as f:
@@ -106,28 +124,30 @@ def update(path, token, assignment=False):
                             # If any changed values are found, push them to
                             # Intune
                             if pdiff or cdiff:
-                                print("Updating profile: " + repo_data["displayName"] + ", values changed:")
 
-                                payload = plistlib.dumps(repo_payload_config)
-                                repo_data["payload"] = str(base64.b64encode(payload), "utf-8")
-                                request_data = json.dumps(repo_data)
-                                q_param = None
-                                makeapirequestPatch(
-                                    ENDPOINT + "/" + mem_id,
-                                    token,
-                                    q_param,
-                                    request_data,
-                                    status_code=204,
-                                )
+                                if report is False:
+                                    payload = plistlib.dumps(repo_payload_config)
+                                    repo_data["payload"] = str(
+                                        base64.b64encode(payload), "utf-8"
+                                    )
+                                    request_data = json.dumps(repo_data)
+                                    q_param = None
+                                    makeapirequestPatch(
+                                        ENDPOINT + "/" + mem_id,
+                                        token,
+                                        q_param,
+                                        request_data,
+                                        status_code=204,
+                                    )
 
                             diff_profile = DiffSummary(
-                                data=pdiff,
+                                data=cdiff,
                                 name=repo_data["displayName"],
                                 type="Configuration Profile",
                             )
 
                             diff_config = DiffSummary(
-                                data=cdiff,
+                                data=pdiff,
                                 name=repo_data["payloadName"],
                                 type="Mobileconfig",
                             )
@@ -139,12 +159,22 @@ def update(path, token, assignment=False):
                             os.remove(configpath + "temp.mobileconfig")
 
                         else:
-                            print("No mobileconfig found for profile: " + repo_data["displayName"])
+                            print(
+                                "No mobileconfig found for profile: "
+                                + repo_data["displayName"]
+                            )
 
                     # If Device Configuration is custom Win10, compare the OMA
                     # settings
-                    elif data["value"]["@odata.type"] == "#microsoft.graph.windows10CustomConfiguration":
-                        print("Checking if Win10 Custom Profile: " + repo_data["displayName"] + " has any upates")
+                    elif (
+                        data["value"]["@odata.type"]
+                        == "#microsoft.graph.windows10CustomConfiguration"
+                    ):
+                        print(
+                            "Checking if Win10 Custom Profile: "
+                            + repo_data["displayName"]
+                            + " has any upates"
+                        )
                         omas = []
                         for setting in data["value"]["omaSettings"]:
                             if setting["isEncrypted"]:
@@ -173,7 +203,9 @@ def update(path, token, assignment=False):
                         data["value"]["omaSettings"] = omas
 
                         repo_omas = []
-                        for mem_omaSetting, repo_omaSetting in zip(data["value"]["omaSettings"], repo_data["omaSettings"]):
+                        for mem_omaSetting, repo_omaSetting in zip(
+                            data["value"]["omaSettings"], repo_data["omaSettings"]
+                        ):
 
                             diff = DeepDiff(
                                 mem_omaSetting,
@@ -187,7 +219,9 @@ def update(path, token, assignment=False):
                             if diff:
                                 if type(repo_omaSetting["value"]) is dict:
                                     repo_omaSetting = remove_keys(repo_omaSetting)
-                                    repo_omaSetting["value"] = repo_omaSetting["value"]["value"]
+                                    repo_omaSetting["value"] = repo_omaSetting["value"][
+                                        "value"
+                                    ]
                                     repo_omas.append(repo_omaSetting)
                                 else:
                                     repo_omaSetting = remove_keys(repo_omaSetting)
@@ -204,7 +238,7 @@ def update(path, token, assignment=False):
                         repo_data.pop("omaSettings")
                         repo_data["omaSettings"] = repo_omas
 
-                        if repo_omas:
+                        if repo_omas and report is False:
                             request_data = json.dumps(repo_data)
                             q_param = None
                             makeapirequestPatch(
@@ -217,10 +251,12 @@ def update(path, token, assignment=False):
 
                     # If Device Configuration is not custom, compare the values
                     else:
-                        diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
+                        diff = DeepDiff(
+                            data["value"], repo_data, ignore_order=True
+                        ).get("values_changed", {})
 
                         # If any changed values are found, push them to Intune
-                        if diff:
+                        if diff and report is False:
                             request_data = json.dumps(repo_data)
                             q_param = None
                             makeapirequestPatch(
@@ -256,12 +292,17 @@ def update(path, token, assignment=False):
                 else:
                     # If profile is custom win10, create correct omaSettings
                     # format before posting
-                    if repo_data["@odata.type"] == "#microsoft.graph.windows10CustomConfiguration":
+                    if (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.windows10CustomConfiguration"
+                    ):
                         repo_omas = []
                         for repo_omaSetting in repo_data["omaSettings"]:
                             if type(repo_omaSetting["value"]) is dict:
                                 repo_omaSetting = remove_keys(repo_omaSetting)
-                                repo_omaSetting["value"] = repo_omaSetting["value"]["value"]
+                                repo_omaSetting["value"] = repo_omaSetting["value"][
+                                    "value"
+                                ]
                                 repo_omas.append(repo_omaSetting)
                             else:
                                 repo_omaSetting = remove_keys(repo_omaSetting)
@@ -270,26 +311,33 @@ def update(path, token, assignment=False):
                         repo_data["omaSettings"] = repo_omas
                     # Post new profile
                     print("-" * 90)
-                    print("Profile not found, creating profile: " + repo_data["displayName"])
-                    request_json = json.dumps(repo_data)
-                    post_request = makeapirequestPost(
-                        ENDPOINT,
-                        token,
-                        q_param=None,
-                        jdata=request_json,
-                        status_code=201,
+                    print(
+                        "Profile not found, creating profile: "
+                        + repo_data["displayName"]
                     )
-                    mem_assign_obj = []
-                    assignment = update_assignment(assign_obj, mem_assign_obj, token)
-                    if assignment is not None:
-                        request_data = {"assignments": assignment}
-                        post_assignment_update(
-                            request_data,
-                            post_request["id"],
-                            "deviceManagement/deviceConfigurations",
-                            "assign",
+                    if report is False:
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(
+                            ENDPOINT,
                             token,
+                            q_param=None,
+                            jdata=request_json,
+                            status_code=201,
                         )
-                    print("Profile created with id: " + post_request["id"])
+                        print("Profile created with id: " + post_request["id"])
+
+                        mem_assign_obj = []
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token
+                        )
+                        if assignment is not None:
+                            request_data = {"assignments": assignment}
+                            post_assignment_update(
+                                request_data,
+                                post_request["id"],
+                                "deviceManagement/deviceConfigurations",
+                                "assign",
+                                token,
+                            )
 
     return diff_summary
