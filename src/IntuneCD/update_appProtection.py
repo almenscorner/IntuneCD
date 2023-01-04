@@ -20,7 +20,7 @@ from .load_file import load_file
 ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/"
 
 
-def update(path, token, assignment=False):
+def update(path, token, assignment=False, report=False):
     """
     This function updates all App Protection Polices in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -39,7 +39,9 @@ def update(path, token, assignment=False):
         # Get App Protections
         mem_data = makeapirequest(f"{ENDPOINT}managedAppPolicies", token)
         # Get current assignments
-        mem_assignments = batch_assignment(mem_data, "deviceAppManagement/", "/assignments", token, app_protection=True)
+        mem_assignments = batch_assignment(
+            mem_data, "deviceAppManagement/", "/assignments", token, app_protection=True
+        )
 
         for filename in os.listdir(configpath):
             file = check_file(configpath, filename)
@@ -51,9 +53,15 @@ def update(path, token, assignment=False):
                 repo_data = load_file(filename, f)
 
                 if repo_data:
-                    if repo_data["@odata.type"] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
+                    if (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.mdmWindowsInformationProtectionPolicy"
+                    ):
                         platform = "mdmWindowsInformationProtectionPolicies"
-                    elif repo_data["@odata.type"] == "#microsoft.graph.windowsInformationProtectionPolicy":
+                    elif (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.windowsInformationProtectionPolicy"
+                    ):
                         platform = "windowsInformationProtectionPolicies"
                     else:
                         platform = f"{str(repo_data['@odata.type']).split('.')[2]}s"
@@ -68,13 +76,20 @@ def update(path, token, assignment=False):
                 data = {"value": ""}
                 if mem_data["value"]:
                     for val in mem_data["value"]:
-                        if "targetedAppManagementLevels" in val and "targetedAppManagementLevels" in repo_data:
+                        if (
+                            "targetedAppManagementLevels" in val
+                            and "targetedAppManagementLevels" in repo_data
+                        ):
                             if (
-                                repo_data["targetedAppManagementLevels"] == val["targetedAppManagementLevels"]
+                                repo_data["targetedAppManagementLevels"]
+                                == val["targetedAppManagementLevels"]
                                 and repo_data["displayName"] == val["displayName"]
                             ):
                                 data["value"] = val
-                        elif repo_data["@odata.type"] == val["@odata.type"] and repo_data["displayName"] == val["displayName"]:
+                        elif (
+                            repo_data["@odata.type"] == val["@odata.type"]
+                            and repo_data["displayName"] == val["displayName"]
+                        ):
                             data["value"] = val
 
                 if data["value"]:
@@ -83,10 +98,12 @@ def update(path, token, assignment=False):
                     # Remove keys before using DeepDiff
                     data["value"] = remove_keys(data["value"])
 
-                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
                     # If any changed values are found, push them to Intune
-                    if diff:
+                    if diff and report is False:
                         request_data = json.dumps(repo_data)
                         q_param = None
                         makeapirequestPatch(
@@ -121,27 +138,33 @@ def update(path, token, assignment=False):
                 # If App Protection does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print("App Protection not found, creating policy: " + repo_data["displayName"])
-                    request_json = json.dumps(repo_data)
-                    post_request = makeapirequestPost(
-                        f"{ENDPOINT}managedAppPolicies",
-                        token,
-                        q_param=None,
-                        jdata=request_json,
-                        status_code=201,
+                    print(
+                        "App Protection not found, creating policy: "
+                        + repo_data["displayName"]
                     )
-                    mem_assign_obj = []
-                    assignment = update_assignment(assign_obj, mem_assign_obj, token)
-                    if assignment is not None:
-                        request_data = {"assignments": assignment}
-                        post_assignment_update(
-                            request_data,
-                            post_request["id"],
-                            f"deviceAppManagement/{platform}",
-                            "assign",
+                    if report is False:
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(
+                            f"{ENDPOINT}managedAppPolicies",
                             token,
-                            status_code=204,
+                            q_param=None,
+                            jdata=request_json,
+                            status_code=201,
                         )
-                    print("App Protection created with id: " + post_request["id"])
+                        mem_assign_obj = []
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token
+                        )
+                        if assignment is not None:
+                            request_data = {"assignments": assignment}
+                            post_assignment_update(
+                                request_data,
+                                post_request["id"],
+                                f"deviceAppManagement/{platform}",
+                                "assign",
+                                token,
+                                status_code=204,
+                            )
+                        print("App Protection created with id: " + post_request["id"])
 
     return diff_summary
