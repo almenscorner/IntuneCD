@@ -16,6 +16,7 @@ from .remove_keys import remove_keys
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/identity/conditionalAccess/policies"
 
+
 def update(path, token):
     """
     This function updates all Conditional Access Profiles in Intune,
@@ -23,7 +24,6 @@ def update(path, token):
 
     :param path: Path to where the backup is saved
     :param token: Token to use for authenticating the request
-    :param assignment: Boolean to determine if assignments should be updated
     """
 
     diff_count = 0
@@ -42,59 +42,59 @@ def update(path, token):
             # and set query parameter
             with open(file) as f:
                 repo_data = load_file(filename, f)
-                repo_data['conditions'].pop('users', None)
+                repo_data["conditions"].pop("users", None)
 
-                data = {'value': ''}
-                if mem_data['value']:
-                    for val in mem_data['value']:
-                        if repo_data['displayName'] == val['displayName']:
-                            data['value'] = val
+                data = {"value": ""}
+                if mem_data["value"]:
+                    for val in mem_data["value"]:
+                        if repo_data["displayName"] == val["displayName"]:
+                            data["value"] = val
 
                 # If Conditional Access policy exists, continue
-                if data['value']:
-                    if 'id' not in data['value']:
+                if data["value"]:
+                    if "id" not in data["value"]:
                         continue
                     print("-" * 90)
 
-                    data['value']['conditions'].pop('users', None)
-                    if data['value']['grantControls']:
-                        data['value']['grantControls'].pop('authenticationStrength@odata.context', None)
+                    data["value"]["conditions"].pop("users", None)
+                    if data["value"]["grantControls"]:
+                        data["value"]["grantControls"].pop("authenticationStrength@odata.context", None)
 
-                    mem_id = data['value']['id']
+                    mem_id = data["value"]["id"]
                     # Remove keys before using DeepDiff
-                    data['value'] = remove_keys(data['value'])
+                    data["value"] = remove_keys(data["value"])
 
-                    diff = DeepDiff(
-                        data['value'],
-                        repo_data,
-                        ignore_order=True)
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True)
 
                     # If any changed values are found, push them to Intune
                     if diff:
                         diff_count += 1
-                        print("Updating Conditional Access policy: " +
-                              repo_data['displayName'])
+                        print("Updating Conditional Access policy: " + repo_data["displayName"])
 
                         request_data = json.dumps(repo_data)
                         q_param = None
                         makeapirequestPatch(
-                            f"{ENDPOINT}/{mem_id}", token, q_param, request_data, status_code=204)
+                            f"{ENDPOINT}/{mem_id}",
+                            token,
+                            q_param,
+                            request_data,
+                            status_code=204,
+                        )
                     else:
-                        print(
-                            'No difference found for Conditional Access policy: ' +
-                            repo_data['displayName'])
+                        print("No changes found for Conditional Access policy: " + repo_data["displayName"])
 
                 # If Conditional Access policy does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print(
-                        "Conditional Access policy not found, creating policy: " +
-                        repo_data['displayName'])
+                    print("Conditional Access policy not found, creating policy: " + repo_data["displayName"])
                     request_json = json.dumps(repo_data)
                     post_request = makeapirequestPost(
-                        ENDPOINT, token, q_param=None, jdata=request_json, status_code=201)
-                    print(
-                        "Conditional Access policy created with id: " +
-                        post_request['id'])
+                        ENDPOINT,
+                        token,
+                        q_param=None,
+                        jdata=request_json,
+                        status_code=201,
+                    )
+                    print("Conditional Access policy created with id: " + post_request["id"])
 
     return diff_count
