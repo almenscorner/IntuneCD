@@ -21,7 +21,7 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
 
 
-def update(path, token, assignment=False):
+def update(path, token, assignment=False, report=False):
     """
     This function updates all Powershell scripts in Intune if,
     the configuration in Intune differs from the JSON/YAML file.
@@ -71,19 +71,29 @@ def update(path, token, assignment=False):
                 if data["value"]:
                     print("-" * 90)
                     # Get Powershell script details
-                    mem_data = makeapirequest(ENDPOINT + "/" + data["value"]["id"], token)
+                    mem_data = makeapirequest(
+                        ENDPOINT + "/" + data["value"]["id"], token
+                    )
                     mem_id = mem_data["id"]
                     # Remove keys before using DeepDiff
                     mem_data = remove_keys(mem_data)
 
                     # Check if script data is saved and read the file
-                    if os.path.exists(configpath + "/Script Data/" + repo_data["fileName"]):
-                        with open(configpath + "/Script Data/" + repo_data["fileName"], "r") as f:
+                    if os.path.exists(
+                        configpath + "/Script Data/" + repo_data["fileName"]
+                    ):
+                        with open(
+                            configpath + "/Script Data/" + repo_data["fileName"], "r"
+                        ) as f:
                             repo_payload_config = f.read()
 
-                        mem_payload_config = base64.b64decode(mem_data["scriptContent"]).decode("utf-8")
+                        mem_payload_config = base64.b64decode(
+                            mem_data["scriptContent"]
+                        ).decode("utf-8")
 
-                        pdiff = DeepDiff(mem_payload_config, repo_payload_config, ignore_order=True).get("values_changed", {})
+                        pdiff = DeepDiff(
+                            mem_payload_config, repo_payload_config, ignore_order=True
+                        ).get("values_changed", {})
                         cdiff = DeepDiff(
                             mem_data,
                             repo_data,
@@ -92,12 +102,16 @@ def update(path, token, assignment=False):
                         ).get("values_changed", {})
 
                         # If any changed values are found, push them to Intune
-                        if pdiff or cdiff:
+                        if pdiff or cdiff and report is False:
                             powershell_bytes = repo_payload_config.encode("utf-8")
-                            repo_data["scriptContent"] = base64.b64encode(powershell_bytes).decode("utf-8")
+                            repo_data["scriptContent"] = base64.b64encode(
+                                powershell_bytes
+                            ).decode("utf-8")
                             request_data = json.dumps(repo_data)
                             q_param = None
-                            makeapirequestPatch(ENDPOINT + "/" + mem_id, token, q_param, request_data)
+                            makeapirequestPatch(
+                                ENDPOINT + "/" + mem_id, token, q_param, request_data
+                            )
 
                         diff_config = DiffSummary(
                             data=cdiff,
@@ -134,26 +148,36 @@ def update(path, token, assignment=False):
                 # If Powershell script does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print("Powershell script not found, creating script: " + repo_data["displayName"])
-                    request_json = json.dumps(repo_data)
-                    post_request = makeapirequestPost(
-                        ENDPOINT,
-                        token,
-                        q_param=None,
-                        jdata=request_json,
-                        status_code=201,
+                    print(
+                        "Powershell script not found, creating script: "
+                        + repo_data["displayName"]
                     )
-                    mem_assign_obj = []
-                    assignment = update_assignment(assign_obj, mem_assign_obj, token)
-                    if assignment is not None:
-                        request_data = {"deviceManagementScriptAssignments": assignment}
-                        post_assignment_update(
-                            request_data,
-                            post_request["id"],
-                            "deviceManagement/deviceManagementScripts",
-                            "assign",
+                    if report is False:
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(
+                            ENDPOINT,
                             token,
+                            q_param=None,
+                            jdata=request_json,
+                            status_code=201,
                         )
-                    print("Powershell script created with id: " + post_request["id"])
+                        mem_assign_obj = []
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token
+                        )
+                        if assignment is not None:
+                            request_data = {
+                                "deviceManagementScriptAssignments": assignment
+                            }
+                            post_assignment_update(
+                                request_data,
+                                post_request["id"],
+                                "deviceManagement/deviceManagementScripts",
+                                "assign",
+                                token,
+                            )
+                        print(
+                            "Powershell script created with id: " + post_request["id"]
+                        )
 
     return diff_summary
