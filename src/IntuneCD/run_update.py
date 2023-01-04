@@ -240,6 +240,7 @@ def start():
                         body.append(
                             {
                                 "name": config.name,
+                                "type": config.type,
                                 "diffs": config.diffs,
                             }
                         )
