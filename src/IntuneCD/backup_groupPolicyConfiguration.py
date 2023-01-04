@@ -29,10 +29,9 @@ def savebackup(path, output, exclude, token):
     configpath = path + "/" + "Group Policy Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        data, 'deviceManagement/groupPolicyConfigurations/', '/assignments', token)
+    assignment_responses = batch_assignment(data, "deviceManagement/groupPolicyConfigurations/", "/assignments", token)
 
-    for profile in data['value']:
+    for profile in data["value"]:
         config_count += 1
         definition_endpoint = f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
         # Get definitions
@@ -40,27 +39,27 @@ def savebackup(path, output, exclude, token):
 
         if definitions:
 
-            profile['definitionValues'] = definitions['value']
+            profile["definitionValues"] = definitions["value"]
 
-            for definition in profile['definitionValues']:
-                presentation_endpoint = \
-                    f"{ENDPOINT}/{profile['id']}/definitionValues/{definition['id']}/" \
+            for definition in profile["definitionValues"]:
+                presentation_endpoint = (
+                    f"{ENDPOINT}/{profile['id']}/definitionValues/{definition['id']}/"
                     f"presentationValues?$expand=presentation "
+                )
                 presentation = makeapirequest(presentation_endpoint, token)
-                definition['presentationValues'] = presentation['value']
+                definition["presentationValues"] = presentation["value"]
 
         if "assignments" not in exclude:
-            assignments = get_object_assignment(
-                profile['id'], assignment_responses)
+            assignments = get_object_assignment(profile["id"], assignment_responses)
             if assignments:
-                profile['assignments'] = assignments
+                profile["assignments"] = assignments
 
         profile = remove_keys(profile)
 
-        print("Backing up profile: " + profile['displayName'])
+        print("Backing up profile: " + profile["displayName"])
 
         # Get filename without illegal characters
-        fname = clean_filename(profile['displayName'])
+        fname = clean_filename(profile["displayName"])
 
         save_output(output, configpath, fname, profile)
 
