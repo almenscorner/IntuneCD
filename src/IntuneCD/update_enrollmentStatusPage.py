@@ -17,11 +17,13 @@ from .remove_keys import remove_keys
 from .diff_summary import DiffSummary
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+)
 APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
-def update(path, token, assignment=False):
+def update(path, token, assignment=False, report=False):
     """
     This function updates all Windows Enrollment Status Page Profiles in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -63,7 +65,10 @@ def update(path, token, assignment=False):
                 data = {"value": ""}
                 if mem_data["value"]:
                     for val in mem_data["value"]:
-                        if repo_data["displayName"] == val["displayName"] and repo_data["@odata.type"] == val["@odata.type"]:
+                        if (
+                            repo_data["displayName"] == val["displayName"]
+                            and repo_data["@odata.type"] == val["@odata.type"]
+                        ):
                             data["value"] = val
 
                 # If Enrollment Status Page Profile exists, continue
@@ -93,15 +98,19 @@ def update(path, token, assignment=False):
                         else:
                             print("No app found with name: " + app["name"])
 
-                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
                     # If any changed values are found, push them to Intune
-                    if diff:
+                    if diff and report is False:
                         repo_data.pop("priority", None)
 
                         request_data = json.dumps(repo_data)
                         q_param = None
-                        makeapirequestPatch(f"{ENDPOINT}/{mem_id}", token, q_param, request_data)
+                        makeapirequestPatch(
+                            f"{ENDPOINT}/{mem_id}", token, q_param, request_data
+                        )
 
                     diff_profile = DiffSummary(
                         data=diff,
@@ -128,31 +137,42 @@ def update(path, token, assignment=False):
                 # If Enrollmen Status Page profile does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print("Enrollment Status Page profile not found, creating profile: " + repo_data["displayName"])
-                    request_json = json.dumps(repo_data)
-                    post_request = makeapirequestPost(
-                        ENDPOINT,
-                        token,
-                        q_param=None,
-                        jdata=request_json,
-                        status_code=201,
+                    print(
+                        "Enrollment Status Page profile not found, creating profile: "
+                        + repo_data["displayName"]
                     )
-                    mem_assign_obj = []
-                    assignment = update_assignment(assign_obj, mem_assign_obj, token)
-                    if assignment is not None:
-                        assignments = []
-                        for assign in assignment:
-                            assignments.append({"target": assign["target"]})
-                        request_data = {"enrollmentConfigurationAssignments": assignments}
-
-                        post_assignment_update(
-                            request_data,
-                            post_request["id"],
-                            "deviceManagement/deviceEnrollmentConfigurations",
-                            "assign",
+                    if report is False:
+                        request_json = json.dumps(repo_data)
+                        post_request = makeapirequestPost(
+                            ENDPOINT,
                             token,
-                            status_code=200,
+                            q_param=None,
+                            jdata=request_json,
+                            status_code=201,
                         )
-                    print("Enrollment Status Page profile created with id: " + post_request["id"])
+                        mem_assign_obj = []
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token
+                        )
+                        if assignment is not None:
+                            assignments = []
+                            for assign in assignment:
+                                assignments.append({"target": assign["target"]})
+                            request_data = {
+                                "enrollmentConfigurationAssignments": assignments
+                            }
+
+                            post_assignment_update(
+                                request_data,
+                                post_request["id"],
+                                "deviceManagement/deviceEnrollmentConfigurations",
+                                "assign",
+                                token,
+                                status_code=200,
+                            )
+                        print(
+                            "Enrollment Status Page profile created with id: "
+                            + post_request["id"]
+                        )
 
     return diff_summary
