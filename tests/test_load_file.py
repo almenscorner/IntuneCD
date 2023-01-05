@@ -18,14 +18,8 @@ class TestLoadFile(unittest.TestCase):
         self.json_name = "file_name.json"
         self.directory = TempDirectory()
         self.directory.create()
-        self.yaml_file = self.directory.write(
-            self.yaml_name,
-            "yaml",
-            encoding="utf-8")
-        self.json_file = self.directory.write(
-            self.json_name,
-            '{"data": "fake_data"}',
-            encoding="utf-8")
+        self.yaml_file = self.directory.write(self.yaml_name, "yaml", encoding="utf-8")
+        self.json_file = self.directory.write(self.json_name, '{"data": "fake_data"}', encoding="utf-8")
 
     def tearDown(self):
         self.directory.cleanup()
@@ -47,5 +41,5 @@ class TestLoadFile(unittest.TestCase):
             load_file("file_name.txt", "txt")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

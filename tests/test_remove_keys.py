@@ -10,16 +10,12 @@ class TestRemoveKeys(unittest.TestCase):
 
     def test_remove_keys(self):
         """The dict should be returned with the keys removed."""
-        self.dict = {
-            'id': '1',
-            'isGlobalScript': True,
-            'lastModifiedDateTime': "2022-07-06",
-            'awesome_key': 'awesome_value'}
+        self.dict = {"id": "1", "isGlobalScript": True, "lastModifiedDateTime": "2022-07-06", "awesome_key": "awesome_value"}
 
         self.dict = remove_keys(self.dict)
 
-        self.assertEqual(self.dict, {'awesome_key': 'awesome_value'})
+        self.assertEqual(self.dict, {"awesome_key": "awesome_value"})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

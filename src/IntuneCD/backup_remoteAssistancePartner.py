@@ -27,19 +27,17 @@ def savebackup(path, output, token):
     configpath = path + "/" + "Partner Connections/Remote Assistance/"
     data = makeapirequest(ENDPOINT, token)
 
-    for partner in data['value']:
-        if partner['onboardingStatus'] == "notOnboarded":
+    for partner in data["value"]:
+        if partner["onboardingStatus"] == "notOnboarded":
             continue
 
         config_count += 1
-        print(
-            "Backing up Remote Assistance Partner: " +
-            partner['displayName'])
+        print("Backing up Remote Assistance Partner: " + partner["displayName"])
 
         partner = remove_keys(partner)
 
         # Get filename without illegal characters
-        fname = clean_filename(partner['displayName'])
+        fname = clean_filename(partner["displayName"])
         # Save Compliance policy as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, partner)

@@ -27,17 +27,17 @@ def savebackup(path, output, token):
     configpath = path + "/" + "Partner Connections/Compliance/"
     data = makeapirequest(ENDPOINT, token)
 
-    for partner in data['value']:
-        if partner['partnerState'] == "unknown":
+    for partner in data["value"]:
+        if partner["partnerState"] == "unknown":
             continue
 
         config_count += 1
-        print("Backing up Compliance Partner: " + partner['displayName'])
+        print("Backing up Compliance Partner: " + partner["displayName"])
 
         partner = remove_keys(partner)
 
         # Get filename without illegal characters
-        fname = clean_filename(partner['displayName'])
+        fname = clean_filename(partner["displayName"])
         # Save Compliance policy as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, partner)

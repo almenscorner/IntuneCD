@@ -28,13 +28,13 @@ def savebackup(path, output, token):
     data = makeapirequest(ENDPOINT, token)
 
     if data:
-        for assign_filter in data['value']:
+        for assign_filter in data["value"]:
             config_count += 1
             assign_filter = remove_keys(assign_filter)
-            print("Backing up Filter: " + assign_filter['displayName'])
+            print("Backing up Filter: " + assign_filter["displayName"])
 
             # Get filename without illegal characters
-            fname = clean_filename(assign_filter['displayName'])
+            fname = clean_filename(assign_filter["displayName"])
             # Save Filters as JSON or YAML depending on configured value in
             # "-o"
             save_output(output, configpath, fname, assign_filter)

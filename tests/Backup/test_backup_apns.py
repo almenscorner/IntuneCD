@@ -21,7 +21,8 @@ APNS = {
     "certificateUploadStatus": None,
     "certificateUploadFailureReason": None,
     "certificateSerialNumber": "11000000000000",
-    "certificate": None}
+    "certificate": None,
+}
 
 
 @patch("src.IntuneCD.backup_apns.savebackup")
@@ -32,14 +33,15 @@ class TestBackupAPNS(unittest.TestCase):
     def setUp(self):
         self.directory = TempDirectory()
         self.directory.create()
-        self.token = 'token'
+        self.token = "token"
         self.saved_path = f"{self.directory.path}/Apple Push Notification/awesome@example.com."
         self.expected_data = {
             "appleIdentifier": "awesome@example.com",
             "expirationDateTime": "2023-04-01T13:59:54Z",
             "certificateUploadStatus": None,
             "certificateUploadFailureReason": None,
-            "certificateSerialNumber": "11000000000000"}
+            "certificateSerialNumber": "11000000000000",
+        }
 
     def tearDown(self):
         self.directory.cleanup()
@@ -47,27 +49,25 @@ class TestBackupAPNS(unittest.TestCase):
     def test_backup_yml(self, mock_data, mock_makeapirequest):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, 'yaml', self.token)
+        self.count = savebackup(self.directory.path, "yaml", self.token)
 
-        with open(self.saved_path + 'yaml', 'r') as f:
+        with open(self.saved_path + "yaml", "r") as f:
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
-        self.assertTrue(
-            Path(f'{self.directory.path}/Apple Push Notification').exists())
+        self.assertTrue(Path(f"{self.directory.path}/Apple Push Notification").exists())
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, self.count)
 
     def test_backup_json(self, mock_data, mock_makeapirequest):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, 'json', self.token)
+        self.count = savebackup(self.directory.path, "json", self.token)
 
-        with open(self.saved_path + 'json', 'r') as f:
+        with open(self.saved_path + "json", "r") as f:
             saved_data = json.load(f)
 
-        self.assertTrue(
-            Path(f'{self.directory.path}/Apple Push Notification').exists())
+        self.assertTrue(Path(f"{self.directory.path}/Apple Push Notification").exists())
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, self.count)
 
@@ -75,9 +75,9 @@ class TestBackupAPNS(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         mock_data.return_value = None
-        self.count = savebackup(self.directory.path, 'json', self.token)
+        self.count = savebackup(self.directory.path, "json", self.token)
         self.assertEqual(0, self.count)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

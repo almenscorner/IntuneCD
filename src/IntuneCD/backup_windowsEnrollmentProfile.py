@@ -30,26 +30,22 @@ def savebackup(path, output, exclude, token):
     data = makeapirequest(ENDPOINT, token)
 
     assignment_responses = batch_assignment(
-        data,
-        'deviceManagement/windowsAutopilotDeploymentProfiles/',
-        '/assignments',
-        token)
+        data, "deviceManagement/windowsAutopilotDeploymentProfiles/", "/assignments", token
+    )
 
-    for profile in data['value']:
+    for profile in data["value"]:
         config_count += 1
         if "assignments" not in exclude:
-            assignments = get_object_assignment(
-                profile['id'], assignment_responses)
+            assignments = get_object_assignment(profile["id"], assignment_responses)
             if assignments:
-                profile['assignments'] = assignments
+                profile["assignments"] = assignments
 
         profile = remove_keys(profile)
 
-        print("Backing up Autopilot enrollment profile: " +
-              profile['displayName'])
+        print("Backing up Autopilot enrollment profile: " + profile["displayName"])
 
         # Get filename without illegal characters
-        fname = clean_filename(profile['displayName'])
+        fname = clean_filename(profile["displayName"])
         # Save Windows Enrollment Profile as JSON or YAML depending on
         # configured value in "-o"
         save_output(output, configpath, fname, profile)

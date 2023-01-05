@@ -13,29 +13,29 @@ def remove_keys(data):
     """
 
     keys = {
-        'id',
-        'version',
-        'topicIdentifier',
-        'certificate',
-        'createdDateTime',
-        'lastModifiedDateTime',
-        'isDefault'
-        'deployedAppCount',
-        'isAssigned',
-        '@odata.context',
-        'scheduledActionConfigurations@odata.context',
-        'scheduledActionsForRule@odata.context',
-        'sourceId',
-        'supportsScopeTags',
-        'companyCodes',
-        'isGlobalScript',
-        'highestAvailableVersion',
-        'token',
-        'lastSyncDateTime',
-        'isReadOnly',
-        'secretReferenceValueId',
-        'isEncrypted',
-        'modifiedDateTime'}
+        "id",
+        "version",
+        "topicIdentifier",
+        "certificate",
+        "createdDateTime",
+        "lastModifiedDateTime",
+        "isDefault" "deployedAppCount",
+        "isAssigned",
+        "@odata.context",
+        "scheduledActionConfigurations@odata.context",
+        "scheduledActionsForRule@odata.context",
+        "sourceId",
+        "supportsScopeTags",
+        "companyCodes",
+        "isGlobalScript",
+        "highestAvailableVersion",
+        "token",
+        "lastSyncDateTime",
+        "isReadOnly",
+        "secretReferenceValueId",
+        "isEncrypted",
+        "modifiedDateTime",
+    }
     for k in keys:
         data.pop(k, None)
 
