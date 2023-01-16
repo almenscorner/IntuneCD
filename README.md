@@ -2,7 +2,7 @@
 [![Downloads](https://pepy.tech/badge/intunecd/month)](https://pepy.tech/project/intunecd)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/IntuneCD?style=flat-square)
 ![PyPI](https://img.shields.io/pypi/v/IntuneCD?style=flat-square)
-![Maintenance](https://img.shields.io/maintenance/yes/2022?style=flat-square)
+![Maintenance](https://img.shields.io/maintenance/yes/2023?style=flat-square)
 ![Unit tests](https://github.com/almenscorner/IntuneCD/actions/workflows/unit-test.yml/badge.svg)
 ![Publish](https://github.com/almenscorner/IntuneCD/actions/workflows/pypi-publish.yml/badge.svg)
 [![codecov](https://codecov.io/gh/almenscorner/IntuneCD/branch/main/graph/badge.svg?token=SNTOJ0N5MU)](https://codecov.io/gh/almenscorner/IntuneCD)

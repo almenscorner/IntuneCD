@@ -91,6 +91,7 @@ def update(path, token, report):
                         + repo_data["displayName"]
                     )
                     if report is False:
+                        repo_data.pop("payloads", None)
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(
                             ENDPOINT,

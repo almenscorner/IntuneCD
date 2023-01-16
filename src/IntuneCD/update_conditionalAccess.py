@@ -77,6 +77,23 @@ def update(path, token, report):
                         )
 
                         if report is False:
+                            # If authenticationStrength is set, set operator to AND and remove unnecessary keys
+                            if repo_data.get("grantControls"):
+                                if repo_data["grantControls"].get(
+                                    "authenticationStrength"
+                                ):
+                                    id = (
+                                        repo_data["grantControls"]
+                                        .get("authenticationStrength", {})
+                                        .get("id")
+                                    )
+                                    repo_data["grantControls"][
+                                        "authenticationStrength"
+                                    ] = ({"id": id} if id else None)
+                                    repo_data["grantControls"]["operator"] = (
+                                        "AND" if id else None
+                                    )
+
                             request_data = json.dumps(repo_data)
                             q_param = None
                             makeapirequestPatch(
@@ -100,6 +117,23 @@ def update(path, token, report):
                         + repo_data["displayName"]
                     )
                     if report is False:
+                        # Users is a required key, set to None as updating assignment is currently not supported
+                        repo_data["conditions"]["users"] = {"includeUsers": ["None"]}
+                        # If authenticationStrength is set, set operator to AND and remove unnecessary keys
+                        if repo_data.get("grantControls"):
+                            if repo_data["grantControls"].get("authenticationStrength"):
+                                id = (
+                                    repo_data["grantControls"]
+                                    .get("authenticationStrength", {})
+                                    .get("id")
+                                )
+                                repo_data["grantControls"]["authenticationStrength"] = (
+                                    {"id": id} if id else None
+                                )
+                                repo_data["grantControls"]["operator"] = (
+                                    "AND" if id else None
+                                )
+
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(
                             ENDPOINT,
@@ -108,9 +142,11 @@ def update(path, token, report):
                             jdata=request_json,
                             status_code=201,
                         )
-                        print(
-                            "Conditional Access policy created with id: "
-                            + post_request["id"]
-                        )
+
+                        if post_request:
+                            print(
+                                "Conditional Access policy created with id: "
+                                + post_request["id"]
+                            )
 
     return diff_count

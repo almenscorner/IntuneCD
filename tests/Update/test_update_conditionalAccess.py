@@ -31,7 +31,14 @@ class TestUpdateConditionalAccess(unittest.TestCase):
                             "excludedApplications": ["d4ebce55-015a-49b5-a083-c84d1797ae8c"],
                         },
                     },
-                    "grantControls": {},
+                    "grantControls": {
+                "operator": "OR",
+                "authenticationStrength": {
+                    "id": "test",
+                    "displayName": "test",
+                    "description": "test",
+                },
+            },
                 }
             ]
         }
@@ -44,7 +51,14 @@ class TestUpdateConditionalAccess(unittest.TestCase):
                     "excludedApplications": ["d4ebce55-015a-49b5-a083-c84d1797ae8c", "2"],
                 },
             },
-            "grantControls": {},
+            "grantControls": {
+                "operator": "OR",
+                "authenticationStrength": {
+                    "id": "test",
+                    "displayName": "test",
+                    "description": "test",
+                },
+            },
         }
 
         self.makeapirequest_patch = patch("src.IntuneCD.update_conditionalAccess.makeapirequest")
@@ -113,7 +127,7 @@ class TestUpdateConditionalAccess(unittest.TestCase):
         """The count should be 0 and makeapirequestPost should not be called."""
 
         self.repo_data["conditions"]["applications"]["excludedApplications"] = ["d4ebce55-015a-49b5-a083-c84d1797ae8c"]
-        self.mem_data["value"][0]["grantControls"] = {"authenticationStrength@odata.context": "test"}
+
         self.makeapirequest.return_value = self.mem_data
 
         self.count = update(self.directory.path, self.token, report=False)
