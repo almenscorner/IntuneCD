@@ -23,6 +23,11 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
+## Whats new in 1.3.1
+- Bug fix for Filters not being able to created if they do not exist
+- Bug fix for Conditional Access policies not being able to be created if `authenticationStrength` is configured
+- Added Graph throttling handling to `makeapirequestPost` to handle creation of large amounts of CA policies https://github.com/almenscorner/IntuneCD/blob/13be20d42a1880184e1ec94d5e87f20a4f6d266d/src/IntuneCD/graph_request.py#L149-L155
+
 ## What's new in 1.3.0
 - New summary of changes, instead of just a count, a summary of the changes with old and new values are sent to the front end
 - Report mode, if you want to send a summary of changes to the front end without actually updating the configuration in Intune, you can activate report mode when running the update using `-r` -> `IntuneCD-startupdate -r`
@@ -36,12 +41,6 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
     - **After**
     
     ![Screenshot 2022-12-08 at 10 26 18](https://user-images.githubusercontent.com/78877636/206411063-66838684-3511-44dc-8eaf-43aaa0b3cb94.png)
-    
-## What's new in 1.2.5
-- Additional improvements to documentation
-  - **NOTE:** The split option `-s` has been changed so you only need to include the parameter without anything else. If you are using this option you will have to change it from `-s Y` to `-s`
-  - All items in lists are now included, before some items were left out
-- Bug fix to Conditional Access where the backup failed if no policys exists
 
 ## I use Powershell, Do I need to learn Python?
 No.
