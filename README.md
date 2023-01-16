@@ -26,7 +26,7 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 ## Whats new in 1.3.1
 - Bug fix for Filters not being able to created if they do not exist
 - Bug fix for Conditional Access policies not being able to be created if `authenticationStrength` is configured
-- Added Graph throttling handling to `makeapirequestPost` to handle creation of large amounts of CA policies https://github.com/almenscorner/IntuneCD/blob/13be20d42a1880184e1ec94d5e87f20a4f6d266d/src/IntuneCD/graph_request.py#L149-L155
+- Added Graph throttling handling to `makeapirequestPost` to handle creation of large amounts of CA policies
 
 ## What's new in 1.3.0
 - New summary of changes, instead of just a count, a summary of the changes with old and new values are sent to the front end
