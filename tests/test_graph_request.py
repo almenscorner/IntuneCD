@@ -198,6 +198,7 @@ class TestGraphRequestPatch(unittest.TestCase):
 
 @patch("src.IntuneCD.graph_request.makeapirequestPost")
 @patch("requests.post")
+@patch("time.sleep", return_value=None)
 class TestGraphRequestPost(unittest.TestCase):
     def setUp(self):
         self.token = {"accessToken": "token"}
@@ -205,7 +206,26 @@ class TestGraphRequestPost(unittest.TestCase):
         self.content = '{"id": "0"}'
         self.expected_result = {"id": "0"}
 
-    def test_makeapirequestPost_no_q_param(self, mock_patch, mock_makeapirequestPost):
+
+    def test_makeapirequestPost_status_429_no_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
+        """The request should be made twice."""
+        self.mock_resp = _mock_response(self, status=429, content="Too Many equests", headers={"Retry-After": "10"})
+        self.mock_resp2 = _mock_response(self, status=200, content="Success")
+        mock_patch.side_effect = self.mock_resp, self.mock_resp2
+        makeapirequestPost("https://endpoint", self.token)
+
+        self.assertEqual(2, mock_patch.call_count)
+
+    def test_makeapirequestPost_status_429_with_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
+        """The request should be made twice."""
+        self.mock_resp = _mock_response(self, status=429, content="Too Many Requests", headers={"Retry-After": "10"})
+        self.mock_resp2 = _mock_response(self, status=200, content="Success")
+        mock_patch.side_effect = self.mock_resp, self.mock_resp2
+        makeapirequestPost("https://endpoint", self.token, q_param="$filter=id eq '0'")
+
+        self.assertEqual(2, mock_patch.call_count)
+
+    def test_makeapirequestPost_no_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content=self.content)
         mock_patch.return_value = self.mock_resp
@@ -213,7 +233,7 @@ class TestGraphRequestPost(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_makeapirequestPost_with_q_param(self, mock_patch, mock_makeapirequestPost):
+    def test_makeapirequestPost_with_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content=self.content)
         mock_patch.return_value = self.mock_resp
@@ -221,7 +241,7 @@ class TestGraphRequestPost(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_makeapirequestPost_not_matching_status_code(self, mock_patch, mock_makeapirequestPost):
+    def test_makeapirequestPost_not_matching_status_code(self, mock_sleep, mock_patch, mock_makeapirequestPost):
         """The request should be made and the response should be returned."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=204, content="")
