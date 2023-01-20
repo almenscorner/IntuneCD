@@ -34,7 +34,7 @@ class TestGraphRequestGet(unittest.TestCase):
     """Test class for graph_request."""
 
     def setUp(self):
-        self.token = {"accessToken": "token"}
+        self.token = {"access_token": "token"}
 
     def test_makeapirequest_status_429_no_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made once and exception should be raised."""
@@ -166,7 +166,7 @@ class TestGraphRequestGet(unittest.TestCase):
 @patch("requests.patch")
 class TestGraphRequestPatch(unittest.TestCase):
     def setUp(self):
-        self.token = {"accessToken": "token"}
+        self.token = {"access_token": "token"}
 
     def test_makeapirequestPatch_no_q_param(self, mock_patch, mock_makeapirequestPatch):
         """The request should be made and the response should be returned."""
@@ -201,7 +201,7 @@ class TestGraphRequestPatch(unittest.TestCase):
 @patch("time.sleep", return_value=None)
 class TestGraphRequestPost(unittest.TestCase):
     def setUp(self):
-        self.token = {"accessToken": "token"}
+        self.token = {"access_token": "token"}
         self.jdata = {"id": "0"}
         self.content = '{"id": "0"}'
         self.expected_result = {"id": "0"}
@@ -255,7 +255,7 @@ class TestGraphRequestPost(unittest.TestCase):
 @patch("requests.put")
 class TestGraphRequestPut(unittest.TestCase):
     def setUp(self):
-        self.token = {"accessToken": "token"}
+        self.token = {"access_token": "token"}
 
     def test_makeapirequestPut_no_q_param(self, mock_patch, mock_makeapirequestPut):
         """The request should be made and the response should be returned."""
