@@ -21,7 +21,7 @@ def makeapirequest(endpoint, token, q_param=None):
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(token["accessToken"]),
+        "Authorization": "Bearer {0}".format(token["access_token"]),
     }
 
     if q_param is not None:
@@ -101,7 +101,7 @@ def makeapirequestPatch(
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(token["accessToken"]),
+        "Authorization": "Bearer {0}".format(token["access_token"]),
     }
 
     if q_param is not None:
@@ -131,7 +131,7 @@ def makeapirequestPost(patchEndpoint, token, q_param=None, jdata=None, status_co
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(token["accessToken"]),
+        "Authorization": "Bearer {0}".format(token["access_token"]),
     }
 
     if q_param is not None:
@@ -172,7 +172,7 @@ def makeapirequestPut(patchEndpoint, token, q_param=None, jdata=None, status_cod
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(token["accessToken"]),
+        "Authorization": "Bearer {0}".format(token["access_token"]),
     }
 
     if q_param is not None:

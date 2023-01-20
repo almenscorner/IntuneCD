@@ -64,6 +64,18 @@ def start():
         type=str,
     )
     parser.add_argument(
+        "-c",
+        "--certauth",
+        help="When using certificate auth, the following ENV variables is required: TENANT_NAME, CLIENT_ID, THUMBPRINT, KEY_FILE",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-i",
+        "--interactiveauth",
+        help="When using interactive auth, the following ENV variables is required: TENANT_NAME, CLIENT_ID",
+        action="store_true",
+    )
+    parser.add_argument(
         "-u",
         help="When this parameter is set, assignments are updated for all configurations",
         action="store_true",
@@ -118,7 +130,18 @@ def start():
         func = switcher.get(argument, "nothing")
         return func()
 
-    token = getAuth(selected_mode(args.mode), args.localauth, tenant="PROD")
+    if args.certauth or args.interactiveauth:
+        args.mode = None
+    else:
+        args.mode = selected_mode(args.mode)
+
+    token = getAuth(
+        args.mode,
+        args.localauth,
+        args.certauth,
+        args.interactiveauth,
+        tenant="PROD",
+    )
 
     def run_update(path, token, assignment, exclude, report):
 
