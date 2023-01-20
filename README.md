@@ -23,7 +23,17 @@ The package can also be run standalone outside a pipeline, or in one to only bac
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
 
-## Whats new in 1.3.1
+
+## What's new in 1.3.2
+The authentication module has been updated to MSAL, which replaces the deprecated ADAL library. This update brings additional authentication options, including Client Credentials and Certificate-based authentication.
+
+- **Client Credentials:** This method utilizes the `CLIENT_ID` and `CLIENT_SECRET` to authenticate.
+
+- **Certificate-based Authentication:** You can use a certificate uploaded to your Azure AD App Registration by adding the `-c` parameter. Additionally, you must set the environment variables `KEY_FILE` and `THUMBPRINT` to specify the path to the private key of the certificate and the thumbprint of the certificate, respectively. When using this option, **do not** specify the `-m` parameter.
+
+- **Interactive Authentication:** If you are running the tool interactively and wish to authenticate with your own account, add the `-i` parameter. This will open a browser window prompting you to authenticate. When using this option, **do not** specify the `-m` parameter.
+
+## What's new in 1.3.1
 - Bug fix for Filters not being able to created if they do not exist
 - Bug fix for Conditional Access policies not being able to be created if `authenticationStrength` is configured
 - Added Graph throttling handling to `makeapirequestPost` to handle creation of large amounts of CA policies
@@ -31,16 +41,6 @@ The front end for IntuneCD has now been released. Check it out [here](https://gi
 ## What's new in 1.3.0
 - New summary of changes, instead of just a count, a summary of the changes with old and new values are sent to the front end
 - Report mode, if you want to send a summary of changes to the front end without actually updating the configuration in Intune, you can activate report mode when running the update using `-r` -> `IntuneCD-startupdate -r`
-
-## What's new in 1.2.7
-- Documentation overhaul
-  - The documentation module has been completely overhauled. It is now much easier to read. Below you can see a before and after example,
-    - **Before**
-    
-    ![Screenshot 2022-12-08 at 10 28 13](https://user-images.githubusercontent.com/78877636/206411116-bdefbb4c-e485-4529-a86f-4f675845b6ab.png)
-    - **After**
-    
-    ![Screenshot 2022-12-08 at 10 26 18](https://user-images.githubusercontent.com/78877636/206411063-66838684-3511-44dc-8eaf-43aaa0b3cb94.png)
 
 ## I use Powershell, Do I need to learn Python?
 No.
@@ -96,6 +96,16 @@ If you just want to back up you can get away with only Read permission (except f
 
 ## How do I use it?
 You have two options, using a pipeline or running it locally. Let's have a look at both.
+
+### Authentication
+There are three options to choose from when running the tool to authenticate to Microsoft Graph.
+
+- Client Credentials
+  - This is using the client ID and client secret to authenticate
+- Certificate
+  - You can choose to authenticate with a certificate uploaded to your Azure AD App Registration by adding the `-c` parameter. In addition you must set ENV variables for `KEY_FILE` and specify the path to the private key of the certificate, and, `THUMBPRINT` and specify the thumbprint of the certificate added to the app registration. If using this option, **do not** specify the `-m` parameter.
+- Interactive
+  - If you are running the tool interactivly and want to authenticate with your own account, add the `-i` parameter. When the tool is run a browser window will open asking you to authenticate. If using this option, **do not** specify the `-m` parameter.
 
 ## Parameters
 To see which parameters you have to provide just type: IntuneCD-startbackup --help, IntuneCD-startupdate --help or IntuneCD-startdocumentation --help
