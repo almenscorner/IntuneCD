@@ -69,6 +69,18 @@ def start():
         type=str,
     )
     parser.add_argument(
+        "-c",
+        "--certauth",
+        help="When using certificate auth, the following ENV variables is required: TENANT_NAME, CLIENT_ID, THUMBPRINT, KEY_FILE",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-i",
+        "--interactiveauth",
+        help="When using interactive auth, the following ENV variables is required: TENANT_NAME, CLIENT_ID",
+        action="store_true",
+    )
+    parser.add_argument(
         "-e",
         "--exclude",
         help="List of objects to exclude from the backup, separated by space.",
@@ -101,9 +113,16 @@ def start():
         nargs="+",
     )
     parser.add_argument(
-        "-f", "--frontend", help="Set the frontend URL to update with configuration count and backup stream", type=str
+        "-f",
+        "--frontend",
+        help="Set the frontend URL to update with configuration count and backup stream",
+        type=str,
     )
-    parser.add_argument("-ap", "--autopilot", help="If set to True, a record of autopilot devices will be saved")
+    parser.add_argument(
+        "-ap",
+        "--autopilot",
+        help="If set to True, a record of autopilot devices will be saved",
+    )
 
     args = parser.parse_args()
 
@@ -119,7 +138,18 @@ def start():
         func = switcher.get(argument, "nothing")
         return func()
 
-    token = getAuth(selected_mode(args.mode), args.localauth, tenant="DEV")
+    if args.certauth or args.interactiveauth:
+        args.mode = None
+    else:
+        args.mode = selected_mode(args.mode)
+
+    token = getAuth(
+        args.mode,
+        args.localauth,
+        args.certauth,
+        args.interactiveauth,
+        tenant="DEV",
+    )
 
     def run_backup(path, output, exclude, token):
 
