@@ -33,9 +33,7 @@ REPO_DIR = os.environ.get("REPO_DIR")
 
 
 def start():
-    parser = argparse.ArgumentParser(
-        description="Update Intune configurations with values from backup"
-    )
+    parser = argparse.ArgumentParser(description="Update Intune configurations with values from backup")
     parser.add_argument(
         "-p",
         "--path",
@@ -96,6 +94,7 @@ def start():
             "Compliance",
             "NotificationTemplate",
             "Profiles",
+            "GPOConfigurations",
             "AppleEnrollmentProfile",
             "WindowsEnrollmentProfile",
             "EnrollmentStatusPage",
@@ -170,6 +169,11 @@ def start():
 
         if "Profiles" not in exclude:
             from .update_profiles import update
+
+            diff_summary.append(update(path, token, assignment, report))
+
+        if "GPOConfigurations" not in exclude:
+            from .update_groupPolicyConfiguration import update
 
             diff_summary.append(update(path, token, assignment, report))
 
