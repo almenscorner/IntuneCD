@@ -141,6 +141,15 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.post_assignment_update.call_count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 0)
 
+    def test_update_with_diffs_and_required_presentation(self):
+        self.repo_data_base["definitionValues"][0]["presentationValues"][0]["presentation"]["required"] = True
+        self.repo_data_base["definitionValues"][0]["presentationValues"][0]["value"] = "1"
+        self.count = update(self.directory.path, self.token, report=False, assignment=False)
+
+        self.assertEqual(self.count[0].count, 3)
+        self.assertEqual(self.post_assignment_update.call_count, 0)
+        self.assertEqual(self.makeapirequestPost.call_count, 2)
+
     def test_update_no_diffs_and_assignment(self):
         self.repo_data_base["description"] = "test"
         self.repo_data_base["definitionValues"][0]["presentationValues"][0]["values"] = ["test"]
@@ -165,6 +174,15 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
 
         self.assertEqual(self.post_assignment_update.call_count, 1)
         self.assertEqual(self.makeapirequestPost.call_count, 3)
+
+    def test_update_config_not_found_and_required_presentation(self):
+        self.repo_data_base["displayName"] = "test1"
+        self.repo_data_base["definitionValues"][0]["presentationValues"][0]["presentation"]["required"] = True
+        self.repo_data_base["definitionValues"][0]["presentationValues"][0]["value"] = "1"
+        self.count = update(self.directory.path, self.token, report=False, assignment=False)
+
+        self.assertEqual(self.post_assignment_update.call_count, 1)
+        self.assertEqual(self.makeapirequestPost.call_count, 2)
 
     def test_update_config_not_found_custom(self):
         self.repo_data_base["policyConfigurationIngestionType"] = "custom"
