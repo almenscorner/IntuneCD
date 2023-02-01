@@ -304,7 +304,7 @@ def update(path, token, assignment=False, report=False):
             # If configurations was found in Intune, continue
             if mem_configs:
                 for val in mem_configs:
-                    # If display name matches, add Intune data to data variable
+                    # If display name and type matches, add Intune data to data variable
                     if (
                         repo_data["displayName"] == val["displayName"]
                         and repo_data["policyConfigurationIngestionType"] == val["policyConfigurationIngestionType"]
