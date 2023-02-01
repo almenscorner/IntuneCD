@@ -105,6 +105,7 @@ def start():
             "ShellScripts",
             "ConfigurationPolicies",
             "ConditionalAccess",
+            "EnrollmentConfigurations",
         ],
         nargs="+",
     )
@@ -189,6 +190,11 @@ def start():
 
         if "EnrollmentStatusPage" not in exclude:
             from .update_enrollmentStatusPage import update
+
+            diff_summary.append(update(path, token, assignment, report))
+
+        if "EnrollmentConfigurations" not in exclude:
+            from .update_enrollmentConfigurations import update
 
             diff_summary.append(update(path, token, assignment, report))
 
