@@ -28,7 +28,7 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
                 }
             ]
         }
-        self.definitionn_value = {
+        self.definition_value = {
             "value": [
                 {
                     "enabled": True,
@@ -49,6 +49,7 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
                     "displayName": "test",
                     "description": "test",
                     "definitionValues": [],
+                    "policyConfigurationIngestionType": "BuiltIn",
                     "assignments": [{"target": {"groupName": "test"}}],
                 }
             ]
@@ -59,6 +60,7 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
             "displayName": "test",
             "description": "test1",
             "roleScopeTagIds": ["1"],
+            "policyConfigurationIngestionType": "BuiltIn",
             "definitionValues": [
                 {
                     "enabled": False,
@@ -100,9 +102,9 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = (
             self.mem_data_base,
-            self.definitionn_value,
+            self.definition_value,
             self.presentation_value,
-            self.definitionn_value,
+            self.definition_value,
         )
         self.makeapirequestPatch_patch = patch("src.IntuneCD.update_groupPolicyConfiguration.makeapirequestPatch")
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
@@ -162,4 +164,30 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.count = update(self.directory.path, self.token, assignment=True)
 
         self.assertEqual(self.post_assignment_update.call_count, 1)
+        self.assertEqual(self.makeapirequestPost.call_count, 3)
+
+    def test_update_config_not_found_custom(self):
+        self.repo_data_base["policyConfigurationIngestionType"] = "custom"
+        self.repo_data_base["displayName"] = "test1"
+        self.repo_data_base["definitionValues"][0]["definition"]["classType"] = "test"
+        self.repo_data_base["definitionValues"][0]["definition"]["categoryPath"] = "test"
+        self.mem_data_base["value"][0]["policyConfiguraionIngestionType"] = "custom"
+        self.definition_value["value"][0]["definition"]["classType"] = "test"
+        self.definition_value["value"][0]["definition"]["categoryPath"] = "test"
+        self.custom_category = {
+            "value": [{"definitions": [{"id": "test", "categoryPath": "test", "classType": "test", "displayName": "test"}]}]
+        }
+
+        self.makeapirequest.side_effect = [
+            self.mem_data_base,
+            self.definition_value,
+            self.presentation_value,
+            self.custom_category,
+            self.definition_value
+        ]
+
+        self.makeapirequestPost.return_value = {"id": "test"}
+
+        self.count = update(self.directory.path, self.token, assignment=False)
+
         self.assertEqual(self.makeapirequestPost.call_count, 3)
