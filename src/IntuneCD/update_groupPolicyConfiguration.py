@@ -42,11 +42,25 @@ class definition_values_json:
         """
         id = self.definition["definition"]["id"]
 
+        presentation_values = []
+
+        for presentation in self.definition["presentationValues"]:
+            if presentation["presentation"].get("required", False) == True:
+                default_presentation = {
+                    "@odata.type": presentation["@odata.type"],
+                    "value": presentation["value"],
+                    "presentation@odata.bind": presentation_odata_bind.replace("{id}", id).replace(
+                        "{pid}", presentation["presentation"]["id"]
+                    ),
+                }
+
+                presentation_values.append(default_presentation)
+
         self.request_json[f"{scenario}"].append(
             {
                 "enabled": self.definition["enabled"],
                 "definition@odata.bind": definition_odata_bind.replace("{id}", id),
-                "presentationValues": [],
+                "presentationValues": presentation_values,
             }
         )
 
@@ -177,8 +191,9 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
             if report is False:
                 post_definition_values(definition, mem_id, "added", None, token)
                 for presentation in definition.get("presentationValues", []):
-                    print("Adding presentation values")
-                    post_presentation_values(definition, presentation, mem_id, "updated", None, token)
+                    if presentation["presentation"].get("required", False) == False:
+                        print("Adding presentation values")
+                        post_presentation_values(definition, presentation, mem_id, "updated", None, token)
 
         # Go through each definition value in data
         for mem_definition in data.get("definitionValues", []):
@@ -210,7 +225,13 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
                     for mem_presentation in mem_definition.get("presentationValues", []):
                         pid = mem_presentation["id"]
                         if presentation["presentation"]["id"] == mem_presentation["presentation"]["id"]:
-                            presentation = remove_keys(presentation)
+
+                            presentation["presentation"].pop("lastModifiedDateTime", None)
+                            presentation["presentation"].pop("createdDateTime", None)
+                            presentation.pop("lastModifiedDateTime", None)
+                            presentation.pop("createdDateTime", None)
+                            presentation.pop("id", None)
+
                             presentation_diff = DeepDiff(mem_presentation, presentation, ignore_order=True).get(
                                 "values_changed", {}
                             )
@@ -422,7 +443,8 @@ def update(path, token, assignment=False, report=False):
                         post_definition_values(definition, post_request["id"], "added", None, token)
 
                         for presentation in definition["presentationValues"]:
-                            post_presentation_values(definition, presentation, post_request["id"], "updated", None, token)
+                            if presentation["presentation"].get("required", False) == False:
+                                post_presentation_values(definition, presentation, post_request["id"], "updated", None, token)
 
                     mem_assign_obj = []
                     assignment = update_assignment(assign_obj, mem_assign_obj, token)
