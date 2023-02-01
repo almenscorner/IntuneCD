@@ -382,6 +382,32 @@ def update(path, token, assignment=False, report=False):
                 print("Group Policy Configuration not found, creating Policy: " + repo_data["displayName"])
 
                 if report is False:
+                    match = 0
+                    # If the configuration is a custom configuration, get all categories and definitions
+                    if repo_data["policyConfigurationIngestionType"] == "custom":
+                        categories = makeapirequest(
+                            "https://graph.microsoft.com/beta/deviceManagement/groupPolicyCategories?$expand=definitions($select=id, displayName, categoryPath, classType)&$select=id, displayName&$filter=ingestionSource eq 'custom'",
+                            token,
+                        )
+                        # Go through each definition in repo data and compare to Intune data
+                        for definition in repo_data["definitionValues"]:
+                            # Create string to compare
+                            repo_def_str = f'{definition["definition"]["classType"]}:{definition["definition"]["displayName"]}:{definition["definition"]["categoryPath"]}'
+                            # Go through each category and definition in Intune data
+                            for mem_definition in categories["value"]:
+                                for mem_def in mem_definition["definitions"]:
+                                    # Create string to compare
+                                    mem_def_str = f'{mem_def["classType"]}:{mem_def["displayName"]}:{mem_def["categoryPath"]}'
+                                    # If the strings match, add the Intune definition id to the repo data
+                                    if repo_def_str == mem_def_str:
+                                        definition["definition"]["id"] = mem_def["id"]
+                                        # If the definition id was found, add 1 to match
+                                        match += 1
+                        # If the number of definitions in repo data does not match the number of definitions found in Intune, exit
+                        if match != len(repo_data["definitionValues"]):
+                            print("Some definitions was not found, import custom ADMX files to Intune first.")
+                            continue
+
                     request_data = json.dumps(repo_data)
                     q_param = None
                     post_request = makeapirequestPost(
