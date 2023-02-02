@@ -18,17 +18,21 @@ from .diff_summary import DiffSummary
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/groupPolicyConfigurations"
-definition_odata_bind = "https://graph.microsoft.com/beta/deviceManagement/groupPolicyDefinitions('{id}')"
-presentation_odata_bind = (
-    "https://graph.microsoft.com/beta/deviceManagement/groupPolicyDefinitions('{id}')/presentations('{pid}')"
+definition_odata_bind = (
+    "https://graph.microsoft.com/beta/deviceManagement/groupPolicyDefinitions('{id}')"
 )
+presentation_odata_bind = "https://graph.microsoft.com/beta/deviceManagement/groupPolicyDefinitions('{id}')/presentations('{pid}')"
 
 
 class definition_values_json:
     def __init__(self, definition: dict, presentation: dict):
         self.definition = definition
         self.presentation = presentation
-        self.request_json = self.request_json = {"added": [], "updated": [], "deletedIds": []}
+        self.request_json = self.request_json = {
+            "added": [],
+            "updated": [],
+            "deletedIds": [],
+        }
 
     def modify_definition(self, scenario, mem_def_id):
         """
@@ -49,9 +53,9 @@ class definition_values_json:
                 default_presentation = {
                     "@odata.type": presentation["@odata.type"],
                     "value": presentation["value"],
-                    "presentation@odata.bind": presentation_odata_bind.replace("{id}", id).replace(
-                        "{pid}", presentation["presentation"]["id"]
-                    ),
+                    "presentation@odata.bind": presentation_odata_bind.replace(
+                        "{id}", id
+                    ).replace("{pid}", presentation["presentation"]["id"]),
                 }
 
                 presentation_values.append(default_presentation)
@@ -92,7 +96,9 @@ class definition_values_json:
                 "presentationValues": [
                     {
                         "@odata.type": self.presentation["@odata.type"],
-                        "presentation@odata.bind": presentation_odata_bind.replace("{id}", id).replace("{pid}", pvid),
+                        "presentation@odata.bind": presentation_odata_bind.replace(
+                            "{id}", id
+                        ).replace("{pid}", pvid),
                     }
                 ],
             }
@@ -101,11 +107,57 @@ class definition_values_json:
         if pid:
             self.request_json[f"{scenario}"][0]["presentationValues"][0]["id"] = pid
         if self.presentation.get("values"):
-            self.request_json[f"{scenario}"][0]["presentationValues"][0]["values"] = self.presentation["values"]
+            self.request_json[f"{scenario}"][0]["presentationValues"][0][
+                "values"
+            ] = self.presentation["values"]
         if self.presentation.get("value"):
-            self.request_json[f"{scenario}"][0]["presentationValues"][0]["value"] = self.presentation["value"]
+            self.request_json[f"{scenario}"][0]["presentationValues"][0][
+                "value"
+            ] = self.presentation["value"]
 
         return self.request_json
+
+
+def custom_ingestion_match(data, token):
+    match = 0
+    categories = makeapirequest(
+        "https://graph.microsoft.com/beta/deviceManagement/groupPolicyCategories?$expand=definitions($select=id, displayName, categoryPath, classType)&$select=id, displayName&$filter=ingestionSource eq 'custom'",
+        token,
+    )
+    # Go through each definition in repo data and compare to Intune data
+    for definition in data["definitionValues"]:
+        definition["definition"].pop("groupPolicyCategoryId", None)
+        # Create string to compare
+        repo_def_str = f'{definition["definition"]["classType"]}:{definition["definition"]["displayName"]}:{definition["definition"]["categoryPath"]}'
+        # Go through each category and definition in Intune data
+        for mem_definition in categories["value"]:
+            for mem_def in mem_definition["definitions"]:
+                # Create string to compare
+                mem_def_str = f'{mem_def["classType"]}:{mem_def["displayName"]}:{mem_def["categoryPath"]}'
+                # If the strings match, add the Intune definition id to the repo data
+                if repo_def_str == mem_def_str:
+                    definition["definition"]["id"] = mem_def["id"]
+                    # If the definition id was found, add 1 to match
+                    match += 1
+
+    if match == len(data["definitionValues"]):
+        return data
+    else:
+        return False
+
+
+def find_matching_presentations(repo_data, data):
+    for repo_def in repo_data.get("definitionValues", []):
+        for mem_def in data.get("definitionValues", []):
+            for repo_pres in repo_def.get("presentationValues", []):
+                for mem_pres in mem_def.get("presentationValues", []):
+                    repo_label = repo_pres.get("presentation", {}).get("label")
+                    mem_label = mem_pres.get("presentation", {}).get("label")
+                    if repo_label == mem_label:
+                        repo_pres["id"] = mem_pres["id"]
+                        repo_pres["presentation"]["id"] = mem_pres["presentation"]["id"]
+
+    return repo_data
 
 
 def post_presentation_values(definition, presentation, mem_id, scenario, pid, token):
@@ -123,7 +175,9 @@ def post_presentation_values(definition, presentation, mem_id, scenario, pid, to
     defval_id = None
 
     # Get definition values from API
-    def_vals = makeapirequest(f"{ENDPOINT}/{mem_id}/definitionValues?$expand=definition", token)
+    def_vals = makeapirequest(
+        f"{ENDPOINT}/{mem_id}/definitionValues?$expand=definition", token
+    )
 
     # Find the matching definition value
     for def_val in def_vals["value"]:
@@ -134,7 +188,9 @@ def post_presentation_values(definition, presentation, mem_id, scenario, pid, to
     # If no matching definition value is found, print a message and return
     if defval_id is None:
         label = presentation.get("presentation", {}).get("label", "None")
-        print(f"No matching definition found for presentation value '{label}'. Skipping...")
+        print(
+            f"No matching definition found for presentation value '{label}'. Skipping..."
+        )
         return
 
     # Prepare definition values data for API request
@@ -143,7 +199,9 @@ def post_presentation_values(definition, presentation, mem_id, scenario, pid, to
     request_data = json.dumps(j.request_json)
 
     # Make API request to update definition values
-    makeapirequestPost(f"{ENDPOINT}/{mem_id}/updateDefinitionValues", token, None, request_data, 204)
+    makeapirequestPost(
+        f"{ENDPOINT}/{mem_id}/updateDefinitionValues", token, None, request_data, 204
+    )
 
 
 def post_definition_values(definition, mem_id, scenario, mem_def_id, token):
@@ -163,7 +221,9 @@ def post_definition_values(definition, mem_id, scenario, mem_def_id, token):
     request_data = json.dumps(j.request_json)
 
     # Make API request to update definition values
-    makeapirequestPost(f"{ENDPOINT}/{mem_id}/updateDefinitionValues/", token, None, request_data, 204)
+    makeapirequestPost(
+        f"{ENDPOINT}/{mem_id}/updateDefinitionValues/", token, None, request_data, 204
+    )
 
 
 def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False):
@@ -180,11 +240,10 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
     """
 
     diff_summary = {"diffs": [], "count": 0}
+
     # Go through each definition value in repo data
     for definition in repo_data.get("definitionValues", []):
-        id = definition["id"]
         def_id = definition["definition"]["id"]
-
         # If definition does not exist in data or not in mem_def_ids, add it
         if not data.get("definitionValues") or def_id not in mem_def_ids:
             print("Adding definition values")
@@ -193,7 +252,9 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
                 for presentation in definition.get("presentationValues", []):
                     if presentation["presentation"].get("required", False) == False:
                         print("Adding presentation values")
-                        post_presentation_values(definition, presentation, mem_id, "updated", None, token)
+                        post_presentation_values(
+                            definition, presentation, mem_id, "updated", None, token
+                        )
 
         # Go through each definition value in data
         for mem_definition in data.get("definitionValues", []):
@@ -219,22 +280,31 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
 
                 # If there are differences, update the definition
                 if definition_diff and report is False:
-                    post_definition_values(definition, mem_id, "updated", mem_def_id, token)
+                    post_definition_values(
+                        definition, mem_id, "updated", mem_def_id, token
+                    )
 
                 for presentation in definition.get("presentationValues", []):
-                    for mem_presentation in mem_definition.get("presentationValues", []):
+                    for mem_presentation in mem_definition.get(
+                        "presentationValues", []
+                    ):
                         pid = mem_presentation["id"]
-                        if presentation["presentation"]["id"] == mem_presentation["presentation"]["id"]:
+                        if (
+                            presentation["presentation"]["id"]
+                            == mem_presentation["presentation"]["id"]
+                        ):
 
-                            presentation["presentation"].pop("lastModifiedDateTime", None)
+                            presentation["presentation"].pop(
+                                "lastModifiedDateTime", None
+                            )
                             presentation["presentation"].pop("createdDateTime", None)
                             presentation.pop("lastModifiedDateTime", None)
                             presentation.pop("createdDateTime", None)
                             presentation.pop("id", None)
 
-                            presentation_diff = DeepDiff(mem_presentation, presentation, ignore_order=True).get(
-                                "values_changed", {}
-                            )
+                            presentation_diff = DeepDiff(
+                                mem_presentation, presentation, ignore_order=True
+                            ).get("values_changed", {})
 
                             presentation_diff_summary = DiffSummary(
                                 data=presentation_diff,
@@ -247,15 +317,30 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
 
                             # If there are differences, update the presentation value
                             if presentation_diff and report is False:
-                                post_presentation_values(definition, presentation, mem_id, "updated", pid, token)
+                                post_presentation_values(
+                                    definition,
+                                    presentation,
+                                    mem_id,
+                                    "updated",
+                                    pid,
+                                    token,
+                                )
 
                         elif (
-                            definition["definition"]["id"] == mem_definition["definition"]["id"]
+                            definition["definition"]["id"]
+                            == mem_definition["definition"]["id"]
                             and mem_definition["presentationValues"] is None
                         ):
                             print("Adding presentation values")
                             if report is False:
-                                post_presentation_values(definition, presentation, mem_id, "added", None, token)
+                                post_presentation_values(
+                                    definition,
+                                    presentation,
+                                    mem_id,
+                                    "added",
+                                    None,
+                                    token,
+                                )
 
     return diff_summary
 
@@ -290,7 +375,9 @@ def update(path, token, assignment=False, report=False):
 
         # Get definitions and presentation values for Group Policy Configurations
         for profile in mem_data["value"]:
-            definition_endpoint = f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
+            definition_endpoint = (
+                f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
+            )
             # Get definitions
             definitions = makeapirequest(definition_endpoint, token)
             # IF definitions exist, continue
@@ -328,7 +415,8 @@ def update(path, token, assignment=False, report=False):
                     # If display name and type matches, add Intune data to data variable
                     if (
                         repo_data["displayName"] == val["displayName"]
-                        and repo_data["policyConfigurationIngestionType"] == val["policyConfigurationIngestionType"]
+                        and repo_data["policyConfigurationIngestionType"]
+                        == val["policyConfigurationIngestionType"]
                     ):
                         data = val
 
@@ -373,10 +461,19 @@ def update(path, token, assignment=False, report=False):
                 # Go through each definition in repo data and compare to Intune data
                 # If any differences are found, push them to Intune
                 mem_def_ids = [
-                    val for val in data["definitionValues"] for key, val in val["definition"].items() if key == "id"
+                    val
+                    for val in data["definitionValues"]
+                    for key, val in val["definition"].items()
+                    if key == "id"
                 ]
 
-                diffs = update_definition(repo_data, data, mem_id, mem_def_ids, token, report)
+                if repo_data["policyConfigurationIngestionType"] == "custom":
+                    repo_data = custom_ingestion_match(repo_data, token)
+                    repo_data = find_matching_presentations(repo_data, data)
+
+                diffs = update_definition(
+                    repo_data, data, mem_id, mem_def_ids, token, report
+                )
 
                 diff_profile.diffs += diffs["diffs"]
                 diff_profile.count += diffs["count"]
@@ -400,33 +497,22 @@ def update(path, token, assignment=False, report=False):
 
             else:
                 print("-" * 90)
-                print("Group Policy Configuration not found, creating Policy: " + repo_data["displayName"])
+                print(
+                    "Group Policy Configuration not found, creating Policy: "
+                    + repo_data["displayName"]
+                )
 
                 if report is False:
-                    match = 0
                     # If the configuration is a custom configuration, get all categories and definitions
                     if repo_data["policyConfigurationIngestionType"] == "custom":
-                        categories = makeapirequest(
-                            "https://graph.microsoft.com/beta/deviceManagement/groupPolicyCategories?$expand=definitions($select=id, displayName, categoryPath, classType)&$select=id, displayName&$filter=ingestionSource eq 'custom'",
-                            token,
-                        )
-                        # Go through each definition in repo data and compare to Intune data
-                        for definition in repo_data["definitionValues"]:
-                            # Create string to compare
-                            repo_def_str = f'{definition["definition"]["classType"]}:{definition["definition"]["displayName"]}:{definition["definition"]["categoryPath"]}'
-                            # Go through each category and definition in Intune data
-                            for mem_definition in categories["value"]:
-                                for mem_def in mem_definition["definitions"]:
-                                    # Create string to compare
-                                    mem_def_str = f'{mem_def["classType"]}:{mem_def["displayName"]}:{mem_def["categoryPath"]}'
-                                    # If the strings match, add the Intune definition id to the repo data
-                                    if repo_def_str == mem_def_str:
-                                        definition["definition"]["id"] = mem_def["id"]
-                                        # If the definition id was found, add 1 to match
-                                        match += 1
-                        # If the number of definitions in repo data does not match the number of definitions found in Intune, exit
-                        if match != len(repo_data["definitionValues"]):
-                            print("Some definitions was not found, import custom ADMX files to Intune first.")
+                        repo_data = custom_ingestion_match(repo_data, token)
+                        for definition in repo_data.get("definitionValues", []):
+                            definition["presentationValues"] = []
+
+                        if not repo_data:
+                            print(
+                                "Some definitions was not found, import custom ADMX files to Intune first."
+                            )
                             continue
 
                     request_data = json.dumps(repo_data)
@@ -440,11 +526,23 @@ def update(path, token, assignment=False, report=False):
                     )
 
                     for definition in repo_data["definitionValues"]:
-                        post_definition_values(definition, post_request["id"], "added", None, token)
+                        post_definition_values(
+                            definition, post_request["id"], "added", None, token
+                        )
 
                         for presentation in definition["presentationValues"]:
-                            if presentation["presentation"].get("required", False) == False:
-                                post_presentation_values(definition, presentation, post_request["id"], "updated", None, token)
+                            if (
+                                presentation["presentation"].get("required", False)
+                                == False
+                            ):
+                                post_presentation_values(
+                                    definition,
+                                    presentation,
+                                    post_request["id"],
+                                    "updated",
+                                    None,
+                                    token,
+                                )
 
                     mem_assign_obj = []
                     assignment = update_assignment(assign_obj, mem_assign_obj, token)
@@ -458,6 +556,9 @@ def update(path, token, assignment=False, report=False):
                             "assign",
                             token,
                         )
-                    print("Group Policy Configuration created with id: " + post_request["id"])
+                    print(
+                        "Group Policy Configuration created with id: "
+                        + post_request["id"]
+                    )
 
     return diff_summary
