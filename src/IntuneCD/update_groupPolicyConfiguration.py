@@ -293,7 +293,6 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
                             presentation["presentation"]["id"]
                             == mem_presentation["presentation"]["id"]
                         ):
-
                             presentation["presentation"].pop(
                                 "lastModifiedDateTime", None
                             )
@@ -506,14 +505,14 @@ def update(path, token, assignment=False, report=False):
                     # If the configuration is a custom configuration, get all categories and definitions
                     if repo_data["policyConfigurationIngestionType"] == "custom":
                         repo_data = custom_ingestion_match(repo_data, token)
-                        for definition in repo_data.get("definitionValues", []):
-                            definition["presentationValues"] = []
-
                         if not repo_data:
                             print(
                                 "Some definitions was not found, import custom ADMX files to Intune first."
                             )
                             continue
+
+                        for definition in repo_data.get("definitionValues", []):
+                            definition["presentationValues"] = []
 
                     request_data = json.dumps(repo_data)
                     q_param = None
