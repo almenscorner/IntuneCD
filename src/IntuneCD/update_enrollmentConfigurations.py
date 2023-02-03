@@ -18,7 +18,9 @@ from .update_assignment import update_assignment, post_assignment_update
 from .diff_summary import DiffSummary
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+)
 
 
 def update(path, token, assignment=False, report=False):
@@ -36,7 +38,6 @@ def update(path, token, assignment=False, report=False):
     configpath = path + "/" + "Enrollment Configurations/"
     # If Enrollment Configuration path exists, continue
     if os.path.exists(configpath):
-
         # Get Enrollment Configurations
         intune_data = makeapirequest(ENDPOINT, token)
 
@@ -71,9 +72,15 @@ def update(path, token, assignment=False, report=False):
                 data = {"value": ""}
                 if intune_data["value"]:
                     for val in intune_data["value"]:
-                        if val["@odata.type"] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration":
+                        if (
+                            val["@odata.type"]
+                            == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+                        ):
                             continue
-                        if repo_data["@odata.type"] == "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration":
+                        if (
+                            repo_data["@odata.type"]
+                            == "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration"
+                        ):
                             if (
                                 repo_data["@odata.type"] == val["@odata.type"]
                                 and repo_data["displayName"] == val["displayName"]
@@ -98,18 +105,31 @@ def update(path, token, assignment=False, report=False):
                     data["value"] = remove_keys(data["value"])
 
                     if repo_priority != mem_priority and mem_priority != 0:
-                        print(f"Updating Enrollment Config {config_type} Priority: " + repo_data["displayName"])
-                        # Update Enrollment Configuration
-                        if report is False:
-                            request_data = json.dumps({"priority": repo_priority})
-                            makeapirequestPost(
-                                f"{ENDPOINT}/{mem_id}/setpriority", token, q_param=None, jdata=request_data, status_code=200
+                        mem_priority = makeapirequest(
+                            f"{ENDPOINT}/{mem_id}?$select=priority", token
+                        )["priority"]
+                        if repo_priority != mem_priority:
+                            print(
+                                f"Updating Enrollment Config {config_type} Priority: "
+                                + repo_data["displayName"]
                             )
+                            # Update Enrollment Configuration
+                            if report is False:
+                                request_data = json.dumps({"priority": repo_priority})
+                                makeapirequestPost(
+                                    f"{ENDPOINT}/{mem_id}/setpriority",
+                                    token,
+                                    q_param=None,
+                                    jdata=request_data,
+                                    status_code=200,
+                                )
 
                     # Compare data from Intune with data from file
                     repo_data.pop("priority", None)
                     data["value"].pop("priority", None)
-                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
                     # If data differs, continue
                     if diff and report is False:
@@ -118,11 +138,19 @@ def update(path, token, assignment=False, report=False):
                         repo_data.pop("deviceEnrollmentConfigurationType", None)
                         repo_data.pop("platformType", None)
                         request_data = json.dumps(repo_data)
-                        makeapirequestPatch(ENDPOINT + "/" + mem_id, token, q_param=None, jdata=request_data, status_code=200)
+                        makeapirequestPatch(
+                            ENDPOINT + "/" + mem_id,
+                            token,
+                            q_param=None,
+                            jdata=request_data,
+                            status_code=200,
+                        )
 
                     # Add diff to summary
                     diff_config = DiffSummary(
-                        data=diff, name=repo_data["displayName"], type=f"Enrollment Config {config_type}"
+                        data=diff,
+                        name=repo_data["displayName"],
+                        type=f"Enrollment Config {config_type}",
                     )
                     diff_summary.append(diff_config)
 
@@ -130,7 +158,9 @@ def update(path, token, assignment=False, report=False):
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
                         update = update_assignment(assign_obj, mem_assign_obj, token)
                         if update is not None:
-                            request_data = {"enrollmentConfigurationAssignments": update}
+                            request_data = {
+                                "enrollmentConfigurationAssignments": update
+                            }
                             post_assignment_update(
                                 request_data,
                                 mem_id,
@@ -142,34 +172,56 @@ def update(path, token, assignment=False, report=False):
                 # If Enrollment Configuration does not exist, continue
                 else:
                     print("-" * 90)
-                    print(f"Creating Enrollment Config {config_type}: " + repo_data["displayName"])
+                    print(
+                        f"Creating Enrollment Config {config_type}: "
+                        + repo_data["displayName"]
+                    )
                     # Create Enrollment Configuration
                     if report is False:
                         platform_types = ["android", "androidForWork"]
 
-                        if repo_data["@odata.type"] == "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration":
+                        if (
+                            repo_data["@odata.type"]
+                            == "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration"
+                        ):
                             if repo_data["platformType"] in platform_types:
                                 for platform in platform_types:
                                     repo_data["platformType"] = platform
                                     request_data = json.dumps(repo_data)
                                     post_request = makeapirequestPost(
-                                        ENDPOINT, token, q_param=None, jdata=request_data, status_code=201
+                                        ENDPOINT,
+                                        token,
+                                        q_param=None,
+                                        jdata=request_data,
+                                        status_code=201,
                                     )
                             else:
                                 request_data = json.dumps(repo_data)
                                 post_request = makeapirequestPost(
-                                    ENDPOINT, token, q_param=None, jdata=request_data, status_code=201
+                                    ENDPOINT,
+                                    token,
+                                    q_param=None,
+                                    jdata=request_data,
+                                    status_code=201,
                                 )
                         else:
                             request_data = json.dumps(repo_data)
                             post_request = makeapirequestPost(
-                                ENDPOINT, token, q_param=None, jdata=request_data, status_code=201
+                                ENDPOINT,
+                                token,
+                                q_param=None,
+                                jdata=request_data,
+                                status_code=201,
                             )
 
                         mem_assign_obj = []
-                        assignment = update_assignment(assign_obj, mem_assign_obj, token)
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token
+                        )
                         if assignment is not None:
-                            request_data = {"enrollmentConfigurationAssignments": assignment}
+                            request_data = {
+                                "enrollmentConfigurationAssignments": assignment
+                            }
                             post_assignment_update(
                                 request_data,
                                 post_request["id"],
@@ -177,6 +229,9 @@ def update(path, token, assignment=False, report=False):
                                 "assign",
                                 token,
                             )
-                        print(f"Enrollment Config {config_type} created with id: " + post_request["id"])
+                        print(
+                            f"Enrollment Config {config_type} created with id: "
+                            + post_request["id"]
+                        )
 
     return diff_summary
