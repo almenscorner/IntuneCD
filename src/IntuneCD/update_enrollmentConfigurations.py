@@ -107,7 +107,7 @@ def update(path, token, assignment=False, report=False):
                     if repo_priority != mem_priority and mem_priority != 0:
                         mem_priority = makeapirequest(
                             f"{ENDPOINT}/{mem_id}?$select=priority", token
-                        )["priority"]
+                        ).get("priority", "")
                         if repo_priority != mem_priority:
                             print(
                                 f"Updating Enrollment Config {config_type} Priority: "
