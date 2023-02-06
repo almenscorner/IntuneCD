@@ -208,4 +208,4 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
-        self.assertEqual(self.makeapirequestPost.call_count, 3)
+        self.assertEqual(self.makeapirequestPost.call_count, 2)
