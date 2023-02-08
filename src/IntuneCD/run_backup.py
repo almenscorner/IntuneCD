@@ -109,6 +109,7 @@ def start():
             "ShellScripts",
             "ConfigurationPolicies",
             "ConditionalAccess",
+            "EnrollmentConfigurations",
         ],
         nargs="+",
     )
@@ -212,6 +213,11 @@ def start():
 
         if "EnrollmentStatusPage" not in exclude:
             from .backup_enrollmentStatusPage import savebackup
+
+            config_count += savebackup(path, output, exclude, token)
+
+        if "EnrollmentConfigurations" not in exclude:
+            from .backup_enrollmentConfigurations import savebackup
 
             config_count += savebackup(path, output, exclude, token)
 

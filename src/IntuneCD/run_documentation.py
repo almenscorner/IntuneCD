@@ -145,6 +145,11 @@ def start():
             f"{configpath}/Enrollment Profiles/Windows/ESP", outpath, "Enrollment Status Page", maxlength, split, cleanup
         )
 
+        # Document Enrollment Configurations
+        document_configs(
+            f"{configpath}/Enrollment Configurations", outpath, "Enrollment Configurations", maxlength, split, cleanup
+        )
+
         # Document filters
         document_configs(f"{configpath}/Filters", outpath, "Filters", maxlength, split, cleanup)
 
