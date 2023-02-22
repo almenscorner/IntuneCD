@@ -71,7 +71,7 @@ def update(path, token, assignment=False, report=False):
                     print("-" * 90)
                     mem_id = data["value"]["id"]
                     # Remove keys before using DeepDiff
-                    mem_data["value"][0] = remove_keys(mem_data["value"][0])
+                    data["value"] = remove_keys(data["value"])
 
                     diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
                         "values_changed", {}
