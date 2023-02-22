@@ -439,7 +439,7 @@ def update(path, token, assignment=False, report=False):
                 )
 
                 # If any differences were found on the profile, push them to Intune
-                if profile_diff:
+                if profile_diff and report is False:
                     request_data = json.dumps(
                         {
                             "displayName": repo_data["displayName"],
