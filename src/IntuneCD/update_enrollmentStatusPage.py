@@ -124,14 +124,17 @@ def update(path, token, assignment=False, report=False):
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
                         update = update_assignment(assign_obj, mem_assign_obj, token)
                         if update is not None:
-                            request_data = {"target": update}
+                            target = [{"target": t["target"]} for t in update]
+                            request_data = {
+                                "enrollmentConfigurationAssignments": target
+                            }
                             post_assignment_update(
                                 request_data,
                                 mem_id,
                                 "deviceManagement/deviceEnrollmentConfigurations",
                                 "assign",
                                 token,
-                                status_code=201,
+                                status_code=200,
                             )
 
                 # If Enrollmen Status Page profile does not exist, create it and assign
