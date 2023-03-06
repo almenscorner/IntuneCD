@@ -23,7 +23,7 @@ ENDPOINT = (
 APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
-def update(path, token, assignment=False, report=False):
+def update(path, token, assignment=False, report=False, create_groups=False):
     """
     This function updates all Windows Enrollment Status Page Profiles in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -122,7 +122,9 @@ def update(path, token, assignment=False, report=False):
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(assign_obj, mem_assign_obj, token)
+                        update = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
                         if update is not None:
                             target = [{"target": t["target"]} for t in update]
                             request_data = {
@@ -155,7 +157,7 @@ def update(path, token, assignment=False, report=False):
                         )
                         mem_assign_obj = []
                         assignment = update_assignment(
-                            assign_obj, mem_assign_obj, token
+                            assign_obj, mem_assign_obj, token, create_groups
                         )
                         if assignment is not None:
                             assignments = []
