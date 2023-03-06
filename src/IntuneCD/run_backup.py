@@ -153,7 +153,6 @@ def start():
     )
 
     def run_backup(path, output, exclude, token):
-
         config_count = 0
 
         if "AppConfigurations" not in exclude:
@@ -281,6 +280,10 @@ def start():
 
             config_count += savebackup(path, output, token)
 
+        from .assignment_report import get_group_report
+
+        get_group_report(path, output)
+
         return config_count
 
     if args.output == "json" or args.output == "yaml":
@@ -293,7 +296,6 @@ def start():
             exclude = []
 
         if args.frontend:
-
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
             count = run_backup(args.path, args.output, exclude, token)
