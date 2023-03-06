@@ -20,7 +20,7 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDeploymentProfiles"
 
 
-def update(path, token, assignment=False, report=False):
+def update(path, token, assignment=False, report=False, create_groups=False):
     """
     This function updates all Windows Enrollment Profiles in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -99,17 +99,20 @@ def update(path, token, assignment=False, report=False):
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(assign_obj, mem_assign_obj, token)
+                        update = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
                         if update is not None:
-                            request_data = {"target": update}
-                            post_assignment_update(
-                                request_data,
-                                mem_id,
-                                "deviceManagement/windowsAutopilotDeploymentProfiles",
-                                "assign",
-                                token,
-                                status_code=201,
-                            )
+                            for target in update:
+                                request_data = {"target": target["target"]}
+                                post_assignment_update(
+                                    request_data,
+                                    mem_id,
+                                    "deviceManagement/windowsAutopilotDeploymentProfiles",
+                                    "assignments",
+                                    token,
+                                    status_code=201,
+                                )
 
                 # If Autopilot profile does not exist, create it and assign
                 else:
@@ -129,18 +132,19 @@ def update(path, token, assignment=False, report=False):
                         )
                         mem_assign_obj = []
                         assignment = update_assignment(
-                            assign_obj, mem_assign_obj, token
+                            assign_obj, mem_assign_obj, token, create_groups
                         )
                         if assignment is not None:
-                            request_data = {"target": assignment[0]["target"]}
-                            post_assignment_update(
-                                request_data,
-                                post_request["id"],
-                                "deviceManagement/windowsAutopilotDeploymentProfiles",
-                                "assignments",
-                                token,
-                                status_code=201,
-                            )
+                            for target in assignment:
+                                request_data = {"target": target["target"]}
+                                post_assignment_update(
+                                    request_data,
+                                    post_request["id"],
+                                    "deviceManagement/windowsAutopilotDeploymentProfiles",
+                                    "assignments",
+                                    token,
+                                    status_code=201,
+                                )
                         print(
                             "Autopilot profile created with id: " + post_request["id"]
                         )
