@@ -24,7 +24,7 @@ ASSIGNMENT_ENDPOINT = (
 )
 
 
-def update(path, token, assignment=False, report=False):
+def update(path, token, assignment=False, report=False, create_groups=False):
     """
     This function updates all Shell scripts in Intune if the configuration in Intune differs from the JSON/YAML file.
 
@@ -137,7 +137,9 @@ def update(path, token, assignment=False, report=False):
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(assign_obj, mem_assign_obj, token)
+                        update = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
                         if update is not None:
                             request_data = {"deviceManagementScriptAssignments": update}
                             post_assignment_update(
@@ -166,7 +168,7 @@ def update(path, token, assignment=False, report=False):
                         )
                         mem_assign_obj = []
                         assignment = update_assignment(
-                            assign_obj, mem_assign_obj, token
+                            assign_obj, mem_assign_obj, token, create_groups
                         )
                         if assignment is not None:
                             request_data = {
