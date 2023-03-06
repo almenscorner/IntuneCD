@@ -5,6 +5,7 @@ This module creates a report of all groups found and their assginment.
 """
 
 import os
+import platform
 
 from .save_output import save_output
 from .check_file import check_file
@@ -71,9 +72,16 @@ def get_group_report(path, output):
 
     def collect_groups(path):
         groups = []
+        slash = "/"
+        run_os = platform.uname().system
+        if run_os == "Windows":
+            slash = "\\"
+        abs_path = os.path.abspath(path)
         for root, dirs, files in os.walk(path, topdown=True):
+            abs_root = os.path.abspath(root)
             for file in files:
-                payload_type = root.replace(path, "").split("/")
+                os.path.abspath(root)
+                payload_type = abs_root.replace(abs_path, "").split(slash)
                 if len(payload_type) > 1:
                     payload_type = payload_type[1]
                 process_file(
