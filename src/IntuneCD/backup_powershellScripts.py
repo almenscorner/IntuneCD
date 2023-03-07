@@ -36,13 +36,19 @@ def savebackup(path, output, exclude, token):
         for script in data["value"]:
             script_ids.append(script["id"])
 
-        assignment_responses = batch_assignment(data, "deviceManagement/intents/", "/assignments", token)
-        script_data_responses = batch_request(script_ids, "deviceManagement/deviceManagementScripts/", "", token)
+        assignment_responses = batch_assignment(
+            data, "deviceManagement/deviceManagementScripts/", "/assignments", token
+        )
+        script_data_responses = batch_request(
+            script_ids, "deviceManagement/deviceManagementScripts/", "", token
+        )
 
         for script_data in script_data_responses:
             config_count += 1
             if "assignments" not in exclude:
-                assignments = get_object_assignment(script_data["id"], assignment_responses)
+                assignments = get_object_assignment(
+                    script_data["id"], assignment_responses
+                )
                 if assignments:
                     script_data["assignments"] = assignments
 
