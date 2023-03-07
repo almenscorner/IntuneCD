@@ -91,6 +91,17 @@ def batch_assignment(data, url, extra_url, token, app_protection=False) -> list:
     if data_ids:
         responses = batch_request(data_ids, url, extra_url, token)
         if responses:
+            if extra_url == "?$expand=assignments":
+                response_values = []
+                for value in responses:
+                    response_values.append(
+                        {
+                            "value": value["assignments"],
+                            "@odata.context": value["assignments@odata.context"],
+                        }
+                    )
+                responses = response_values
+
             group_ids = [
                 val
                 for list in responses
