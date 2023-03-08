@@ -93,7 +93,6 @@ def get_group_report(path, output):
         return groups
 
     groups = collect_groups(path)
-    groups += collect_groups(f"{path}/Management Intents")
 
     if groups:
         save_output(output, report_path, "report", groups)
