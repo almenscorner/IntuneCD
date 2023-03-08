@@ -22,7 +22,7 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
 
 
-def update(path, token, assignment=False, report=False):
+def update(path, token, assignment=False, report=False, create_groups=False):
     """
     This function updates all Device Configurations in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -75,7 +75,6 @@ def update(path, token, assignment=False, report=False):
                             data["value"] = val
 
                 if data["value"]:
-
                     print("-" * 90)
                     mem_id = data["value"]["id"]
                     # Remove keys before using DeepDiff
@@ -124,7 +123,6 @@ def update(path, token, assignment=False, report=False):
                             # If any changed values are found, push them to
                             # Intune
                             if pdiff or cdiff:
-
                                 if report is False:
                                     payload = plistlib.dumps(repo_payload_config)
                                     repo_data["payload"] = str(
@@ -206,7 +204,6 @@ def update(path, token, assignment=False, report=False):
                         for mem_omaSetting, repo_omaSetting in zip(
                             data["value"]["omaSettings"], repo_data["omaSettings"]
                         ):
-
                             diff = DeepDiff(
                                 mem_omaSetting,
                                 repo_omaSetting,
@@ -277,7 +274,9 @@ def update(path, token, assignment=False, report=False):
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(assign_obj, mem_assign_obj, token)
+                        update = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
                         if update is not None:
                             request_data = {"assignments": update}
                             post_assignment_update(
@@ -328,7 +327,7 @@ def update(path, token, assignment=False, report=False):
 
                         mem_assign_obj = []
                         assignment = update_assignment(
-                            assign_obj, mem_assign_obj, token
+                            assign_obj, mem_assign_obj, token, create_groups
                         )
                         if assignment is not None:
                             request_data = {"assignments": assignment}

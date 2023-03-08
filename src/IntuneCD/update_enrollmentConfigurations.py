@@ -23,7 +23,7 @@ ENDPOINT = (
 )
 
 
-def update(path, token, assignment=False, report=False):
+def update(path, token, assignment=False, report=False, create_groups=False):
     """_summary_
 
     Args:
@@ -156,7 +156,9 @@ def update(path, token, assignment=False, report=False):
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(assign_obj, mem_assign_obj, token)
+                        update = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
                         if update is not None:
                             request_data = {
                                 "enrollmentConfigurationAssignments": update
@@ -216,7 +218,7 @@ def update(path, token, assignment=False, report=False):
 
                         mem_assign_obj = []
                         assignment = update_assignment(
-                            assign_obj, mem_assign_obj, token
+                            assign_obj, mem_assign_obj, token, create_groups
                         )
                         if assignment is not None:
                             request_data = {

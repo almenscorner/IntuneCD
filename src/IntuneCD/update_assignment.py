@@ -5,6 +5,7 @@ This module contains the functions used to update assignments in Intune.
 """
 
 import json
+import uuid
 from deepdiff import DeepDiff
 from .graph_request import makeapirequest, makeapirequestPost
 
@@ -69,7 +70,7 @@ def get_added_removed(diff_object) -> list:
     return update
 
 
-def update_assignment(repo, mem, token) -> list:
+def update_assignment(repo, mem, token, create_groups) -> list:
     """
     This function is used to update assignments for configurations in Intune.
 
@@ -98,7 +99,36 @@ def update_assignment(repo, mem, token) -> list:
                 )
                 if request["value"]:
                     val["target"].pop("groupName")
+                    val["target"].pop("groupType", None)
+                    val["target"].pop("membershipRule", None)
                     val["target"]["groupId"] = request["value"][0]["id"]
+                else:
+                    if create_groups:
+                        group_data = {
+                            "description": "Created by IntuneCD",
+                            "displayName": val["target"]["groupName"],
+                            "securityEnabled": True,
+                            "mailEnabled": False,
+                            "mailNickname": uuid.uuid4().hex,
+                        }
+                        if val["target"]["groupType"] == "DynamicMembership":
+                            group_data["groupTypes"] = ["DynamicMembership"]
+                            group_data["membershipRule"] = val["target"][
+                                "membershipRule"
+                            ]
+                            group_data["membershipRuleProcessingState"] = "On"
+
+                        request = makeapirequestPost(
+                            "https://graph.microsoft.com/beta/groups",
+                            token,
+                            None,
+                            json.dumps(group_data),
+                            201,
+                        )
+                        val["target"].pop("groupName")
+                        val["target"].pop("groupType", None)
+                        val["target"].pop("membershipRule", None)
+                        val["target"]["groupId"] = request["id"]
 
             # Request filter id based on filter name
             if val["target"]["deviceAndAppManagementAssignmentFilterId"]:

@@ -15,7 +15,9 @@ from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/"
-ASSIGNMENT_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
+ASSIGNMENT_ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
+)
 
 
 # Get all Shell scripts and save them in specified path
@@ -36,8 +38,12 @@ def savebackup(path, output, exclude, token):
     for script in data["value"]:
         script_ids.append(script["id"])
 
-    assignment_responses = batch_assignment(data, "deviceManagement/deviceManagementScripts/", "/assignments", token)
-    script_data_responses = batch_request(script_ids, "deviceManagement/deviceShellScripts/", "", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/deviceShellScripts/", "?$expand=assignments", token
+    )
+    script_data_responses = batch_request(
+        script_ids, "deviceManagement/deviceShellScripts/", "", token
+    )
 
     for script_data in script_data_responses:
         config_count += 1

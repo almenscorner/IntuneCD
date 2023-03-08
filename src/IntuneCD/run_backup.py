@@ -153,7 +153,6 @@ def start():
     )
 
     def run_backup(path, output, exclude, token):
-
         config_count = 0
 
         if "AppConfigurations" not in exclude:
@@ -281,6 +280,10 @@ def start():
 
             config_count += savebackup(path, output, token)
 
+        from .assignment_report import get_group_report
+
+        get_group_report(path, output)
+
         return config_count
 
     if args.output == "json" or args.output == "yaml":
@@ -293,7 +296,6 @@ def start():
             exclude = []
 
         if args.frontend:
-
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
             count = run_backup(args.path, args.output, exclude, token)
@@ -306,6 +308,34 @@ def start():
 
             body = {"type": "backup", "feed": out}
             update_frontend(f"{args.frontend}/api/feed/update", body)
+
+            body = []
+
+            from .load_file import load_file
+            from .check_file import check_file
+
+            config_path = f"{args.path}/Assignment Report"
+            file_name = f"report.{args.output}"
+            if os.path.exists(config_path):
+                file_check = check_file(config_path, file_name)
+                if file_check:
+                    with open(f"{config_path}/{file_name}", "r") as f:
+                        assignment_summary = load_file(file_name, f)
+                    if assignment_summary:
+                        for assignment in assignment_summary:
+                            body.append(
+                                {
+                                    "groupName": assignment["groupName"],
+                                    "groupType": assignment["groupType"],
+                                    "membershipRule": assignment["membershipRule"],
+                                    "assignedTo": assignment["assignedTo"],
+                                }
+                            )
+
+                        if len(body) > 0:
+                            update_frontend(
+                                f"{args.frontend}/api/assignments/summary", body
+                            )
 
         else:
             run_backup(args.path, args.output, exclude, token)

@@ -344,7 +344,7 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
     return diff_summary
 
 
-def update(path, token, assignment=False, report=False):
+def update(path, token, assignment=False, report=False, create_groups=False):
     """
     This function updates all Group Policy configurations in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -483,7 +483,9 @@ def update(path, token, assignment=False, report=False):
                 # If assignments should be updated, look for updates and push them to Intune
                 if assignment and report is False:
                     mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                    update = update_assignment(assign_obj, mem_assign_obj, token)
+                    update = update_assignment(
+                        assign_obj, mem_assign_obj, token, create_groups
+                    )
                     if update is not None:
                         request_data = {"assignments": update}
                         post_assignment_update(
@@ -544,7 +546,9 @@ def update(path, token, assignment=False, report=False):
                                 )
 
                     mem_assign_obj = []
-                    assignment = update_assignment(assign_obj, mem_assign_obj, token)
+                    assignment = update_assignment(
+                        assign_obj, mem_assign_obj, token, create_groups
+                    )
 
                     if assignment is not None:
                         request_data = {"assignments": assignment}

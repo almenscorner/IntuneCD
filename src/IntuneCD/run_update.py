@@ -23,7 +23,6 @@ import os
 import sys
 import base64
 import argparse
-import json
 
 from io import StringIO
 from .get_authparams import getAuth
@@ -33,7 +32,9 @@ REPO_DIR = os.environ.get("REPO_DIR")
 
 
 def start():
-    parser = argparse.ArgumentParser(description="Update Intune configurations with values from backup")
+    parser = argparse.ArgumentParser(
+        description="Update Intune configurations with values from backup"
+    )
     parser.add_argument(
         "-p",
         "--path",
@@ -115,6 +116,12 @@ def start():
         help="When this parameter is set, no updates are pushed to Intune but the change summary is pushed to the frontend",
         action="store_true",
     )
+    parser.add_argument(
+        "-g",
+        "--create-groups",
+        help="When this parameter is set, groups are created if they do not exist",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
@@ -143,25 +150,24 @@ def start():
         tenant="PROD",
     )
 
-    def run_update(path, token, assignment, exclude, report):
-
+    def run_update(path, token, assignment, exclude, report, create_groups):
         diff_count = 0
         diff_summary = []
 
         if "AppConfigurations" not in exclude:
             from .update_appConfiguration import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "AppProtection" not in exclude:
             from .update_appProtection import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "Compliance" not in exclude:
             from .update_compliance import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "NotificationTemplate" not in exclude:
             from .update_notificationTemplate import update
@@ -171,12 +177,12 @@ def start():
         if "Profiles" not in exclude:
             from .update_profiles import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "GPOConfigurations" not in exclude:
             from .update_groupPolicyConfiguration import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "AppleEnrollmentProfile" not in exclude:
             from .update_appleEnrollmentProfile import update
@@ -186,17 +192,17 @@ def start():
         if "WindowsEnrollmentProfile" not in exclude:
             from .update_windowsEnrollmentProfile import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "EnrollmentStatusPage" not in exclude:
             from .update_enrollmentStatusPage import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "EnrollmentConfigurations" not in exclude:
             from .update_enrollmentConfigurations import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "Filters" not in exclude:
             from .update_assignmentFilter import update
@@ -206,27 +212,27 @@ def start():
         if "Intents" not in exclude:
             from .update_managementIntents import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "ProactiveRemediation" not in exclude:
             from .update_proactiveRemediation import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "PowershellScripts" not in exclude:
             from .update_powershellScripts import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "ShellScripts" not in exclude:
             from .update_shellScripts import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "ConfigurationPolicies" not in exclude:
             from .update_configurationPolicies import update
 
-            diff_summary.append(update(path, token, assignment, report))
+            diff_summary.append(update(path, token, assignment, report, create_groups))
 
         if "ConditionalAccess" not in exclude:
             from .update_conditionalAccess import update
@@ -242,7 +248,6 @@ def start():
     if token is None:
         raise Exception("Token is empty, please check os.environ variables")
     else:
-
         if args.exclude:
             exclude = args.exclude
         else:
@@ -252,7 +257,6 @@ def start():
             print("***Running in report mode, no updates will be pushed to Intune***")
 
         if args.frontend:
-
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
             summary = run_update(args.path, token, args.u, exclude, args.report)
@@ -282,7 +286,9 @@ def start():
                 update_frontend(f"{args.frontend}/api/changes/summary", body)
 
         else:
-            run_update(args.path, token, args.u, exclude, args.report)
+            run_update(
+                args.path, token, args.u, exclude, args.report, args.create_groups
+            )
 
 
 if __name__ == "__main__":
