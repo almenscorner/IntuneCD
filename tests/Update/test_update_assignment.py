@@ -1,7 +1,11 @@
 import unittest
 
 from unittest.mock import patch
-from src.IntuneCD.update_assignment import update_assignment, get_added_removed, post_assignment_update
+from src.IntuneCD.update_assignment import (
+    update_assignment,
+    get_added_removed,
+    post_assignment_update,
+)
 
 
 class TestUpdateAssignment(unittest.TestCase):
@@ -33,10 +37,14 @@ class TestUpdateAssignment(unittest.TestCase):
             }
         ]
         self.request_data = {"value": [{"id": "12345", "displayName": "test"}]}
-        self.makeapirequest_patch = patch("src.IntuneCD.update_assignment.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.update_assignment.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
 
-        self.makeapirequestPost_patch = patch("src.IntuneCD.update_assignment.makeapirequestPost")
+        self.makeapirequestPost_patch = patch(
+            "src.IntuneCD.update_assignment.makeapirequestPost"
+        )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
 
     def tearDown(self):
@@ -47,13 +55,19 @@ class TestUpdateAssignment(unittest.TestCase):
         """The list of added and removed should be returned."""
         result = get_added_removed(self.output_data)
 
-        self.assertEqual(result, ["intent: apply, Filter ID: 1234, Filter Type: device, target: All Devices"])
+        self.assertEqual(
+            result,
+            [
+                "intent: apply, Filter ID: 1234, Filter Type: device, target: All Devices"
+            ],
+        )
 
     def test_update_assignment(self):
-
         self.makeapirequest.return_value = self.request_data
 
-        result = update_assignment(self.repo_data, self.mem_data, self.token)
+        result = update_assignment(
+            self.repo_data, self.mem_data, self.token, create_groups=True
+        )
 
         self.assertEqual(
             result,
