@@ -259,7 +259,9 @@ def start():
         if args.frontend:
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
-            summary = run_update(args.path, token, args.u, exclude, args.report)
+            summary = run_update(
+                args.path, token, args.u, exclude, args.report, args.create_groups
+            )
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
             out = base64.b64encode(feed_bytes).decode("utf-8")
