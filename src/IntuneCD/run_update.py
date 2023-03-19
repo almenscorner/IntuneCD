@@ -107,6 +107,8 @@ def start():
             "ConfigurationPolicies",
             "ConditionalAccess",
             "EnrollmentConfigurations",
+            "DeviceManagementSettings",
+            "CustomAttribute",
         ],
         nargs="+",
     )
@@ -169,6 +171,16 @@ def start():
 
             diff_summary.append(update(path, token, assignment, report, create_groups))
 
+        if "DeviceManagementSettings" not in exclude and args.interactiveauth is True:
+            from .update_deviceManagementSettings import update
+
+            diff_summary.append(update(path, token, report))
+        else:
+            print("-" * 90)
+            print(
+                "***Device Management Settings is only available with interactive auth***"
+            )
+
         if "NotificationTemplate" not in exclude:
             from .update_notificationTemplate import update
 
@@ -226,6 +238,11 @@ def start():
 
         if "ShellScripts" not in exclude:
             from .update_shellScripts import update
+
+            diff_summary.append(update(path, token, assignment, report, create_groups))
+
+        if "CustomAttribute" not in exclude:
+            from .update_customAttributeShellScript import update
 
             diff_summary.append(update(path, token, assignment, report, create_groups))
 
