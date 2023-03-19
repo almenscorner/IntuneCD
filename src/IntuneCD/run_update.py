@@ -108,7 +108,7 @@ def start():
             "ConditionalAccess",
             "EnrollmentConfigurations",
             "DeviceManagementSettings",
-            "CustomAttribute",
+            "CustomAttributes",
         ],
         nargs="+",
     )
