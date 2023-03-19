@@ -130,6 +130,16 @@ class TestUpdateConfigurationPolicies(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
+    def test_update_skip_edr(self):
+        """The count should be 0 as EDR is currently not supported"""
+
+        self.repo_data["templateReference"] = {"templateDisplayName": "Endpoint detection and response"}
+
+        self.count = update(self.directory.path, self.token, assignment=False)
+
+        self.assertEqual(self.count, [])
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
+        self.assertEqual(self.makeapirequestPost.call_count, 0)
 
 if __name__ == "__main__":
     unittest.main()
