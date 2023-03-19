@@ -16,7 +16,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/settings"
 # Get settings and save in specified path
 def savebackup(path, output, token):
     """
-    Save Apple Push Notification setting to a JSON or YAML file.
+    Save Device Management Setting to a JSON or YAML file.
 
     :param path: Path to save the backup to
     :param output: Format the backup will be saved as
