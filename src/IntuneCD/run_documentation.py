@@ -25,16 +25,31 @@ import argparse
 
 from datetime import datetime
 from markdown_toclify import markdown_toclify
-from .documentation_functions import document_configs, document_management_intents, md_file, get_md_files
+from .documentation_functions import (
+    document_configs,
+    document_management_intents,
+    md_file,
+    get_md_files,
+)
 
 REPO_DIR = os.environ.get("REPO_DIR")
 
 
 def start():
-    parser = argparse.ArgumentParser(description="Create markdown document from backup files")
-    parser.add_argument("-p", "--path", help="Path to where the backup is saved, default is REPO_DIR", default=REPO_DIR)
+    parser = argparse.ArgumentParser(
+        description="Create markdown document from backup files"
+    )
     parser.add_argument(
-        "-o", "--outpath", help="The path to save the document, default is REPO_DIR/README.md", default=f"{REPO_DIR}/README.md"
+        "-p",
+        "--path",
+        help="Path to where the backup is saved, default is REPO_DIR",
+        default=REPO_DIR,
+    )
+    parser.add_argument(
+        "-o",
+        "--outpath",
+        help="The path to save the document, default is REPO_DIR/README.md",
+        default=f"{REPO_DIR}/README.md",
     )
     parser.add_argument("-t", "--tenantname", help="Name of the tenant")
     parser.add_argument(
@@ -63,12 +78,18 @@ def start():
         "list of all files",
         action="store_true",
     )
-    parser.add_argument("-c", "--cleanup", help="If set, will remove all table rows with an empty value", action="store_true")
+    parser.add_argument(
+        "-c",
+        "--cleanup",
+        help="If set, will remove all table rows with an empty value",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
-    def run_documentation(configpath, outpath, tenantname, jsondata, maxlength, split, cleanup):
-
+    def run_documentation(
+        configpath, outpath, tenantname, jsondata, maxlength, split, cleanup
+    ):
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
 
@@ -76,103 +97,284 @@ def start():
             md_file(outpath)
 
         # Document App Configuration
-        document_configs(f"{configpath}/App Configuration", outpath, "App Configuration", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/App Configuration",
+            outpath,
+            "App Configuration",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document App Protection
-        document_configs(f"{configpath}/App Protection", outpath, "App Protection", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/App Protection",
+            outpath,
+            "App Protection",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Apple Push Notification
         document_configs(
-            f"{configpath}/Apple Push Notification", outpath, "Apple Push Notification", maxlength, split, cleanup
+            f"{configpath}/Apple Push Notification",
+            outpath,
+            "Apple Push Notification",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Document Apple VPP Tokens
-        document_configs(f"{configpath}/Apple VPP Tokens", outpath, "Apple VPP Tokens", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Apple VPP Tokens",
+            outpath,
+            "Apple VPP Tokens",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document iOS Applications
-        document_configs(f"{configpath}/Applications/iOS", outpath, "iOS Applications", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Applications/iOS",
+            outpath,
+            "iOS Applications",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document macOS Applications
-        document_configs(f"{configpath}/Applications/macOS", outpath, "macOS Applications", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Applications/macOS",
+            outpath,
+            "macOS Applications",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Android Applications
-        document_configs(f"{configpath}/Applications/Android", outpath, "Android Applications", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Applications/Android",
+            outpath,
+            "Android Applications",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Windows Applications
-        document_configs(f"{configpath}/Applications/Windows", outpath, "Windows Applications", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Applications/Windows",
+            outpath,
+            "Windows Applications",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Web Apps
-        document_configs(f"{configpath}/Applications/Web App", outpath, "Web Applications", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Applications/Web App",
+            outpath,
+            "Web Applications",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Office Suite apps
         document_configs(
-            f"{configpath}/Applications/Office Suite", outpath, "Office Suite Applications", maxlength, split, cleanup
+            f"{configpath}/Applications/Office Suite",
+            outpath,
+            "Office Suite Applications",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Document compliance
         document_configs(
-            f"{configpath}/Compliance Policies/Policies", outpath, "Compliance Policies", maxlength, split, cleanup
+            f"{configpath}/Compliance Policies/Policies",
+            outpath,
+            "Compliance Policies",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Message Templates
         document_configs(
-            f"{configpath}/Compliance Policies/Message Templates", outpath, "Message Templates", maxlength, split, cleanup
+            f"{configpath}/Compliance Policies/Message Templates",
+            outpath,
+            "Message Templates",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Conditional Access
-        document_configs(f"{configpath}/Conditional Access", outpath, "Conditional Access", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Conditional Access",
+            outpath,
+            "Conditional Access",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document profiles
-        document_configs(f"{configpath}/Device Configurations", outpath, "Configuration Profiles", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Device Configurations",
+            outpath,
+            "Configuration Profiles",
+            maxlength,
+            split,
+            cleanup,
+        )
+
+        # Document Device Management Settings
+        document_configs(
+            f"{configpath}/Device Management Settings",
+            outpath,
+            "Device Management Settings",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Group Policy Configurations
         document_configs(
-            f"{configpath}/Group Policy Configurations", outpath, "Group Policy Configurations", maxlength, split, cleanup
+            f"{configpath}/Group Policy Configurations",
+            outpath,
+            "Group Policy Configurations",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Document Apple Enrollment Profiles
         document_configs(
-            f"{configpath}/Enrollment Profiles/Apple", outpath, "Apple Enrollment Profiles", maxlength, split, cleanup
+            f"{configpath}/Enrollment Profiles/Apple",
+            outpath,
+            "Apple Enrollment Profiles",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Document Windows Enrollment Profiles
         document_configs(
-            f"{configpath}/Enrollment Profiles/Windows", outpath, "Windows Enrollment Profiles", maxlength, split, cleanup
+            f"{configpath}/Enrollment Profiles/Windows",
+            outpath,
+            "Windows Enrollment Profiles",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Document Enrollment Status Page profiles
         document_configs(
-            f"{configpath}/Enrollment Profiles/Windows/ESP", outpath, "Enrollment Status Page", maxlength, split, cleanup
+            f"{configpath}/Enrollment Profiles/Windows/ESP",
+            outpath,
+            "Enrollment Status Page",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Document Enrollment Configurations
         document_configs(
-            f"{configpath}/Enrollment Configurations", outpath, "Enrollment Configurations", maxlength, split, cleanup
+            f"{configpath}/Enrollment Configurations",
+            outpath,
+            "Enrollment Configurations",
+            maxlength,
+            split,
+            cleanup,
         )
 
         # Document filters
-        document_configs(f"{configpath}/Filters", outpath, "Filters", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Filters", outpath, "Filters", maxlength, split, cleanup
+        )
 
         # Managed Google Play
-        document_configs(f"{configpath}/Managed Google Play", outpath, "Managed Google Play", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Managed Google Play",
+            outpath,
+            "Managed Google Play",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Intents
-        document_management_intents(f"{configpath}/Management Intents/", outpath, "Management Intents", split)
+        document_management_intents(
+            f"{configpath}/Management Intents/", outpath, "Management Intents", split
+        )
 
         # Document Partner Connections
-        document_configs(f"{configpath}/Partner Connections/", outpath, "Partner Connections", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Partner Connections/",
+            outpath,
+            "Partner Connections",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Proactive Remediations
-        document_configs(f"{configpath}/Proactive Remediations", outpath, "Proactive Remediations", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Proactive Remediations",
+            outpath,
+            "Proactive Remediations",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Shell Scripts
-        document_configs(f"{configpath}/Scripts/Shell", outpath, "Shell Scripts", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Scripts/Shell",
+            outpath,
+            "Shell Scripts",
+            maxlength,
+            split,
+            cleanup,
+        )
+
+        # Document Custom Attributes
+        document_configs(
+            f"{configpath}/Custom Attributes",
+            outpath,
+            "Custom Attributes",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Powershell Scripts
-        document_configs(f"{configpath}/Scripts/Powershell", outpath, "Powershell Scripts", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Scripts/Powershell",
+            outpath,
+            "Powershell Scripts",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         # Document Settings Catalog
-        document_configs(f"{configpath}/Settings Catalog", outpath, "Settings Catalog", maxlength, split, cleanup)
+        document_configs(
+            f"{configpath}/Settings Catalog",
+            outpath,
+            "Settings Catalog",
+            maxlength,
+            split,
+            cleanup,
+        )
 
         if jsondata:
             json_dict = json.loads(jsondata)
@@ -211,10 +413,20 @@ def start():
                 l5 = "## File index \n\n"
                 doc.writelines([l1, l2, l3, l4, l5])
                 for file in files:
-                    doc.writelines(["[", str(file).split("/")[-1], "](", str(file).replace(" ", "%20"), ") \n\n"])
+                    doc.writelines(
+                        [
+                            "[",
+                            str(file).split("/")[-1],
+                            "](",
+                            str(file).replace(" ", "%20"),
+                            ") \n\n",
+                        ]
+                    )
 
         else:
-            document = markdown_toclify(input_file=outpath, back_to_top=True, exclude_h=[3])
+            document = markdown_toclify(
+                input_file=outpath, back_to_top=True, exclude_h=[3]
+            )
             with open(outpath, "w") as doc:
                 l1 = f"# {title} \n\n"
                 l2 = f"{intro} \n\n"
@@ -222,7 +434,15 @@ def start():
                 l4 = f"{updated} {current_date} \n\n"
                 doc.writelines([l1, l2, l3, l4, document])
 
-    run_documentation(args.path, args.outpath, args.tenantname, args.jsondata, args.maxlength, args.split, args.cleanup)
+    run_documentation(
+        args.path,
+        args.outpath,
+        args.tenantname,
+        args.jsondata,
+        args.maxlength,
+        args.split,
+        args.cleanup,
+    )
 
 
 if __name__ == "__main__":
