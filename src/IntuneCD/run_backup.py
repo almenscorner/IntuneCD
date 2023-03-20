@@ -110,6 +110,8 @@ def start():
             "ConfigurationPolicies",
             "ConditionalAccess",
             "EnrollmentConfigurations",
+            "DeviceManagementSettings",
+            "CustomAttributes",
         ],
         nargs="+",
     )
@@ -184,6 +186,11 @@ def start():
             from .backup_compliance import savebackup
 
             config_count += savebackup(path, output, exclude, token)
+
+        if "DeviceManagementSettings" not in exclude:
+            from .backup_deviceManagementSettings import savebackup
+
+            config_count += savebackup(path, output, token)
 
         if "NotificationTemplate" not in exclude:
             from .backup_notificationTemplate import savebackup
@@ -267,6 +274,11 @@ def start():
 
         if "ShellScripts" not in exclude:
             from .backup_shellScripts import savebackup
+
+            config_count += savebackup(path, output, exclude, token)
+
+        if "CustomAttributes" not in exclude:
+            from .backup_customAttributeShellScript import savebackup
 
             config_count += savebackup(path, output, exclude, token)
 

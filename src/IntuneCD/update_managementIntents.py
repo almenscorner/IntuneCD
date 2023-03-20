@@ -71,6 +71,15 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                     ):
                         mem_data = intent
 
+                if (
+                    repo_data.get("templateId")
+                    == "e44c2ca3-2f9a-400a-a113-6cc88efd773d"
+                ):
+                    print(
+                        "Endpoint detection and response is currently not supported..."
+                    )
+                    continue
+
                 # If Intent exists, continue
                 if mem_data:
                     print("-" * 90)

@@ -1,69 +1,105 @@
 #!/usr/bin/env python3
 
-"""This module tests updating Configuration Policies."""
+"""This module tests updating Custom Attribute Shell Scripts."""
 
 import unittest
 
 from testfixtures import TempDirectory
 from unittest.mock import patch
-from src.IntuneCD.update_configurationPolicies import update
+from src.IntuneCD.update_customAttributeShellScript import update
 
 
-class TestUpdateConfigurationPolicies(unittest.TestCase):
-    """Test class for update_configurationPolicies."""
+class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
+    """Test class for update_customAttributeShellScript."""
 
     def setUp(self):
         self.directory = TempDirectory()
         self.directory.create()
-        self.directory.makedir("Settings Catalog")
-        self.directory.write("Settings Catalog/test.json", '{"test": "test"}', encoding="utf-8")
-        self.directory.write("Settings Catalog/test.txt", "txt", encoding="utf-8")
+        self.directory.makedir("Custom Attributes")
+        self.directory.makedir("Custom Attributes/Script Data")
+        self.directory.write(
+            "Custom Attributes/test.json", '{"test": "test"}', encoding="utf-8"
+        )
+        self.directory.write(
+            "Custom Attributes/Script Data/test.sh",
+            "You found a secret message, hooray!",
+            encoding="utf-8",
+        )
         self.token = "token"
-        self.mem_data = {
+        self.mem_script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2Us"
+        self.repo_script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE="
+        self.mem_shellScript_data = {
             "value": [
                 {
                     "@odata.type": "test",
                     "id": "0",
-                    "name": "test",
+                    "displayName": "test",
                     "testvalue": "test",
-                    "settings": [{"id": "0", "testvalue": "test"}],
+                    "scriptContent": self.mem_script_content,
+                    "fileName": "test.sh",
                     "assignments": [{"target": {"groupId": "test"}}],
                 }
             ]
         }
+        self.mem_data = {
+            "@odata.type": "test",
+            "id": "0",
+            "displayName": "test",
+            "testvalue": "test",
+            "scriptContent": self.mem_script_content,
+            "fileName": "test.sh",
+            "assignments": [{"target": {"groupId": "test"}}],
+        }
         self.repo_data = {
             "@odata.type": "test",
             "id": "0",
-            "name": "test",
-            "testvalue": "test1",
-            "settings": [{"id": "0", "testvalue": "test1"}],
-            "assignments": [{"target": {"groupName": "test1"}}],
+            "displayName": "test",
+            "testvalue": "test",
+            "scriptContent": self.repo_script_content,
+            "fileName": "test.sh",
+            "assignments": [{"target": {"groupId": "test"}}],
         }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.update_configurationPolicies.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
 
-        self.object_assignment_patch = patch("src.IntuneCD.update_configurationPolicies.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
 
-        self.makeapirequest_patch = patch("src.IntuneCD.update_configurationPolicies.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
-        self.update_assignment_patch = patch("src.IntuneCD.update_configurationPolicies.update_assignment")
+        self.update_assignment_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.update_assignment"
+        )
         self.update_assignment = self.update_assignment_patch.start()
 
-        self.load_file_patch = patch("src.IntuneCD.update_configurationPolicies.load_file")
+        self.load_file_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.load_file"
+        )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
-        self.post_assignment_update_patch = patch("src.IntuneCD.update_configurationPolicies.post_assignment_update")
+        self.post_assignment_update_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.post_assignment_update"
+        )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
-        self.makeapirequestPatch_patch = patch("src.IntuneCD.update_configurationPolicies.makeapirequestPut")
+        self.makeapirequestPatch_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.makeapirequestPatch"
+        )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
-        self.makeapirequestPost_patch = patch("src.IntuneCD.update_configurationPolicies.makeapirequestPost")
+        self.makeapirequestPost_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.makeapirequestPost"
+        )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
@@ -81,18 +117,24 @@ class TestUpdateConfigurationPolicies(unittest.TestCase):
     def test_update_with_diffs_and_assignment(self):
         """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
 
+        self.repo_data["testvalue"] = "test1"
+        self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
+
         self.count = update(self.directory.path, self.token, assignment=True)
 
-        self.assertEqual(self.count[0].count, 1)
+        self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
     def test_update_with_diffs_no_assignment(self):
         """The count should be 1 and the makeapirequestPatch should be called."""
 
+        self.repo_data["testvalue"] = "test1"
+        self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
+
         self.count = update(self.directory.path, self.token, assignment=False)
 
-        self.assertEqual(self.count[0].count, 1)
+        self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
@@ -100,7 +142,10 @@ class TestUpdateConfigurationPolicies(unittest.TestCase):
         """The count should be 0, the post_assignment_update should be called,
         and makeapirequestPatch should not be called."""
 
-        self.mem_data["value"][0]["testvalue"] = "test1"
+        self.mem_data["testvalue"] = "test"
+        self.mem_data["scriptContent"] = self.repo_script_content
+
+        self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
@@ -111,7 +156,10 @@ class TestUpdateConfigurationPolicies(unittest.TestCase):
     def test_update_with_no_diffs_no_assignment(self):
         """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
 
-        self.mem_data["value"][0]["testvalue"] = "test1"
+        self.mem_data["testvalue"] = "test"
+        self.mem_data["scriptContent"] = self.repo_script_content
+
+        self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
         self.count = update(self.directory.path, self.token, assignment=False)
 
@@ -122,7 +170,8 @@ class TestUpdateConfigurationPolicies(unittest.TestCase):
     def test_update_config_not_found_and_assignment(self):
         """The count should be 0, the post_assignment_update and makeapirequestPost should be called."""
 
-        self.mem_data["value"][0]["name"] = "test1"
+        self.mem_shellScript_data["value"][0]["displayName"] = "test1"
+        self.makeapirequest.return_value = self.mem_shellScript_data
 
         self.count = update(self.directory.path, self.token, assignment=True)
 
@@ -130,16 +179,6 @@ class TestUpdateConfigurationPolicies(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
-    def test_update_skip_edr(self):
-        """The count should be 0 as EDR is currently not supported"""
-
-        self.repo_data["templateReference"] = {"templateDisplayName": "Endpoint detection and response"}
-
-        self.count = update(self.directory.path, self.token, assignment=False)
-
-        self.assertEqual(self.count, [])
-        self.assertEqual(self.makeapirequestPatch.call_count, 0)
-        self.assertEqual(self.makeapirequestPost.call_count, 0)
 
 if __name__ == "__main__":
     unittest.main()
