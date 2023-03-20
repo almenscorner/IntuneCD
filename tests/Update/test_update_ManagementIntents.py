@@ -17,6 +17,8 @@ class TestUpdateManagementIntents(unittest.TestCase):
         self.directory.create()
         self.directory.makedir("Management Intents")
         self.directory.write("Management Intents/macOS Firewall/test.json", '{"test": "test"}', encoding="utf-8")
+        self.directory.write("Management Intents/macOS Firewall/.DS_Store", '', encoding="utf-8")
+        self.directory.write("Management Intents/macOS Firewall/test.md", '', encoding="utf-8")
         self.token = "token"
         self.mem_data = {
             "value": [
@@ -133,6 +135,16 @@ class TestUpdateManagementIntents(unittest.TestCase):
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
+    def test_update_skip_edr(self):
+        """The count should be 0 as EDR is currently not supported"""
+
+        self.repo_data["templateId"] = "e44c2ca3-2f9a-400a-a113-6cc88efd773d"
+
+        self.count = update(self.directory.path, self.token, assignment=False)
+
+        self.assertEqual(self.count, [])
+        self.assertEqual(self.makeapirequestPost.call_count, 0)
 
 
 if __name__ == "__main__":

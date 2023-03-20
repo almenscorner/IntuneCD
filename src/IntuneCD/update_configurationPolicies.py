@@ -63,6 +63,17 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         if repo_data["name"] == val["name"]:
                             data["value"] = val
 
+                if (
+                    "templateReference" in repo_data
+                    and repo_data["templateReference"].get("templateDisplayName")
+                    == "Endpoint detection and response"
+                ):
+                    print("-" * 90)
+                    print(
+                        f'Skipping "{repo_data["name"]}", Endpoint detection and response is currently not supported...',
+                    )
+                    continue
+
                 # If Filter exists, continue
                 if data["value"]:
                     print("-" * 90)
