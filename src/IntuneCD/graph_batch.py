@@ -94,17 +94,19 @@ def batch_assignment(data, url, extra_url, token, app_protection=False) -> list:
             if extra_url == "?$expand=assignments":
                 response_values = []
                 for value in responses:
-                    response_values.append(
-                        {
-                            "value": value["assignments"],
-                            "@odata.context": value["assignments@odata.context"],
-                        }
-                    )
+                    if value:
+                        response_values.append(
+                            {
+                                "value": value["assignments"],
+                                "@odata.context": value["assignments@odata.context"],
+                            }
+                        )
                 responses = response_values
 
             group_ids = [
                 val
                 for list in responses
+                if list and "value" in list
                 for val in list["value"]
                 for keys, val in val.items()
                 if "target" in keys
@@ -114,6 +116,7 @@ def batch_assignment(data, url, extra_url, token, app_protection=False) -> list:
             filter_ids = [
                 val
                 for list in responses
+                if list and "value" in list
                 for val in list["value"]
                 for keys, val in val.items()
                 if "target" in keys
@@ -131,7 +134,7 @@ def batch_assignment(data, url, extra_url, token, app_protection=False) -> list:
                 token,
             )
             for value in responses:
-                if value["value"]:
+                if value is not None and "value" in value:
                     for val in value["value"]:
                         if "groupId" in val["target"]:
                             for id in group_responses:
@@ -259,6 +262,7 @@ def get_object_assignment(id, responses) -> list:
     assignments_list = [
         val
         for list in responses
+        if list and "value" in list
         if id in list["@odata.context"]
         for val in list["value"]
     ]
