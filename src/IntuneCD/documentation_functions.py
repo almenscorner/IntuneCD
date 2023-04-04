@@ -301,6 +301,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                     if assignments_table:
                         md.write("### Assignments \n")
                         md.write(str(assignments_table) + "\n")
+                    md.write('### Configuration \n')
                     md.write(str(config_table) + "\n")
 
 
@@ -406,6 +407,7 @@ def document_management_intents(configpath, outpath, header, split):
                     if assignments_table:
                         md.write("### Assignments \n")
                         md.write(str(assignments_table) + "\n")
+                    md.write('### Configuration \n')
                     md.write(str(config_table) + "\n")
 
 
