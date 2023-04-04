@@ -7,6 +7,7 @@ from src.IntuneCD.documentation_functions import (
     write_table,
     assignment_table,
     remove_characters,
+    escape_markdown,
     clean_list,
     document_configs,
     document_management_intents,
@@ -75,6 +76,12 @@ class TestDocumentationFunctions(unittest.TestCase):
         self.string = "@[test]{}"
 
         self.assertEqual(remove_characters(self.string), "test")
+
+    def test_escape_markdown(self):
+        """The escaped string should be returned."""
+        self.string = "\\`*_{}[]()#+-.!Hello World"
+
+        self.assertEqual(escape_markdown(self.string), "\\\\`\\*\\_\\{\\}\\[\\]\\(\\)\\#\\+\\-\\.\\!Hello World")
 
     def test_clean_list_list(self):
         """The list should be returned."""

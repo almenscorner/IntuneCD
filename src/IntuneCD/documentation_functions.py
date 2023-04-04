@@ -42,6 +42,20 @@ def write_table(data):
     return writer
 
 
+def escape_markdown(text):
+    """
+    This function escapes markdown characters.
+
+    :param text: The text to be escaped
+    :return: The escaped text
+    """
+
+    # Escape markdown characters
+    parse = re.sub(r"([\_*\[\]()\{\}`>\#\+\-=|\.!])", r"\\\1", text)
+
+    return parse
+
+
 def assignment_table(data):
     """
     This function creates the Markdown assignments table.
@@ -297,7 +311,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                     if "name" in repo_data:
                         md.write("## " + repo_data["name"] + "\n")
                     if description:
-                        md.write(f"Description: {description} \n")
+                        md.write(f"Description: {escape_markdown(description)} \n")
                     if assignments_table:
                         md.write("### Assignments \n")
                         md.write(str(assignments_table) + "\n")
@@ -403,7 +417,7 @@ def document_management_intents(configpath, outpath, header, split):
                     if "name" in repo_data:
                         md.write("## " + repo_data["name"] + "\n")
                     if description:
-                        md.write(f"Description: {description} \n")
+                        md.write(f"Description: {escape_markdown(description)} \n")
                     if assignments_table:
                         md.write("### Assignments \n")
                         md.write(str(assignments_table) + "\n")
