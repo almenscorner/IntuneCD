@@ -22,7 +22,16 @@
           "editor.formatOnType": true
         },
         "editor.fontSize": 13,
-        "workbench.colorTheme": "Palenight (Mild Contrast)"
+        "workbench.colorTheme": "Palenight (Mild Contrast)",
+	"python.testing.pytestPath": "pytest",
+	"python.testing.unittestArgs": [
+	  "-v",
+	  "-s",
+	  ".",
+	  "-p",
+	  "*test*.py"
+	],
+	"python.testing.autoTestDiscoverOnSaveEnabled": true
       },
 			"extensions": [
 				"ms-python.black-formatter",
