@@ -42,5 +42,5 @@
 	"postCreateCommand": "pip3 install -r test-requirements.txt && pip3 install IntuneCD && sudo apt update && sudo apt install fonts-firacode",
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-  "remoteUser": "root"
+  	//"remoteUser": "root"
 }
