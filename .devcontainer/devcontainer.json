@@ -27,7 +27,9 @@
 		"tests"
     	],
     	"python.testing.unittestEnabled": false,
-    	"python.testing.pytestEnabled": true
+    	"python.testing.pytestEnabled": true,
+	"editor.fontFamily": "Fira Code",
+	"editor.fontLigatures": true
       },
 			"extensions": [
 				"ms-python.black-formatter",
@@ -37,7 +39,7 @@
 	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip3 install -r test-requirements.txt && pip3 install IntuneCD",
+	"postCreateCommand": "pip3 install -r test-requirements.txt && pip3 install IntuneCD && sudo apt install fonts-firacode",
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
   "remoteUser": "root"
