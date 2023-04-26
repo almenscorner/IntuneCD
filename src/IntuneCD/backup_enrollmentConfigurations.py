@@ -13,7 +13,9 @@ from .remove_keys import remove_keys
 from .graph_batch import batch_assignment, get_object_assignment
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+)
 
 
 # Get all Enrollment Configurations and save them in specified path
@@ -26,16 +28,21 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Enrollment Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token
+    )
 
     for config in data["value"]:
-        if config["@odata.type"] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration":
+        if (
+            config["@odata.type"]
+            == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+        ):
             continue
-        config_count += 1
+        results["config_count"] += 1
         config_type = config.get("deviceEnrollmentConfigurationType", None)
         config_type = config_type[0].upper() + config_type[1:]
         config_type = re.findall("[A-Z][^A-Z]*", config_type)
@@ -48,7 +55,9 @@ def savebackup(path, output, exclude, token):
             if assignments:
                 config["assignments"] = assignments
 
-        fname = clean_filename(f"{config['displayName']}_{str(config['@odata.type']).split('.')[2]}")
+        fname = clean_filename(
+            f"{config['displayName']}_{str(config['@odata.type']).split('.')[2]}"
+        )
 
         config = remove_keys(config)
 
@@ -58,4 +67,6 @@ def savebackup(path, output, exclude, token):
         # value in "-o"
         save_output(output, configpath, fname, config)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results
