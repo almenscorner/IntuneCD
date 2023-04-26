@@ -8,7 +8,12 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPatch,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
@@ -49,6 +54,7 @@ def update(path, token, report):
                     for val in mem_data["value"]:
                         if repo_data["displayName"] == val["displayName"]:
                             data["value"] = val
+                            mem_data["value"].remove(val)
 
                 # If Conditional Access policy exists, continue
                 if data["value"]:
@@ -148,5 +154,18 @@ def update(path, token, report):
                                 "Conditional Access policy created with id: "
                                 + post_request["id"]
                             )
+
+        # If any Conditional Access policy are left in mem_data, remove them from Intune as they are not in the repo
+        if mem_data.get("value", None) is not None:
+            for val in mem_data["value"]:
+                print("-" * 90)
+                print(
+                    "Removing Conditional Access Policy from Intune: "
+                    + val["displayName"]
+                )
+                if report is False:
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=204
+                    )
 
     return diff_count
