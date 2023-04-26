@@ -23,13 +23,13 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Filters/"
     data = makeapirequest(ENDPOINT, token)
 
     if data:
         for assign_filter in data["value"]:
-            config_count += 1
+            results["config_count"] += 1
             assign_filter = remove_keys(assign_filter)
             print("Backing up Filter: " + assign_filter["displayName"])
 
@@ -39,4 +39,6 @@ def savebackup(path, output, token):
             # "-o"
             save_output(output, configpath, fname, assign_filter)
 
-    return config_count
+            results["outputs"].append(fname)
+
+    return results
