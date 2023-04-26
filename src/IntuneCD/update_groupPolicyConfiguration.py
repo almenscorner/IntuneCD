@@ -8,7 +8,12 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPatch,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .graph_batch import batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
 from .check_file import check_file
@@ -418,6 +423,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         == val["policyConfigurationIngestionType"]
                     ):
                         data = val
+                        mem_configs.remove(val)
 
             # If data was found, continue
             if data:
@@ -562,6 +568,19 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                     print(
                         "Group Policy Configuration created with id: "
                         + post_request["id"]
+                    )
+
+        # If any Group Policy Configuration are left in mem_configs, remove them from Intune as they are not in the repo
+        if mem_configs is not None:
+            for val in mem_configs:
+                print("-" * 90)
+                print(
+                    "Removing Group Policy Configuration from Intune: "
+                    + val["displayName"]
+                )
+                if report is False:
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=204
                     )
 
     return diff_summary
