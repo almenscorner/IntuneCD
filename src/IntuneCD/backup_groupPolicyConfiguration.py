@@ -25,20 +25,23 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Group Policy Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceManagement/groupPolicyConfigurations/", "/assignments", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/groupPolicyConfigurations/", "/assignments", token
+    )
 
     for profile in data["value"]:
-        config_count += 1
-        definition_endpoint = f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
+        results["config_count"] += 1
+        definition_endpoint = (
+            f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
+        )
         # Get definitions
         definitions = makeapirequest(definition_endpoint, token)
 
         if definitions:
-
             profile["definitionValues"] = definitions["value"]
 
             for definition in profile["definitionValues"]:
@@ -63,4 +66,6 @@ def savebackup(path, output, exclude, token):
 
         save_output(output, configpath, fname, profile)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results
