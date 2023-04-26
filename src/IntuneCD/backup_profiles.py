@@ -28,14 +28,16 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Device Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceManagement/deviceConfigurations/", "/assignments", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/deviceConfigurations/", "/assignments", token
+    )
 
     for profile in data["value"]:
-        config_count += 1
+        results["config_count"] += 1
         if "assignments" not in exclude:
             assignments = get_object_assignment(profile["id"], assignment_responses)
             if assignments:
@@ -47,7 +49,9 @@ def savebackup(path, output, exclude, token):
         print("Backing up profile: " + profile["displayName"])
 
         # Get filename without illegal characters
-        fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type']).split('.')[2]}")
+        fname = clean_filename(
+            f"{profile['displayName']}_{str(profile['@odata.type']).split('.')[2]}"
+        )
 
         # If profile is custom macOS or iOS, decode the payload
         if (profile["@odata.type"] == "#microsoft.graph.macOSCustomConfiguration") or (
@@ -58,19 +62,22 @@ def savebackup(path, output, exclude, token):
             if not os.path.exists(configpath + "/" + "mobileconfig/"):
                 os.makedirs(configpath + "/" + "mobileconfig/")
             # Save decoded payload as .mobileconfig
-            config_count += 1
-            f = open(configpath + "/" + "mobileconfig/" + profile["payloadFileName"], "w")
+            results["config_count"] += 1
+            f = open(
+                configpath + "/" + "mobileconfig/" + profile["payloadFileName"], "w"
+            )
             f.write(decoded)
             # Save Device Configuration as JSON or YAML depending on configured
             # value in "-o"
             save_output(output, configpath, fname, profile)
+
+            results["outputs"].append(fname)
 
         # If Device Configuration is custom Win10 and the OMA settings are
         # encrypted, get them in plain text
         elif profile["@odata.type"] == "#microsoft.graph.windows10CustomConfiguration":
             if profile["omaSettings"]:
                 if profile["omaSettings"][0]["isEncrypted"] is True:
-
                     omas = []
                     for setting in profile["omaSettings"]:
                         if setting["isEncrypted"]:
@@ -101,9 +108,13 @@ def savebackup(path, output, exclude, token):
             # value in "-o"
             save_output(output, configpath, fname, profile)
 
+            results["outputs"].append(fname)
+
         # If Device Configuration are not custom, save it as JSON or YAML
         # depending on configured value in "-o"
         else:
             save_output(output, configpath, fname, profile)
 
-    return config_count
+            results["outputs"].append(fname)
+
+    return results
