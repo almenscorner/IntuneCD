@@ -10,7 +10,12 @@ import base64
 import plistlib
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPatch,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .graph_batch import batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
 from .check_file import check_file
@@ -73,6 +78,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                             and repo_data["displayName"] == val["displayName"]
                         ):
                             data["value"] = val
+                            mem_data["value"].remove(val)
 
                 if data["value"]:
                     print("-" * 90)
@@ -338,5 +344,15 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                                 "assign",
                                 token,
                             )
+
+        # If any Profiles are left in mem_data, remove them from Intune as they are not in the repo
+        if mem_data.get("value", None) is not None:
+            for val in mem_data["value"]:
+                print("-" * 90)
+                print("Removing Profile from Intune: " + val["displayName"])
+                if report is False:
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=200
+                    )
 
     return diff_summary
