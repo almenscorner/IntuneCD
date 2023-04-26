@@ -9,7 +9,12 @@ import os
 import base64
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPatch,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .graph_batch import batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
 from .check_file import check_file
@@ -67,6 +72,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                     for val in mem_proactiveRemediation["value"]:
                         if repo_data["displayName"] == val["displayName"]:
                             data["value"] = val
+                            mem_proactiveRemediation["value"].remove(val)
 
                 # If Powershell script exists, continue
                 if data["value"]:
@@ -218,6 +224,20 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         print(
                             "Proactive Remediation created with id: "
                             + post_request["id"]
+                        )
+
+        # If any Proactive Remediations are left in mem_proactiveRemediation, remove them from Intune as they are not in the repo
+        if mem_proactiveRemediation.get("value", None) is not None:
+            for val in mem_proactiveRemediation["value"]:
+                if val.get("publisher", None) != "Microsoft":
+                    print("-" * 90)
+                    print(
+                        "Removing Proactive Remediation from Intune: "
+                        + val["displayName"]
+                    )
+                    if report is False:
+                        makeapirequestDelete(
+                            f"{ENDPOINT}/{val['id']}", token, status_code=200
                         )
 
     return diff_summary
