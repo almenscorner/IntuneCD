@@ -27,6 +27,7 @@ import argparse
 from io import StringIO
 from .get_authparams import getAuth
 from .update_frontend import update_frontend
+from .archive import move_to_archive
 
 REPO_DIR = os.environ.get("REPO_DIR")
 
@@ -155,77 +156,77 @@ def start():
     )
 
     def run_backup(path, output, exclude, token):
-        config_count = 0
+        results = []
 
         if "AppConfigurations" not in exclude:
             from .backup_appConfiguration import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "AppProtection" not in exclude:
             from .backup_AppProtection import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "APNs" not in exclude:
             from .backup_apns import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "VPP" not in exclude:
             from .backup_vppTokens import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "Applications" not in exclude:
             from .backup_applications import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "Compliance" not in exclude:
             from .backup_compliance import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "DeviceManagementSettings" not in exclude:
             from .backup_deviceManagementSettings import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "NotificationTemplate" not in exclude:
             from .backup_notificationTemplate import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "Profiles" not in exclude:
             from .backup_profiles import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "GPOConfigurations" not in exclude:
             from .backup_groupPolicyConfiguration import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "AppleEnrollmentProfile" not in exclude:
             from .backup_appleEnrollmentProfile import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "WindowsEnrollmentProfile" not in exclude:
             from .backup_windowsEnrollmentProfile import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "EnrollmentStatusPage" not in exclude:
             from .backup_enrollmentStatusPage import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "EnrollmentConfigurations" not in exclude:
             from .backup_enrollmentConfigurations import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if args.autopilot == "True":
             from .backup_autopilotDevices import savebackup
@@ -235,66 +236,78 @@ def start():
         if "Filters" not in exclude:
             from .backup_assignmentFilters import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "ManagedGooglePlay" not in exclude:
             from .backup_managedGPlay import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "Intents" not in exclude:
             from .backup_managementIntents import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "CompliancePartner" not in exclude:
             from .backup_compliancePartner import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "ManagementPartner" not in exclude:
             from .backup_managementPartner import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "RemoteAssistancePartner" not in exclude:
             from .backup_remoteAssistancePartner import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         if "ProactiveRemediation" not in exclude:
             from .backup_proactiveRemediation import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "PowershellScripts" not in exclude:
             from .backup_powershellScripts import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "ShellScripts" not in exclude:
             from .backup_shellScripts import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "CustomAttributes" not in exclude:
             from .backup_customAttributeShellScript import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "ConfigurationPolicies" not in exclude:
             from .backup_configurationPolicies import savebackup
 
-            config_count += savebackup(path, output, exclude, token)
+            results.append(savebackup(path, output, exclude, token))
 
         if "ConditionalAccess" not in exclude:
             from .backup_conditionalAccess import savebackup
 
-            config_count += savebackup(path, output, token)
+            results.append(savebackup(path, output, token))
 
         from .assignment_report import get_group_report
 
         get_group_report(path, output)
+
+        config_count = sum([result.get("config_count", 0) for result in results])
+
+        created_files = [
+            output
+            for result in results
+            if result.get("outputs", None)
+            for output in result.get("outputs", None)
+            if output is not None
+        ]
+
+        move_to_archive(path, created_files, output)
 
         return config_count
 
