@@ -86,6 +86,11 @@ class TestUpdateWindowsEnrollmentProfile(unittest.TestCase):
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
+        self.makeapirequestDelete_patch = patch(
+            "src.IntuneCD.update_windowsEnrollmentProfile.makeapirequestDelete"
+        )
+        self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
@@ -96,6 +101,7 @@ class TestUpdateWindowsEnrollmentProfile(unittest.TestCase):
         self.post_assignment_update.stop()
         self.makeapirequestPatch.stop()
         self.makeapirequestPost.stop()
+        self.makeapirequestDelete.stop()
 
     def test_update_with_diffs_and_assignment(self):
         """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
