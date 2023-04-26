@@ -24,7 +24,7 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Enrollment Profiles/Apple/"
     data = makeapirequest(ENDPOINT, token)
 
@@ -34,11 +34,14 @@ def savebackup(path, output, token):
             profile_ids.append(profile["id"])
 
         batch_profile_data = batch_request(
-            profile_ids, "deviceManagement/depOnboardingSettings/", "/enrollmentProfiles", token
+            profile_ids,
+            "deviceManagement/depOnboardingSettings/",
+            "/enrollmentProfiles",
+            token,
         )
 
         for profile in batch_profile_data:
-            config_count += 1
+            results["config_count"] += 1
             for value in profile["value"]:
                 value = remove_keys(value)
 
@@ -50,4 +53,6 @@ def savebackup(path, output, token):
                 # configured value in "-o"
                 save_output(output, configpath, fname, value)
 
-    return config_count
+                results["outputs"].append(fname)
+
+    return results
