@@ -6,7 +6,12 @@ This module backs up all Configuration Policies in Intune.
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .graph_batch import batch_assignment, get_object_assignment, batch_request, get_object_details
+from .graph_batch import (
+    batch_assignment,
+    get_object_assignment,
+    batch_request,
+    get_object_details,
+)
 from .save_output import save_output
 from .remove_keys import remove_keys
 
@@ -25,18 +30,22 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Settings Catalog/"
     policies = makeapirequest(BASE_ENDPOINT + "/configurationPolicies", token)
     policy_ids = []
     for policy in policies["value"]:
         policy_ids.append(policy["id"])
 
-    assignment_responses = batch_assignment(policies, "deviceManagement/configurationPolicies/", "/assignments", token)
-    policy_settings_batch = batch_request(policy_ids, "deviceManagement/configurationPolicies/", "/settings", token)
+    assignment_responses = batch_assignment(
+        policies, "deviceManagement/configurationPolicies/", "/assignments", token
+    )
+    policy_settings_batch = batch_request(
+        policy_ids, "deviceManagement/configurationPolicies/", "/settings", token
+    )
 
     for policy in policies["value"]:
-        config_count += 1
+        results["config_count"] += 1
         name = policy["name"]
         print("Backing up configuration policy: " + name)
 
@@ -58,4 +67,6 @@ def savebackup(path, output, exclude, token):
         # value in "-o"
         save_output(output, configpath, fname, policy)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results
