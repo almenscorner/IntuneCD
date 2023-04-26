@@ -10,7 +10,9 @@ from .save_output import save_output
 from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/applePushNotificationCertificate"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/applePushNotificationCertificate"
+)
 
 
 # Get APNs information and save in specified path
@@ -23,13 +25,13 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
 
     configpath = path + "/" + "Apple Push Notification/"
     data = makeapirequest(ENDPOINT, token)
 
     if data:
-        config_count += 1
+        results["config_count"] += 1
         data = remove_keys(data)
         print("Backing up Apple Push Notification: " + data["appleIdentifier"])
 
@@ -38,4 +40,6 @@ def savebackup(path, output, token):
         # Save APNs as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, data)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results
