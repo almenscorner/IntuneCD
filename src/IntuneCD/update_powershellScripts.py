@@ -9,7 +9,12 @@ import os
 import base64
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPatch,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .graph_batch import batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
 from .check_file import check_file
@@ -66,6 +71,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                     for val in mem_powershellScript["value"]:
                         if repo_data["displayName"] == val["displayName"]:
                             data["value"] = val
+                            mem_powershellScript["value"].remove(val)
 
                 # If Powershell script exists, continue
                 if data["value"]:
@@ -181,5 +187,15 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         print(
                             "Powershell script created with id: " + post_request["id"]
                         )
+
+        # If any Powershell Scripts are left in mem_powershellScript, remove them from Intune as they are not in the repo
+        if mem_powershellScript.get("value", None) is not None:
+            for val in mem_powershellScript["value"]:
+                print("-" * 90)
+                print("Removing Powershell Script from Intune: " + val["displayName"])
+                if report is False:
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=200
+                    )
 
     return diff_summary
