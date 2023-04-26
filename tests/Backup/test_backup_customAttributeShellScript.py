@@ -84,7 +84,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
 
         self.assertTrue(f"{self.directory.path}/Custom Attributes")
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -96,7 +96,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
 
         self.assertTrue(f"{self.directory.path}/Custom Attributes")
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_script_is_created(self):
         """The folder should be created and a .ps1 file should be created."""
@@ -105,7 +105,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
 
         self.assertTrue(f"{self.directory.path}/Custom Attributes/Script Data")
         self.assertTrue(self.script_content_path)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
@@ -113,7 +113,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
         self.batch_request.return_value = []
         self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
 
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":
