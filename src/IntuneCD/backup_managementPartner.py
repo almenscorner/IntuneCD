@@ -23,7 +23,7 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Partner Connections/Management/"
     data = makeapirequest(ENDPOINT, token)
 
@@ -31,7 +31,7 @@ def savebackup(path, output, token):
         if partner["isConfigured"] is False:
             continue
 
-        config_count += 1
+        results["config_count"] += 1
         print("Backing up Management Partner: " + partner["displayName"])
 
         partner = remove_keys(partner)
@@ -42,4 +42,6 @@ def savebackup(path, output, token):
         # value in "-o"
         save_output(output, configpath, fname, partner)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results
