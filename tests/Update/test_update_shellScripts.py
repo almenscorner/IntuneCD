@@ -17,8 +17,14 @@ class TestUpdateShellScripts(unittest.TestCase):
         self.directory.create()
         self.directory.makedir("Scripts/Shell")
         self.directory.makedir("Scripts/Shell/Script Data")
-        self.directory.write("Scripts/Shell/test.json", '{"test": "test"}', encoding="utf-8")
-        self.directory.write("Scripts/Shell/Script Data/test.sh", "You found a secret message, hooray!", encoding="utf-8")
+        self.directory.write(
+            "Scripts/Shell/test.json", '{"test": "test"}', encoding="utf-8"
+        )
+        self.directory.write(
+            "Scripts/Shell/Script Data/test.sh",
+            "You found a secret message, hooray!",
+            encoding="utf-8",
+        )
         self.token = "token"
         self.mem_script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2Us"
         self.repo_script_content = "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE="
@@ -54,32 +60,51 @@ class TestUpdateShellScripts(unittest.TestCase):
             "assignments": [{"target": {"groupId": "test"}}],
         }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.update_shellScripts.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.update_shellScripts.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
 
-        self.object_assignment_patch = patch("src.IntuneCD.update_shellScripts.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.update_shellScripts.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
 
-        self.makeapirequest_patch = patch("src.IntuneCD.update_shellScripts.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.update_shellScripts.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
-        self.update_assignment_patch = patch("src.IntuneCD.update_shellScripts.update_assignment")
+        self.update_assignment_patch = patch(
+            "src.IntuneCD.update_shellScripts.update_assignment"
+        )
         self.update_assignment = self.update_assignment_patch.start()
 
         self.load_file_patch = patch("src.IntuneCD.update_shellScripts.load_file")
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
-        self.post_assignment_update_patch = patch("src.IntuneCD.update_shellScripts.post_assignment_update")
+        self.post_assignment_update_patch = patch(
+            "src.IntuneCD.update_shellScripts.post_assignment_update"
+        )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
-        self.makeapirequestPatch_patch = patch("src.IntuneCD.update_shellScripts.makeapirequestPatch")
+        self.makeapirequestPatch_patch = patch(
+            "src.IntuneCD.update_shellScripts.makeapirequestPatch"
+        )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
-        self.makeapirequestPost_patch = patch("src.IntuneCD.update_shellScripts.makeapirequestPost")
+        self.makeapirequestPost_patch = patch(
+            "src.IntuneCD.update_shellScripts.makeapirequestPost"
+        )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
+
+        self.makeapirequestDelete_patch = patch(
+            "src.IntuneCD.update_shellScripts.makeapirequestDelete"
+        )
+        self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 
     def tearDown(self):
         self.directory.cleanup()
@@ -91,6 +116,7 @@ class TestUpdateShellScripts(unittest.TestCase):
         self.post_assignment_update.stop()
         self.makeapirequestPatch.stop()
         self.makeapirequestPost.stop()
+        self.makeapirequestDelete.stop()
 
     def test_update_with_diffs_and_assignment(self):
         """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
