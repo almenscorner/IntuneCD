@@ -16,21 +16,45 @@ class TestUpdateAppleEnrollmentProfile(unittest.TestCase):
         self.directory = TempDirectory()
         self.directory.create()
         self.directory.makedir("Enrollment Profiles/Apple")
-        self.directory.write("Enrollment Profiles/Apple/test.json", '{"test": "test"}', encoding="utf-8")
-        self.directory.write("Enrollment Profiles/Apple/test.txt", '{"test": "test"}', encoding="utf-8")
+        self.directory.write(
+            "Enrollment Profiles/Apple/test.json", '{"test": "test"}', encoding="utf-8"
+        )
+        self.directory.write(
+            "Enrollment Profiles/Apple/test.txt", '{"test": "test"}', encoding="utf-8"
+        )
         self.token = "token"
-        self.mem_data = {"value": [{"@odata.type": "test", "id": "0", "displayName": "test", "testvalue": "test"}]}
-        self.repo_data = {"@odata.type": "test", "id": "0", "displayName": "test", "testvalue": "test1"}
+        self.mem_data = {
+            "value": [
+                {
+                    "@odata.type": "test",
+                    "id": "0",
+                    "displayName": "test",
+                    "testvalue": "test",
+                }
+            ]
+        }
+        self.repo_data = {
+            "@odata.type": "test",
+            "id": "0",
+            "displayName": "test",
+            "testvalue": "test1",
+        }
 
-        self.makeapirequest_patch = patch("src.IntuneCD.update_appleEnrollmentProfile.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.update_appleEnrollmentProfile.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
-        self.load_file_patch = patch("src.IntuneCD.update_appleEnrollmentProfile.load_file")
+        self.load_file_patch = patch(
+            "src.IntuneCD.update_appleEnrollmentProfile.load_file"
+        )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
-        self.makeapirequestPatch_patch = patch("src.IntuneCD.update_appleEnrollmentProfile.makeapirequestPatch")
+        self.makeapirequestPatch_patch = patch(
+            "src.IntuneCD.update_appleEnrollmentProfile.makeapirequestPatch"
+        )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
     def tearDown(self):
