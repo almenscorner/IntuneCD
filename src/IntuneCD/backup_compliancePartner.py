@@ -10,7 +10,9 @@ from .save_output import save_output
 from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/complianceManagementPartners"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/complianceManagementPartners"
+)
 
 
 # Get all Compliance Partners and save them in specified path
@@ -23,7 +25,7 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Partner Connections/Compliance/"
     data = makeapirequest(ENDPOINT, token)
 
@@ -31,7 +33,7 @@ def savebackup(path, output, token):
         if partner["partnerState"] == "unknown":
             continue
 
-        config_count += 1
+        results["config_count"] += 1
         print("Backing up Compliance Partner: " + partner["displayName"])
 
         partner = remove_keys(partner)
@@ -42,4 +44,6 @@ def savebackup(path, output, token):
         # value in "-o"
         save_output(output, configpath, fname, partner)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results
