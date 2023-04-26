@@ -35,6 +35,7 @@ def remove_keys(data):
         "secretReferenceValueId",
         "isEncrypted",
         "modifiedDateTime",
+        "deployedAppCount",
     }
     for k in keys:
         data.pop(k, None)
