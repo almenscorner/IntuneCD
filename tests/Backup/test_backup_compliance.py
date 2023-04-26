@@ -29,7 +29,12 @@ class TestBackupCompliance(unittest.TestCase):
             "roleScopeTagIds": ["0"],
             "description": "Description value",
             "displayName": "test",
-            "scheduledActionsForRule": [{"ruleName": None, "scheduledActionConfigurations": [{"gracePeriodHours": 0}]}],
+            "scheduledActionsForRule": [
+                {
+                    "ruleName": None,
+                    "scheduledActionConfigurations": [{"gracePeriodHours": 0}],
+                }
+            ],
             "assignments": [{"target": {"groupName": "Group1"}}],
         }
         self.compliance_policy = {
@@ -41,21 +46,32 @@ class TestBackupCompliance(unittest.TestCase):
                     "description": "Description value",
                     "displayName": "test",
                     "scheduledActionsForRule": [
-                        {"ruleName": None, "scheduledActionConfigurations": [{"id": "0", "gracePeriodHours": 0}]}
+                        {
+                            "ruleName": None,
+                            "scheduledActionConfigurations": [
+                                {"id": "0", "gracePeriodHours": 0}
+                            ],
+                        }
                     ],
                 }
             ]
         }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_compliance.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_compliance.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_compliance.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_compliance.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_compliance.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup_compliance.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.compliance_policy
 
@@ -76,9 +92,11 @@ class TestBackupCompliance(unittest.TestCase):
             saved_data = json.loads(data)
 
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
-        self.assertTrue(Path(f"{self.directory.path}/Compliance Policies/Policies").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Compliance Policies/Policies").exists()
+        )
         self.assertEqual(self.expected_data, saved_data)
-        self.assertEqual(1, count)
+        self.assertEqual(1, count["config_count"])
 
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -90,16 +108,18 @@ class TestBackupCompliance(unittest.TestCase):
             saved_data = json.load(f)
 
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
-        self.assertTrue(Path(f"{self.directory.path}/Compliance Policies/Policies").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Compliance Policies/Policies").exists()
+        )
         self.assertEqual(self.expected_data, saved_data)
-        self.assertEqual(1, count)
+        self.assertEqual(1, count["config_count"])
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":
