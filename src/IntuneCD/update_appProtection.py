@@ -8,7 +8,12 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPatch,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .graph_batch import batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
 from .remove_keys import remove_keys
@@ -85,11 +90,13 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                                 and repo_data["displayName"] == val["displayName"]
                             ):
                                 data["value"] = val
+                                mem_data["value"].remove(val)
                         elif (
                             repo_data["@odata.type"] == val["@odata.type"]
                             and repo_data["displayName"] == val["displayName"]
                         ):
                             data["value"] = val
+                            mem_data["value"].remove(val)
 
                 if data["value"]:
                     print("-" * 90)
@@ -167,5 +174,17 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                                 status_code=204,
                             )
                         print("App Protection created with id: " + post_request["id"])
+
+        # If any App Protections are left in mem_data, remove them from Intune as they are not in the repo
+        if mem_data.get("value", None) is not None:
+            for val in mem_data["value"]:
+                print("-" * 90)
+                print("Removing App Protection from Intune: " + val["displayName"])
+                if report is False:
+                    makeapirequestDelete(
+                        f"{ENDPOINT}managedAppPolicies/{val['id']}",
+                        token,
+                        status_code=204,
+                    )
 
     return diff_summary
