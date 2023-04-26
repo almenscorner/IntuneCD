@@ -23,15 +23,22 @@ class TestBackupAppProtection(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.exclude = []
-        self.saved_path = f"{self.directory.path}/App Protection/test_iosManagedAppProtection."
-        self.saved_targetedAppManagementLevels = f"{self.directory.path}/App Protection/test_test."
+        self.saved_path = (
+            f"{self.directory.path}/App Protection/test_iosManagedAppProtection."
+        )
+        self.saved_targetedAppManagementLevels = (
+            f"{self.directory.path}/App Protection/test_test."
+        )
         self.expected_data = {
             "@odata.type": "#microsoft.graph.iosManagedAppProtection",
             "displayName": "test",
             "description": "",
             "roleScopeTagIds": ["0"],
             "exemptedAppProtocols": [
-                {"name": "Default", "value": "skype;app-settings;calshow;itms;itmss;itms-apps;itms-appss;itms-services;"}
+                {
+                    "name": "Default",
+                    "value": "skype;app-settings;calshow;itms;itmss;itms-apps;itms-appss;itms-services;",
+                }
             ],
             "assignments": [{"target": {"groupName": "Group1"}}],
         }
@@ -55,15 +62,21 @@ class TestBackupAppProtection(unittest.TestCase):
             ],
         }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_AppProtection.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_AppProtection.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_AppProtection.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_AppProtection.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_AppProtection.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup_AppProtection.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.app_protection
 
@@ -84,7 +97,7 @@ class TestBackupAppProtection(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/App Protection").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -96,14 +109,18 @@ class TestBackupAppProtection(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/App Protection").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_targetedManagedAppConfiguration(self):
         """The count should be 0 since the targetedManagedAppConfiguration is not supported."""
 
-        self.makeapirequest.return_value = {"value": [{"@odata.type": "#microsoft.graph.targetedManagedAppConfiguration"}]}
+        self.makeapirequest.return_value = {
+            "value": [
+                {"@odata.type": "#microsoft.graph.targetedManagedAppConfiguration"}
+            ]
+        }
         self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
     def test_backup_targetedAppManagementLevels(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -118,14 +135,14 @@ class TestBackupAppProtection(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/App Protection").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":
