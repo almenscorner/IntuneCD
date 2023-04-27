@@ -29,7 +29,9 @@ ASSIGNMENT_ENDPOINT = (
 )
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Shell scripts in Intune if the configuration in Intune differs from the JSON/YAML file.
 
@@ -190,7 +192,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         print("Shell script created with id: " + post_request["id"])
 
         # If any Shell Scripts are left in mem_shellScript, remove them from Intune as they are not in the repo
-        if mem_shellScript.get("value", None) is not None:
+        if mem_shellScript.get("value", None) is not None and remove is True:
             for val in mem_shellScript["value"]:
                 print("-" * 90)
                 print("Removing Shell Script from Intune: " + val["displayName"])

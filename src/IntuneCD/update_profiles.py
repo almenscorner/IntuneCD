@@ -27,7 +27,9 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Device Configurations in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -346,7 +348,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                             )
 
         # If any Profiles are left in mem_data, remove them from Intune as they are not in the repo
-        if mem_data.get("value", None) is not None:
+        if mem_data.get("value", None) is not None and remove is True:
             for val in mem_data["value"]:
                 print("-" * 90)
                 print("Removing Profile from Intune: " + val["displayName"])

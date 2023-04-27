@@ -349,7 +349,9 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
     return diff_summary
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Group Policy configurations in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -571,7 +573,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                     )
 
         # If any Group Policy Configuration are left in mem_configs, remove them from Intune as they are not in the repo
-        if mem_configs is not None:
+        if mem_configs is not None and remove is True:
             for val in mem_configs:
                 print("-" * 90)
                 print(

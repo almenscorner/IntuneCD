@@ -29,7 +29,9 @@ ASSIGNMENT_ENDPOINT = (
 )
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Custom Attribute Shell scripts in Intune if the configuration in Intune differs from the JSON/YAML file.
 
@@ -199,7 +201,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         print("Custom Attribute created with id: " + post_request["id"])
 
         # If any Custom Attribute scripts are left in mem_shellScript, remove them from Intune as they are not in the repo
-        if mem_shellScript.get("value", None) is not None:
+        if mem_shellScript.get("value", None) is not None and remove is True:
             for val in mem_shellScript["value"]:
                 print("-" * 90)
                 print("Removing Custom Attribute from Intune: " + val["displayName"])

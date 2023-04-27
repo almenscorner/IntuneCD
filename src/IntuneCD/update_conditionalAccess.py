@@ -22,7 +22,7 @@ from .remove_keys import remove_keys
 ENDPOINT = "https://graph.microsoft.com/beta/identity/conditionalAccess/policies"
 
 
-def update(path, token, report):
+def update(path, token, report, remove):
     """
     This function updates all Conditional Access Profiles in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -156,7 +156,7 @@ def update(path, token, report):
                             )
 
         # If any Conditional Access policy are left in mem_data, remove them from Intune as they are not in the repo
-        if mem_data.get("value", None) is not None:
+        if mem_data.get("value", None) is not None and remove is True:
             for val in mem_data["value"]:
                 print("-" * 90)
                 print(

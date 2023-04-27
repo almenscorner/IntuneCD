@@ -28,7 +28,9 @@ ENDPOINT = (
 APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Windows Enrollment Status Page Profiles in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -187,7 +189,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         )
 
         # If any ESP are left in mem_data, remove them from Intune as they are not in the repo
-        if mem_data.get("value", None) is not None:
+        if mem_data.get("value", None) is not None and remove is True:
             for val in mem_data["value"]:
                 if val["displayName"] == "All users and all devices":
                     continue

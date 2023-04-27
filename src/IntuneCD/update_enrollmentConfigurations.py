@@ -28,7 +28,9 @@ ENDPOINT = (
 )
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """_summary_
 
     Args:
@@ -243,7 +245,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         )
 
         # If any Enrollment Configurations are left in intune_data, remove them from Intune as they are not in the repo
-        if intune_data.get("value", None) is not None:
+        if intune_data.get("value", None) is not None and remove is True:
             for val in intune_data["value"]:
                 if (
                     val["@odata.type"]

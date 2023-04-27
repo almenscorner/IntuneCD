@@ -25,7 +25,9 @@ from .load_file import load_file
 ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all App Protection Polices in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -176,7 +178,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         print("App Protection created with id: " + post_request["id"])
 
         # If any App Protections are left in mem_data, remove them from Intune as they are not in the repo
-        if mem_data.get("value", None) is not None:
+        if mem_data.get("value", None) is not None and remove is True:
             for val in mem_data["value"]:
                 print("-" * 90)
                 print("Removing App Protection from Intune: " + val["displayName"])

@@ -19,7 +19,9 @@ from .diff_summary import DiffSummary
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Endpoint Security configurations (intents) in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -199,7 +201,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         print("Intent created with id: " + post_request["id"])
 
         # If any Intents are left in intent_responses, remove them from Intune as they are not in the repo
-        if intent_responses.get("value", None) is not None:
+        if intent_responses.get("value", None) is not None and remove is True:
             for val in intent_responses["value"]:
                 print("-" * 90)
                 print("Removing Management Intent from Intune: " + val["displayName"])

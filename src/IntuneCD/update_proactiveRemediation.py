@@ -27,7 +27,9 @@ from .clean_filename import clean_filename
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScripts"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Proactive Remediation in Intune if,
     the configuration in Intune differs from the JSON/YAML file.
@@ -227,7 +229,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         )
 
         # If any Proactive Remediations are left in mem_proactiveRemediation, remove them from Intune as they are not in the repo
-        if mem_proactiveRemediation.get("value", None) is not None:
+        if mem_proactiveRemediation.get("value", None) is not None and remove is True:
             for val in mem_proactiveRemediation["value"]:
                 if val.get("publisher", None) != "Microsoft":
                     print("-" * 90)
