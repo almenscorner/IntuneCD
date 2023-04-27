@@ -67,13 +67,6 @@ def update(
                 # If Device Configuration exists, continue
                 data = {"value": ""}
                 if mem_data["value"]:
-                    # Updating Windows update rings is currently not supported
-                    if (
-                        repo_data["@odata.type"]
-                        == "#microsoft.graph.windowsUpdateForBusinessConfiguration"
-                    ):
-                        continue
-
                     for val in mem_data["value"]:
                         if (
                             repo_data["@odata.type"] == val["@odata.type"]
@@ -253,6 +246,13 @@ def update(
                                 request_data,
                                 status_code=204,
                             )
+
+                    # Updating Windows update rings is currently not supported
+                    elif (
+                        data["value"]["@odata.type"]
+                        == "#microsoft.graph.windowsUpdateForBusinessConfiguration"
+                    ):
+                        continue
 
                     # If Device Configuration is not custom, compare the values
                     else:
