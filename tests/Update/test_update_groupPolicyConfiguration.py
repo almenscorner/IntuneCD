@@ -154,7 +154,9 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.makeapirequestDelete_patch.stop()
 
     def test_update_with_diffs_and_assignment(self):
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 3)
         self.assertEqual(self.post_assignment_update.call_count, 1)
@@ -162,7 +164,11 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
 
     def test_update_with_diffs_and_assignment_report_mode(self):
         self.count = update(
-            self.directory.path, self.token, report=True, assignment=True
+            self.directory.path,
+            self.token,
+            report=True,
+            assignment=True,
+            remove=False,
         )
 
         self.assertEqual(self.count[0].count, 3)
@@ -177,7 +183,11 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
             "value"
         ] = "1"
         self.count = update(
-            self.directory.path, self.token, report=False, assignment=False
+            self.directory.path,
+            self.token,
+            report=False,
+            assignment=False,
+            remove=False,
         )
 
         self.assertEqual(self.count[0].count, 3)
@@ -191,14 +201,22 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         ] = ["test"]
         self.repo_data_base["definitionValues"][0]["enabled"] = True
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.post_assignment_update.call_count, 1)
         self.assertEqual(self.makeapirequestPost.call_count, 0)
 
     def test_update_with_diffs_no_assignment(self):
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
 
         self.assertEqual(self.count[0].count, 3)
         self.assertEqual(self.post_assignment_update.call_count, 0)
@@ -206,7 +224,9 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
 
     def test_update_config_not_found_with_assignment(self):
         self.repo_data_base["displayName"] = "test1"
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.post_assignment_update.call_count, 1)
         self.assertEqual(self.makeapirequestPost.call_count, 3)
@@ -220,7 +240,11 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
             "value"
         ] = "1"
         self.count = update(
-            self.directory.path, self.token, report=False, assignment=False
+            self.directory.path,
+            self.token,
+            report=False,
+            assignment=False,
+            remove=False,
         )
 
         self.assertEqual(self.post_assignment_update.call_count, 1)
@@ -261,6 +285,71 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
 
         self.makeapirequestPost.return_value = {"id": "test"}
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
 
         self.assertEqual(self.makeapirequestPost.call_count, 2)
+
+    def test_remove_config(self):
+        """makeapirequestDelete should be called."""
+
+        self.presentation_value_rm = {
+            "value": [
+                {
+                    "@odata.type": "#microsoft.graph.groupPolicyPresentationValueList",
+                    "values": ["test"],
+                    "id": "test",
+                    "presentation": {
+                        "id": "test",
+                        "label": "test",
+                        "@odata.type": "@odata.type': '#microsoft.graph.groupPolicyPresentationListBox",
+                    },
+                }
+            ]
+        }
+        self.definition_value_rm = {
+            "value": [
+                {
+                    "enabled": True,
+                    "configurationType": "Policy",
+                    "id": "test",
+                    "definition": {
+                        "id": "test",
+                        "displayName": "test",
+                    },
+                    "presentationValues": [],
+                }
+            ]
+        }
+        self.mem_data_base_rm = {
+            "value": [
+                {
+                    "id": "test",
+                    "displayName": "test2",
+                    "description": "test",
+                    "definitionValues": [],
+                    "policyConfigurationIngestionType": "BuiltIn",
+                    "assignments": [{"target": {"groupName": "test"}}],
+                }
+            ]
+        }
+
+        self.makeapirequest.side_effect = (
+            self.mem_data_base_rm,
+            self.definition_value_rm,
+            self.presentation_value_rm,
+            self.definition_value_rm,
+        )
+
+        self.update = update(self.directory.path, self.token, report=False, remove=True)
+
+        self.assertEqual(self.makeapirequestDelete.call_count, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

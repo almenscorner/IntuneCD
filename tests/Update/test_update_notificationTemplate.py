@@ -104,7 +104,7 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
         """The count should be 1 and makeapirequestPatch should be called."""
 
         self.makeapirequest.side_effect = [self.mem_data, self.mem_template_data]
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -116,7 +116,7 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
         self.repo_data["brandingOptions"] = "test1"
         self.makeapirequest.side_effect = [self.mem_data, self.mem_template_data]
 
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 2)
@@ -128,7 +128,7 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
             "messageTemplate"
         ] = "test1"
         self.makeapirequest.side_effect = [self.mem_data, self.mem_template_data]
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -137,10 +137,27 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
         """The count should be 0 and makeapirequestPost should be called."""
 
         self.mem_data["value"][0]["displayName"] = "test1"
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 2)
+
+    def test_remove_config(self):
+        """makeapirequestDelete should be called."""
+
+        self.mem_data["value"].append(
+            {
+                "displayName": "test2",
+                "id": "2",
+                "localizedNotificationMessages": [{"messageTemplate": "test"}],
+            }
+        )
+
+        self.makeapirequest.side_effect = [self.mem_data, self.mem_template_data]
+
+        self.update = update(self.directory.path, self.token, report=False, remove=True)
+
+        self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
 
 if __name__ == "__main__":

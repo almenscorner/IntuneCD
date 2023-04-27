@@ -114,7 +114,9 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
     def test_update_with_diffs_and_assignment(self):
         """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -123,7 +125,9 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
     def test_update_with_diffs_no_assignment(self):
         """The count should be 1 and the makeapirequestPatch should be called."""
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -135,7 +139,9 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
 
         self.mem_data["value"][0]["platformRestriction"]["platformBlocked"] = False
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -146,7 +152,9 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
 
         self.mem_data["value"][0]["platformRestriction"]["platformBlocked"] = False
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -155,7 +163,9 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
     def test_update_priority(self):
         self.repo_data["priority"] = 2
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
@@ -165,7 +175,9 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
 
         self.mem_data["value"][0]["displayName"] = "test1"
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 2)
@@ -177,7 +189,9 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
         self.mem_data["value"][0]["displayName"] = "test1"
         self.repo_data["platformType"] = "iOS"
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
@@ -189,11 +203,24 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
         self.mem_data["value"][0]["displayName"] = "test1"
         self.repo_data["@odata.type"] = "#microsoft.graph.limit"
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
+    def test_remove_config(self):
+        """makeapirequestDelete should be called."""
+
+        self.mem_data["value"].append(
+            {"displayName": "test2", "id": "2", "@odata.type": "#microsoft.graph.limit"}
+        )
+
+        self.update = update(self.directory.path, self.token, report=False, remove=True)
+
+        self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
 
 if __name__ == "__main__":

@@ -105,7 +105,7 @@ class TestUpdateConditionalAccess(unittest.TestCase):
     def test_update_with_diffs(self):
         """The count should be 1 and the makeapirequestPatch should be called."""
 
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -117,7 +117,7 @@ class TestUpdateConditionalAccess(unittest.TestCase):
             "d4ebce55-015a-49b5-a083-c84d1797ae8c"
         ]
 
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -128,7 +128,7 @@ class TestUpdateConditionalAccess(unittest.TestCase):
         self.mem_data["value"][0]["displayName"] = "test1"
         self.makeapirequest.return_value = self.mem_data
 
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
@@ -139,7 +139,7 @@ class TestUpdateConditionalAccess(unittest.TestCase):
         self.mem_data["value"][0].pop("id")
         self.makeapirequest.return_value = self.mem_data
 
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 0)
@@ -153,10 +153,19 @@ class TestUpdateConditionalAccess(unittest.TestCase):
 
         self.makeapirequest.return_value = self.mem_data
 
-        self.count = update(self.directory.path, self.token, report=False)
+        self.count = update(self.directory.path, self.token, report=False, remove=False)
 
         self.assertEqual(self.count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 0)
+
+    def test_remove_config(self):
+        """makeapirequestDelete should be called."""
+
+        self.mem_data["value"].append({"displayName": "test2", "id": "2"})
+
+        self.update = update(self.directory.path, self.token, report=False, remove=True)
+
+        self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
 
 if __name__ == "__main__":

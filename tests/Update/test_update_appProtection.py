@@ -111,7 +111,9 @@ class TestUpdateAppProtection(unittest.TestCase):
     def test_update_with_diffs_and_assignment(self):
         """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -120,7 +122,9 @@ class TestUpdateAppProtection(unittest.TestCase):
     def test_update_with_diffs_no_assignment(self):
         """The count should be 1 and the makeapirequestPatch should be called."""
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -138,7 +142,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -155,7 +161,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -185,7 +193,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -215,7 +225,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -245,7 +257,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -275,7 +289,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -303,7 +319,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -331,7 +349,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -361,7 +381,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -391,7 +413,9 @@ class TestUpdateAppProtection(unittest.TestCase):
             "assignments": [{"target": {"groupName": "test1"}}],
         }
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -406,11 +430,38 @@ class TestUpdateAppProtection(unittest.TestCase):
             ]
         }
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
+    def test_remove_config(self):
+        """makeapirequestDelete should be called."""
+
+        self.makeapirequest.return_value = {
+            "value": [
+                {
+                    "@odata.type": "#test.test.test",
+                    "id": "0",
+                    "displayName": "test",
+                    "testvalue": "test",
+                    "targetedAppManagementLevels": "test",
+                    "assignments": [{"target": {"groupId": "test"}}],
+                },
+                {
+                    "@odata.type": "#test.test.test",
+                    "id": "1",
+                    "displayName": "test2",
+                },
+            ]
+        }
+
+        self.update = update(self.directory.path, self.token, report=False, remove=True)
+
+        self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
 
 if __name__ == "__main__":

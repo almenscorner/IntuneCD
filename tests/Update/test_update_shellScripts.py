@@ -124,7 +124,9 @@ class TestUpdateShellScripts(unittest.TestCase):
         self.repo_data["testvalue"] = "test1"
         self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -136,7 +138,13 @@ class TestUpdateShellScripts(unittest.TestCase):
         self.repo_data["testvalue"] = "test1"
         self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
 
         self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -151,7 +159,9 @@ class TestUpdateShellScripts(unittest.TestCase):
 
         self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -165,7 +175,13 @@ class TestUpdateShellScripts(unittest.TestCase):
 
         self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -177,11 +193,23 @@ class TestUpdateShellScripts(unittest.TestCase):
         self.mem_shellScript_data["value"][0]["displayName"] = "test1"
         self.makeapirequest.return_value = self.mem_shellScript_data
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
+    def test_remove_config(self):
+        """makeapirequestDelete should be called."""
+
+        self.mem_shellScript_data["value"].append({"displayName": "test2", "id": "2"})
+        self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
+
+        self.update = update(self.directory.path, self.token, report=False, remove=True)
+
+        self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
 
 if __name__ == "__main__":

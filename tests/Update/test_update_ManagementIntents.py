@@ -133,7 +133,9 @@ class TestUpdateManagementIntents(unittest.TestCase):
     def test_update_with_diffs_and_assignment(self):
         """The count should be 1 and the post_assignment_update and makeapirequestPost should be called."""
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
@@ -142,7 +144,13 @@ class TestUpdateManagementIntents(unittest.TestCase):
     def test_update_with_diffs_no_assignment(self):
         """The count should be 1 and the makeapirequestPost should be called."""
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPost.call_count, 1)
@@ -153,7 +161,9 @@ class TestUpdateManagementIntents(unittest.TestCase):
         and makeapirequestPost should not be called."""
         self.batch_intent_data["value"][0]["settingsDelta"][0]["value"] = False
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 0)
@@ -164,7 +174,13 @@ class TestUpdateManagementIntents(unittest.TestCase):
 
         self.batch_intent_data["value"][0]["settingsDelta"][0]["value"] = False
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 0)
@@ -176,7 +192,9 @@ class TestUpdateManagementIntents(unittest.TestCase):
         self.mem_data["value"][0]["displayName"] = "test1"
         self.batch_intent_data["value"][0]["templateId"] = "test1_test1"
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, report=False, remove=False
+        )
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
@@ -187,10 +205,27 @@ class TestUpdateManagementIntents(unittest.TestCase):
 
         self.repo_data["templateId"] = "e44c2ca3-2f9a-400a-a113-6cc88efd773d"
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 0)
+
+    def test_remove_config(self):
+        """makeapirequestDelete should be called."""
+
+        self.batch_intent_data["value"].append(
+            {"templateId": "test2_test2", "displayName": "test2", "id": "2"}
+        )
+
+        self.update = update(self.directory.path, self.token, report=False, remove=True)
+
+        self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
 
 if __name__ == "__main__":
