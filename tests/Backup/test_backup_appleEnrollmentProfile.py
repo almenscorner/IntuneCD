@@ -44,8 +44,14 @@ BATCH_INTUNE = [
 
 
 @patch("src.IntuneCD.backup_appleEnrollmentProfile.savebackup")
-@patch("src.IntuneCD.backup_appleEnrollmentProfile.makeapirequest", return_value=TOKEN_RESPONSE)
-@patch("src.IntuneCD.backup_appleEnrollmentProfile.batch_request", return_value=BATCH_INTUNE)
+@patch(
+    "src.IntuneCD.backup_appleEnrollmentProfile.makeapirequest",
+    return_value=TOKEN_RESPONSE,
+)
+@patch(
+    "src.IntuneCD.backup_appleEnrollmentProfile.batch_request",
+    return_value=BATCH_INTUNE,
+)
 class TestBackupAppleEnrollmentProfile(unittest.TestCase):
     """Test class for backup_appleEnrollmentProfile."""
 
@@ -77,9 +83,11 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(Path(f"{self.directory.path}/Enrollment Profiles/Apple").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Enrollment Profiles/Apple").exists()
+        )
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self, mock_data, mock_makeapirequest, mock_batch_request):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -90,17 +98,21 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(Path(f"{self.directory.path}/Enrollment Profiles/Apple").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Enrollment Profiles/Apple").exists()
+        )
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
-    def test_backup_with_no_return_data(self, mock_data, mock_makeapirequest, mock_batch_request):
+    def test_backup_with_no_return_data(
+        self, mock_data, mock_makeapirequest, mock_batch_request
+    ):
         """The count should be 0 if no data is returned."""
 
         mock_makeapirequest.return_value = {"value": []}
         self.count = savebackup(self.directory.path, "json", self.token)
 
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":

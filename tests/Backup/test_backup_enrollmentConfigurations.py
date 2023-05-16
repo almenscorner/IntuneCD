@@ -25,7 +25,10 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
             "displayName": "test",
             "deviceEnrollmentConfigurationType": "singlePlatformRestriction",
             "platformType": "android",
-            "platformRestriction": {"platformBlocked": False, "personalDeviceEnrollmentBlocked": False},
+            "platformRestriction": {
+                "platformBlocked": False,
+                "personalDeviceEnrollmentBlocked": False,
+            },
         }
         self.enrollment_config = {
             "value": [
@@ -35,20 +38,29 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
                     "displayName": "test",
                     "deviceEnrollmentConfigurationType": "singlePlatformRestriction",
                     "platformType": "android",
-                    "platformRestriction": {"platformBlocked": False, "personalDeviceEnrollmentBlocked": False},
+                    "platformRestriction": {
+                        "platformBlocked": False,
+                        "personalDeviceEnrollmentBlocked": False,
+                    },
                 }
             ]
         }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_enrollmentConfigurations.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_enrollmentConfigurations.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_enrollmentConfigurations.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_enrollmentConfigurations.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_enrollmentConfigurations.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup_enrollmentConfigurations.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.enrollment_config
 
@@ -77,10 +89,12 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
     def test_backup_skip_ESP(self):
         """Test that the backup is skipped when config is ESP."""
         output = "json"
-        self.enrollment_config["value"][0]["@odata.type"] = "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+        self.enrollment_config["value"][0][
+            "@odata.type"
+        ] = "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
         count = savebackup(self.directory.path, output, self.exclude, self.token)
 
-        self.assertEqual(0, count)
+        self.assertEqual(0, count["config_count"])
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
@@ -88,7 +102,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         self.makeapirequest.side_effect = [{"value": []}]
         self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
 
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":

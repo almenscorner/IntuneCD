@@ -28,7 +28,7 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "App Configuration/"
     data = makeapirequest(ENDPOINT, token)
 
@@ -38,7 +38,7 @@ def savebackup(path, output, exclude, token):
         )
 
         for profile in data["value"]:
-            config_count += 1
+            results["config_count"] += 1
             if "assignments" not in exclude:
                 assignments = get_object_assignment(profile["id"], assignment_responses)
                 if assignments:
@@ -68,4 +68,6 @@ def savebackup(path, output, exclude, token):
             # in "-o"
             save_output(output, configpath, fname, profile)
 
-    return config_count
+            results["outputs"].append(fname)
+
+    return results

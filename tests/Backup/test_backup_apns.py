@@ -34,7 +34,9 @@ class TestBackupAPNS(unittest.TestCase):
         self.directory = TempDirectory()
         self.directory.create()
         self.token = "token"
-        self.saved_path = f"{self.directory.path}/Apple Push Notification/awesome@example.com."
+        self.saved_path = (
+            f"{self.directory.path}/Apple Push Notification/awesome@example.com."
+        )
         self.expected_data = {
             "appleIdentifier": "awesome@example.com",
             "expirationDateTime": "2023-04-01T13:59:54Z",
@@ -57,7 +59,7 @@ class TestBackupAPNS(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/Apple Push Notification").exists())
         self.assertEqual(self.expected_data, saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self, mock_data, mock_makeapirequest):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -69,14 +71,14 @@ class TestBackupAPNS(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/Apple Push Notification").exists())
         self.assertEqual(self.expected_data, saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_with_no_return_data(self, mock_data, mock_makeapirequest):
         """The count should be 0 if no data is returned."""
 
         mock_data.return_value = None
         self.count = savebackup(self.directory.path, "json", self.token)
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":

@@ -24,7 +24,10 @@ MANAGEMENT_PARTNER = {
 
 
 @patch("src.IntuneCD.backup_managementPartner.savebackup")
-@patch("src.IntuneCD.backup_managementPartner.makeapirequest", return_value=MANAGEMENT_PARTNER)
+@patch(
+    "src.IntuneCD.backup_managementPartner.makeapirequest",
+    return_value=MANAGEMENT_PARTNER,
+)
 class TestBackupManagementPartner(unittest.TestCase):
     """Test class for backup_managementPartner."""
 
@@ -51,9 +54,11 @@ class TestBackupManagementPartner(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(Path(f"{self.directory.path}/Partner Connections/Management").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Partner Connections/Management").exists()
+        )
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self, mock_data, mock_makeapirequest):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -63,16 +68,18 @@ class TestBackupManagementPartner(unittest.TestCase):
         with open(self.saved_path + "json", "r") as f:
             self.saved_data = json.load(f)
 
-        self.assertTrue(Path(f"{self.directory.path}/Partner Connections/Management").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Partner Connections/Management").exists()
+        )
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_with_no_return_data(self, mock_data, mock_makeapirequest):
         """The count should be 0 if no data is returned."""
 
         mock_data.return_value = {"value": [{"isConfigured": False}]}
         self.count = savebackup(self.directory.path, "json", self.token)
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":

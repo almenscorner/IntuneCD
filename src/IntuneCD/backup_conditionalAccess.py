@@ -23,18 +23,20 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Conditional Access/"
     data = makeapirequest(ENDPOINT, token)
 
     if data["value"]:
         for policy in data["value"]:
-            config_count += 1
+            results["config_count"] += 1
             print("Backing up Conditional Access policy: " + policy["displayName"])
 
             policy = makeapirequest(f"{ENDPOINT}/{policy['id']}", token)
             if policy["grantControls"]:
-                policy["grantControls"].pop("authenticationStrength@odata.context", None)
+                policy["grantControls"].pop(
+                    "authenticationStrength@odata.context", None
+                )
             policy = remove_keys(policy)
 
             # Get filename without illegal characters
@@ -43,4 +45,6 @@ def savebackup(path, output, token):
             # value in "-o"
             save_output(output, configpath, fname, policy)
 
-    return config_count
+            results["outputs"].append(fname)
+
+    return results

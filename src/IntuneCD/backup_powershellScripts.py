@@ -28,7 +28,7 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Scripts/Powershell/"
     data = makeapirequest(ENDPOINT, token)
     if data["value"]:
@@ -44,7 +44,7 @@ def savebackup(path, output, exclude, token):
         )
 
         for script_data in script_data_responses:
-            config_count += 1
+            results["config_count"] += 1
             if "assignments" not in exclude:
                 assignments = get_object_assignment(
                     script_data["id"], assignment_responses
@@ -62,6 +62,8 @@ def savebackup(path, output, exclude, token):
             # in "-o"
             save_output(output, configpath, fname, script_data)
 
+            results["outputs"].append(fname)
+
             # Save Powershell script data to the script data folder
             if not os.path.exists(configpath + "Script Data/"):
                 os.makedirs(configpath + "Script Data/")
@@ -69,4 +71,4 @@ def savebackup(path, output, exclude, token):
             f = open(configpath + "Script Data/" + script_data["fileName"], "w")
             f.write(decoded)
 
-    return config_count
+    return results

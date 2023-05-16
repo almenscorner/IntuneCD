@@ -23,12 +23,12 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = f"{path}/Apple VPP Tokens/"
     data = makeapirequest(ENDPOINT, token)
 
     for vpp_token in data["value"]:
-        config_count += 1
+        results["config_count"] += 1
         token_name = vpp_token["displayName"]
         vpp_token = remove_keys(vpp_token)
 
@@ -40,4 +40,6 @@ def savebackup(path, output, token):
         # Save token as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, vpp_token)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results

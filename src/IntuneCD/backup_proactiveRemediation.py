@@ -28,7 +28,7 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = f"{path}/Proactive Remediations/"
     data = makeapirequest(ENDPOINT, token)
     if data["value"]:
@@ -36,14 +36,20 @@ def savebackup(path, output, exclude, token):
         for script in data["value"]:
             pr_ids.append(script["id"])
 
-        assignment_responses = batch_assignment(data, "deviceManagement/deviceHealthScripts/", "/assignments", token)
-        pr_data_responses = batch_request(pr_ids, "deviceManagement/deviceHealthScripts/", "", token)
+        assignment_responses = batch_assignment(
+            data, "deviceManagement/deviceHealthScripts/", "/assignments", token
+        )
+        pr_data_responses = batch_request(
+            pr_ids, "deviceManagement/deviceHealthScripts/", "", token
+        )
 
         for pr_details in pr_data_responses:
             if "Microsoft" not in pr_details["publisher"]:
-                config_count += 1
+                results["config_count"] += 1
                 if "assignments" not in exclude:
-                    assignments = get_object_assignment(pr_details["id"], assignment_responses)
+                    assignments = get_object_assignment(
+                        pr_details["id"], assignment_responses
+                    )
                     if assignments:
                         pr_details["assignments"] = assignments
 
@@ -58,18 +64,24 @@ def savebackup(path, output, exclude, token):
                 # configured value in "-o"
                 save_output(output, configpath, fname, pr_details)
 
+                results["outputs"].append(fname)
+
                 if not os.path.exists(f"{configpath}/Script Data"):
                     os.makedirs(f"{configpath}/Script Data")
 
                 # Save detection script to the Script Data folder
-                config_count += 1
-                decoded = base64.b64decode(pr_details["detectionScriptContent"]).decode("utf-8")
+                results["config_count"] += 1
+                decoded = base64.b64decode(pr_details["detectionScriptContent"]).decode(
+                    "utf-8"
+                )
                 f = open(f"{configpath}/Script Data/{fname}_DetectionScript.ps1", "w")
                 f.write(decoded)
                 # Save remediation script to the Script Data folder
-                config_count += 1
-                decoded = base64.b64decode(pr_details["remediationScriptContent"]).decode("utf-8")
+                results["config_count"] += 1
+                decoded = base64.b64decode(
+                    pr_details["remediationScriptContent"]
+                ).decode("utf-8")
                 f = open(f"{configpath}/Script Data/{fname}_RemediationScript.ps1", "w")
                 f.write(decoded)
 
-    return config_count
+    return results

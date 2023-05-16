@@ -8,7 +8,12 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPatch,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
@@ -20,7 +25,7 @@ ENDPOINT = (
 )
 
 
-def update(path, token, report):
+def update(path, token, report, remove):
     """
     This function updates all Notification Templates in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -34,7 +39,6 @@ def update(path, token, report):
     configpath = path + "/" + "Compliance Policies/Message Templates/"
     # If Notification Template path exists, continue
     if os.path.exists(configpath):
-
         # Get notification templates
         mem_data = makeapirequest(ENDPOINT, token)
 
@@ -50,8 +54,11 @@ def update(path, token, report):
                 data = {"value": ""}
                 if mem_data["value"]:
                     for val in mem_data["value"]:
+                        if val["displayName"] == "EnrollmentNotificationInternalMEO":
+                            continue
                         if repo_data["displayName"] == val["displayName"]:
                             data["value"] = val
+                            mem_data["value"].remove(val)
 
                 # If Notification Template exists, continue
                 if data["value"]:
@@ -169,5 +176,19 @@ def update(path, token, report):
                             "Notification template created with id: "
                             + template_post_request["id"]
                         )
+
+        # If any Notification Template are left in mem_data, remove them from Intune as they are not in the repo
+        if mem_data.get("value", None) is not None and remove is True:
+            for val in mem_data["value"]:
+                if val["displayName"] == "EnrollmentNotificationInternalMEO":
+                    continue
+                print("-" * 90)
+                print(
+                    "Removing Notification template from Intune: " + val["displayName"]
+                )
+                if report is False:
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=200
+                    )
 
     return diff_summary

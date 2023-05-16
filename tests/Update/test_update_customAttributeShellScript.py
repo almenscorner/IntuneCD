@@ -103,6 +103,11 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
+        self.makeapirequestDelete_patch = patch(
+            "src.IntuneCD.update_customAttributeShellScript.makeapirequestDelete"
+        )
+        self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
@@ -113,6 +118,7 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
         self.post_assignment_update.stop()
         self.makeapirequestPatch.stop()
         self.makeapirequestPost.stop()
+        self.makeapirequestDelete.stop()
 
     def test_update_with_diffs_and_assignment(self):
         """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
@@ -120,7 +126,9 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
         self.repo_data["testvalue"] = "test1"
         self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -132,7 +140,9 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
         self.repo_data["testvalue"] = "test1"
         self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 2)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -147,7 +157,9 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
 
         self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -161,7 +173,9 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
 
         self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
 
-        self.count = update(self.directory.path, self.token, assignment=False)
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=False
+        )
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -173,11 +187,24 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
         self.mem_shellScript_data["value"][0]["displayName"] = "test1"
         self.makeapirequest.return_value = self.mem_shellScript_data
 
-        self.count = update(self.directory.path, self.token, assignment=True)
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
+
+    def test_remove_config(self):
+        """makeapirequestDelete should be called."""
+
+        self.mem_shellScript_data["value"].append({"displayName": "test2", "id": "2"})
+
+        self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
+
+        self.update = update(self.directory.path, self.token, report=False, remove=True)
+
+        self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
 
 if __name__ == "__main__":

@@ -88,19 +88,27 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
             ]
         }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_configurationPolicies.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_configurationPolicies.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.batch_request_patch = patch("src.IntuneCD.backup_configurationPolicies.batch_request")
+        self.batch_request_patch = patch(
+            "src.IntuneCD.backup_configurationPolicies.batch_request"
+        )
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.return_value = BATCH_REQUEST
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_configurationPolicies.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_configurationPolicies.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_configurationPolicies.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup_configurationPolicies.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.configuration_policy
 
@@ -122,7 +130,7 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/Settings Catalog").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -134,14 +142,14 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/Settings Catalog").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":

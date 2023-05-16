@@ -23,13 +23,13 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
 
     configpath = path + "/" + "Device Management Settings/"
     data = makeapirequest(ENDPOINT, token)
 
     if data:
-        config_count += 1
+        results["config_count"] += 1
         data = remove_keys(data)
         print("Backing up Device Management Settings")
 
@@ -38,4 +38,6 @@ def savebackup(path, output, token):
         # Save settings as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, data)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results

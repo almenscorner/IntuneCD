@@ -25,16 +25,19 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Enrollment Profiles/Windows/"
     data = makeapirequest(ENDPOINT, token)
 
     assignment_responses = batch_assignment(
-        data, "deviceManagement/windowsAutopilotDeploymentProfiles/", "/assignments", token
+        data,
+        "deviceManagement/windowsAutopilotDeploymentProfiles/",
+        "/assignments",
+        token,
     )
 
     for profile in data["value"]:
-        config_count += 1
+        results["config_count"] += 1
         if "assignments" not in exclude:
             assignments = get_object_assignment(profile["id"], assignment_responses)
             if assignments:
@@ -50,4 +53,6 @@ def savebackup(path, output, exclude, token):
         # configured value in "-o"
         save_output(output, configpath, fname, profile)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results

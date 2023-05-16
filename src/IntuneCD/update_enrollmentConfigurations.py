@@ -9,7 +9,12 @@ import os
 import re
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPatch,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
@@ -23,7 +28,9 @@ ENDPOINT = (
 )
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """_summary_
 
     Args:
@@ -87,12 +94,14 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                                 and repo_data["platformType"] == val["platformType"]
                             ):
                                 data["value"] = val
+                                intune_data["value"].remove(val)
                         else:
                             if (
                                 repo_data["@odata.type"] == val["@odata.type"]
                                 and repo_data["displayName"] == val["displayName"]
                             ):
                                 data["value"] = val
+                                intune_data["value"].remove(val)
 
                 # If Enrollment Configuration exists, continue
                 if data["value"]:
@@ -103,7 +112,6 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                     repo_priority = repo_data["priority"]
                     # Remove keys from data that should not be compared
                     data["value"] = remove_keys(data["value"])
-
                     if repo_priority != mem_priority and mem_priority != 0:
                         mem_priority = makeapirequest(
                             f"{ENDPOINT}/{mem_id}?$select=priority", token
@@ -235,5 +243,23 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                             f"Enrollment Config {config_type} created with id: "
                             + post_request["id"]
                         )
+
+        # If any Enrollment Configurations are left in intune_data, remove them from Intune as they are not in the repo
+        if intune_data.get("value", None) is not None and remove is True:
+            for val in intune_data["value"]:
+                if (
+                    val["@odata.type"]
+                    == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+                ):
+                    continue
+                print("-" * 90)
+                print(
+                    "Removing Enrollment Configuration from Intune: "
+                    + val["displayName"]
+                )
+                if report is False:
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=200
+                    )
 
     return diff_summary

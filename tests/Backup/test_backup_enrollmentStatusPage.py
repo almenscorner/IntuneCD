@@ -26,7 +26,9 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
         self.expected_data = {
             "assignments": [{"target": {"groupName": "Group1"}}],
             "displayName": "test",
-            "selectedMobileAppNames": [{"name": "app1", "type": "#microsoft.graph.mobileApp"}],
+            "selectedMobileAppNames": [
+                {"name": "app1", "type": "#microsoft.graph.mobileApp"}
+            ],
             "@odata.type": "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration",
         }
         self.statuspage_profile = {
@@ -39,17 +41,26 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
                 }
             ]
         }
-        self.app_data = {"displayName": "app1", "@odata.type": "#microsoft.graph.mobileApp"}
+        self.app_data = {
+            "displayName": "app1",
+            "@odata.type": "#microsoft.graph.mobileApp",
+        }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_enrollmentStatusPage.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_enrollmentStatusPage.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_enrollmentStatusPage.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_enrollmentStatusPage.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_enrollmentStatusPage.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup_enrollmentStatusPage.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = self.statuspage_profile, self.app_data
 
@@ -71,7 +82,7 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
 
         self.assertTrue(f"{self.directory.path}/Enrollment Profiles/Windows")
         self.assertEqual(self.expected_data, saved_data)
-        self.assertEqual(1, count)
+        self.assertEqual(1, count["config_count"])
 
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -84,7 +95,7 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
 
         self.assertTrue(f"{self.directory.path}/Enrollment Profiles/Windows/ESP")
         self.assertEqual(self.expected_data, saved_data)
-        self.assertEqual(1, count)
+        self.assertEqual(1, count["config_count"])
 
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
@@ -92,7 +103,7 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
         self.makeapirequest.side_effect = [{"value": []}]
         self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
 
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":

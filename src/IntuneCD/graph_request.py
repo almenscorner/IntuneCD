@@ -118,6 +118,38 @@ def makeapirequestPatch(
         )
 
 
+def makeapirequestDelete(
+    deleteEndpoint, token, q_param=None, jdata=None, status_code=200
+):
+    """
+    This function makes a DELETE request to the Microsoft Graph API.
+
+    :param deleteEndpoint: The endpoint to make the request to.
+    :param token: The token to use for authenticating the request.
+    :param q_param: The query parameters to use for the request.
+    :param jdata: The JSON data to use for the request.
+    :param status_code: The status code to expect from the request.
+    """
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer {0}".format(token["access_token"]),
+    }
+
+    if q_param is not None:
+        response = requests.delete(
+            deleteEndpoint, headers=headers, params=q_param, data=jdata
+        )
+    else:
+        response = requests.delete(deleteEndpoint, headers=headers, data=jdata)
+    if response.status_code == status_code:
+        pass
+    else:
+        raise Exception(
+            "Request failed with ", response.status_code, " - ", response.text
+        )
+
+
 def makeapirequestPost(patchEndpoint, token, q_param=None, jdata=None, status_code=200):
     """
     This function makes a POST request to the Microsoft Graph API.

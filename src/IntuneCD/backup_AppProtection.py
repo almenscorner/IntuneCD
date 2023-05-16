@@ -24,18 +24,21 @@ def savebackup(path, output, exclude, token):
     :param exclude: List of policies to exclude from the backup
     :param token: Token to use for authenticating the request
     """
-    config_count = 0
+
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "App Protection/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceAppManagement/", "/assignments", token, app_protection=True)
+    assignment_responses = batch_assignment(
+        data, "deviceAppManagement/", "/assignments", token, app_protection=True
+    )
 
     # If profile is ManagedAppConfiguration, skip to next
     for profile in data["value"]:
         if profile["@odata.type"] == "#microsoft.graph.targetedManagedAppConfiguration":
             continue
 
-        config_count += 1
+        results["config_count"] += 1
 
         if "assignments" not in exclude:
             assignments = get_object_assignment(profile["id"], assignment_responses)
@@ -47,12 +50,18 @@ def savebackup(path, output, exclude, token):
         print("Backing up App Protection: " + profile["displayName"])
 
         if "targetedAppManagementLevels" in profile:
-            fname = clean_filename(f"{profile['displayName']}_{profile['targetedAppManagementLevels']}")
+            fname = clean_filename(
+                f"{profile['displayName']}_{profile['targetedAppManagementLevels']}"
+            )
         else:
-            fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
+            fname = clean_filename(
+                f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}"
+            )
 
         # Save App Protection as JSON or YAML depending on configured value in
         # "-o"
         save_output(output, configpath, fname, profile)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results

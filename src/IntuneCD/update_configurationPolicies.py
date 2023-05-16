@@ -8,7 +8,12 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPut, makeapirequestPost
+from .graph_request import (
+    makeapirequest,
+    makeapirequestPut,
+    makeapirequestPost,
+    makeapirequestDelete,
+)
 from .graph_batch import batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
 from .check_file import check_file
@@ -19,7 +24,9 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Settings Catalog configurations in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -62,6 +69,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                     for val in mem_data["value"]:
                         if repo_data["name"] == val["name"]:
                             data["value"] = val
+                            mem_data["value"].remove(val)
 
                 if (
                     "templateReference" in repo_data
@@ -138,6 +146,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                     )
                     if report is False:
                         repo_data.pop("settingCount", None)
+                        repo_data.pop("creationSource", None)
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(
                             ENDPOINT,
@@ -163,5 +172,15 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                             "Configuration Policy created with id: "
                             + post_request["id"]
                         )
+
+        # If any Configuration Policies are left in mem_data, remove them from Intune as they are not in the repo
+        if mem_data.get("value", None) is not None and remove is True:
+            for val in mem_data["value"]:
+                print("-" * 90)
+                print("Removing Configuration Policy from Intune: " + val["name"])
+                if report is False:
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=200
+                    )
 
     return diff_summary

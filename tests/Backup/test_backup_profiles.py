@@ -23,11 +23,15 @@ class TestBackupProfiles(unittest.TestCase):
         self.token = "token"
         self.exclude = []
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_profiles.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_profiles.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_profiles.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_profiles.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
@@ -57,9 +61,17 @@ class TestBackupProfiles(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
 
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/test_macOSCustomConfiguration.json").exists())
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig").exists())
-        self.assertEqual(2, self.count)
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_macOSCustomConfiguration.json"
+            ).exists()
+        )
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig"
+            ).exists()
+        )
+        self.assertEqual(2, self.count["config_count"])
 
     def test_backup_ios_custom_profile(self):
         """The folders and files should be created and the count should be 2."""
@@ -78,9 +90,17 @@ class TestBackupProfiles(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
 
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/test_iosCustomConfiguration.json").exists())
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig").exists())
-        self.assertEqual(2, self.count)
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_iosCustomConfiguration.json"
+            ).exists()
+        )
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig"
+            ).exists()
+        )
+        self.assertEqual(2, self.count["config_count"])
 
     def test_backup_windows_custom_profile_encrypted(self):
         """The file should be created and the count should be 1."""
@@ -105,14 +125,21 @@ class TestBackupProfiles(unittest.TestCase):
                 }
             ]
         }
-        self.oma_values = {"@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String", "value": "password"}
+        self.oma_values = {
+            "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+            "value": "password",
+        }
 
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
         self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
 
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json").exists())
-        self.assertEqual(1, self.count)
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json"
+            ).exists()
+        )
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_windows_custom_profile_not_encrypted(self):
         """The file should be created and the count should be 1."""
@@ -137,28 +164,43 @@ class TestBackupProfiles(unittest.TestCase):
                 }
             ]
         }
-        self.oma_values = {"@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String", "value": "password"}
+        self.oma_values = {
+            "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+            "value": "password",
+        }
 
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
         self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
 
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json").exists())
-        self.assertEqual(1, self.count)
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json"
+            ).exists()
+        )
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_non_custom_profile(self):
         """The file should be created and the count should be 1."""
 
         self.makeapirequest.return_value = {
-            "value": [{"@odata.type": "#microsoft.graph.macOSGeneralDeviceConfiguration", "id": "0", "displayName": "test"}]
+            "value": [
+                {
+                    "@odata.type": "#microsoft.graph.macOSGeneralDeviceConfiguration",
+                    "id": "0",
+                    "displayName": "test",
+                }
+            ]
         }
 
         self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
 
         self.assertTrue(
-            Path(f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration.json").exists()
+            Path(
+                f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration.json"
+            ).exists()
         )
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
 
 if __name__ == "__main__":

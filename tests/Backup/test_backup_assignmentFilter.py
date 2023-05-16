@@ -26,7 +26,10 @@ ASSIGNMENT_FILTER = {
 
 
 @patch("src.IntuneCD.backup_assignmentFilters.savebackup")
-@patch("src.IntuneCD.backup_assignmentFilters.makeapirequest", return_value=ASSIGNMENT_FILTER)
+@patch(
+    "src.IntuneCD.backup_assignmentFilters.makeapirequest",
+    return_value=ASSIGNMENT_FILTER,
+)
 class TestBackupAssignmentFilters(unittest.TestCase):
     """Test class for backup_assignmentFilters."""
 
@@ -57,7 +60,7 @@ class TestBackupAssignmentFilters(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/Filters").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self, mock_data, mock_makeapirequest):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -69,14 +72,14 @@ class TestBackupAssignmentFilters(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/Filters").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_with_no_return_data(self, mock_data, mock_makeapirequest):
         """The count should be 0 if no data is returned."""
 
         mock_data.return_value = {"value": []}
         self.count = savebackup(self.directory.path, "json", self.token)
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":

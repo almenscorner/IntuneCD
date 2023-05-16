@@ -9,7 +9,7 @@ import os
 import glob
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPost
+from .graph_request import makeapirequest, makeapirequestPost, makeapirequestDelete
 from .graph_batch import batch_intents, batch_assignment, get_object_assignment
 from .update_assignment import update_assignment, post_assignment_update
 from .load_file import load_file
@@ -19,7 +19,9 @@ from .diff_summary import DiffSummary
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all Endpoint Security configurations (intents) in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -70,6 +72,7 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                         and repo_data["templateId"] == intent["templateId"]
                     ):
                         mem_data = intent
+                        intent_responses["value"].remove(intent)
 
                 if (
                     repo_data.get("templateId")
@@ -196,5 +199,15 @@ def update(path, token, assignment=False, report=False, create_groups=False):
                                 status_code=204,
                             )
                         print("Intent created with id: " + post_request["id"])
+
+        # If any Intents are left in intent_responses, remove them from Intune as they are not in the repo
+        if intent_responses.get("value", None) is not None and remove is True:
+            for val in intent_responses["value"]:
+                print("-" * 90)
+                print("Removing Management Intent from Intune: " + val["displayName"])
+                if report is False:
+                    makeapirequestDelete(
+                        f"{BASE_ENDPOINT}/intents/{val['id']}", token, status_code=200
+                    )
 
     return diff_summary

@@ -124,6 +124,11 @@ def start():
         help="When this parameter is set, groups are created if they do not exist",
         action="store_true",
     )
+    parser.add_argument(
+        "--remove",
+        help="When this parameter is set, configurations in Intune that are not in the backup are removed",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
@@ -152,24 +157,30 @@ def start():
         tenant="PROD",
     )
 
-    def run_update(path, token, assignment, exclude, report, create_groups):
+    def run_update(path, token, assignment, exclude, report, create_groups, remove):
         diff_count = 0
         diff_summary = []
 
         if "AppConfigurations" not in exclude:
             from .update_appConfiguration import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "AppProtection" not in exclude:
             from .update_appProtection import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "Compliance" not in exclude:
             from .update_compliance import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "DeviceManagementSettings" not in exclude and args.interactiveauth is True:
             from .update_deviceManagementSettings import update
@@ -184,17 +195,21 @@ def start():
         if "NotificationTemplate" not in exclude:
             from .update_notificationTemplate import update
 
-            diff_summary.append(update(path, token, report))
+            diff_summary.append(update(path, token, report, remove))
 
         if "Profiles" not in exclude:
             from .update_profiles import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "GPOConfigurations" not in exclude:
             from .update_groupPolicyConfiguration import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "AppleEnrollmentProfile" not in exclude:
             from .update_appleEnrollmentProfile import update
@@ -204,17 +219,23 @@ def start():
         if "WindowsEnrollmentProfile" not in exclude:
             from .update_windowsEnrollmentProfile import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "EnrollmentStatusPage" not in exclude:
             from .update_enrollmentStatusPage import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "EnrollmentConfigurations" not in exclude:
             from .update_enrollmentConfigurations import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "Filters" not in exclude:
             from .update_assignmentFilter import update
@@ -224,37 +245,49 @@ def start():
         if "Intents" not in exclude:
             from .update_managementIntents import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "ProactiveRemediation" not in exclude:
             from .update_proactiveRemediation import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "PowershellScripts" not in exclude:
             from .update_powershellScripts import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "ShellScripts" not in exclude:
             from .update_shellScripts import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "CustomAttribute" not in exclude:
             from .update_customAttributeShellScript import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "ConfigurationPolicies" not in exclude:
             from .update_configurationPolicies import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "ConditionalAccess" not in exclude:
             from .update_conditionalAccess import update
 
-            diff_count += update(path, token, report)
+            diff_count += update(path, token, report, remove)
 
         for sum in diff_summary:
             for config in sum:
@@ -277,7 +310,13 @@ def start():
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
             summary = run_update(
-                args.path, token, args.u, exclude, args.report, args.create_groups
+                args.path,
+                token,
+                args.u,
+                exclude,
+                args.report,
+                args.create_groups,
+                args.remove,
             )
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
@@ -306,7 +345,13 @@ def start():
 
         else:
             run_update(
-                args.path, token, args.u, exclude, args.report, args.create_groups
+                args.path,
+                token,
+                args.u,
+                exclude,
+                args.report,
+                args.create_groups,
+                args.remove,
             )
 
 

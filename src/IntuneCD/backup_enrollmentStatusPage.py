@@ -11,7 +11,9 @@ from .save_output import save_output
 from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+)
 APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
@@ -26,15 +28,20 @@ def savebackup(path, output, exclude, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Enrollment Profiles/Windows/ESP/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token
+    )
 
     for profile in data["value"]:
-        if profile["@odata.type"] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration":
-            config_count += 1
+        if (
+            profile["@odata.type"]
+            == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+        ):
+            results["config_count"] += 1
             if "assignments" not in exclude:
                 assignments = get_object_assignment(profile["id"], assignment_responses)
                 if assignments:
@@ -48,7 +55,10 @@ def savebackup(path, output, exclude, token):
                 app_names = []
                 for app_id in app_ids:
                     app_data = makeapirequest(APP_ENDPOINT + "/" + app_id, token)
-                    app = {"name": app_data["displayName"], "type": app_data["@odata.type"]}
+                    app = {
+                        "name": app_data["displayName"],
+                        "type": app_data["@odata.type"],
+                    }
                     app_names.append(app)
                 if app_names:
                     profile.pop("selectedMobileAppIds", None)
@@ -62,4 +72,6 @@ def savebackup(path, output, exclude, token):
             # configured value in "-o"
             save_output(output, configpath, fname, profile)
 
-    return config_count
+            results["outputs"].append(fname)
+
+    return results

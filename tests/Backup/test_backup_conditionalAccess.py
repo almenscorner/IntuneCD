@@ -47,10 +47,14 @@ class TestBackupConditionalAccess(unittest.TestCase):
                         "clientAppTypes": ["all"],
                         "applications": {
                             "includeApplications": ["All"],
-                            "excludedApplications": ["d4ebce55-015a-49b5-a083-c84d1797ae8c"],
+                            "excludedApplications": [
+                                "d4ebce55-015a-49b5-a083-c84d1797ae8c"
+                            ],
                         },
                     },
-                    "grantControls": {"authenticationStrength@odata.context": "context"},
+                    "grantControls": {
+                        "authenticationStrength@odata.context": "context"
+                    },
                 }
             ]
         }
@@ -66,7 +70,9 @@ class TestBackupConditionalAccess(unittest.TestCase):
             "grantControls": {},
         }
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_conditionalAccess.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup_conditionalAccess.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = [self.policy, self.policy["value"][0]]
 
@@ -85,7 +91,7 @@ class TestBackupConditionalAccess(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/Conditional Access").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self, mock_data):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -97,14 +103,14 @@ class TestBackupConditionalAccess(unittest.TestCase):
 
         self.assertTrue(Path(f"{self.directory.path}/Conditional Access").exists())
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_with_no_return_data(self, mock_data):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.side_effect = [{"value": []}]
         self.count = savebackup(self.directory.path, "json", self.token)
-        self.assertEqual(0, self.count)
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":

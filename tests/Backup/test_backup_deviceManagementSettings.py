@@ -73,7 +73,7 @@ class TestBackupDeviceManagementSettings(unittest.TestCase):
             Path(f"{self.directory.path}/Device Management Settings").exists()
         )
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
     def test_backup_json(self, mock_data, mock_makeapirequest):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -87,7 +87,7 @@ class TestBackupDeviceManagementSettings(unittest.TestCase):
             Path(f"{self.directory.path}/Device Management Settings").exists()
         )
         self.assertEqual(self.expected_data, self.saved_data)
-        self.assertEqual(1, self.count)
+        self.assertEqual(1, self.count["config_count"])
 
 
 if __name__ == "__main__":

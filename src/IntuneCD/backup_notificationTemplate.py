@@ -10,7 +10,9 @@ from .save_output import save_output
 from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
+)
 
 
 # Get all Notification Templates and save them in specified path
@@ -23,13 +25,13 @@ def savebackup(path, output, token):
     :param token: Token to use for authenticating the request
     """
 
-    config_count = 0
+    results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Compliance Policies/Message Templates/"
     q_param = "?$expand=localizedNotificationMessages"
     data = makeapirequest(ENDPOINT, token, q_param)
 
     for template in data["value"]:
-        config_count += 1
+        results["config_count"] += 1
         print("Backing up Notification message template: " + template["displayName"])
         q_param = "?$expand=localizedNotificationMessages"
         template_data = makeapirequest(ENDPOINT + "/" + template["id"], token, q_param)
@@ -45,4 +47,6 @@ def savebackup(path, output, token):
         # value in "-o"
         save_output(output, configpath, fname, template_data)
 
-    return config_count
+        results["outputs"].append(fname)
+
+    return results
