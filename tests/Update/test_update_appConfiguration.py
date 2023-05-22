@@ -16,9 +16,7 @@ class TestUpdateAppConfiguration(unittest.TestCase):
         self.directory = TempDirectory()
         self.directory.create()
         self.directory.makedir("App Configuration")
-        self.directory.write(
-            "App Configuration/test.json", '{"test": "test"}', encoding="utf-8"
-        )
+        self.directory.write("App Configuration/test.json", '{"test": "test"}', encoding="utf-8")
         self.directory.write("App Configuration/test.txt", "txt", encoding="utf-8")
         self.token = "token"
         self.mem_data = {
@@ -29,6 +27,7 @@ class TestUpdateAppConfiguration(unittest.TestCase):
                     "displayName": "test",
                     "testvalue": "test",
                     "assignments": [{"target": {"groupId": "test"}}],
+                    "payloadJson": "eyJ0ZXN0IjogInRlc3QifQ==",
                 }
             ]
         }
@@ -39,52 +38,37 @@ class TestUpdateAppConfiguration(unittest.TestCase):
             "testvalue": "test1",
             "targetedMobileApps": {"appName": "test", "type": "#test.test.test"},
             "assignments": [{"target": {"groupName": "test1"}}],
+            "payloadJson": {"test": "test"},
         }
 
-        self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_appConfiguration.batch_assignment"
-        )
+        self.batch_assignment_patch = patch("src.IntuneCD.update_appConfiguration.batch_assignment")
         self.batch_assignment = self.batch_assignment_patch.start()
 
-        self.object_assignment_patch = patch(
-            "src.IntuneCD.update_appConfiguration.get_object_assignment"
-        )
+        self.object_assignment_patch = patch("src.IntuneCD.update_appConfiguration.get_object_assignment")
         self.object_assignment = self.object_assignment_patch.start()
 
-        self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_appConfiguration.makeapirequest"
-        )
+        self.makeapirequest_patch = patch("src.IntuneCD.update_appConfiguration.makeapirequest")
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
-        self.update_assignment_patch = patch(
-            "src.IntuneCD.update_appConfiguration.update_assignment"
-        )
+        self.update_assignment_patch = patch("src.IntuneCD.update_appConfiguration.update_assignment")
         self.update_assignment = self.update_assignment_patch.start()
 
         self.load_file_patch = patch("src.IntuneCD.update_appConfiguration.load_file")
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
-        self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_appConfiguration.post_assignment_update"
-        )
+        self.post_assignment_update_patch = patch("src.IntuneCD.update_appConfiguration.post_assignment_update")
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
-        self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_appConfiguration.makeapirequestPatch"
-        )
+        self.makeapirequestPatch_patch = patch("src.IntuneCD.update_appConfiguration.makeapirequestPatch")
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
-        self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_appConfiguration.makeapirequestPost"
-        )
+        self.makeapirequestPost_patch = patch("src.IntuneCD.update_appConfiguration.makeapirequestPost")
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
-        self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_appConfiguration.makeapirequestDelete"
-        )
+        self.makeapirequestDelete_patch = patch("src.IntuneCD.update_appConfiguration.makeapirequestDelete")
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 
     def tearDown(self):
@@ -102,9 +86,7 @@ class TestUpdateAppConfiguration(unittest.TestCase):
     def test_update_with_diffs_and_assignment(self):
         """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
 
-        self.count = update(
-            self.directory.path, self.token, assignment=True, remove=False
-        )
+        self.count = update(self.directory.path, self.token, assignment=True, remove=False)
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -113,9 +95,7 @@ class TestUpdateAppConfiguration(unittest.TestCase):
     def test_update_with_diffs_no_assignment(self):
         """The count should be 1 and the makeapirequestPatch should be called."""
 
-        self.count = update(
-            self.directory.path, self.token, assignment=False, remove=False
-        )
+        self.count = update(self.directory.path, self.token, assignment=False, remove=False)
 
         self.assertEqual(self.count[0].count, 1)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
@@ -127,9 +107,7 @@ class TestUpdateAppConfiguration(unittest.TestCase):
 
         self.mem_data["value"][0]["testvalue"] = "test1"
 
-        self.count = update(
-            self.directory.path, self.token, assignment=True, remove=False
-        )
+        self.count = update(self.directory.path, self.token, assignment=True, remove=False)
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -140,9 +118,7 @@ class TestUpdateAppConfiguration(unittest.TestCase):
 
         self.mem_data["value"][0]["testvalue"] = "test1"
 
-        self.count = update(
-            self.directory.path, self.token, assignment=False, remove=False
-        )
+        self.count = update(self.directory.path, self.token, assignment=False, remove=False)
 
         self.assertEqual(self.count[0].count, 0)
         self.assertEqual(self.makeapirequestPatch.call_count, 0)
@@ -165,9 +141,7 @@ class TestUpdateAppConfiguration(unittest.TestCase):
         self.mem_data["value"][0]["displayName"] = "test1"
         self.repo_data["targetedMobileApps"] = {}
 
-        self.count = update(
-            self.directory.path, self.token, assignment=True, remove=False
-        )
+        self.count = update(self.directory.path, self.token, assignment=True, remove=False)
 
         self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestPost.call_count, 0)
