@@ -23,9 +23,7 @@ class TestBackupAppConfig(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.exclude = []
-        self.saved_path = (
-            f"{self.directory.path}/App Configuration/test_iosMobileAppConfiguration."
-        )
+        self.saved_path = f"{self.directory.path}/App Configuration/test_iosMobileAppConfiguration."
         self.expected_data = {
             "@odata.type": "#microsoft.graph.iosMobileAppConfiguration",
             "assignments": [{"target": {"groupName": "Group1"}}],
@@ -41,6 +39,7 @@ class TestBackupAppConfig(unittest.TestCase):
                 "appName": "Microsoft Authenticator",
                 "type": "#microsoft.graph.iosVppApp",
             },
+            "payloadJson": {"test": "test"},
         }
         self.app_config = {
             "@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceAppManagement/mobileAppConfigurations",
@@ -57,6 +56,7 @@ class TestBackupAppConfig(unittest.TestCase):
                             "appConfigKeyValue": "true",
                         }
                     ],
+                    "payloadJson": "eyJ0ZXN0IjogInRlc3QifQ==",
                 }
             ],
         }
@@ -70,21 +70,15 @@ class TestBackupAppConfig(unittest.TestCase):
             "revokeLicenseActionResults": [],
         }
 
-        self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_appConfiguration.batch_assignment"
-        )
+        self.batch_assignment_patch = patch("src.IntuneCD.backup_appConfiguration.batch_assignment")
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_appConfiguration.get_object_assignment"
-        )
+        self.object_assignment_patch = patch("src.IntuneCD.backup_appConfiguration.get_object_assignment")
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_appConfiguration.makeapirequest"
-        )
+        self.makeapirequest_patch = patch("src.IntuneCD.backup_appConfiguration.makeapirequest")
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = self.app_config, self.app_data
 
