@@ -126,6 +126,12 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 else:
                     print("-" * 90)
                     print("App Configuration not found, creating: " + repo_data["displayName"])
+
+                    if repo_data.get("payloadJson"):
+                        repo_data["payloadJson"] = base64.b64encode(
+                            json.dumps(repo_data["payloadJson"]).encode("utf-8")
+                        ).decode("utf-8")
+
                     app_ids = {}
                     # If backup contains targeted apps, search for the app
                     if repo_data["targetedMobileApps"]:
@@ -135,7 +141,7 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                             + str(repo_data["targetedMobileApps"]["type"]).replace("#", "")
                             + "'"
                             + "))",
-                            "$search": repo_data["targetedMobileApps"]["appName"],
+                            "$search": f'"{repo_data["targetedMobileApps"]["appName"]}"',
                         }
                         app_request = makeapirequest(APP_ENDPOINT, token, q_param)
                         if app_request["value"]:
