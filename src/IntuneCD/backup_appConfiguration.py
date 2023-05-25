@@ -4,6 +4,9 @@
 This module backs up all App Configuration Polices in Intune.
 """
 
+import base64
+import json
+
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment
@@ -11,9 +14,7 @@ from .save_output import save_output
 from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
-ENDPOINT = (
-    "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfigurations"
-)
+ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfigurations"
 APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
@@ -33,9 +34,7 @@ def savebackup(path, output, exclude, token):
     data = makeapirequest(ENDPOINT, token)
 
     if data["value"]:
-        assignment_responses = batch_assignment(
-            data, "deviceAppManagement/mobileAppConfigurations/", "/assignments", token
-        )
+        assignment_responses = batch_assignment(data, "deviceAppManagement/mobileAppConfigurations/", "/assignments", token)
 
         for profile in data["value"]:
             results["config_count"] += 1
@@ -58,12 +57,17 @@ def savebackup(path, output, exclude, token):
                 profile.pop("targetedMobileApps")
                 profile["targetedMobileApps"] = app_dict
 
+            if profile.get("payloadJson"):
+                try:
+                    profile["payloadJson"] = base64.b64decode(profile["payloadJson"]).decode("utf-8")
+                    profile["payloadJson"] = json.loads(profile["payloadJson"])
+                except Exception:
+                    print("Unable to decode payloadJson for " + profile["displayName"])
+
             print("Backing up App Configuration: " + profile["displayName"])
 
             # Get filename without illegal characters
-            fname = clean_filename(
-                f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}"
-            )
+            fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
             # Save App Configuration as JSON or YAML depending on configured value
             # in "-o"
             save_output(output, configpath, fname, profile)
