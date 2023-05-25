@@ -6,6 +6,7 @@ This module is used to update all App Configuration Assignments in Intune.
 
 import json
 import os
+import base64
 
 from deepdiff import DeepDiff
 from .graph_request import (
@@ -22,15 +23,11 @@ from .check_file import check_file
 from .load_file import load_file
 
 # Set MS Graph endpoint
-ENDPOINT = (
-    "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfigurations"
-)
+ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfigurations"
 APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
-def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
-):
+def update(path, token, assignment=False, report=False, create_groups=False, remove=False):
     """
     This function updates all App Configuration Polices in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -74,10 +71,7 @@ def update(
                 data = {"value": ""}
                 if mem_data["value"]:
                     for val in mem_data["value"]:
-                        if (
-                            repo_data["@odata.type"] == val["@odata.type"]
-                            and repo_data["displayName"] == val["displayName"]
-                        ):
+                        if repo_data["@odata.type"] == val["@odata.type"] and repo_data["displayName"] == val["displayName"]:
                             data["value"] = val
                             mem_data["value"].remove(val)
 
@@ -88,9 +82,12 @@ def update(
                     data = remove_keys(data)
                     repo_data.pop("targetedMobileApps", None)
 
-                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
-                        "values_changed", {}
-                    )
+                    if repo_data.get("payloadJson"):
+                        repo_data["payloadJson"] = base64.b64encode(
+                            json.dumps(repo_data["payloadJson"]).encode("utf-8")
+                        ).decode("utf-8")
+
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
 
                     # If any changed values are found, push them to Intune
                     if diff and report is False:
@@ -114,9 +111,7 @@ def update(
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(
-                            assign_obj, mem_assign_obj, token, create_groups
-                        )
+                        update = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
                         if update is not None:
                             request_data = {"assignments": update}
                             post_assignment_update(
@@ -130,22 +125,23 @@ def update(
                 # If App Configuration does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print(
-                        "App Configuration not found, creating: "
-                        + repo_data["displayName"]
-                    )
+                    print("App Configuration not found, creating: " + repo_data["displayName"])
+
+                    if repo_data.get("payloadJson"):
+                        repo_data["payloadJson"] = base64.b64encode(
+                            json.dumps(repo_data["payloadJson"]).encode("utf-8")
+                        ).decode("utf-8")
+
                     app_ids = {}
                     # If backup contains targeted apps, search for the app
                     if repo_data["targetedMobileApps"]:
                         q_param = {
                             "$filter": "(isof("
                             + "'"
-                            + str(repo_data["targetedMobileApps"]["type"]).replace(
-                                "#", ""
-                            )
+                            + str(repo_data["targetedMobileApps"]["type"]).replace("#", "")
                             + "'"
                             + "))",
-                            "$search": repo_data["targetedMobileApps"]["appName"],
+                            "$search": f'"{repo_data["targetedMobileApps"]["appName"]}"',
                         }
                         app_request = makeapirequest(APP_ENDPOINT, token, q_param)
                         if app_request["value"]:
@@ -164,9 +160,7 @@ def update(
                             status_code=201,
                         )
                         mem_assign_obj = []
-                        assignment = update_assignment(
-                            assign_obj, mem_assign_obj, token, create_groups
-                        )
+                        assignment = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
                         if assignment is not None:
                             request_data = {"assignments": assignment}
                             post_assignment_update(
@@ -176,13 +170,9 @@ def update(
                                 "/microsoft.graph.managedDeviceMobileAppConfiguration/assign",
                                 token,
                             )
-                        print(
-                            "App Configuration created with id: " + post_request["id"]
-                        )
+                        print("App Configuration created with id: " + post_request["id"])
                     else:
-                        print(
-                            "App configured in App Configuration profile could not be found, skipping creation"
-                        )
+                        print("App configured in App Configuration profile could not be found, skipping creation")
 
         # If any App Configurations are left in mem_data, remove them from Intune as they are not in the repo
         if mem_data.get("value", None) is not None and remove is True:
@@ -190,8 +180,6 @@ def update(
                 print("-" * 90)
                 print("Removing App Configuration from Intune: " + val["displayName"])
                 if report is False:
-                    makeapirequestDelete(
-                        f"{ENDPOINT}/{val['id']}", token, status_code=200
-                    )
+                    makeapirequestDelete(f"{ENDPOINT}/{val['id']}", token, status_code=200)
 
     return diff_summary
