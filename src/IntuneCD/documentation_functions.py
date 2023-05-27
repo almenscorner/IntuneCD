@@ -4,12 +4,14 @@
 This module contains all functions for the documentation.
 """
 
+import binascii
 import yaml
 import json
 import os
 import glob
 import re
 import platform
+import base64
 
 from pytablewriter import MarkdownTableWriter
 
@@ -124,7 +126,32 @@ def remove_characters(string):
     return string
 
 
-def clean_list(data):
+def is_base64(s):
+    try:
+        # Attempt to decode the string
+        if type(s) is str:
+            s = s.encode("utf-8")
+            base64.b64decode(s)
+            return True
+    except binascii.Error:
+        # If decoding fails, it's not base64 encoded
+        return False
+
+
+def decode_base64(data):
+    """
+    This function decodes the data if it is base64 encoded.
+    :param data: The data to be decoded
+    :return: The decoded data
+    """
+
+    try:
+        return base64.b64decode(data).decode("utf-8")
+    except Exception:
+        return data
+
+
+def clean_list(data, decode):
     """
     This function returns a list with strings to be used in a table.
     :param data: The data to be cleaned
@@ -135,6 +162,9 @@ def clean_list(data):
         string = ""
         for i in l:
             if isinstance(i, (str, int, bool)):
+                if decode:
+                    if is_base64(i):
+                        i = decode_base64(i)
                 string += f"<li> {i} </li>"
             elif isinstance(i, dict):
                 string += dict_to_string(i)
@@ -162,13 +192,25 @@ def clean_list(data):
                                 string += list_to_string(v2)
                                 string += "</ul>"
                             elif isinstance(v2, (str, bool, int)):
+                                if decode:
+                                    if is_base64(v2):
+                                        v2 = decode_base64(v2)
                                 string += f"**{k2}:** {v2}</br>"
                             else:
+                                if decode:
+                                    if is_base64(v2):
+                                        v2 = decode_base64(v2)
                                 string += f"**{k2}:** {v2}</br>"
                     else:
+                        if decode:
+                            if is_base64(v):
+                                v = decode_base64(v)
                         string += f"**{k}:** {v}</br>"
                 string += "</ul>"
             else:
+                if decode:
+                    if is_base64(val):
+                        val = decode_base64(val)
                 string += f"**{key}:** {val}<br/>"
 
         string += "<br/>"
@@ -193,8 +235,14 @@ def clean_list(data):
                         string += dict_to_string(v)
                         string += "</ul>"
                     else:
+                        if decode:
+                            if is_base64(v):
+                                v = decode_base64(v)
                         string += f"**{k}:** {v}</br>"
             else:
+                if decode:
+                    if is_base64(val):
+                        val = decode_base64(val)
                 string += f"**{key}:** {val}</br>"
 
         return string
@@ -203,6 +251,9 @@ def clean_list(data):
         string = ""
         for i in l:
             if isinstance(i, (str, int, bool)):
+                if decode:
+                    if is_base64(i):
+                        i = decode_base64(i)
                 string += f"{i}<br/>"
             if isinstance(i, list):
                 string += list_to_string(i)
@@ -212,6 +263,9 @@ def clean_list(data):
         return string
 
     def string(s) -> str:
+        if decode:
+            if is_base64(s):
+                s = decode_base64(s)
         if len(s) > 200:
             string = f"<details><summary>Click to expand...</summary>{item}</details>"
         else:
@@ -236,7 +290,7 @@ def clean_list(data):
     return values
 
 
-def document_configs(configpath, outpath, header, max_length, split, cleanup):
+def document_configs(configpath, outpath, header, max_length, split, cleanup, decode):
     """
     This function documents the configuration.
 
@@ -283,7 +337,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
 
                 # Write configuration Markdown table
                 config_table_list = []
-                for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
+                for key, value in zip(repo_data.keys(), clean_list(repo_data.values(), decode)):
                     if cleanup:
                         if not value and type(value) is not bool:
                             continue
@@ -300,6 +354,10 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                         if value and isinstance(value, str) and len(value) > max_length:
                             value = "Value too long to display"
 
+                    if decode:
+                        if is_base64(value):
+                            value = decode_base64(value)
+
                     config_table_list.append([key, value])
 
                 config_table = write_table(config_table_list)
@@ -315,7 +373,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup):
                     if assignments_table:
                         md.write("### Assignments \n")
                         md.write(str(assignments_table) + "\n")
-                    md.write('### Configuration \n')
+                    md.write("### Configuration \n")
                     md.write(str(config_table) + "\n")
 
 
@@ -390,7 +448,7 @@ def document_management_intents(configpath, outpath, header, split):
 
                 intent_table_list = []
 
-                for key, value in zip(repo_data.keys(), clean_list(repo_data.values())):
+                for key, value in zip(repo_data.keys(), clean_list(repo_data.values(), decode=False)):
                     key = key[0].upper() + key[1:]
                     key = re.findall("[A-Z][^A-Z]*", key)
                     key = " ".join(key)
@@ -421,7 +479,7 @@ def document_management_intents(configpath, outpath, header, split):
                     if assignments_table:
                         md.write("### Assignments \n")
                         md.write(str(assignments_table) + "\n")
-                    md.write('### Configuration \n')
+                    md.write("### Configuration \n")
                     md.write(str(config_table) + "\n")
 
 
