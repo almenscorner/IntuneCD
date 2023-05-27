@@ -36,9 +36,7 @@ REPO_DIR = os.environ.get("REPO_DIR")
 
 
 def start():
-    parser = argparse.ArgumentParser(
-        description="Create markdown document from backup files"
-    )
+    parser = argparse.ArgumentParser(description="Create markdown document from backup files")
     parser.add_argument(
         "-p",
         "--path",
@@ -84,12 +82,16 @@ def start():
         help="If set, will remove all table rows with an empty value",
         action="store_true",
     )
+    parser.add_argument(
+        "-d",
+        "--decode",
+        help="If set, will decode all base64 encoded values",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
-    def run_documentation(
-        configpath, outpath, tenantname, jsondata, maxlength, split, cleanup
-    ):
+    def run_documentation(configpath, outpath, tenantname, jsondata, maxlength, split, cleanup, decode):
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
 
@@ -104,6 +106,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document App Protection
@@ -114,6 +117,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Apple Push Notification
@@ -124,6 +128,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Apple VPP Tokens
@@ -134,6 +139,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document iOS Applications
@@ -144,6 +150,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document macOS Applications
@@ -154,6 +161,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Android Applications
@@ -164,6 +172,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Windows Applications
@@ -174,6 +183,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Web Apps
@@ -184,6 +194,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Office Suite apps
@@ -194,6 +205,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document compliance
@@ -204,6 +216,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Message Templates
@@ -214,6 +227,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Conditional Access
@@ -224,6 +238,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document profiles
@@ -234,6 +249,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Device Management Settings
@@ -244,6 +260,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Group Policy Configurations
@@ -254,6 +271,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Apple Enrollment Profiles
@@ -264,6 +282,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Windows Enrollment Profiles
@@ -274,6 +293,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Enrollment Status Page profiles
@@ -284,6 +304,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Enrollment Configurations
@@ -294,12 +315,11 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document filters
-        document_configs(
-            f"{configpath}/Filters", outpath, "Filters", maxlength, split, cleanup
-        )
+        document_configs(f"{configpath}/Filters", outpath, "Filters", maxlength, split, cleanup, decode)
 
         # Managed Google Play
         document_configs(
@@ -309,12 +329,11 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Intents
-        document_management_intents(
-            f"{configpath}/Management Intents/", outpath, "Management Intents", split
-        )
+        document_management_intents(f"{configpath}/Management Intents/", outpath, "Management Intents", split)
 
         # Document Partner Connections
         document_configs(
@@ -324,6 +343,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Proactive Remediations
@@ -334,6 +354,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Shell Scripts
@@ -344,6 +365,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Custom Attributes
@@ -354,6 +376,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Powershell Scripts
@@ -364,6 +387,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         # Document Settings Catalog
@@ -374,6 +398,7 @@ def start():
             maxlength,
             split,
             cleanup,
+            decode,
         )
 
         if jsondata:
@@ -424,9 +449,7 @@ def start():
                     )
 
         else:
-            document = markdown_toclify(
-                input_file=outpath, back_to_top=True, exclude_h=[3]
-            )
+            document = markdown_toclify(input_file=outpath, back_to_top=True, exclude_h=[3])
             with open(outpath, "w") as doc:
                 l1 = f"# {title} \n\n"
                 l2 = f"{intro} \n\n"
@@ -442,6 +465,7 @@ def start():
         args.maxlength,
         args.split,
         args.cleanup,
+        args.decode,
     )
 
 
