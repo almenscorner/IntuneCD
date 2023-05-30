@@ -87,7 +87,7 @@ class TestDocumentationFunctions(unittest.TestCase):
         """The list should be returned."""
         self.list = [{"teamIdentifier": "test", "bundleId": "test"}]
         self.expected_list = ["**teamIdentifier:** test</br>**bundleId:** test</br>"]
-        self.result = clean_list(self.list)
+        self.result = clean_list(self.list, decode=True)
 
         self.assertEqual(self.result, self.expected_list)
 
@@ -95,7 +95,7 @@ class TestDocumentationFunctions(unittest.TestCase):
         """The list should be returned."""
         self.dict = {"appName": "test", "type": "#microsoft.graph.iosVppApp"}
         self.expected_list = ["appName", "type"]
-        self.result = clean_list(self.dict)
+        self.result = clean_list(self.dict, decode=True)
 
         self.assertEqual(self.result, self.expected_list)
 
@@ -103,7 +103,7 @@ class TestDocumentationFunctions(unittest.TestCase):
         """The list should be returned."""
         self.string = ["test"]
         self.expected_list = ["test"]
-        self.result = clean_list(self.string)
+        self.result = clean_list(self.string, decode=True)
 
         self.assertEqual(self.result, self.expected_list)
 
@@ -111,13 +111,19 @@ class TestDocumentationFunctions(unittest.TestCase):
         """The list should be returned."""
         self.directory.write(
             "config/test_file_name.json",
-            '{"@odata.type":"test","test":"test","name":"test","description":"test","testvals":"1,2","testbool":false,"testlist":["test"],"testlistdict":[{"test":{"test":{"test":["1"]}}}],"testdict2":{"test":{"test":{"test":["1"]}}},"testdictlist":{"test":["a","b","c"]},"assignments":[{"intent":"apply","target":{"@odata.type":"#test","groupName":"test-group","deviceAndAppManagementAssignmentFilterId":"test-filter","deviceAndAppManagementAssignmentFilterType":"test"}}]}',
+            '{"@odata.type":"test","test":"test","name":"test","description":"test","testvals":"1,2","testbool":false,"testlist":["test"],"testlistdict":[{"test":{"test":{"test":["1"],"testb64":"dW5pY29ybg=="}}}],"testdict2":{"test":{"test":{"test":["1"]}}},"testdictlist":{"test":["a","b","c"]},"assignments":[{"intent":"apply","target":{"@odata.type":"#test","groupName":"test-group","deviceAndAppManagementAssignmentFilterId":"test-filter","deviceAndAppManagementAssignmentFilterType":"test"}}]}',
             encoding="utf-8",
         )
-        self.expected_data = "#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter|###Configuration|setting|value||------------|-------------------------------------------------------||Odatatype|test||Test|test||Name|test||Testvals|1,2||Testbool|False||Testlist|test<br/>||Testlistdict|**test:**<ul>**test:**<ul><li>1</li></ul></ul><br/>||Testdict2|**test**<ul>**test:**<ul><li>1</li></ul><br/></ul>||Testdictlist|**test:**<ul><li>a</li><li>b</li><li>c</li></ul>|"
+        self.expected_data = "#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter|###Configuration|setting|value||------------|--------------------------------------------------------------------------------||Odatatype|test||Test|test||Name|test||Testvals|1,2||Testbool|False||Testlist|test<br/>||Testlistdict|**test:**<ul>**test:**<ul><li>1</li></ul>**testb64:**unicorn</br></ul><br/>||Testdict2|**test**<ul>**test:**<ul><li>1</li></ul><br/></ul>||Testdictlist|**test:**<ul><li>a</li><li>b</li><li>c</li></ul>|"
 
         document_configs(
-            f"{self.directory.path}/config", f"{self.directory.path}/test.md", "test", 100, split=False, cleanup=True
+            f"{self.directory.path}/config",
+            f"{self.directory.path}/test.md",
+            "test",
+            100,
+            split=False,
+            cleanup=True,
+            decode=True,
         )
 
         with open(f"{self.directory.path}/test.md", "r") as f:

@@ -22,3 +22,5 @@ __pycache__/
 .pytest_cache/
 .coverage
 .vscode/
+htmlcov/
+coverage.xml
