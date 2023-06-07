@@ -32,9 +32,7 @@ REPO_DIR = os.environ.get("REPO_DIR")
 
 
 def start():
-    parser = argparse.ArgumentParser(
-        description="Update Intune configurations with values from backup"
-    )
+    parser = argparse.ArgumentParser(description="Update Intune configurations with values from backup")
     parser.add_argument(
         "-p",
         "--path",
@@ -109,6 +107,7 @@ def start():
             "EnrollmentConfigurations",
             "DeviceManagementSettings",
             "CustomAttributes",
+            "DeviceCategories",
         ],
         nargs="+",
     )
@@ -164,23 +163,17 @@ def start():
         if "AppConfigurations" not in exclude:
             from .update_appConfiguration import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "AppProtection" not in exclude:
             from .update_appProtection import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "Compliance" not in exclude:
             from .update_compliance import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "DeviceManagementSettings" not in exclude and args.interactiveauth is True:
             from .update_deviceManagementSettings import update
@@ -188,9 +181,12 @@ def start():
             diff_summary.append(update(path, token, report))
         else:
             print("-" * 90)
-            print(
-                "***Device Management Settings is only available with interactive auth***"
-            )
+            print("***Device Management Settings is only available with interactive auth***")
+
+        if "deviceCategories" not in exclude:
+            from .update_deviceCategories import update
+
+            diff_summary.append(update(path, token, report, remove))
 
         if "NotificationTemplate" not in exclude:
             from .update_notificationTemplate import update
@@ -200,16 +196,12 @@ def start():
         if "Profiles" not in exclude:
             from .update_profiles import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "GPOConfigurations" not in exclude:
             from .update_groupPolicyConfiguration import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "AppleEnrollmentProfile" not in exclude:
             from .update_appleEnrollmentProfile import update
@@ -219,23 +211,17 @@ def start():
         if "WindowsEnrollmentProfile" not in exclude:
             from .update_windowsEnrollmentProfile import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "EnrollmentStatusPage" not in exclude:
             from .update_enrollmentStatusPage import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "EnrollmentConfigurations" not in exclude:
             from .update_enrollmentConfigurations import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "Filters" not in exclude:
             from .update_assignmentFilter import update
@@ -245,44 +231,32 @@ def start():
         if "Intents" not in exclude:
             from .update_managementIntents import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "ProactiveRemediation" not in exclude:
             from .update_proactiveRemediation import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "PowershellScripts" not in exclude:
             from .update_powershellScripts import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "ShellScripts" not in exclude:
             from .update_shellScripts import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "CustomAttribute" not in exclude:
             from .update_customAttributeShellScript import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "ConfigurationPolicies" not in exclude:
             from .update_configurationPolicies import update
 
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
+            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
 
         if "ConditionalAccess" not in exclude:
             from .update_conditionalAccess import update
