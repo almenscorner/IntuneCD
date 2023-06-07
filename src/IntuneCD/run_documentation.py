@@ -318,6 +318,17 @@ def start():
             decode,
         )
 
+        # Document Device Categories
+        document_configs(
+            f"{configpath}/Device Categories",
+            outpath,
+            "Device Categories",
+            maxlength,
+            split,
+            cleanup,
+            decode,
+        )
+
         # Document filters
         document_configs(f"{configpath}/Filters", outpath, "Filters", maxlength, split, cleanup, decode)
 
