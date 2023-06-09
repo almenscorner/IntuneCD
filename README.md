@@ -14,11 +14,11 @@
   <img src="https://user-images.githubusercontent.com/78877636/204501041-a7cc2321-8991-4abb-a622-97f72f19051f.png#gh-light-mode-only" width="500" height="300">
 </p>
 
-IntuneCD or, Intune Continuous Delivery as it stands for is a Python package that is used to back up and update configurations in Intune. It was created with running it from a pipeline in mind. Using this approach we get complete history of which configurations have been changed and what setting has been changed.
+IntuneCD, short for Intune Continuous Delivery, is a powerful Python package designed to facilitate the backup and update of configurations in Intune. With a primary focus on seamless integration with pipelines, it enables users to maintain a comprehensive history of configuration changes and track specific setting modifications.
 
-The main function is to back up configurations from Intune to a Git repository from a DEV environment and if any configurations has changed, push them to PROD Intune environment.
+The core functionality of IntuneCD revolves around securely backing up Intune configurations to a Git repository within a DEV environment. It goes beyond simple backup capabilities by automatically detecting any alterations made to configurations and efficiently propagating those changes to the PROD Intune environment.
 
-The package can also be run standalone outside a pipeline, or in one to only backup data.
+By leveraging IntuneCD, users can streamline their configuration management workflow, ensuring smooth and consistent deployment of settings while maintaining an auditable history of changes.
 
 # Exciting news 📣
 The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
