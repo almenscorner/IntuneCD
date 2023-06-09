@@ -113,6 +113,7 @@ def start():
             "EnrollmentConfigurations",
             "DeviceManagementSettings",
             "CustomAttributes",
+            "DeviceCategories",
         ],
         nargs="+",
     )
@@ -190,6 +191,11 @@ def start():
 
         if "DeviceManagementSettings" not in exclude:
             from .backup_deviceManagementSettings import savebackup
+
+            results.append(savebackup(path, output, token))
+
+        if "deviceCategories" not in exclude:
+            from .backup_deviceCategories import savebackup
 
             results.append(savebackup(path, output, token))
 
@@ -358,9 +364,7 @@ def start():
                             )
 
                         if len(body) > 0:
-                            update_frontend(
-                                f"{args.frontend}/api/assignments/summary", body
-                            )
+                            update_frontend(f"{args.frontend}/api/assignments/summary", body)
 
         else:
             run_backup(args.path, args.output, exclude, token)
