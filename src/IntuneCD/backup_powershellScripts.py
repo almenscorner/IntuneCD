@@ -36,19 +36,13 @@ def savebackup(path, output, exclude, token):
         for script in data["value"]:
             script_ids.append(script["id"])
 
-        assignment_responses = batch_assignment(
-            data, "deviceManagement/deviceManagementScripts/", "/assignments", token
-        )
-        script_data_responses = batch_request(
-            script_ids, "deviceManagement/deviceManagementScripts/", "", token
-        )
+        assignment_responses = batch_assignment(data, "deviceManagement/deviceManagementScripts/", "/assignments", token)
+        script_data_responses = batch_request(script_ids, "deviceManagement/deviceManagementScripts/", "", token)
 
         for script_data in script_data_responses:
             results["config_count"] += 1
             if "assignments" not in exclude:
-                assignments = get_object_assignment(
-                    script_data["id"], assignment_responses
-                )
+                assignments = get_object_assignment(script_data["id"], assignment_responses)
                 if assignments:
                     script_data["assignments"] = assignments
 
@@ -65,10 +59,11 @@ def savebackup(path, output, exclude, token):
             results["outputs"].append(fname)
 
             # Save Powershell script data to the script data folder
-            if not os.path.exists(configpath + "Script Data/"):
-                os.makedirs(configpath + "Script Data/")
-            decoded = base64.b64decode(script_data["scriptContent"]).decode("utf-8")
-            f = open(configpath + "Script Data/" + script_data["fileName"], "w")
-            f.write(decoded)
+            if script_data.get("scriptContent"):
+                if not os.path.exists(configpath + "Script Data/"):
+                    os.makedirs(configpath + "Script Data/")
+                decoded = base64.b64decode(script_data["scriptContent"]).decode("utf-8")
+                f = open(configpath + "Script Data/" + script_data["fileName"], "w")
+                f.write(decoded)
 
     return results
