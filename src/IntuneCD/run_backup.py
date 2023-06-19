@@ -194,7 +194,7 @@ def start():
 
             results.append(savebackup(path, output, token))
 
-        if "deviceCategories" not in exclude:
+        if "DeviceCategories" not in exclude:
             from .backup_deviceCategories import savebackup
 
             results.append(savebackup(path, output, token))
