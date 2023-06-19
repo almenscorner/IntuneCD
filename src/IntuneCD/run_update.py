@@ -183,7 +183,7 @@ def start():
             print("-" * 90)
             print("***Device Management Settings is only available with interactive auth***")
 
-        if "deviceCategories" not in exclude:
+        if "DeviceCategories" not in exclude:
             from .update_deviceCategories import update
 
             diff_summary.append(update(path, token, report, remove))
