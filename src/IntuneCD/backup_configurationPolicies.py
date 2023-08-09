@@ -37,12 +37,8 @@ def savebackup(path, output, exclude, token):
     for policy in policies["value"]:
         policy_ids.append(policy["id"])
 
-    assignment_responses = batch_assignment(
-        policies, "deviceManagement/configurationPolicies/", "/assignments", token
-    )
-    policy_settings_batch = batch_request(
-        policy_ids, "deviceManagement/configurationPolicies/", "/settings", token
-    )
+    assignment_responses = batch_assignment(policies, "deviceManagement/configurationPolicies/", "/assignments", token)
+    policy_settings_batch = batch_request(policy_ids, "deviceManagement/configurationPolicies/", "/settings", token)
 
     for policy in policies["value"]:
         results["config_count"] += 1
@@ -62,7 +58,8 @@ def savebackup(path, output, exclude, token):
         policy = remove_keys(policy)
 
         # Get filename without illegal characters
-        fname = clean_filename(name)
+        # fname = clean_filename(name)
+        fname = clean_filename(f"{name}_{str(policy['technologies']).split(',')[-1]}")
         # Save Configuration Policy as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, policy)
