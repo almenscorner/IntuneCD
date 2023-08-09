@@ -24,9 +24,7 @@ from .diff_summary import DiffSummary
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
 
 
-def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
-):
+def update(path, token, assignment=False, report=False, create_groups=False, remove=False):
     """
     This function updates all Settings Catalog configurations in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -44,9 +42,7 @@ def update(
         # Get configurations policies
         mem_data = makeapirequest(ENDPOINT, token)
         # Get current assignments
-        mem_assignments = batch_assignment(
-            mem_data, "deviceManagement/configurationPolicies/", "/assignments", token
-        )
+        mem_assignments = batch_assignment(mem_data, "deviceManagement/configurationPolicies/", "/assignments", token)
 
         for filename in os.listdir(configpath):
             file = check_file(configpath, filename)
@@ -67,14 +63,13 @@ def update(
                 data = {"value": ""}
                 if mem_data["value"]:
                     for val in mem_data["value"]:
-                        if repo_data["name"] == val["name"]:
+                        if repo_data["name"] == val["name"] and repo_data["technologies"] == val["technologies"]:
                             data["value"] = val
                             mem_data["value"].remove(val)
 
                 if (
                     "templateReference" in repo_data
-                    and repo_data["templateReference"].get("templateDisplayName")
-                    == "Endpoint detection and response"
+                    and repo_data["templateReference"].get("templateDisplayName") == "Endpoint detection and response"
                 ):
                     print("-" * 90)
                     print(
@@ -86,19 +81,13 @@ def update(
                 if data["value"]:
                     print("-" * 90)
                     # Get Filter data from Intune
-                    mem_policy_data = makeapirequest(
-                        ENDPOINT + "/" + data["value"]["id"], token
-                    )
+                    mem_policy_data = makeapirequest(ENDPOINT + "/" + data["value"]["id"], token)
                     # Get Filter settings from Intune
-                    mem_policy_settings = makeapirequest(
-                        ENDPOINT + "/" + data["value"]["id"] + "/settings", token
-                    )
+                    mem_policy_settings = makeapirequest(ENDPOINT + "/" + data["value"]["id"] + "/settings", token)
                     # Add settings to the data dictionary
                     mem_policy_data["settings"] = mem_policy_settings["value"]
 
-                    diff = DeepDiff(mem_policy_data, repo_data, ignore_order=True).get(
-                        "values_changed", {}
-                    )
+                    diff = DeepDiff(mem_policy_data, repo_data, ignore_order=True).get("values_changed", {})
 
                     # If any changed values are found, push them to Intune
                     if diff and report is False:
@@ -121,12 +110,8 @@ def update(
                     diff_summary.append(diff_policy)
 
                     if assignment:
-                        mem_assign_obj = get_object_assignment(
-                            data["value"]["id"], mem_assignments
-                        )
-                        update = update_assignment(
-                            assign_obj, mem_assign_obj, token, create_groups
-                        )
+                        mem_assign_obj = get_object_assignment(data["value"]["id"], mem_assignments)
+                        update = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
                         if update is not None:
                             request_data = {"assignments": update}
                             post_assignment_update(
@@ -140,10 +125,7 @@ def update(
                 # If Configuration Policy does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print(
-                        "Configuration Policy not found, creating Policy: "
-                        + repo_data["name"]
-                    )
+                    print("Configuration Policy not found, creating Policy: " + repo_data["name"])
                     if report is False:
                         repo_data.pop("settingCount", None)
                         repo_data.pop("creationSource", None)
@@ -156,9 +138,7 @@ def update(
                             status_code=201,
                         )
                         mem_assign_obj = []
-                        assignment = update_assignment(
-                            assign_obj, mem_assign_obj, token, create_groups
-                        )
+                        assignment = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
                         if assignment is not None:
                             request_data = {"assignments": assignment}
                             post_assignment_update(
@@ -168,10 +148,7 @@ def update(
                                 "assign",
                                 token,
                             )
-                        print(
-                            "Configuration Policy created with id: "
-                            + post_request["id"]
-                        )
+                        print("Configuration Policy created with id: " + post_request["id"])
 
         # If any Configuration Policies are left in mem_data, remove them from Intune as they are not in the repo
         if mem_data.get("value", None) is not None and remove is True:
@@ -179,8 +156,6 @@ def update(
                 print("-" * 90)
                 print("Removing Configuration Policy from Intune: " + val["name"])
                 if report is False:
-                    makeapirequestDelete(
-                        f"{ENDPOINT}/{val['id']}", token, status_code=200
-                    )
+                    makeapirequestDelete(f"{ENDPOINT}/{val['id']}", token, status_code=200)
 
     return diff_summary
