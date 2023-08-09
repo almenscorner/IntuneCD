@@ -44,12 +44,13 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.exclude = []
-        self.saved_path = f"{self.directory.path}/Settings Catalog/test."
+        self.saved_path = f"{self.directory.path}/Settings Catalog/test_test."
         self.expected_data = {
             "@odata.type": "#microsoft.graph.deviceManagementConfigurationPolicy",
             "assignments": [{"target": {"groupName": "Group1"}}],
             "description": "Description value",
             "name": "test",
+            "technologies": "test",
             "roleScopeTagIds": ["Role Scope Tag Ids value"],
             "settings": [
                 {
@@ -77,6 +78,7 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
                     "@odata.type": "#microsoft.graph.deviceManagementConfigurationPolicy",
                     "id": "0",
                     "name": "test",
+                    "technologies": "test",
                     "description": "Description value",
                     "roleScopeTagIds": ["Role Scope Tag Ids value"],
                     "isAssigned": True,
@@ -88,27 +90,19 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
             ]
         }
 
-        self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_configurationPolicies.batch_assignment"
-        )
+        self.batch_assignment_patch = patch("src.IntuneCD.backup_configurationPolicies.batch_assignment")
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.batch_request_patch = patch(
-            "src.IntuneCD.backup_configurationPolicies.batch_request"
-        )
+        self.batch_request_patch = patch("src.IntuneCD.backup_configurationPolicies.batch_request")
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.return_value = BATCH_REQUEST
 
-        self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_configurationPolicies.get_object_assignment"
-        )
+        self.object_assignment_patch = patch("src.IntuneCD.backup_configurationPolicies.get_object_assignment")
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_configurationPolicies.makeapirequest"
-        )
+        self.makeapirequest_patch = patch("src.IntuneCD.backup_configurationPolicies.makeapirequest")
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.configuration_policy
 
