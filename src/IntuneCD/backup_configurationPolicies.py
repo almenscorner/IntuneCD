@@ -38,7 +38,7 @@ def savebackup(path, output, exclude, token):
         policy_ids.append(policy["id"])
 
     assignment_responses = batch_assignment(policies, "deviceManagement/configurationPolicies/", "/assignments", token)
-    policy_settings_batch = batch_request(policy_ids, "deviceManagement/configurationPolicies/", "/settings", token)
+    policy_settings_batch = batch_request(policy_ids, "deviceManagement/configurationPolicies/", "/settings?&top=1000", token)
 
     for policy in policies["value"]:
         results["config_count"] += 1
