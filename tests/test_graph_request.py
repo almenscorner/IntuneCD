@@ -49,9 +49,7 @@ class TestGraphRequestGet(unittest.TestCase):
     def setUp(self):
         self.token = {"access_token": "token"}
 
-    def test_makeapirequest_status_429_no_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_status_429_no_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made once and exception should be raised."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(
@@ -66,9 +64,7 @@ class TestGraphRequestGet(unittest.TestCase):
 
         self.assertEqual(2, mock_get.call_count)
 
-    def test_makeapirequest_status_429_with_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_status_429_with_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made once and exception should be raised."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(
@@ -85,16 +81,12 @@ class TestGraphRequestGet(unittest.TestCase):
 
     def test_makeapirequest_no_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made once and the response should be returned."""
-        self.mock_resp = _mock_response(
-            self, status=200, content='{"value": [{"id": "0"}]}'
-        )
+        self.mock_resp = _mock_response(self, status=200, content='{"value": [{"id": "0"}]}')
         mock_get.return_value = self.mock_resp
         self.result = makeapirequest("https://endpoint", self.token)
         self.assertEqual(self.result, {"value": [{"id": "0"}]})
 
-    def test_makeapirequest_status_502_no_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_status_502_no_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made twice and exception should be raised."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=502, content="request timeout")
@@ -103,9 +95,7 @@ class TestGraphRequestGet(unittest.TestCase):
 
         self.assertEqual(2, mock_get.call_count)
 
-    def test_makeapirequest_status_503_no_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_status_503_no_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made twice and exception should be raised."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=503, content="request timeout")
@@ -114,9 +104,7 @@ class TestGraphRequestGet(unittest.TestCase):
 
         self.assertEqual(2, mock_get.call_count)
 
-    def test_makeapirequest_status_504_no_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_status_504_no_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made twice and exception should be raised."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=504, content="request timeout")
@@ -125,22 +113,14 @@ class TestGraphRequestGet(unittest.TestCase):
 
         self.assertEqual(2, mock_get.call_count)
 
-    def test_makeapirequest_with_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_with_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made once and the response should be returned."""
-        self.mock_resp = _mock_response(
-            self, status=200, content='{"value": [{"id": "0"}]}'
-        )
+        self.mock_resp = _mock_response(self, status=200, content='{"value": [{"id": "0"}]}')
         mock_get.return_value = self.mock_resp
-        self.result = makeapirequest(
-            "https://endpoint", self.token, q_param="$filter=id eq '0'"
-        )
+        self.result = makeapirequest("https://endpoint", self.token, q_param="$filter=id eq '0'")
         self.assertEqual(self.result, {"value": [{"id": "0"}]})
 
-    def test_makeapirequest_status_502_with_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_status_502_with_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made twice and exception should be raised."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=502, content="request timeout")
@@ -149,9 +129,7 @@ class TestGraphRequestGet(unittest.TestCase):
 
         self.assertEqual(2, mock_get.call_count)
 
-    def test_makeapirequest_status_503_with_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_status_503_with_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made twice and exception should be raised."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=503, content="request timeout")
@@ -160,9 +138,7 @@ class TestGraphRequestGet(unittest.TestCase):
 
         self.assertEqual(2, mock_get.call_count)
 
-    def test_makeapirequest_status_504_with_q_param(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_status_504_with_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made twice and exception should be raised."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=504, content="request timeout")
@@ -171,9 +147,7 @@ class TestGraphRequestGet(unittest.TestCase):
 
         self.assertEqual(2, mock_get.call_count)
 
-    def test_makeapirequest_odata_nextlink(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_odata_nextlink(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made and the response should contain next link values."""
         self.NEXT_LINK_VALUE = {"value": [{"id": "1"}]}
         mock_makeapirequest.return_value = self.NEXT_LINK_VALUE
@@ -195,13 +169,9 @@ class TestGraphRequestGet(unittest.TestCase):
 
         self.assertEqual(1, mock_get.call_count)
 
-    def test_makeapirequest_assignmentfilter_not_enabled(
-        self, mock_sleep, mock_get, mock_makeapirequest
-    ):
+    def test_makeapirequest_assignmentfilter_not_enabled(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made and assignment filters should be skipped."""
-        self.mock_resp = _mock_response(
-            self, status=500, content='{"FeatureNotEnabled": []}'
-        )
+        self.mock_resp = _mock_response(self, status=500, content='{"FeatureNotEnabled": []}')
         mock_get.return_value = self.mock_resp
         makeapirequest("https://endpoint/assignmentFilters", self.token)
 
@@ -210,9 +180,7 @@ class TestGraphRequestGet(unittest.TestCase):
     def test_makeapirequest_exception(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made and exception should be raised."""
         with self.assertRaises(Exception):
-            self.mock_resp = _mock_response(
-                self, status=500, content="Internal Server Error"
-            )
+            self.mock_resp = _mock_response(self, status=500, content="Internal Server Error")
             mock_get.return_value = self.mock_resp
             makeapirequest("https://endpoint/", self.token)
 
@@ -229,15 +197,11 @@ class TestGraphRequestPatch(unittest.TestCase):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content="")
         mock_patch.return_value = self.mock_resp
-        result = makeapirequestPatch(
-            "https://endpoint", self.token, q_param=None, jdata='{"id": "0"}'
-        )
+        result = makeapirequestPatch("https://endpoint", self.token, q_param=None, jdata='{"id": "0"}')
 
         self.assertEqual(result, None)
 
-    def test_makeapirequestPatch_with_q_param(
-        self, mock_patch, mock_makeapirequestPatch
-    ):
+    def test_makeapirequestPatch_with_q_param(self, mock_patch, mock_makeapirequestPatch):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content="")
         mock_patch.return_value = self.mock_resp
@@ -250,9 +214,7 @@ class TestGraphRequestPatch(unittest.TestCase):
 
         self.assertEqual(self.result, None)
 
-    def test_makeapirequestPatch_not_matching_status_code(
-        self, mock_patch, mock_makeapirequestPatch
-    ):
+    def test_makeapirequestPatch_not_matching_status_code(self, mock_patch, mock_makeapirequestPatch):
         """The request should be made and the response should be returned."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=204, content="")
@@ -278,47 +240,42 @@ class TestGraphRequestPost(unittest.TestCase):
         self.content = '{"id": "0"}'
         self.expected_result = {"id": "0"}
 
-    def test_makeapirequestPost_status_429_no_q_param(
-        self, mock_sleep, mock_patch, mock_makeapirequestPost
-    ):
+    def test_makeapirequestPost_status_429_no_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
         """The request should be made twice."""
-        self.mock_resp = _mock_response(
-            self, status=429, content="Too Many equests", headers={"Retry-After": "10"}
-        )
+        self.mock_resp = _mock_response(self, status=429, content="Too Many equests", headers={"Retry-After": "10"})
         self.mock_resp2 = _mock_response(self, status=200, content="Success")
         mock_patch.side_effect = self.mock_resp, self.mock_resp2
         makeapirequestPost("https://endpoint", self.token)
 
         self.assertEqual(2, mock_patch.call_count)
 
-    def test_makeapirequestPost_status_429_with_q_param(
-        self, mock_sleep, mock_patch, mock_makeapirequestPost
-    ):
+    def test_makeapirequestPost_status_429_with_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
         """The request should be made twice."""
-        self.mock_resp = _mock_response(
-            self, status=429, content="Too Many Requests", headers={"Retry-After": "10"}
-        )
+        self.mock_resp = _mock_response(self, status=429, content="Too Many Requests", headers={"Retry-After": "10"})
         self.mock_resp2 = _mock_response(self, status=200, content="Success")
         mock_patch.side_effect = self.mock_resp, self.mock_resp2
         makeapirequestPost("https://endpoint", self.token, q_param="$filter=id eq '0'")
 
         self.assertEqual(2, mock_patch.call_count)
 
-    def test_makeapirequestPost_no_q_param(
-        self, mock_sleep, mock_patch, mock_makeapirequestPost
-    ):
+    def test_makeapirequestPost_status_504_no_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
+        """The request should be made twice."""
+        self.mock_resp = _mock_response(self, status=504, content="Error")
+        self.mock_resp2 = _mock_response(self, status=200, content="Success")
+        mock_patch.side_effect = self.mock_resp, self.mock_resp2
+        makeapirequestPost("https://endpoint", self.token)
+
+        self.assertEqual(2, mock_patch.call_count)
+
+    def test_makeapirequestPost_no_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content=self.content)
         mock_patch.return_value = self.mock_resp
-        self.result = makeapirequestPost(
-            "https://endpoint", self.token, q_param=None, jdata=self.jdata
-        )
+        self.result = makeapirequestPost("https://endpoint", self.token, q_param=None, jdata=self.jdata)
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_makeapirequestPost_with_q_param(
-        self, mock_sleep, mock_patch, mock_makeapirequestPost
-    ):
+    def test_makeapirequestPost_with_q_param(self, mock_sleep, mock_patch, mock_makeapirequestPost):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content=self.content)
         mock_patch.return_value = self.mock_resp
@@ -331,9 +288,7 @@ class TestGraphRequestPost(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_makeapirequestPost_not_matching_status_code(
-        self, mock_sleep, mock_patch, mock_makeapirequestPost
-    ):
+    def test_makeapirequestPost_not_matching_status_code(self, mock_sleep, mock_patch, mock_makeapirequestPost):
         """The request should be made and the response should be returned."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=204, content="")
@@ -359,9 +314,7 @@ class TestGraphRequestPut(unittest.TestCase):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content="")
         mock_patch.return_value = self.mock_resp
-        self.result = makeapirequestPut(
-            "https://endpoint", self.token, q_param=None, jdata='{"id": "0"}'
-        )
+        self.result = makeapirequestPut("https://endpoint", self.token, q_param=None, jdata='{"id": "0"}')
 
         self.assertEqual(self.result, None)
 
@@ -378,9 +331,7 @@ class TestGraphRequestPut(unittest.TestCase):
 
         self.assertEqual(self.result, None)
 
-    def test_makeapirequestPut_not_matching_status_code(
-        self, mock_patch, mock_makeapirequestPut
-    ):
+    def test_makeapirequestPut_not_matching_status_code(self, mock_patch, mock_makeapirequestPut):
         """The request should be made and the response should be returned."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=204, content="")
@@ -402,21 +353,15 @@ class TestGraphRequestDelete(unittest.TestCase):
     def setUp(self):
         self.token = {"access_token": "token"}
 
-    def test_makeapirequestDelete_no_q_param(
-        self, mock_patch, mock_makeapirequestDelete
-    ):
+    def test_makeapirequestDelete_no_q_param(self, mock_patch, mock_makeapirequestDelete):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content="")
         mock_patch.return_value = self.mock_resp
-        self.result = makeapirequestDelete(
-            "https://endpoint", self.token, q_param=None, jdata='{"id": "0"}'
-        )
+        self.result = makeapirequestDelete("https://endpoint", self.token, q_param=None, jdata='{"id": "0"}')
 
         self.assertEqual(self.result, None)
 
-    def test_makeapirequestDelete_with_q_param(
-        self, mock_patch, mock_makeapirequestDelete
-    ):
+    def test_makeapirequestDelete_with_q_param(self, mock_patch, mock_makeapirequestDelete):
         """The request should be made and the response should be returned."""
         self.mock_resp = _mock_response(self, status=200, content="")
         mock_patch.return_value = self.mock_resp
@@ -429,9 +374,7 @@ class TestGraphRequestDelete(unittest.TestCase):
 
         self.assertEqual(self.result, None)
 
-    def test_makeapirequestDelete_not_matching_status_code(
-        self, mock_patch, mock_makeapirequestDelete
-    ):
+    def test_makeapirequestDelete_not_matching_status_code(self, mock_patch, mock_makeapirequestDelete):
         """The request should be made and the response should be returned."""
         with self.assertRaises(Exception):
             self.mock_resp = _mock_response(self, status=204, content="")
