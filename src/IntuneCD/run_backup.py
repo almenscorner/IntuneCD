@@ -118,9 +118,8 @@ def start():
         nargs="+",
     )
     parser.add_argument(
-        "-f",
-        "--frontend",
-        help="Set the frontend URL to update with configuration count and backup stream",
+        "--intunecdmonitor",
+        help="When this parameter is set, the script is run in the IntuneCDMonitor context",
         type=str,
     )
     parser.add_argument(
@@ -326,7 +325,7 @@ def start():
         else:
             exclude = []
 
-        if args.frontend:
+        if args.intunecdmonitor:
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
             count = run_backup(args.path, args.output, exclude, token)
@@ -334,37 +333,12 @@ def start():
             feed_bytes = feedstdout.getvalue().encode("utf-8")
             out = base64.b64encode(feed_bytes).decode("utf-8")
 
-            body = {"type": "config_count", "config_count": count}
-            update_frontend(f"{args.frontend}/api/overview/summary", body)
+            summary = {"config_count": count, "feed": out}
 
-            body = {"type": "backup", "feed": out}
-            update_frontend(f"{args.frontend}/api/feed/update", body)
+            with open(f"{args.path}/backup_summary.json", "w") as f:
+                import json
 
-            body = []
-
-            from .load_file import load_file
-            from .check_file import check_file
-
-            config_path = f"{args.path}/Assignment Report"
-            file_name = f"report.{args.output}"
-            if os.path.exists(config_path):
-                file_check = check_file(config_path, file_name)
-                if file_check:
-                    with open(f"{config_path}/{file_name}", "r") as f:
-                        assignment_summary = load_file(file_name, f)
-                    if assignment_summary:
-                        for assignment in assignment_summary:
-                            body.append(
-                                {
-                                    "groupName": assignment["groupName"],
-                                    "groupType": assignment["groupType"],
-                                    "membershipRule": assignment["membershipRule"],
-                                    "assignedTo": assignment["assignedTo"],
-                                }
-                            )
-
-                        if len(body) > 0:
-                            update_frontend(f"{args.frontend}/api/assignments/summary", body)
+                f.write(json.dumps(summary))
 
         else:
             run_backup(args.path, args.output, exclude, token)
