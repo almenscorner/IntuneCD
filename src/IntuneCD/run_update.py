@@ -32,7 +32,9 @@ REPO_DIR = os.environ.get("REPO_DIR")
 
 
 def start():
-    parser = argparse.ArgumentParser(description="Update Intune configurations with values from backup")
+    parser = argparse.ArgumentParser(
+        description="Update Intune configurations with values from backup"
+    )
     parser.add_argument(
         "-p",
         "--path",
@@ -76,12 +78,6 @@ def start():
         "-u",
         help="When this parameter is set, assignments are updated for all configurations",
         action="store_true",
-    )
-    parser.add_argument(
-        "-f",
-        "--frontend",
-        help="Set the frontend URL to update with configuration count and backup stream",
-        type=str,
     )
     parser.add_argument(
         "-e",
@@ -128,6 +124,11 @@ def start():
         help="When this parameter is set, configurations in Intune that are not in the backup are removed",
         action="store_true",
     )
+    parser.add_argument(
+        "--intunecdmonitor",
+        help="When this parameter is set, the script is run in the IntuneCDMonitor context",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
@@ -163,17 +164,23 @@ def start():
         if "AppConfigurations" not in exclude:
             from .update_appConfiguration import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "AppProtection" not in exclude:
             from .update_appProtection import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "Compliance" not in exclude:
             from .update_compliance import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "DeviceManagementSettings" not in exclude and args.interactiveauth is True:
             from .update_deviceManagementSettings import update
@@ -181,7 +188,9 @@ def start():
             diff_summary.append(update(path, token, report))
         else:
             print("-" * 90)
-            print("***Device Management Settings is only available with interactive auth***")
+            print(
+                "***Device Management Settings is only available with interactive auth***"
+            )
 
         if "DeviceCategories" not in exclude:
             from .update_deviceCategories import update
@@ -196,12 +205,16 @@ def start():
         if "Profiles" not in exclude:
             from .update_profiles import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "GPOConfigurations" not in exclude:
             from .update_groupPolicyConfiguration import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "AppleEnrollmentProfile" not in exclude:
             from .update_appleEnrollmentProfile import update
@@ -211,17 +224,23 @@ def start():
         if "WindowsEnrollmentProfile" not in exclude:
             from .update_windowsEnrollmentProfile import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "EnrollmentStatusPage" not in exclude:
             from .update_enrollmentStatusPage import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "EnrollmentConfigurations" not in exclude:
             from .update_enrollmentConfigurations import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "Filters" not in exclude:
             from .update_assignmentFilter import update
@@ -231,32 +250,44 @@ def start():
         if "Intents" not in exclude:
             from .update_managementIntents import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "ProactiveRemediation" not in exclude:
             from .update_proactiveRemediation import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "PowershellScripts" not in exclude:
             from .update_powershellScripts import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "ShellScripts" not in exclude:
             from .update_shellScripts import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "CustomAttribute" not in exclude:
             from .update_customAttributeShellScript import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "ConfigurationPolicies" not in exclude:
             from .update_configurationPolicies import update
 
-            diff_summary.append(update(path, token, assignment, report, create_groups, remove))
+            diff_summary.append(
+                update(path, token, assignment, report, create_groups, remove)
+            )
 
         if "ConditionalAccess" not in exclude:
             from .update_conditionalAccess import update
@@ -280,7 +311,8 @@ def start():
         if args.report:
             print("***Running in report mode, no updates will be pushed to Intune***")
 
-        if args.frontend:
+        if args.intunecdmonitor:
+            # We are running in the IntuneCDMonitor context, instead of using API calls to the frontend, we will output to file
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
             summary = run_update(
@@ -296,17 +328,12 @@ def start():
             feed_bytes = feedstdout.getvalue().encode("utf-8")
             out = base64.b64encode(feed_bytes).decode("utf-8")
 
-            body = {"type": "diff_count", "diff_count": summary[0]}
-            update_frontend(f"{args.frontend}/api/overview/summary", body)
-
-            body = {"type": "update", "feed": out}
-            update_frontend(f"{args.frontend}/api/feed/update", body)
-
-            body = []
+            # Write the summary to a file
+            changes = []
             for sum in summary[1]:
                 for config in sum:
                     if config.diffs:
-                        body.append(
+                        changes.append(
                             {
                                 "name": config.name,
                                 "type": config.type,
@@ -314,8 +341,17 @@ def start():
                             }
                         )
 
-            if len(body) > 0:
-                update_frontend(f"{args.frontend}/api/changes/summary", body)
+            summary = {
+                "type": "diff_count",
+                "diff_count": summary[0],
+                "changes": changes,
+                "feed": out,
+            }
+
+            with open(f"{args.path}/update_summary.json", "w") as f:
+                import json
+
+                f.write(json.dumps(summary))
 
         else:
             run_update(
