@@ -26,7 +26,6 @@ import argparse
 
 from io import StringIO
 from .get_authparams import getAuth
-from .update_frontend import update_frontend
 from .archive import move_to_archive
 
 REPO_DIR = os.environ.get("REPO_DIR")
@@ -120,12 +119,18 @@ def start():
     parser.add_argument(
         "--intunecdmonitor",
         help="When this parameter is set, the script is run in the IntuneCDMonitor context",
-        type=str,
+        action="store_true",
     )
     parser.add_argument(
         "-ap",
         "--autopilot",
         help="If set to True, a record of autopilot devices will be saved",
+    )
+    parser.add_argument(
+        "-f",
+        "--frontend",
+        help="***This parameter is deprecated and will be removed in a future release***",
+        type=str,
     )
 
     args = parser.parse_args()
@@ -317,6 +322,10 @@ def start():
         return config_count
 
     if args.output == "json" or args.output == "yaml":
+        if args.frontend:
+            print("***The --frontend parameter is deprecated and will be removed in a future release***")
+            print("***Please use --intunecdmonitor instead***")
+
         if token is None:
             raise Exception("Token is empty, please check os.environ variables")
 
