@@ -23,6 +23,7 @@ import os
 import sys
 import base64
 import argparse
+import json
 
 from io import StringIO
 from .get_authparams import getAuth
@@ -113,6 +114,9 @@ def start():
             "DeviceManagementSettings",
             "CustomAttributes",
             "DeviceCategories",
+            "windowsDriverUpdates",
+            "windowsFeatuteUpdates",
+            "windowsQualityUpdates",
         ],
         nargs="+",
     )
@@ -130,6 +134,11 @@ def start():
         "-f",
         "--frontend",
         help="***This parameter is deprecated and will be removed in a future release***",
+        type=str,
+    )
+    parser.add_argument(
+        "--prefix",
+        help="When set, only backs up configurations whose name starts with the configured prefix",
         type=str,
     )
 
@@ -160,18 +169,18 @@ def start():
         tenant="DEV",
     )
 
-    def run_backup(path, output, exclude, token):
+    def run_backup(path, output, exclude, token, prefix):
         results = []
 
         if "AppConfigurations" not in exclude:
             from .backup_appConfiguration import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "AppProtection" not in exclude:
             from .backup_AppProtection import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "APNs" not in exclude:
             from .backup_apns import savebackup
@@ -191,7 +200,7 @@ def start():
         if "Compliance" not in exclude:
             from .backup_compliance import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "DeviceManagementSettings" not in exclude:
             from .backup_deviceManagementSettings import savebackup
@@ -201,42 +210,42 @@ def start():
         if "DeviceCategories" not in exclude:
             from .backup_deviceCategories import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, prefix))
 
         if "NotificationTemplate" not in exclude:
             from .backup_notificationTemplate import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, prefix))
 
         if "Profiles" not in exclude:
             from .backup_profiles import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "GPOConfigurations" not in exclude:
             from .backup_groupPolicyConfiguration import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "AppleEnrollmentProfile" not in exclude:
             from .backup_appleEnrollmentProfile import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, prefix))
 
         if "WindowsEnrollmentProfile" not in exclude:
             from .backup_windowsEnrollmentProfile import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "EnrollmentStatusPage" not in exclude:
             from .backup_enrollmentStatusPage import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "EnrollmentConfigurations" not in exclude:
             from .backup_enrollmentConfigurations import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if args.autopilot == "True":
             from .backup_autopilotDevices import savebackup
@@ -246,7 +255,7 @@ def start():
         if "Filters" not in exclude:
             from .backup_assignmentFilters import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, prefix))
 
         if "ManagedGooglePlay" not in exclude:
             from .backup_managedGPlay import savebackup
@@ -256,7 +265,7 @@ def start():
         if "Intents" not in exclude:
             from .backup_managementIntents import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "CompliancePartner" not in exclude:
             from .backup_compliancePartner import savebackup
@@ -276,32 +285,47 @@ def start():
         if "ProactiveRemediation" not in exclude:
             from .backup_proactiveRemediation import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "PowershellScripts" not in exclude:
             from .backup_powershellScripts import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "ShellScripts" not in exclude:
             from .backup_shellScripts import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "CustomAttributes" not in exclude:
             from .backup_customAttributeShellScript import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "ConfigurationPolicies" not in exclude:
             from .backup_configurationPolicies import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         if "ConditionalAccess" not in exclude:
             from .backup_conditionalAccess import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, prefix))
+
+        if "WindowsDriverUpdates" not in exclude:
+            from .backup_windowsDriverUpdates import savebackup
+
+            results.append(savebackup(path, output, exclude, token, prefix))
+
+        if "WindowsFeatureUpdates" not in exclude:
+            from .backup_windowsFeatureUpdates import savebackup
+
+            results.append(savebackup(path, output, exclude, token, prefix))
+
+        if "WindowsQualityUpdates" not in exclude:
+            from .backup_windowsQualityUpdates import savebackup
+
+            results.append(savebackup(path, output, exclude, token, prefix))
 
         from .assignment_report import get_group_report
 
@@ -323,8 +347,12 @@ def start():
 
     if args.output == "json" or args.output == "yaml":
         if args.frontend:
-            print("***The --frontend parameter is deprecated and will be removed in a future release***")
-            print("***Please use --intunecdmonitor instead***")
+            print(
+                "***This parameter is deprecated and will be removed in a future release***"
+            )
+            print(
+                "***Please migrate to --intunecdmonitor instead, see https;//github.com/almenscorner/intunecd/wiki***"
+            )
 
         if token is None:
             raise Exception("Token is empty, please check os.environ variables")
@@ -345,12 +373,10 @@ def start():
             summary = {"config_count": count, "feed": out}
 
             with open(f"{args.path}/backup_summary.json", "w") as f:
-                import json
-
                 f.write(json.dumps(summary))
 
         else:
-            run_backup(args.path, args.output, exclude, token)
+            run_backup(args.path, args.output, exclude, token, args.prefix)
 
     else:
         print("Please enter a valid output format, json or yaml")
