@@ -9,13 +9,14 @@ from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/managedAppPolicies"
 
 
 # Get all App Protection policies and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, prefix):
     """
     Saves all App Protection policies in Intune to a JSON or YAML file.
 
@@ -35,6 +36,9 @@ def savebackup(path, output, exclude, token):
 
     # If profile is ManagedAppConfiguration, skip to next
     for profile in data["value"]:
+        if prefix and not check_prefix_match(profile["displayName"], prefix):
+            continue
+
         if profile["@odata.type"] == "#microsoft.graph.targetedManagedAppConfiguration":
             continue
 
