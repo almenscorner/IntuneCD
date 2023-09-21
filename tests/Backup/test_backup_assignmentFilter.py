@@ -52,7 +52,7 @@ class TestBackupAssignmentFilters(unittest.TestCase):
     def test_backup_yml(self, mock_data, mock_makeapirequest):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.token)
+        self.count = savebackup(self.directory.path, "yaml", self.token, "")
 
         with open(self.saved_path + "yaml", "r") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -65,7 +65,7 @@ class TestBackupAssignmentFilters(unittest.TestCase):
     def test_backup_json(self, mock_data, mock_makeapirequest):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.token)
+        self.count = savebackup(self.directory.path, "json", self.token, "")
 
         with open(self.saved_path + "json", "r") as f:
             self.saved_data = json.load(f)
@@ -78,7 +78,14 @@ class TestBackupAssignmentFilters(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         mock_data.return_value = {"value": []}
-        self.count = savebackup(self.directory.path, "json", self.token)
+        self.count = savebackup(self.directory.path, "json", self.token, "")
+        self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_with_prefix(self, mock_data, mock_makeapirequest):
+        """The count should be 0 if no data is returned."""
+
+        mock_data.return_value = {"value": []}
+        self.count = savebackup(self.directory.path, "json", self.token, "test")
         self.assertEqual(0, self.count["config_count"])
 
 
