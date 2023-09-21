@@ -9,6 +9,7 @@ from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = (
@@ -18,7 +19,7 @@ APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
 # Get all Windows Enrollment Status Page profiles and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, prefix):
     """
     Saves all Windows Enrollment Status Page profiles in Intune to a JSON or YAML file.
 
@@ -37,6 +38,9 @@ def savebackup(path, output, exclude, token):
     )
 
     for profile in data["value"]:
+        if prefix and not check_prefix_match(profile["displayName"], prefix):
+            continue
+
         if (
             profile["@odata.type"]
             == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
