@@ -11,6 +11,7 @@ from .graph_request import makeapirequest
 from .save_output import save_output
 from .remove_keys import remove_keys
 from .graph_batch import batch_assignment, get_object_assignment
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = (
@@ -19,7 +20,7 @@ ENDPOINT = (
 
 
 # Get all Enrollment Configurations and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, prefix):
     """
     Saves all Enrollment Configurations in Intune to a JSON or YAML file.
 
@@ -37,6 +38,9 @@ def savebackup(path, output, exclude, token):
     )
 
     for config in data["value"]:
+        if prefix and not check_prefix_match(config["displayName"], prefix):
+            continue
+
         if (
             config["@odata.type"]
             == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
