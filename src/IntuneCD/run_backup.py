@@ -365,7 +365,7 @@ def start():
         if args.intunecdmonitor:
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
-            count = run_backup(args.path, args.output, exclude, token)
+            count = run_backup(args.path, args.output, exclude, token, args.prefix)
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
             out = base64.b64encode(feed_bytes).decode("utf-8")
