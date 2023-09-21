@@ -59,7 +59,9 @@ class TestBackupProfiles(unittest.TestCase):
             ]
         }
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, ""
+        )
 
         self.assertTrue(
             Path(
@@ -88,7 +90,9 @@ class TestBackupProfiles(unittest.TestCase):
             ]
         }
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, ""
+        )
 
         self.assertTrue(
             Path(
@@ -132,7 +136,9 @@ class TestBackupProfiles(unittest.TestCase):
 
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, ""
+        )
 
         self.assertTrue(
             Path(
@@ -171,7 +177,9 @@ class TestBackupProfiles(unittest.TestCase):
 
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, ""
+        )
 
         self.assertTrue(
             Path(
@@ -193,7 +201,9 @@ class TestBackupProfiles(unittest.TestCase):
             ]
         }
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, ""
+        )
 
         self.assertTrue(
             Path(
@@ -201,6 +211,14 @@ class TestBackupProfiles(unittest.TestCase):
             ).exists()
         )
         self.assertEqual(1, self.count["config_count"])
+
+    def test_backup_with_prefix(self):
+        """The count should be 0 if no data is returned."""
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "test1"
+        )
+        self.assertEqual(0, self.count["config_count"])
 
 
 if __name__ == "__main__":
