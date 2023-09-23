@@ -332,7 +332,7 @@ def start():
     else:
         if args.frontend:
             print(
-                "***The --frontend parameter is deprecated and will be removed in a future release***"
+                "***The --frontend argument is deprecated and will be removed in a future release***"
             )
             print(
                 "***Please migrate to --intunecdmonitor instead, see https;//github.com/almenscorner/intunecd/wiki***"
