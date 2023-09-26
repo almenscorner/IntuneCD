@@ -77,7 +77,9 @@ class TestBackupProactiveRemediation(unittest.TestCase):
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "yaml", self.exclude, self.token, ""
+        )
 
         with open(self.saved_path + "yaml", "r") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -90,7 +92,9 @@ class TestBackupProactiveRemediation(unittest.TestCase):
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, ""
+        )
 
         with open(self.saved_path + "json", "r") as f:
             self.saved_data = json.load(f)
@@ -102,7 +106,9 @@ class TestBackupProactiveRemediation(unittest.TestCase):
     def test_detection_script_is_created(self):
         """The folder should be created and a .ps1 file should be created."""
 
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, ""
+        )
 
         self.assertTrue(f"{self.directory.path}/Proactive Remediations/Script Data")
         self.assertTrue(self.detection_script_path)
@@ -110,7 +116,9 @@ class TestBackupProactiveRemediation(unittest.TestCase):
     def test_remediation_script_is_created(self):
         """The folder should be created and a .ps1 file should be created."""
 
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, ""
+        )
 
         self.assertTrue(f"{self.directory.path}/Proactive Remediations/Script Data")
         self.assertTrue(self.remediation_script_path)
@@ -123,7 +131,7 @@ class TestBackupProactiveRemediation(unittest.TestCase):
             side_effect=[[{"publisher": "Microsoft"}]],
         ):
             self.count = savebackup(
-                self.directory.path, "json", self.exclude, self.token
+                self.directory.path, "json", self.exclude, self.token, ""
             )
 
         self.assertEqual(0, self.count["config_count"])
@@ -136,9 +144,17 @@ class TestBackupProactiveRemediation(unittest.TestCase):
             return_value={"value": []},
         ):
             self.count = savebackup(
-                self.directory.path, "json", self.exclude, self.token
+                self.directory.path, "json", self.exclude, self.token, ""
             )
         """No data should be backed up."""
+        self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_with_prefix(self):
+        """The count should be 0 if no data is returned."""
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "test1"
+        )
         self.assertEqual(0, self.count["config_count"])
 
 

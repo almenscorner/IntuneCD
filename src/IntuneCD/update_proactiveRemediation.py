@@ -87,6 +87,8 @@ def update(
                     mem_id = data["value"]["id"]
                     # Remove keys before using DeepDiff
                     mem_data = remove_keys(mem_data)
+                    mem_data.pop("deviceHealthScriptType", None)
+                    repo_data.pop("deviceHealthScriptType", None)
 
                     # Check if script data is saved and read the file
                     fname = clean_filename(repo_data["displayName"])

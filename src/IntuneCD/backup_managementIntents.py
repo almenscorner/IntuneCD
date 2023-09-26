@@ -8,6 +8,7 @@ from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .graph_batch import batch_intents, get_object_assignment, batch_assignment
 from .save_output import save_output
+from .check_prefix import check_prefix_match
 
 # Set MS Graph base endpoint
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
@@ -15,7 +16,7 @@ TEMPLATE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/templates
 
 
 # Get all Intents and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, prefix):
     """
     Saves all Intents in Intune to a JSON or YAML file.
 
@@ -37,6 +38,9 @@ def savebackup(path, output, exclude, token):
 
     if intent_responses:
         for intent_value in intent_responses["value"]:
+            if prefix and not check_prefix_match(intent_value["displayName"], prefix):
+                continue
+
             results["config_count"] += 1
             print("Backing up Intent: " + intent_value["displayName"])
 

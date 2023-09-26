@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""This module tests backing up Windows enrollment profile."""
+"""This module tests backing up Windows Quality Update profiles."""
 
 import json
 import yaml
@@ -8,21 +8,21 @@ import unittest
 
 from unittest.mock import patch
 from testfixtures import TempDirectory
-from src.IntuneCD.backup_windowsEnrollmentProfile import savebackup
+from src.IntuneCD.backup_windowsQualityUpdates import savebackup
 
 BATCH_ASSIGNMENT = [{"value": [{"id": "0", "target": {"groupName": "Group1"}}]}]
 OBJECT_ASSIGNMENT = [{"target": {"groupName": "Group1"}}]
 
 
-class TestBackupWindowsEnrollmentProfile(unittest.TestCase):
-    """Test class for backup_windowsEnrollmentProfile."""
+class TestBackupWindowsDriverUpdates(unittest.TestCase):
+    """Test class for backup_windowsQualityUpdates."""
 
     def setUp(self):
         self.directory = TempDirectory()
         self.directory.create()
         self.token = "token"
         self.exclude = []
-        self.saved_path = f"{self.directory.path}/Enrollment Profiles/Windows/test."
+        self.saved_path = f"{self.directory.path}/Quality Updates/test."
         self.expected_data = {
             "assignments": [{"target": {"groupName": "Group1"}}],
             "displayName": "test",
@@ -30,19 +30,19 @@ class TestBackupWindowsEnrollmentProfile(unittest.TestCase):
         self.enrollment_profile = {"value": [{"displayName": "test", "id": "0"}]}
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_windowsEnrollmentProfile.batch_assignment"
+            "src.IntuneCD.backup_windowsQualityUpdates.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_windowsEnrollmentProfile.get_object_assignment"
+            "src.IntuneCD.backup_windowsQualityUpdates.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_windowsEnrollmentProfile.makeapirequest"
+            "src.IntuneCD.backup_windowsQualityUpdates.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.enrollment_profile
@@ -63,7 +63,7 @@ class TestBackupWindowsEnrollmentProfile(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
-        self.assertTrue(f"{self.directory.path}/Enrollment Profiles/Windows")
+        self.assertTrue(f"{self.directory.path}/Quality Updates")
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, count["config_count"])
 
@@ -76,7 +76,7 @@ class TestBackupWindowsEnrollmentProfile(unittest.TestCase):
         with open(self.saved_path + output, "r") as f:
             saved_data = json.load(f)
 
-        self.assertTrue(f"{self.directory.path}/Enrollment Profiles/Windows")
+        self.assertTrue(f"{self.directory.path}/Quality Updates")
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, count["config_count"])
 

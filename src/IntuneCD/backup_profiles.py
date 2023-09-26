@@ -12,13 +12,14 @@ from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
 
 
 # Get all Device Configurations and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, prefix):
     """
     Saves all Device Configurations in Intune to a JSON or YAML file and custom macOS/iOS to .mobileconfig.
 
@@ -37,6 +38,9 @@ def savebackup(path, output, exclude, token):
     )
 
     for profile in data["value"]:
+        if prefix and not check_prefix_match(profile["displayName"], prefix):
+            continue
+
         results["config_count"] += 1
         if "assignments" not in exclude:
             assignments = get_object_assignment(profile["id"], assignment_responses)

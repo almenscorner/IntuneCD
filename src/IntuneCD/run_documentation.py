@@ -36,7 +36,9 @@ REPO_DIR = os.environ.get("REPO_DIR")
 
 
 def start():
-    parser = argparse.ArgumentParser(description="Create markdown document from backup files")
+    parser = argparse.ArgumentParser(
+        description="Create markdown document from backup files"
+    )
     parser.add_argument(
         "-p",
         "--path",
@@ -91,7 +93,9 @@ def start():
 
     args = parser.parse_args()
 
-    def run_documentation(configpath, outpath, tenantname, jsondata, maxlength, split, cleanup, decode):
+    def run_documentation(
+        configpath, outpath, tenantname, jsondata, maxlength, split, cleanup, decode
+    ):
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
 
@@ -330,7 +334,15 @@ def start():
         )
 
         # Document filters
-        document_configs(f"{configpath}/Filters", outpath, "Filters", maxlength, split, cleanup, decode)
+        document_configs(
+            f"{configpath}/Filters",
+            outpath,
+            "Filters",
+            maxlength,
+            split,
+            cleanup,
+            decode,
+        )
 
         # Managed Google Play
         document_configs(
@@ -344,7 +356,9 @@ def start():
         )
 
         # Document Intents
-        document_management_intents(f"{configpath}/Management Intents/", outpath, "Management Intents", split)
+        document_management_intents(
+            f"{configpath}/Management Intents/", outpath, "Management Intents", split
+        )
 
         # Document Partner Connections
         document_configs(
@@ -412,6 +426,39 @@ def start():
             decode,
         )
 
+        # Document Windows Driver Update Profiles
+        document_configs(
+            f"{configpath}/Driver Updates",
+            outpath,
+            "Windows Driver Updates",
+            maxlength,
+            split,
+            cleanup,
+            decode,
+        )
+
+        # Document Windows Feature Update Profiles
+        document_configs(
+            f"{configpath}/Feature Updates",
+            outpath,
+            "Windows Feature Updates",
+            maxlength,
+            split,
+            cleanup,
+            decode,
+        )
+
+        # Document Windows Quality Update Profiles
+        document_configs(
+            f"{configpath}/Quality Updates",
+            outpath,
+            "Windows Quality Updates",
+            maxlength,
+            split,
+            cleanup,
+            decode,
+        )
+
         if jsondata:
             json_dict = json.loads(jsondata)
             if "title" in json_dict:
@@ -460,7 +507,9 @@ def start():
                     )
 
         else:
-            document = markdown_toclify(input_file=outpath, back_to_top=True, exclude_h=[3])
+            document = markdown_toclify(
+                input_file=outpath, back_to_top=True, exclude_h=[3]
+            )
             with open(outpath, "w") as doc:
                 l1 = f"# {title} \n\n"
                 l2 = f"{intro} \n\n"

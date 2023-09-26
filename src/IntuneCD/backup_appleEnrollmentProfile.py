@@ -9,13 +9,14 @@ from .graph_request import makeapirequest
 from .graph_batch import batch_request
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSettings/"
 
 
 # Get all Apple Enrollment Profiles and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, token, prefix):
     """
     Saves all Apple Enrollment Profiles in Intune to a JSON or YAML file.
 
@@ -43,6 +44,9 @@ def savebackup(path, output, token):
         for profile in batch_profile_data:
             results["config_count"] += 1
             for value in profile["value"]:
+                if prefix and not check_prefix_match(value["displayName"], prefix):
+                    continue
+
                 value = remove_keys(value)
 
                 print("Backing up Apple enrollment profile: " + value["displayName"])

@@ -90,19 +90,27 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
             ]
         }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_configurationPolicies.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_configurationPolicies.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.batch_request_patch = patch("src.IntuneCD.backup_configurationPolicies.batch_request")
+        self.batch_request_patch = patch(
+            "src.IntuneCD.backup_configurationPolicies.batch_request"
+        )
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.return_value = BATCH_REQUEST
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_configurationPolicies.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_configurationPolicies.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_configurationPolicies.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup_configurationPolicies.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.configuration_policy
 
@@ -116,7 +124,9 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "yaml", self.exclude, self.token, ""
+        )
 
         with open(self.saved_path + "yaml", "r") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -129,7 +139,9 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, ""
+        )
 
         with open(self.saved_path + "json", "r") as f:
             self.saved_data = json.load(f)
@@ -142,7 +154,18 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = {"value": []}
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, ""
+        )
+        self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_with_prefix(self):
+        """The count should be 0 if no data is returned."""
+
+        self.makeapirequest.return_value = {"value": []}
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "test"
+        )
         self.assertEqual(0, self.count["config_count"])
 
 

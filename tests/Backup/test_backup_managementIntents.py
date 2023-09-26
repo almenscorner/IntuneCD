@@ -95,7 +95,9 @@ class TestBackupManagementIntent(unittest.TestCase):
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "yaml", self.exclude, self.token, ""
+        )
 
         with open(self.saved_path + "yaml", "r") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -110,7 +112,9 @@ class TestBackupManagementIntent(unittest.TestCase):
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, ""
+        )
 
         with open(self.saved_path + "json", "r") as f:
             saved_data = json.load(f)
@@ -125,8 +129,18 @@ class TestBackupManagementIntent(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.batch_intent.return_value = {"value": []}
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, ""
+        )
 
+        self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_with_prefix(self):
+        """The count should be 0 if no data is returned."""
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "test1"
+        )
         self.assertEqual(0, self.count["config_count"])
 
 
