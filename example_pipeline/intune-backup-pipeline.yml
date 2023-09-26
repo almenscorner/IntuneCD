@@ -1,5 +1,6 @@
 # PIPELINE VARIABLES THAT NEEDS TO BE DEFINED FIRST FOR THIS PIPELINE TO WORK:
 # CLIENT_ID (application ID), CLIENT_SECRET (application secret), TENANT_NAME, USER_EMAIL (email that will be used in the commit), USER_NAME (name that will be used in commit)
+# based on https://github.com/aaronparker/intune-backup-template
 
 trigger:
   none
