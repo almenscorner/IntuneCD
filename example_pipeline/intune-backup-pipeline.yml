@@ -1,0 +1,225 @@
+# PIPELINE VARIABLES THAT NEEDS TO BE DEFINED FIRST FOR THIS PIPELINE TO WORK:
+# CLIENT_ID (application ID), CLIENT_SECRET (application secret), TENANT_NAME, USER_EMAIL (email that will be used in the commit), USER_NAME (name that will be used in commit)
+
+trigger:
+  none
+schedules:
+  - cron: '0 1 * * *'
+    displayName: "1am"
+    branches:
+      include:
+      - main
+    always: true
+
+jobs:
+  - job: backup_document
+    displayName: Backup configuration and generate markdown
+    pool:
+      vmImage: ubuntu-latest
+    continueOnError: false
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    # Set git global settings
+    - task: Bash@3
+      displayName: Configure Git
+      inputs:
+        targetType: 'inline'
+        script: |
+          git config --global user.name $(USER_NAME)
+          git config --global user.email $(USER_EMAIL)
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: true
+
+    - task: Bash@3
+      displayName: Remove existing prod-backup directory
+      inputs:
+        targetType: 'inline'
+        script: |
+          rm -rfv "$(Build.SourcesDirectory)/prod-backup"
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: false
+
+    # Install IntuneCD
+    # https://github.com/almenscorner/IntuneCD
+    - task: Bash@3
+      displayName: Install IntuneCD
+      inputs:
+        targetType: 'inline'
+        script: |
+          pip3 install IntuneCD
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: true
+
+    # Backup the latest configuration, using the current directory
+    - task: Bash@3
+      displayName: IntuneCD backup
+      inputs:
+        targetType: 'inline'
+        script: |
+          mkdir -p "$(Build.SourcesDirectory)/prod-backup"
+          IntuneCD-startbackup \
+              --mode=1 \
+              --output=json \
+              --path="$(Build.SourcesDirectory)/prod-backup"
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: true
+      env:
+        TENANT_NAME: $(TENANT_NAME)
+        CLIENT_ID: $(CLIENT_ID)
+        CLIENT_SECRET: $(CLIENT_SECRET)
+
+    # Commit changes and push to repo
+    - task: Bash@3
+      displayName: Commit changes
+      name: commitAndsetVariable
+      inputs:
+        targetType: 'inline'
+        script: |
+          DATEF=`date +%Y.%m.%d`
+
+          git add --all
+
+          # modified files in folder prod-backup
+          var=$(git diff --name-only --staged -- prod-backup)
+          echo "##vso[task.setVariable variable=CHANGE_DETECTED;isOutput=true;]$var"
+
+          git commit -m "Intune config backup $DATEF"
+          git push origin HEAD:main
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: false
+
+    # Create markdown documentation
+    # Install IntuneCD
+    # https://github.com/almenscorner/IntuneCD
+    - task: Bash@3
+      displayName: Generate markdown document
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ ! -z "$(commitAndsetVariable.CHANGE_DETECTED)" ]
+          then
+            INTRO="Intune backup and documentation generated at $(Build.Repository.Uri) <img align=\"right\" width=\"96\" height=\"96\" src=\"./logo.png\">"
+            IntuneCD-startdocumentation \
+                --path="$(Build.SourcesDirectory)/prod-backup" \
+                --outpath="$(Build.SourcesDirectory)/prod-as-built.md" \
+                --tenantname=$TENANT_NAME \
+                --intro="$INTRO" \
+                #--split=Y
+          else
+            echo "no configuration backup change detected in the last commit, documentation will not be created"
+          fi
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: true
+      env:
+        TENANT_NAME: $(TENANT_NAME)
+
+    # Commit changes and push to repo
+    - task: Bash@3
+      displayName: Commit changes
+      inputs:
+        targetType: 'inline'
+        script: |
+          DATEF=`date +%Y.%m.%d`
+          git add --all
+          git commit -m "Intune config as-built $DATEF"
+          git push origin HEAD:main
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: false
+
+  - job: tag
+    displayName: Tag repo
+    dependsOn: backup_document
+    condition: and(succeeded(), ne(dependencies.backup_document.outputs['commitAndsetVariable.CHANGE_DETECTED'], ''))
+    pool:
+      vmImage: ubuntu-latest
+    continueOnError: false
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    # Set git global settings
+    - task: Bash@3
+      displayName: Configure Git
+      inputs:
+        targetType: 'inline'
+        script: |
+          git config --global user.name $(USER_NAME)
+          git config --global user.email $(USER_EMAIL)
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: true
+
+    - task: Bash@3
+      displayName: Pull origin
+      inputs:
+        targetType: 'inline'
+        script: |
+          git pull origin main
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: false
+
+    - task: PowerShell@2
+      displayName: Git tag
+      inputs:
+        targetType: 'inline'
+        script: |
+          # change in configuration backup folder detected, create TAG
+          $DATEF= Get-Date -format 'yyyy.MM.dd_HH.mm'
+          git tag -a "v$DATEF" -m "Microsoft Intune configuration snapshot $DATEF"
+          git push origin "v$DATEF" *> $null # even status information goes to stderr :(
+        failOnStderr: true
+        pwsh: false
+        workingDirectory: '$(Build.SourcesDirectory)'
+
+  - job: publish
+    displayName: Publish as-built artefacts
+    dependsOn: tag
+    condition: and(succeeded(), ne(dependencies.backup_document.outputs['commitAndsetVariable.CHANGE_DETECTED'], ''))
+    pool:
+      vmImage: ubuntu-latest
+    continueOnError: false
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    # Install md-to-pdf
+    # https://github.com/simonhaenisch/md-to-pdf
+    - task: Bash@3
+      displayName: Install md-to-pdf
+      inputs:
+        targetType: 'inline'
+        script: |
+          npm i --location=global md-to-pdf
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: true
+
+    # Convert markdown document to HTML
+    - task: Bash@3
+      displayName: Convert markdown to HTML
+      inputs:
+        targetType: 'inline'
+        script: |
+          cat "$(Build.SourcesDirectory)/prod-as-built.md" | md-to-pdf --config-file "$(Build.SourcesDirectory)/md2pdf/htmlconfig.json" --as-html > "$(Build.SourcesDirectory)/prod-as-built.html"
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: false
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: "$(Build.SourcesDirectory)/prod-as-built.html"
+        artifactName: "prod-as-built.html"
+
+    # Convert markdown document to PDF
+    - task: Bash@3
+      displayName: Convert markdown to PDF
+      inputs:
+        targetType: 'inline'
+        script: |
+          cat "$(Build.SourcesDirectory)/prod-as-built.md" | md-to-pdf --config-file "$(Build.SourcesDirectory)/md2pdf/pdfconfig.json" > "$(Build.SourcesDirectory)/prod-as-built.pdf"
+        workingDirectory: '$(Build.SourcesDirectory)'
+        failOnStderr: false
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: "$(Build.SourcesDirectory)/prod-as-built.pdf"
+        artifactName: "prod-as-built.pdf"
