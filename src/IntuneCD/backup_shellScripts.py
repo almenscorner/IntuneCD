@@ -12,6 +12,7 @@ from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment, batch_request
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/"
@@ -21,7 +22,7 @@ ASSIGNMENT_ENDPOINT = (
 
 
 # Get all Shell scripts and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, prefix):
     """
     Saves all Shell scripts in Intune to a JSON or YAML file and script files.
 
@@ -46,6 +47,9 @@ def savebackup(path, output, exclude, token):
     )
 
     for script_data in script_data_responses:
+        if prefix and not check_prefix_match(script_data["displayName"], prefix):
+            continue
+
         results["config_count"] += 1
         if "assignments" not in exclude:
             assignments = get_object_assignment(script_data["id"], assignment_responses)

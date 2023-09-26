@@ -8,13 +8,14 @@ from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/assignmentFilters"
 
 
 # Get all Filters and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, token, prefix):
     """
     Saves all Filter in Intune to a JSON or YAML file.
 
@@ -29,6 +30,9 @@ def savebackup(path, output, token):
 
     if data:
         for assign_filter in data["value"]:
+            if prefix and not check_prefix_match(assign_filter["displayName"], prefix):
+                continue
+
             results["config_count"] += 1
             assign_filter = remove_keys(assign_filter)
             print("Backing up Filter: " + assign_filter["displayName"])

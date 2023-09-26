@@ -8,6 +8,7 @@ from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = (
@@ -16,7 +17,7 @@ ENDPOINT = (
 
 
 # Get all Notification Templates and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, token, prefix):
     """
     Saves all Notification Templates in Intune to a JSON or YAML file.
 
@@ -31,6 +32,9 @@ def savebackup(path, output, token):
     data = makeapirequest(ENDPOINT, token, q_param)
 
     for template in data["value"]:
+        if prefix and not check_prefix_match(template["displayName"], prefix):
+            continue
+
         results["config_count"] += 1
         print("Backing up Notification message template: " + template["displayName"])
         q_param = "?$expand=localizedNotificationMessages"

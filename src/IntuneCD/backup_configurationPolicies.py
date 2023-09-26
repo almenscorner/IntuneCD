@@ -14,13 +14,14 @@ from .graph_batch import (
 )
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph base endpoint
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
 
 # Get all Configuration Policies and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, prefix):
     """
     Saves all Configuration Policies in Intune to a JSON or YAML file.
 
@@ -37,10 +38,20 @@ def savebackup(path, output, exclude, token):
     for policy in policies["value"]:
         policy_ids.append(policy["id"])
 
-    assignment_responses = batch_assignment(policies, "deviceManagement/configurationPolicies/", "/assignments", token)
-    policy_settings_batch = batch_request(policy_ids, "deviceManagement/configurationPolicies/", "/settings?&top=1000", token)
+    assignment_responses = batch_assignment(
+        policies, "deviceManagement/configurationPolicies/", "/assignments", token
+    )
+    policy_settings_batch = batch_request(
+        policy_ids,
+        "deviceManagement/configurationPolicies/",
+        "/settings?&top=1000",
+        token,
+    )
 
     for policy in policies["value"]:
+        if prefix and not check_prefix_match(policy["name"], prefix):
+            continue
+
         results["config_count"] += 1
         name = policy["name"]
         print("Backing up configuration policy: " + name)

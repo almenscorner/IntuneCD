@@ -73,7 +73,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
     def test_backup_yml(self):
         """Test that the backup is saved as yml. And that the data is correct."""
         output = "yaml"
-        count = savebackup(self.directory.path, output, self.exclude, self.token)
+        count = savebackup(self.directory.path, output, self.exclude, self.token, "")
         with open(f"{self.saved_path}yaml", "r") as file:
             data = yaml.safe_load(file)
         self.assertEqual(data, self.expected_data)
@@ -81,7 +81,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
     def test_backup_json(self):
         """Test that the backup is saved as json. And that the data is correct."""
         output = "json"
-        count = savebackup(self.directory.path, output, self.exclude, self.token)
+        count = savebackup(self.directory.path, output, self.exclude, self.token, "")
         with open(f"{self.saved_path}json", "r") as file:
             data = yaml.safe_load(file)
         self.assertEqual(data, self.expected_data)
@@ -92,7 +92,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         self.enrollment_config["value"][0][
             "@odata.type"
         ] = "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
-        count = savebackup(self.directory.path, output, self.exclude, self.token)
+        count = savebackup(self.directory.path, output, self.exclude, self.token, "")
 
         self.assertEqual(0, count["config_count"])
 
@@ -100,8 +100,18 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.side_effect = [{"value": []}]
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, ""
+        )
 
+        self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_with_prefix(self):
+        """The count should be 0 if no data is returned."""
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "test1"
+        )
         self.assertEqual(0, self.count["config_count"])
 
 

@@ -8,13 +8,14 @@ from .clean_filename import clean_filename
 from .graph_request import makeapirequest
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCategories"
 
 
 # Get Device Categories information and save in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, token, prefix):
     """
     Save Device Categories to a JSON or YAML file.
 
@@ -30,6 +31,9 @@ def savebackup(path, output, token):
 
     if data["value"]:
         for item in data["value"]:
+            if prefix and not check_prefix_match(item["displayName"], prefix):
+                continue
+
             results["config_count"] += 1
             item = remove_keys(item)
             print("Backing up Device Category: " + item["displayName"])

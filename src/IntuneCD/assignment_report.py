@@ -38,9 +38,7 @@ def get_group_report(path, output):
                             data = {
                                 "groupName": assignment["target"]["groupName"],
                                 "groupType": assignment["target"].get("groupType"),
-                                "membershipRule": assignment["target"].get(
-                                    "membershipRule", None
-                                ),
+                                "membershipRule": assignment["target"].get("membershipRule", None),
                                 "assignedTo": {},
                             }
 
@@ -53,16 +51,10 @@ def get_group_report(path, output):
                             else:
                                 for item in groups:
                                     if item["groupName"] == data["groupName"]:
-                                        if not payload_added and item["assignedTo"].get(
-                                            payload_type
-                                        ):
-                                            item["assignedTo"][payload_type].append(
-                                                name
-                                            )
+                                        if not payload_added and item["assignedTo"].get(payload_type):
+                                            item["assignedTo"][payload_type].append(name)
                                             payload_added = True
-                                        elif not payload_added and not item[
-                                            "assignedTo"
-                                        ].get(payload_type):
+                                        elif not payload_added and not item["assignedTo"].get(payload_type):
                                             item["assignedTo"][payload_type] = [name]
                                             payload_added = True
 
@@ -71,6 +63,11 @@ def get_group_report(path, output):
                                     groups.append(data)
 
     def collect_groups(path):
+        exclude = set(
+            [
+                "__archive__",
+            ]
+        )
         groups = []
         slash = "/"
         run_os = platform.uname().system
@@ -78,6 +75,7 @@ def get_group_report(path, output):
             slash = "\\"
         abs_path = os.path.abspath(path)
         for root, dirs, files in os.walk(path, topdown=True):
+            dirs[:] = [d for d in dirs if d not in exclude]
             abs_root = os.path.abspath(root)
             for file in files:
                 os.path.abspath(root)

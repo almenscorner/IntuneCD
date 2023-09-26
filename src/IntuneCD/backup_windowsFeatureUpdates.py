@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-This module backs up Group Policy Configurations in Intune.
+This module backs up all Windows Feature Update Profiles in Intune.
 """
 
 from .clean_filename import clean_filename
@@ -12,13 +12,15 @@ from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/groupPolicyConfigurations"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/windowsFeatureUpdateProfiles"
+)
 
 
-# Get all Group Policy Configurations and save them in specified path
+# Get all Windows Feature Profiles and save them in specified path
 def savebackup(path, output, exclude, token, prefix):
     """
-    Saves all Group Policy Configurations in Intune to a JSON or YAML file.
+    Saves all Windows Feature Update Profiles in Intune to a JSON or YAML file.
 
     :param path: Path to save the backup to
     :param output: Format the backup will be saved as
@@ -27,11 +29,14 @@ def savebackup(path, output, exclude, token, prefix):
     """
 
     results = {"config_count": 0, "outputs": []}
-    configpath = path + "/" + "Group Policy Configurations/"
+    configpath = path + "/" + "Feature Updates/"
     data = makeapirequest(ENDPOINT, token)
 
     assignment_responses = batch_assignment(
-        data, "deviceManagement/groupPolicyConfigurations/", "/assignments", token
+        data,
+        "deviceManagement/windowsFeatureUpdateProfiles/",
+        "/assignments",
+        token,
     )
 
     for profile in data["value"]:
@@ -39,23 +44,6 @@ def savebackup(path, output, exclude, token, prefix):
             continue
 
         results["config_count"] += 1
-        definition_endpoint = (
-            f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
-        )
-        # Get definitions
-        definitions = makeapirequest(definition_endpoint, token)
-
-        if definitions:
-            profile["definitionValues"] = definitions["value"]
-
-            for definition in profile["definitionValues"]:
-                presentation_endpoint = (
-                    f"{ENDPOINT}/{profile['id']}/definitionValues/{definition['id']}/"
-                    f"presentationValues?$expand=presentation "
-                )
-                presentation = makeapirequest(presentation_endpoint, token)
-                definition["presentationValues"] = presentation["value"]
-
         if "assignments" not in exclude:
             assignments = get_object_assignment(profile["id"], assignment_responses)
             if assignments:
@@ -63,11 +51,12 @@ def savebackup(path, output, exclude, token, prefix):
 
         profile = remove_keys(profile)
 
-        print("Backing up profile: " + profile["displayName"])
+        print("Backing up Feature Update profile: " + profile["displayName"])
 
         # Get filename without illegal characters
         fname = clean_filename(profile["displayName"])
-
+        # Save Windows Enrollment Profile as JSON or YAML depending on
+        # configured value in "-o"
         save_output(output, configpath, fname, profile)
 
         results["outputs"].append(fname)

@@ -12,13 +12,14 @@ from .graph_request import makeapirequest
 from .graph_batch import batch_assignment, get_object_assignment, batch_request
 from .save_output import save_output
 from .remove_keys import remove_keys
+from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts/"
 
 
 # Get all Powershell scripts and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, prefix):
     """
     Saves all Powershell scripts in Intune to a JSON or YAML file and script files.
 
@@ -36,13 +37,22 @@ def savebackup(path, output, exclude, token):
         for script in data["value"]:
             script_ids.append(script["id"])
 
-        assignment_responses = batch_assignment(data, "deviceManagement/deviceManagementScripts/", "/assignments", token)
-        script_data_responses = batch_request(script_ids, "deviceManagement/deviceManagementScripts/", "", token)
+        assignment_responses = batch_assignment(
+            data, "deviceManagement/deviceManagementScripts/", "/assignments", token
+        )
+        script_data_responses = batch_request(
+            script_ids, "deviceManagement/deviceManagementScripts/", "", token
+        )
 
         for script_data in script_data_responses:
+            if prefix and not check_prefix_match(script_data["displayName"], prefix):
+                continue
+
             results["config_count"] += 1
             if "assignments" not in exclude:
-                assignments = get_object_assignment(script_data["id"], assignment_responses)
+                assignments = get_object_assignment(
+                    script_data["id"], assignment_responses
+                )
                 if assignments:
                     script_data["assignments"] = assignments
 
