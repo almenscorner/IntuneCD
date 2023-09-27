@@ -34,7 +34,7 @@ def savebackup(path, output, exclude, token, prefix):
 
     assignment_responses = batch_assignment(
         data,
-        "deviceManagement/windowsDriverUpdateProfiles/",
+        "deviceManagement/windowsQualityUpdateProfiles/",
         "/assignments",
         token,
     )
