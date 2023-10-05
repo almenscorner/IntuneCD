@@ -6,6 +6,7 @@ import json
 import yaml
 import unittest
 
+from pathlib import Path
 from unittest.mock import patch
 from testfixtures import TempDirectory
 from src.IntuneCD.backup_customAttributeShellScript import savebackup
@@ -22,6 +23,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.exclude = []
+        self.append_id = False
         self.saved_path = f"{self.directory.path}/Custom Attributes/test."
         self.script_content_path = (
             f"{self.directory.path}/Custom Attributes/Script Data/test.ps1"
@@ -77,7 +79,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "yaml", self.exclude, self.token, ""
+            self.directory.path, "yaml", self.exclude, self.token, "", self.append_id
         )
 
         with open(self.saved_path + "yaml", "r") as f:
@@ -92,7 +94,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, ""
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
         )
 
         with open(self.saved_path + "json", "r") as f:
@@ -106,7 +108,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
         """The folder should be created and a .ps1 file should be created."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, ""
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
         )
 
         self.assertTrue(f"{self.directory.path}/Custom Attributes/Script Data")
@@ -118,7 +120,7 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
 
         self.batch_request.return_value = []
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, ""
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -127,10 +129,26 @@ class TestBackupCustomAttributeShellScript(unittest.TestCase):
         """The count should be 0 if the prefix does not match."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "test1"
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "test1",
+            self.append_id,
         )
 
         self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_append_id(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", True
+        )
+
+        self.assertTrue(
+            Path(f"{self.directory.path}/Custom Attributes/test_0.json").exists()
+        )
 
 
 if __name__ == "__main__":

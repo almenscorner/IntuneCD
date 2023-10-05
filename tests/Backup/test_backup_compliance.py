@@ -23,6 +23,7 @@ class TestBackupCompliance(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.exclude = []
+        self.append_id = False
         self.saved_path = f"{self.directory.path}/Compliance Policies/Policies/test_iosCompliancePolicy."
         self.expected_data = {
             "@odata.type": "#microsoft.graph.iosCompliancePolicy",
@@ -85,7 +86,9 @@ class TestBackupCompliance(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = "yaml"
-        count = savebackup(self.directory.path, output, self.exclude, self.token, "")
+        count = savebackup(
+            self.directory.path, output, self.exclude, self.token, "", self.append_id
+        )
 
         with open(self.saved_path + output, "r") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -102,7 +105,9 @@ class TestBackupCompliance(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = "json"
-        count = savebackup(self.directory.path, output, self.exclude, self.token, "")
+        count = savebackup(
+            self.directory.path, output, self.exclude, self.token, "", self.append_id
+        )
 
         with open(self.saved_path + output, "r") as f:
             saved_data = json.load(f)
@@ -119,7 +124,7 @@ class TestBackupCompliance(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, ""
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -128,9 +133,27 @@ class TestBackupCompliance(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "test"
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "test",
+            self.append_id,
         )
         self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_append_id(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", True
+        )
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Compliance Policies/Policies/test_iosCompliancePolicy_0.json"
+            ).exists()
+        )
 
 
 if __name__ == "__main__":

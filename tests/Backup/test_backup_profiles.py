@@ -22,6 +22,7 @@ class TestBackupProfiles(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.exclude = []
+        self.append_id = False
 
         self.batch_assignment_patch = patch(
             "src.IntuneCD.backup_profiles.batch_assignment"
@@ -60,7 +61,7 @@ class TestBackupProfiles(unittest.TestCase):
         }
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, ""
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
         )
 
         self.assertTrue(
@@ -91,7 +92,7 @@ class TestBackupProfiles(unittest.TestCase):
         }
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, ""
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
         )
 
         self.assertTrue(
@@ -137,7 +138,7 @@ class TestBackupProfiles(unittest.TestCase):
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, ""
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
         )
 
         self.assertTrue(
@@ -178,7 +179,7 @@ class TestBackupProfiles(unittest.TestCase):
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, ""
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
         )
 
         self.assertTrue(
@@ -202,7 +203,7 @@ class TestBackupProfiles(unittest.TestCase):
         }
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, ""
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
         )
 
         self.assertTrue(
@@ -216,9 +217,36 @@ class TestBackupProfiles(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "test1"
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "test1",
+            self.append_id,
         )
         self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_append_id(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+        self.makeapirequest.return_value = {
+            "value": [
+                {
+                    "@odata.type": "#microsoft.graph.macOSGeneralDeviceConfiguration",
+                    "id": "0",
+                    "displayName": "test",
+                }
+            ]
+        }
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", True
+        )
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration_0.json"
+            ).exists()
+        )
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@ class TestBackupAppConfig(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.exclude = []
+        self.append_id = False
         self.saved_path = (
             f"{self.directory.path}/App Configuration/test_iosMobileAppConfiguration."
         )
@@ -100,7 +101,7 @@ class TestBackupAppConfig(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "yaml", self.exclude, self.token, ""
+            self.directory.path, "yaml", self.exclude, self.token, "", self.append_id
         )
 
         with open(self.saved_path + "yaml", "r") as f:
@@ -115,7 +116,7 @@ class TestBackupAppConfig(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, ""
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
         )
 
         with open(self.saved_path + "json", "r") as f:
@@ -129,7 +130,7 @@ class TestBackupAppConfig(unittest.TestCase):
         """The count should be 0 if no data is returned."""
         self.makeapirequest.side_effect = [{"value": []}]
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, ""
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -137,10 +138,28 @@ class TestBackupAppConfig(unittest.TestCase):
     def test_backup_with_prefix(self):
         """The count should be 0 if the prefix does not match."""
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "test1"
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "test1",
+            self.append_id,
         )
 
         self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_append_id(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path, "yaml", self.exclude, self.token, "", True
+        )
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/App Configuration/test_iosMobileAppConfiguration_0.yaml"
+            ).exists()
+        )
 
 
 if __name__ == "__main__":

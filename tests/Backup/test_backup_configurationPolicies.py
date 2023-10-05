@@ -44,6 +44,7 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.exclude = []
+        self.append_id = False
         self.saved_path = f"{self.directory.path}/Settings Catalog/test_test."
         self.expected_data = {
             "@odata.type": "#microsoft.graph.deviceManagementConfigurationPolicy",
@@ -125,7 +126,7 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "yaml", self.exclude, self.token, ""
+            self.directory.path, "yaml", self.exclude, self.token, "", self.append_id
         )
 
         with open(self.saved_path + "yaml", "r") as f:
@@ -140,7 +141,7 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, ""
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
         )
 
         with open(self.saved_path + "json", "r") as f:
@@ -155,7 +156,7 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, ""
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -164,9 +165,25 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "test"
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "test",
+            self.append_id,
         )
         self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_append_id(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", True
+        )
+
+        self.assertTrue(
+            Path(f"{self.directory.path}/Settings Catalog/test_test_0.json").exists()
+        )
 
 
 if __name__ == "__main__":
