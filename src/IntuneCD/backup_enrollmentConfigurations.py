@@ -20,7 +20,7 @@ ENDPOINT = (
 
 
 # Get all Enrollment Configurations and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all Enrollment Configurations in Intune to a JSON or YAML file.
 
@@ -59,9 +59,12 @@ def savebackup(path, output, exclude, token, prefix):
             if assignments:
                 config["assignments"] = assignments
 
+        graph_id = config["id"]
         fname = clean_filename(
             f"{config['displayName']}_{str(config['@odata.type']).split('.')[2]}"
         )
+        if append_id:
+            fname = f"{fname}_{graph_id}"
 
         config = remove_keys(config)
 

@@ -17,7 +17,7 @@ ENDPOINT = (
 
 
 # Get all Notification Templates and save them in specified path
-def savebackup(path, output, token, prefix):
+def savebackup(path, output, token, prefix, append_id):
     """
     Saves all Notification Templates in Intune to a JSON or YAML file.
 
@@ -40,6 +40,7 @@ def savebackup(path, output, token, prefix):
         q_param = "?$expand=localizedNotificationMessages"
         template_data = makeapirequest(ENDPOINT + "/" + template["id"], token, q_param)
 
+        graph_id = template_data["id"]
         template_data = remove_keys(template_data)
 
         for locale in template_data["localizedNotificationMessages"]:
@@ -47,6 +48,8 @@ def savebackup(path, output, token, prefix):
 
         # Get filename without illegal characters
         fname = clean_filename(template_data["displayName"])
+        if append_id:
+            fname = f"{fname}_{graph_id}"
         # Save Notification template as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, template_data)

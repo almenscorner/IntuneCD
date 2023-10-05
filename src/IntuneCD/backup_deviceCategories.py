@@ -15,7 +15,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCategories"
 
 
 # Get Device Categories information and save in specified path
-def savebackup(path, output, token, prefix):
+def savebackup(path, output, token, prefix, append_id):
     """
     Save Device Categories to a JSON or YAML file.
 
@@ -35,11 +35,14 @@ def savebackup(path, output, token, prefix):
                 continue
 
             results["config_count"] += 1
+            graph_id = item["id"]
             item = remove_keys(item)
             print("Backing up Device Category: " + item["displayName"])
 
             # Get filename without illegal characters
             fname = clean_filename(item["displayName"])
+            if append_id:
+                fname = f"{fname}_{graph_id}"
             # Save Device Categories as JSON or YAML depending on configured value in "-o"
             save_output(output, configpath, fname, item)
 

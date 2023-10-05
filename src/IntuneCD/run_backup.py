@@ -141,6 +141,11 @@ def start():
         help="When set, only backs up configurations whose name starts with the configured prefix",
         type=str,
     )
+    parser.add_argument(
+        "--append-id",
+        help="When set, the id of the configuration will be appended to the name of the exported file",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
@@ -169,38 +174,38 @@ def start():
         tenant="DEV",
     )
 
-    def run_backup(path, output, exclude, token, prefix):
+    def run_backup(path, output, exclude, token, prefix, append_id):
         results = []
 
         if "AppConfigurations" not in exclude:
             from .backup_appConfiguration import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "AppProtection" not in exclude:
             from .backup_AppProtection import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "APNs" not in exclude:
             from .backup_apns import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, append_id))
 
         if "VPP" not in exclude:
             from .backup_vppTokens import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, append_id))
 
         if "Applications" not in exclude:
             from .backup_applications import savebackup
 
-            results.append(savebackup(path, output, exclude, token))
+            results.append(savebackup(path, output, exclude, token, append_id))
 
         if "Compliance" not in exclude:
             from .backup_compliance import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "DeviceManagementSettings" not in exclude:
             from .backup_deviceManagementSettings import savebackup
@@ -210,42 +215,42 @@ def start():
         if "DeviceCategories" not in exclude:
             from .backup_deviceCategories import savebackup
 
-            results.append(savebackup(path, output, token, prefix))
+            results.append(savebackup(path, output, token, prefix, append_id))
 
         if "NotificationTemplate" not in exclude:
             from .backup_notificationTemplate import savebackup
 
-            results.append(savebackup(path, output, token, prefix))
+            results.append(savebackup(path, output, token, prefix, append_id))
 
         if "Profiles" not in exclude:
             from .backup_profiles import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "GPOConfigurations" not in exclude:
             from .backup_groupPolicyConfiguration import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "AppleEnrollmentProfile" not in exclude:
             from .backup_appleEnrollmentProfile import savebackup
 
-            results.append(savebackup(path, output, token, prefix))
+            results.append(savebackup(path, output, token, prefix, append_id))
 
         if "WindowsEnrollmentProfile" not in exclude:
             from .backup_windowsEnrollmentProfile import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "EnrollmentStatusPage" not in exclude:
             from .backup_enrollmentStatusPage import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "EnrollmentConfigurations" not in exclude:
             from .backup_enrollmentConfigurations import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if args.autopilot == "True":
             from .backup_autopilotDevices import savebackup
@@ -255,77 +260,77 @@ def start():
         if "Filters" not in exclude:
             from .backup_assignmentFilters import savebackup
 
-            results.append(savebackup(path, output, token, prefix))
+            results.append(savebackup(path, output, token, prefix, append_id))
 
         if "ManagedGooglePlay" not in exclude:
             from .backup_managedGPlay import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, append_id))
 
         if "Intents" not in exclude:
             from .backup_managementIntents import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "CompliancePartner" not in exclude:
             from .backup_compliancePartner import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, append_id))
 
         if "ManagementPartner" not in exclude:
             from .backup_managementPartner import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, append_id))
 
         if "RemoteAssistancePartner" not in exclude:
             from .backup_remoteAssistancePartner import savebackup
 
-            results.append(savebackup(path, output, token))
+            results.append(savebackup(path, output, token, append_id))
 
         if "ProactiveRemediation" not in exclude:
             from .backup_proactiveRemediation import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "PowershellScripts" not in exclude:
             from .backup_powershellScripts import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "ShellScripts" not in exclude:
             from .backup_shellScripts import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "CustomAttributes" not in exclude:
             from .backup_customAttributeShellScript import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "ConfigurationPolicies" not in exclude:
             from .backup_configurationPolicies import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "ConditionalAccess" not in exclude:
             from .backup_conditionalAccess import savebackup
 
-            results.append(savebackup(path, output, token, prefix))
+            results.append(savebackup(path, output, token, prefix, append_id))
 
         if "WindowsDriverUpdates" not in exclude:
             from .backup_windowsDriverUpdates import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "WindowsFeatureUpdates" not in exclude:
             from .backup_windowsFeatureUpdates import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "WindowsQualityUpdates" not in exclude:
             from .backup_windowsQualityUpdates import savebackup
 
-            results.append(savebackup(path, output, exclude, token, prefix))
+            results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         from .assignment_report import get_group_report
 
@@ -365,7 +370,9 @@ def start():
         if args.intunecdmonitor:
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
-            count = run_backup(args.path, args.output, exclude, token, args.prefix)
+            count = run_backup(
+                args.path, args.output, exclude, token, args.prefix, args.append_id
+            )
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
             out = base64.b64encode(feed_bytes).decode("utf-8")
@@ -376,7 +383,9 @@ def start():
                 f.write(json.dumps(summary))
 
         else:
-            run_backup(args.path, args.output, exclude, token, args.prefix)
+            run_backup(
+                args.path, args.output, exclude, token, args.prefix, args.append_id
+            )
 
     else:
         print("Please enter a valid output format, json or yaml")

@@ -91,7 +91,7 @@ def update(
                     repo_data.pop("deviceHealthScriptType", None)
 
                     # Check if script data is saved and read the file
-                    fname = clean_filename(repo_data["displayName"])
+                    fname = filename.split(".")[0]
                     detection_script_name = (
                         f"{configpath}/Script Data/{fname}_DetectionScript.ps1"
                     )

@@ -22,7 +22,7 @@ ASSIGNMENT_ENDPOINT = (
 
 
 # Get all Shell scripts and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all Shell scripts in Intune to a JSON or YAML file and script files.
 
@@ -56,12 +56,15 @@ def savebackup(path, output, exclude, token, prefix):
             if assignments:
                 script_data["assignments"] = assignments
 
+        graph_id = script_data["id"]
         script_data = remove_keys(script_data)
 
         print("Backing up Shell script: " + script_data["displayName"])
 
         # Get filename without illegal characters
         fname = clean_filename(script_data["displayName"])
+        if append_id:
+            fname = f"{fname}_{graph_id}"
 
         # Save Shell script as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, script_data)
