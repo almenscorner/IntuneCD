@@ -190,7 +190,7 @@ def start():
         if "APNs" not in exclude:
             from .backup_apns import savebackup
 
-            results.append(savebackup(path, output, token, append_id))
+            results.append(savebackup(path, output, token))
 
         if "VPP" not in exclude:
             from .backup_vppTokens import savebackup
