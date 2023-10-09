@@ -21,7 +21,7 @@ BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
 
 # Get all Configuration Policies and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all Configuration Policies in Intune to a JSON or YAML file.
 
@@ -66,11 +66,14 @@ def savebackup(path, output, exclude, token, prefix):
             if assignments:
                 policy["assignments"] = assignments
 
+        graph_id = policy["id"]
         policy = remove_keys(policy)
 
         # Get filename without illegal characters
         # fname = clean_filename(name)
         fname = clean_filename(f"{name}_{str(policy['technologies']).split(',')[-1]}")
+        if append_id:
+            fname = f"{fname}_{graph_id}"
         # Save Configuration Policy as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, policy)

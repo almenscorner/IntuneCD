@@ -14,7 +14,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/vppTokens"
 
 
 # Get all VPP tokens and save them in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, token, append_id):
     """
     Save all VPP tokens in Intune to a JSON or YAML file.
 
@@ -30,12 +30,15 @@ def savebackup(path, output, token):
     for vpp_token in data["value"]:
         results["config_count"] += 1
         token_name = vpp_token["displayName"]
+        graph_id = vpp_token["id"]
         vpp_token = remove_keys(vpp_token)
 
         print(f"Backing up VPP token: {token_name}")
 
         # Get filename without illegal characters
         fname = clean_filename(token_name)
+        if append_id:
+            fname = f"{fname}_{graph_id}"
 
         # Save token as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, vpp_token)

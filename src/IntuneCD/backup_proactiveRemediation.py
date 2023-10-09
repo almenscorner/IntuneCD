@@ -19,7 +19,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScript
 
 
 # Get all Proactive Remediation and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all Proactive Remediation in Intune to a JSON or YAML file and script files.
 
@@ -57,12 +57,15 @@ def savebackup(path, output, exclude, token, prefix):
                     if assignments:
                         pr_details["assignments"] = assignments
 
+                graph_id = pr_details["id"]
                 pr_details = remove_keys(pr_details)
 
                 print(f"Backing up Proactive Remediation: {pr_details['displayName']}")
 
                 # Get filename without illegal characters
                 fname = clean_filename(pr_details["displayName"])
+                if append_id:
+                    fname = f"{fname}_{graph_id}"
 
                 # Save Proactive Remediation as JSON or YAML depending on
                 # configured value in "-o"
@@ -75,17 +78,22 @@ def savebackup(path, output, exclude, token, prefix):
 
                 # Save detection script to the Script Data folder
                 results["config_count"] += 1
+                fname = clean_filename(pr_details["displayName"])
+                if append_id:
+                    fname_id = f"_{graph_id}"
+                else:
+                    fname_id = ""
                 decoded = base64.b64decode(pr_details["detectionScriptContent"]).decode(
                     "utf-8"
                 )
-                f = open(f"{configpath}/Script Data/{fname}_DetectionScript.ps1", "w")
+                f = open(f"{configpath}/Script Data/{fname}_DetectionScript{fname_id}.ps1", "w")
                 f.write(decoded)
                 # Save remediation script to the Script Data folder
                 results["config_count"] += 1
                 decoded = base64.b64decode(
                     pr_details["remediationScriptContent"]
                 ).decode("utf-8")
-                f = open(f"{configpath}/Script Data/{fname}_RemediationScript.ps1", "w")
+                f = open(f"{configpath}/Script Data/{fname}_RemediationScript{fname_id}.ps1", "w")
                 f.write(decoded)
 
     return results

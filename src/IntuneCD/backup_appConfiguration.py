@@ -22,7 +22,7 @@ APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
 # Get all App Configuration policies and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all App Configuration policies in Intune to a JSON or YAML file.
 
@@ -51,6 +51,7 @@ def savebackup(path, output, exclude, token, prefix):
                 if assignments:
                     profile["assignments"] = assignments
 
+            graph_id = profile["id"]
             profile = remove_keys(profile)
 
             # Get name and type of app on App Configuration Profile
@@ -80,6 +81,8 @@ def savebackup(path, output, exclude, token, prefix):
             fname = clean_filename(
                 f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}"
             )
+            if append_id:
+                fname = f"{fname}_{graph_id}"
             # Save App Configuration as JSON or YAML depending on configured value
             # in "-o"
             save_output(output, configpath, fname, profile)

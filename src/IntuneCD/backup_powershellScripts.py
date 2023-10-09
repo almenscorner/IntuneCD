@@ -19,7 +19,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementSc
 
 
 # Get all Powershell scripts and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all Powershell scripts in Intune to a JSON or YAML file and script files.
 
@@ -56,12 +56,15 @@ def savebackup(path, output, exclude, token, prefix):
                 if assignments:
                     script_data["assignments"] = assignments
 
+            graph_id = script_data["id"]
             script_data = remove_keys(script_data)
 
             print("Backing up Powershell script: " + script_data["displayName"])
 
             # Get filename without illegal characters
             fname = clean_filename(script_data["displayName"])
+            if append_id:
+                fname += "_" + graph_id
             # Save Powershell script as JSON or YAML depending on configured value
             # in "-o"
             save_output(output, configpath, fname, script_data)

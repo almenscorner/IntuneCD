@@ -16,7 +16,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSetti
 
 
 # Get all Apple Enrollment Profiles and save them in specified path
-def savebackup(path, output, token, prefix):
+def savebackup(path, output, token, prefix, append_id):
     """
     Saves all Apple Enrollment Profiles in Intune to a JSON or YAML file.
 
@@ -47,12 +47,15 @@ def savebackup(path, output, token, prefix):
                 if prefix and not check_prefix_match(value["displayName"], prefix):
                     continue
 
+                graph_id = value["id"]
                 value = remove_keys(value)
 
                 print("Backing up Apple enrollment profile: " + value["displayName"])
 
                 # Get filename without illegal characters
                 fname = clean_filename(value["displayName"])
+                if append_id:
+                    fname = f"{fname}_{graph_id}"
                 # Save Apple Enrollment Profile as JSON or YAML depending on
                 # configured value in "-o"
                 save_output(output, configpath, fname, value)

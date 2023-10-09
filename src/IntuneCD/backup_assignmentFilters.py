@@ -15,7 +15,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/assignmentFilters"
 
 
 # Get all Filters and save them in specified path
-def savebackup(path, output, token, prefix):
+def savebackup(path, output, token, prefix, append_id):
     """
     Saves all Filter in Intune to a JSON or YAML file.
 
@@ -34,11 +34,14 @@ def savebackup(path, output, token, prefix):
                 continue
 
             results["config_count"] += 1
+            graph_id = assign_filter["id"]
             assign_filter = remove_keys(assign_filter)
             print("Backing up Filter: " + assign_filter["displayName"])
 
             # Get filename without illegal characters
             fname = clean_filename(assign_filter["displayName"])
+            if append_id:
+                fname = f"{fname}_{graph_id}"
             # Save Filters as JSON or YAML depending on configured value in
             # "-o"
             save_output(output, configpath, fname, assign_filter)

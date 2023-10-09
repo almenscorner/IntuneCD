@@ -36,7 +36,7 @@ def match(platform, input) -> bool:
 
 
 # Get all applications and save them in specified path
-def savebackup(path, output, exclude, token):
+def savebackup(path, output, exclude, token, append_id):
     """
     Saves all applications in Intune to a JSON or YAML file.
 
@@ -63,6 +63,7 @@ def savebackup(path, output, exclude, token):
             if assignments:
                 app["assignments"] = assignments
 
+        graph_id = app["id"]
         app = remove_keys(app)
         app.pop("description", None)
 
@@ -125,6 +126,8 @@ def savebackup(path, output, exclude, token):
 
         # Get filename without illegal characters
         fname = clean_filename(app_name)
+        if append_id:
+            fname = f"{fname}_{graph_id}"
 
         save_output(output, configpath, fname, app)
 

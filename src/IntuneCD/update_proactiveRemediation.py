@@ -91,13 +91,22 @@ def update(
                     repo_data.pop("deviceHealthScriptType", None)
 
                     # Check if script data is saved and read the file
-                    fname = clean_filename(repo_data["displayName"])
-                    detection_script_name = (
-                        f"{configpath}/Script Data/{fname}_DetectionScript.ps1"
-                    )
-                    remediation_script_name = (
-                        f"{configpath}/Script Data/{fname}_RemediationScript.ps1"
-                    )
+                    fname = filename.split(".")[0]
+                    # Get id from filename
+                    fname_id = filename.split("_")[-1].replace(".json", "").replace(".yaml", "")
+                    # Get all remediation scripts and detection scripts files
+                    script_files = os.listdir(f"{configpath}/Script Data")
+                    # Filter out files that matches the id
+                    script_files = [f for f in script_files if fname_id in f]
+                    detection_script_name = ""
+                    remediation_script_name = ""
+                    # Set detection and remediation script name and path
+                    for f in script_files:
+                        if "DetectionScript" in f:
+                            detection_script_name = f"{configpath}/Script Data/{f}"
+                        elif "RemediationScript" in f:
+                            remediation_script_name = f"{configpath}/Script Data/{f}"
+
                     if os.path.exists(detection_script_name) and os.path.exists(
                         remediation_script_name
                     ):
@@ -179,6 +188,9 @@ def update(
                         )
 
                         diff_summary.append(diff_config)
+
+                    else:
+                        print(f"Detection or Remediation script not found for {fname}")
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)

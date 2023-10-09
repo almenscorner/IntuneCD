@@ -16,7 +16,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePo
 
 
 # Get all Compliance policies and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all Compliance policies in Intune to a JSON or YAML file.
 
@@ -49,6 +49,7 @@ def savebackup(path, output, exclude, token, prefix):
             if assignments:
                 policy["assignments"] = assignments
 
+        graph_id = policy["id"]
         policy = remove_keys(policy)
         for rule in policy["scheduledActionsForRule"]:
             remove_keys(rule)
@@ -60,18 +61,19 @@ def savebackup(path, output, exclude, token, prefix):
 
         # Get filename without illegal characters
         fname = clean_filename(policy["displayName"])
-
+        if append_id:
+            fname = f"{fname}_{policy['@odata.type'].split('.')[2]}_{graph_id}"
+        else:
+            fname = f"{fname}_{policy['@odata.type'].split('.')[2]}"
         # Save Compliance policy as JSON or YAML depending on configured value
         # in "-o"
         save_output(
             output,
             configpath,
-            f"{fname}_" + str(policy["@odata.type"].split(".")[2]),
+            fname,
             policy,
         )
 
-        results["outputs"].append(
-            f"{fname}_" + str(policy["@odata.type"].split(".")[2])
-        )
+        results["outputs"].append(fname)
 
     return results

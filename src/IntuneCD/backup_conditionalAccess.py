@@ -15,7 +15,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/identity/conditionalAccess/policies
 
 
 # Get all Conditional Access and save them in specified path
-def savebackup(path, output, token, prefix):
+def savebackup(path, output, token, prefix, append_id):
     """
     Saves all Conditional Access in Intune to a JSON or YAML file.
 
@@ -41,10 +41,14 @@ def savebackup(path, output, token, prefix):
                 policy["grantControls"].pop(
                     "authenticationStrength@odata.context", None
                 )
+
+            graph_id = policy["id"]
             policy = remove_keys(policy)
 
             # Get filename without illegal characters
             fname = clean_filename(policy["displayName"])
+            if append_id:
+                fname = f"{fname}_{graph_id}"
             # Save Conditional Access as JSON or YAML depending on configured
             # value in "-o"
             save_output(output, configpath, fname, policy)

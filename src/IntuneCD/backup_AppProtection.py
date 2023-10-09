@@ -16,7 +16,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/managedAppPolic
 
 
 # Get all App Protection policies and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all App Protection policies in Intune to a JSON or YAML file.
 
@@ -49,6 +49,7 @@ def savebackup(path, output, exclude, token, prefix):
             if assignments:
                 profile["assignments"] = assignments
 
+        graph_id = profile["id"]
         profile = remove_keys(profile)
 
         print("Backing up App Protection: " + profile["displayName"])
@@ -61,6 +62,9 @@ def savebackup(path, output, exclude, token, prefix):
             fname = clean_filename(
                 f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}"
             )
+
+        if append_id:
+            fname = f"{fname}_{graph_id}"
 
         # Save App Protection as JSON or YAML depending on configured value in
         # "-o"

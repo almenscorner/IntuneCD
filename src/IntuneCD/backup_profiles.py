@@ -19,7 +19,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfiguratio
 
 
 # Get all Device Configurations and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all Device Configurations in Intune to a JSON or YAML file and custom macOS/iOS to .mobileconfig.
 
@@ -47,6 +47,7 @@ def savebackup(path, output, exclude, token, prefix):
             if assignments:
                 profile["assignments"] = assignments
 
+        graph_id = profile["id"]
         pid = profile["id"]
         profile = remove_keys(profile)
 
@@ -56,6 +57,8 @@ def savebackup(path, output, exclude, token, prefix):
         fname = clean_filename(
             f"{profile['displayName']}_{str(profile['@odata.type']).split('.')[2]}"
         )
+        if append_id:
+            fname = f"{fname}_{graph_id}"
 
         # If profile is custom macOS or iOS, decode the payload
         if (profile["@odata.type"] == "#microsoft.graph.macOSCustomConfiguration") or (

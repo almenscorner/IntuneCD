@@ -18,7 +18,7 @@ ENDPOINT = (
 
 
 # Get all Windows Driver Profiles and save them in specified path
-def savebackup(path, output, exclude, token, prefix):
+def savebackup(path, output, exclude, token, prefix, append_id):
     """
     Saves all Windows Driver Update Profiles in Intune to a JSON or YAML file.
 
@@ -49,12 +49,15 @@ def savebackup(path, output, exclude, token, prefix):
             if assignments:
                 profile["assignments"] = assignments
 
+        graph_id = profile["id"]
         profile = remove_keys(profile)
 
         print("Backing up Driver Update profile: " + profile["displayName"])
 
         # Get filename without illegal characters
         fname = clean_filename(profile["displayName"])
+        if append_id:
+            fname = f"{fname}_{graph_id}"
         # Save Windows Enrollment Profile as JSON or YAML depending on
         # configured value in "-o"
         save_output(output, configpath, fname, profile)
