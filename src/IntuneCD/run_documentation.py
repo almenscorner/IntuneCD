@@ -464,7 +464,7 @@ def start():
             if "title" in json_dict:
                 title = json_dict["title"]
             else:
-                title = "MEM Documentation"
+                title = "Intune Documentation"
             if "intro" in json_dict:
                 intro = json_dict["intro"]
             else:
@@ -478,7 +478,7 @@ def start():
             else:
                 updated = f"**Document updated on:**"
         else:
-            title = "MEM Documentation"
+            title = "Intune Documentation"
             intro = args.intro
             tenant = f"**Tenant:** {tenantname}"
             updated = f"**Document updated on:**"

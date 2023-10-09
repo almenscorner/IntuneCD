@@ -1,5 +1,5 @@
 ![PyPI - License](https://img.shields.io/pypi/l/IntuneCD?style=flat-square)
-[![Downloads](https://pepy.tech/badge/intunecd/month)](https://pepy.tech/project/intunecd)
+[![Downloads](https://static.pepy.tech/badge/intunecd)](https://pepy.tech/project/intunecd)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/IntuneCD?style=flat-square)
 ![PyPI](https://img.shields.io/pypi/v/IntuneCD?style=flat-square)
 ![Maintenance](https://img.shields.io/maintenance/yes/2023?style=flat-square)
