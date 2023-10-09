@@ -35,6 +35,9 @@ def savebackup(path, output, token, prefix, append_id):
         if prefix and not check_prefix_match(template["displayName"], prefix):
             continue
 
+        if template["displayName"] == "EnrollmentNotificationInternalMEO":
+            continue
+
         results["config_count"] += 1
         print("Backing up Notification message template: " + template["displayName"])
         q_param = "?$expand=localizedNotificationMessages"
