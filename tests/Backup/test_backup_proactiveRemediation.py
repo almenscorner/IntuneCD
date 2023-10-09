@@ -25,8 +25,8 @@ class TestBackupProactiveRemediation(unittest.TestCase):
         self.exclude = []
         self.append_id = False
         self.saved_path = f"{self.directory.path}/Proactive Remediations/test."
-        self.detection_script_path = f"{self.directory.path}/Proactive Remediations/Script Data/test__DetectionScript.ps1"
-        self.remediation_script_path = f"{self.directory.path}/Proactive Remediations/Script Data/test__RemediationScript.ps1"
+        self.detection_script_path = f"{self.directory.path}/Proactive Remediations/Script Data/test_DetectionScript.ps1"
+        self.remediation_script_path = f"{self.directory.path}/Proactive Remediations/Script Data/test_RemediationScript.ps1"
         self.expected_data = {
             "assignments": [{"target": {"groupName": "Group1"}}],
             "displayName": "test",
@@ -183,6 +183,9 @@ class TestBackupProactiveRemediation(unittest.TestCase):
 
         self.assertTrue(
             Path(f"{self.directory.path}/Proactive Remediations/test_0.json").exists()
+        )
+        self.assertTrue(
+            Path(f"{self.directory.path}/Proactive Remediations/Script Data/test_DetectionScript_0.ps1").exists()
         )
 
 

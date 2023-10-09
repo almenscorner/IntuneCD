@@ -78,17 +78,22 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
                 # Save detection script to the Script Data folder
                 results["config_count"] += 1
+                fname = clean_filename(pr_details["displayName"])
+                if append_id:
+                    fname_id = f"_{graph_id}"
+                else:
+                    fname_id = ""
                 decoded = base64.b64decode(pr_details["detectionScriptContent"]).decode(
                     "utf-8"
                 )
-                f = open(f"{configpath}/Script Data/{fname}_DetectionScript.ps1", "w")
+                f = open(f"{configpath}/Script Data/{fname}_DetectionScript{fname_id}.ps1", "w")
                 f.write(decoded)
                 # Save remediation script to the Script Data folder
                 results["config_count"] += 1
                 decoded = base64.b64decode(
                     pr_details["remediationScriptContent"]
                 ).decode("utf-8")
-                f = open(f"{configpath}/Script Data/{fname}_RemediationScript.ps1", "w")
+                f = open(f"{configpath}/Script Data/{fname}_RemediationScript{fname_id}.ps1", "w")
                 f.write(decoded)
 
     return results
