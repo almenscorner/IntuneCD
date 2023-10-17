@@ -93,7 +93,7 @@ class TestGraphRequestGet(unittest.TestCase):
             mock_get.return_value = self.mock_resp
             makeapirequest("https://endpoint", self.token)
 
-        self.assertEqual(2, mock_get.call_count)
+        self.assertEqual(4, mock_get.call_count)
 
     def test_makeapirequest_status_503_no_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made twice and exception should be raised."""
@@ -102,7 +102,7 @@ class TestGraphRequestGet(unittest.TestCase):
             mock_get.return_value = self.mock_resp
             makeapirequest("https://endpoint", self.token)
 
-        self.assertEqual(2, mock_get.call_count)
+        self.assertEqual(4, mock_get.call_count)
 
     def test_makeapirequest_status_504_no_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made twice and exception should be raised."""
@@ -111,7 +111,7 @@ class TestGraphRequestGet(unittest.TestCase):
             mock_get.return_value = self.mock_resp
             makeapirequest("https://endpoint", self.token)
 
-        self.assertEqual(2, mock_get.call_count)
+        self.assertEqual(4, mock_get.call_count)
 
     def test_makeapirequest_with_q_param(self, mock_sleep, mock_get, mock_makeapirequest):
         """The request should be made once and the response should be returned."""
