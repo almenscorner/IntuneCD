@@ -74,7 +74,7 @@ def savebackup(path, output, exclude, token, append_id):
         # If app type is Win32 or MSI, add version to the name as multiple
         # versions can exist
         elif app["@odata.type"] == "#microsoft.graph.win32LobApp":
-            if app["displayVersion"] is None:
+            if not app["displayVersion"]:
                 app_name = app["displayName"] + "_Win32"
             else:
                 app_name = app["displayName"] + "_Win32_" + str(app["displayVersion"]).replace(".", "_")
