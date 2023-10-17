@@ -30,9 +30,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     configpath = path + "/" + "App Protection/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        data, "deviceAppManagement/", "/assignments", token, app_protection=True
-    )
+    assignment_responses = batch_assignment(data, "deviceAppManagement/", "/assignments", token, app_protection=True)
 
     # If profile is ManagedAppConfiguration, skip to next
     for profile in data["value"]:
@@ -55,16 +53,12 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         print("Backing up App Protection: " + profile["displayName"])
 
         if "targetedAppManagementLevels" in profile:
-            fname = clean_filename(
-                f"{profile['displayName']}_{profile['targetedAppManagementLevels']}"
-            )
+            fname = clean_filename(f"{profile['displayName']}_{profile['targetedAppManagementLevels']}")
         else:
-            fname = clean_filename(
-                f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}"
-            )
+            fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
 
         if append_id:
-            fname = f"{fname}_{graph_id}"
+            fname = f"{fname}__{graph_id}"
 
         # Save App Protection as JSON or YAML depending on configured value in
         # "-o"

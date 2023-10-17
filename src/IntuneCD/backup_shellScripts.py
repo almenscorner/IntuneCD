@@ -16,9 +16,7 @@ from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/"
-ASSIGNMENT_ENDPOINT = (
-    "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
-)
+ASSIGNMENT_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
 
 
 # Get all Shell scripts and save them in specified path
@@ -39,12 +37,8 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     for script in data["value"]:
         script_ids.append(script["id"])
 
-    assignment_responses = batch_assignment(
-        data, "deviceManagement/deviceShellScripts/", "?$expand=assignments", token
-    )
-    script_data_responses = batch_request(
-        script_ids, "deviceManagement/deviceShellScripts/", "", token
-    )
+    assignment_responses = batch_assignment(data, "deviceManagement/deviceShellScripts/", "?$expand=assignments", token)
+    script_data_responses = batch_request(script_ids, "deviceManagement/deviceShellScripts/", "", token)
 
     for script_data in script_data_responses:
         if prefix and not check_prefix_match(script_data["displayName"], prefix):
@@ -63,8 +57,11 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
         # Get filename without illegal characters
         fname = clean_filename(script_data["displayName"])
+        script_file_name = script_data["fileName"]
         if append_id:
-            fname = f"{fname}_{graph_id}"
+            fname = f"{fname}__{graph_id}"
+            script_name = script_data["fileName"].replace(".sh", "")
+            script_file_name = f"{script_name}__{graph_id}.sh"
 
         # Save Shell script as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, script_data)
@@ -75,7 +72,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         if not os.path.exists(configpath + "Script Data/"):
             os.makedirs(configpath + "Script Data/")
         decoded = base64.b64decode(script_data["scriptContent"]).decode("utf-8")
-        f = open(configpath + "Script Data/" + script_data["fileName"], "w")
+        f = open(configpath + "Script Data/" + script_file_name, "w")
         f.write(decoded)
 
     return results

@@ -11,9 +11,7 @@ from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
-ENDPOINT = (
-    "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
-)
+ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
 
 
 # Get all Notification Templates and save them in specified path
@@ -52,7 +50,7 @@ def savebackup(path, output, token, prefix, append_id):
         # Get filename without illegal characters
         fname = clean_filename(template_data["displayName"])
         if append_id:
-            fname = f"{fname}_{graph_id}"
+            fname = f"{fname}__{graph_id}"
         # Save Notification template as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, template_data)

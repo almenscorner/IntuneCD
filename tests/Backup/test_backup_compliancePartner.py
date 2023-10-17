@@ -70,9 +70,7 @@ class TestBackupCompliancePartner(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(
-            Path(f"{self.directory.path}/Partner Connections/Compliance").exists()
-        )
+        self.assertTrue(Path(f"{self.directory.path}/Partner Connections/Compliance").exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count["config_count"])
 
@@ -84,9 +82,7 @@ class TestBackupCompliancePartner(unittest.TestCase):
         with open(self.saved_path + "json", "r") as f:
             self.saved_data = json.load(f)
 
-        self.assertTrue(
-            Path(f"{self.directory.path}/Partner Connections/Compliance").exists()
-        )
+        self.assertTrue(Path(f"{self.directory.path}/Partner Connections/Compliance").exists())
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count["config_count"])
 
@@ -102,11 +98,7 @@ class TestBackupCompliancePartner(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, True)
 
-        self.assertTrue(
-            Path(
-                f"{self.directory.path}/Partner Connections/Compliance/test_0.json"
-            ).exists()
-        )
+        self.assertTrue(Path(f"{self.directory.path}/Partner Connections/Compliance/test__0.json").exists())
 
 
 if __name__ == "__main__":

@@ -48,14 +48,10 @@ class TestBackupConditionalAccess(unittest.TestCase):
                         "clientAppTypes": ["all"],
                         "applications": {
                             "includeApplications": ["All"],
-                            "excludedApplications": [
-                                "d4ebce55-015a-49b5-a083-c84d1797ae8c"
-                            ],
+                            "excludedApplications": ["d4ebce55-015a-49b5-a083-c84d1797ae8c"],
                         },
                     },
-                    "grantControls": {
-                        "authenticationStrength@odata.context": "context"
-                    },
+                    "grantControls": {"authenticationStrength@odata.context": "context"},
                 }
             ]
         }
@@ -71,9 +67,7 @@ class TestBackupConditionalAccess(unittest.TestCase):
             "grantControls": {},
         }
 
-        self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_conditionalAccess.makeapirequest"
-        )
+        self.makeapirequest_patch = patch("src.IntuneCD.backup_conditionalAccess.makeapirequest")
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = [self.policy, self.policy["value"][0]]
 
@@ -84,9 +78,7 @@ class TestBackupConditionalAccess(unittest.TestCase):
     def test_backup_yml(self, mock_data):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(
-            self.directory.path, "yaml", self.token, "", self.append_id
-        )
+        self.count = savebackup(self.directory.path, "yaml", self.token, "", self.append_id)
 
         with open(self.saved_path + "yaml", "r") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -99,9 +91,7 @@ class TestBackupConditionalAccess(unittest.TestCase):
     def test_backup_json(self, mock_data):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
-        )
+        self.count = savebackup(self.directory.path, "json", self.token, "", self.append_id)
 
         with open(self.saved_path + "json", "r") as f:
             self.saved_data = json.load(f)
@@ -114,17 +104,13 @@ class TestBackupConditionalAccess(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.side_effect = [{"value": []}]
-        self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
-        )
+        self.count = savebackup(self.directory.path, "json", self.token, "", self.append_id)
         self.assertEqual(0, self.count["config_count"])
 
     def test_backup_with_prefix(self, mock_data):
         """The count should be 0 if the prefix does not match."""
 
-        self.count = savebackup(
-            self.directory.path, "json", self.token, "test1", self.append_id
-        )
+        self.count = savebackup(self.directory.path, "json", self.token, "test1", self.append_id)
 
         self.assertEqual(0, self.count["config_count"])
 
@@ -133,9 +119,7 @@ class TestBackupConditionalAccess(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, "", True)
 
-        self.assertTrue(
-            Path(f"{self.directory.path}/Conditional Access/test_1.json").exists()
-        )
+        self.assertTrue(Path(f"{self.directory.path}/Conditional Access/test__1.json").exists())
 
 
 if __name__ == "__main__":

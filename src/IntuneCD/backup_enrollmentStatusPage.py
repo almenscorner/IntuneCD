@@ -12,9 +12,7 @@ from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
 
 # Set MS Graph endpoint
-ENDPOINT = (
-    "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
-)
+ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
 APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
@@ -33,18 +31,13 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     configpath = path + "/" + "Enrollment Profiles/Windows/ESP/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token
-    )
+    assignment_responses = batch_assignment(data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token)
 
     for profile in data["value"]:
         if prefix and not check_prefix_match(profile["displayName"], prefix):
             continue
 
-        if (
-            profile["@odata.type"]
-            == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
-        ):
+        if profile["@odata.type"] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration":
             results["config_count"] += 1
             if "assignments" not in exclude:
                 assignments = get_object_assignment(profile["id"], assignment_responses)
@@ -74,7 +67,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
             # Get filename without illegal characters
             fname = clean_filename(profile["displayName"])
             if append_id:
-                fname = f"{fname}_{graph_id}"
+                fname = f"{fname}__{graph_id}"
             # Save Windows Enrollment Profile as JSON or YAML depending on
             # configured value in "-o"
             save_output(output, configpath, fname, profile)

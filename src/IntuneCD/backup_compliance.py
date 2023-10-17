@@ -28,14 +28,10 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
     results = {"config_count": 0, "outputs": []}
     configpath = path + "/" + "Compliance Policies/Policies/"
-    q_param = {
-        "$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"
-    }
+    q_param = {"$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"}
     data = makeapirequest(ENDPOINT, token, q_param)
 
-    assignment_responses = batch_assignment(
-        data, "deviceManagement/deviceCompliancePolicies/", "/assignments", token
-    )
+    assignment_responses = batch_assignment(data, "deviceManagement/deviceCompliancePolicies/", "/assignments", token)
 
     for policy in data["value"]:
         if prefix and not check_prefix_match(policy["displayName"], prefix):
@@ -54,15 +50,13 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         for rule in policy["scheduledActionsForRule"]:
             remove_keys(rule)
         if policy["scheduledActionsForRule"]:
-            for scheduled_config in policy["scheduledActionsForRule"][0][
-                "scheduledActionConfigurations"
-            ]:
+            for scheduled_config in policy["scheduledActionsForRule"][0]["scheduledActionConfigurations"]:
                 remove_keys(scheduled_config)
 
         # Get filename without illegal characters
         fname = clean_filename(policy["displayName"])
         if append_id:
-            fname = f"{fname}_{policy['@odata.type'].split('.')[2]}_{graph_id}"
+            fname = f"{fname}__{policy['@odata.type'].split('.')[2]}_{graph_id}"
         else:
             fname = f"{fname}_{policy['@odata.type'].split('.')[2]}"
         # Save Compliance policy as JSON or YAML depending on configured value

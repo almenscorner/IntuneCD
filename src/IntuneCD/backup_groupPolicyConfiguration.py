@@ -30,18 +30,14 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     configpath = path + "/" + "Group Policy Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        data, "deviceManagement/groupPolicyConfigurations/", "/assignments", token
-    )
+    assignment_responses = batch_assignment(data, "deviceManagement/groupPolicyConfigurations/", "/assignments", token)
 
     for profile in data["value"]:
         if prefix and not check_prefix_match(profile["displayName"], prefix):
             continue
 
         results["config_count"] += 1
-        definition_endpoint = (
-            f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
-        )
+        definition_endpoint = f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
         # Get definitions
         definitions = makeapirequest(definition_endpoint, token)
 
@@ -69,7 +65,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         # Get filename without illegal characters
         fname = clean_filename(profile["displayName"])
         if append_id:
-            fname = f"{fname}_{graph_id}"
+            fname = f"{fname}__{graph_id}"
 
         save_output(output, configpath, fname, profile)
 

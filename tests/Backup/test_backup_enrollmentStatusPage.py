@@ -28,9 +28,7 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
         self.expected_data = {
             "assignments": [{"target": {"groupName": "Group1"}}],
             "displayName": "test",
-            "selectedMobileAppNames": [
-                {"name": "app1", "type": "#microsoft.graph.mobileApp"}
-            ],
+            "selectedMobileAppNames": [{"name": "app1", "type": "#microsoft.graph.mobileApp"}],
             "@odata.type": "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration",
         }
         self.statuspage_profile = {
@@ -48,21 +46,15 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
             "@odata.type": "#microsoft.graph.mobileApp",
         }
 
-        self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_enrollmentStatusPage.batch_assignment"
-        )
+        self.batch_assignment_patch = patch("src.IntuneCD.backup_enrollmentStatusPage.batch_assignment")
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_enrollmentStatusPage.get_object_assignment"
-        )
+        self.object_assignment_patch = patch("src.IntuneCD.backup_enrollmentStatusPage.get_object_assignment")
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_enrollmentStatusPage.makeapirequest"
-        )
+        self.makeapirequest_patch = patch("src.IntuneCD.backup_enrollmentStatusPage.makeapirequest")
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = self.statuspage_profile, self.app_data
 
@@ -76,9 +68,7 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = "yaml"
-        count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
-        )
+        count = savebackup(self.directory.path, output, self.exclude, self.token, "", self.append_id)
 
         with open(self.saved_path + output, "r") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -92,9 +82,7 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = "json"
-        count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
-        )
+        count = savebackup(self.directory.path, output, self.exclude, self.token, "", self.append_id)
 
         with open(self.saved_path + output, "r") as f:
             saved_data = json.load(f)
@@ -107,9 +95,7 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.side_effect = [{"value": []}]
-        self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
-        )
+        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", self.append_id)
 
         self.assertEqual(0, self.count["config_count"])
 
@@ -129,15 +115,9 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
-        )
+        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", True)
 
-        self.assertTrue(
-            Path(
-                f"{self.directory.path}/Enrollment Profiles/Windows/ESP/test_0.json"
-            ).exists()
-        )
+        self.assertTrue(Path(f"{self.directory.path}/Enrollment Profiles/Windows/ESP/test__0.json").exists())
 
 
 if __name__ == "__main__":

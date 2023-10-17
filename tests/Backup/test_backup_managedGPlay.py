@@ -20,9 +20,7 @@ class TestBackupManagedGPlay(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.append_id = False
-        self.saved_path = (
-            f"{self.directory.path}/Managed Google Play/awesome@gmail.com."
-        )
+        self.saved_path = f"{self.directory.path}/Managed Google Play/awesome@gmail.com."
         self.expected_data = {
             "bindStatus": "boundAndValidated",
             "lastAppSyncDateTime": "2022-01-28T12:28:48.975089Z",
@@ -84,11 +82,7 @@ class TestBackupManagedGPlay(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, True)
 
-        self.assertTrue(
-            Path(
-                f"{self.directory.path}/Managed Google Play/awesome@gmail.com_0.json"
-            ).exists()
-        )
+        self.assertTrue(Path(f"{self.directory.path}/Managed Google Play/awesome@gmail.com__0.json").exists())
 
 
 if __name__ == "__main__":

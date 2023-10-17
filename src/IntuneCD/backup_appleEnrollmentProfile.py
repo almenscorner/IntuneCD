@@ -55,7 +55,7 @@ def savebackup(path, output, token, prefix, append_id):
                 # Get filename without illegal characters
                 fname = clean_filename(value["displayName"])
                 if append_id:
-                    fname = f"{fname}_{graph_id}"
+                    fname = f"{fname}__{graph_id}"
                 # Save Apple Enrollment Profile as JSON or YAML depending on
                 # configured value in "-o"
                 save_output(output, configpath, fname, value)

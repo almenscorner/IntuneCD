@@ -22,9 +22,7 @@ class TestBackupVPPTokens(unittest.TestCase):
         self.append_id = False
         self.saved_path = f"{self.directory.path}/Apple VPP Tokens/test."
         self.expected_data = {"tokenName": "test", "displayName": "test"}
-        self.vpp_token = {
-            "value": [{"id": "0", "tokenName": "test", "displayName": "test"}]
-        }
+        self.vpp_token = {"value": [{"id": "0", "tokenName": "test", "displayName": "test"}]}
 
         self.patch_makeapirequest = patch(
             "src.IntuneCD.backup_vppTokens.makeapirequest",
@@ -73,9 +71,7 @@ class TestBackupVPPTokens(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, True)
 
-        self.assertTrue(
-            Path(f"{self.directory.path}/Apple VPP Tokens/test_0.json").exists()
-        )
+        self.assertTrue(Path(f"{self.directory.path}/Apple VPP Tokens/test__0.json").exists())
 
 
 if __name__ == "__main__":
