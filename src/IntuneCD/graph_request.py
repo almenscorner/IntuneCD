@@ -39,8 +39,8 @@ def makeapirequest(endpoint, token, q_param=None):
         response = requests.get(endpoint, headers=headers)
         if response.status_code == 504 or response.status_code == 502 or response.status_code == 503:
             retry_count = 0
-            print("Ran into issues with Graph request, waiting 10 seconds and trying again...")
             while retry_count < 3:
+                print("Ran into issues with Graph request, waiting 10 seconds and trying again...")
                 time.sleep(10)
                 response = requests.get(endpoint, headers=headers)
                 if response.status_code == 200:
