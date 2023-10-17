@@ -129,7 +129,7 @@ class TestBackupCompliance(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", True)
 
-        self.assertTrue(Path(f"{self.directory.path}/Compliance Policies/Policies/test__iosCompliancePolicy_0.json").exists())
+        self.assertTrue(Path(f"{self.directory.path}/Compliance Policies/Policies/test_iosCompliancePolicy__0.json").exists())
 
 
 if __name__ == "__main__":
