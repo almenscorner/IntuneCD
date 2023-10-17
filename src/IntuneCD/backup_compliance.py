@@ -56,7 +56,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         # Get filename without illegal characters
         fname = clean_filename(policy["displayName"])
         if append_id:
-            fname = f"{fname}__{policy['@odata.type'].split('.')[2]}_{graph_id}"
+            fname = f"{fname}_{policy['@odata.type'].split('.')[2]}__{graph_id}"
         else:
             fname = f"{fname}_{policy['@odata.type'].split('.')[2]}"
         # Save Compliance policy as JSON or YAML depending on configured value
