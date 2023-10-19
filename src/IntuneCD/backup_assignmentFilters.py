@@ -41,7 +41,7 @@ def savebackup(path, output, token, prefix, append_id):
             # Get filename without illegal characters
             fname = clean_filename(assign_filter["displayName"])
             if append_id:
-                fname = f"{fname}_{graph_id}"
+                fname = f"{fname}__{graph_id}"
             # Save Filters as JSON or YAML depending on configured value in
             # "-o"
             save_output(output, configpath, fname, assign_filter)

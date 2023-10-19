@@ -48,21 +48,15 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
             ]
         }
 
-        self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_enrollmentConfigurations.batch_assignment"
-        )
+        self.batch_assignment_patch = patch("src.IntuneCD.backup_enrollmentConfigurations.batch_assignment")
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_enrollmentConfigurations.get_object_assignment"
-        )
+        self.object_assignment_patch = patch("src.IntuneCD.backup_enrollmentConfigurations.get_object_assignment")
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_enrollmentConfigurations.makeapirequest"
-        )
+        self.makeapirequest_patch = patch("src.IntuneCD.backup_enrollmentConfigurations.makeapirequest")
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.enrollment_config
 
@@ -75,9 +69,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
     def test_backup_yml(self):
         """Test that the backup is saved as yml. And that the data is correct."""
         output = "yaml"
-        count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
-        )
+        count = savebackup(self.directory.path, output, self.exclude, self.token, "", self.append_id)
         with open(f"{self.saved_path}yaml", "r") as file:
             data = yaml.safe_load(file)
         self.assertEqual(data, self.expected_data)
@@ -85,9 +77,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
     def test_backup_json(self):
         """Test that the backup is saved as json. And that the data is correct."""
         output = "json"
-        count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
-        )
+        count = savebackup(self.directory.path, output, self.exclude, self.token, "", self.append_id)
         with open(f"{self.saved_path}json", "r") as file:
             data = yaml.safe_load(file)
         self.assertEqual(data, self.expected_data)
@@ -95,12 +85,8 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
     def test_backup_skip_ESP(self):
         """Test that the backup is skipped when config is ESP."""
         output = "json"
-        self.enrollment_config["value"][0][
-            "@odata.type"
-        ] = "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
-        count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
-        )
+        self.enrollment_config["value"][0]["@odata.type"] = "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+        count = savebackup(self.directory.path, output, self.exclude, self.token, "", self.append_id)
 
         self.assertEqual(0, count["config_count"])
 
@@ -108,9 +94,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.side_effect = [{"value": []}]
-        self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
-        )
+        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", self.append_id)
 
         self.assertEqual(0, self.count["config_count"])
 
@@ -130,15 +114,9 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
-        )
+        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", True)
 
-        self.assertTrue(
-            Path(
-                f"{self.directory.path}/Enrollment Configurations/test_test_test.json"
-            ).exists()
-        )
+        self.assertTrue(Path(f"{self.directory.path}/Enrollment Configurations/test_test__test.json").exists())
 
 
 if __name__ == "__main__":

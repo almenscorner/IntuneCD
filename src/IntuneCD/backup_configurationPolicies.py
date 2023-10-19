@@ -38,9 +38,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     for policy in policies["value"]:
         policy_ids.append(policy["id"])
 
-    assignment_responses = batch_assignment(
-        policies, "deviceManagement/configurationPolicies/", "/assignments", token
-    )
+    assignment_responses = batch_assignment(policies, "deviceManagement/configurationPolicies/", "/assignments", token)
     policy_settings_batch = batch_request(
         policy_ids,
         "deviceManagement/configurationPolicies/",
@@ -73,7 +71,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         # fname = clean_filename(name)
         fname = clean_filename(f"{name}_{str(policy['technologies']).split(',')[-1]}")
         if append_id:
-            fname = f"{fname}_{graph_id}"
+            fname = f"{fname}__{graph_id}"
         # Save Configuration Policy as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, policy)

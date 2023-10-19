@@ -10,9 +10,7 @@ from .save_output import save_output
 from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
-ENDPOINT = (
-    "https://graph.microsoft.com/beta/deviceManagement/complianceManagementPartners"
-)
+ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/complianceManagementPartners"
 
 
 # Get all Compliance Partners and save them in specified path
@@ -42,7 +40,7 @@ def savebackup(path, output, token, append_id):
         # Get filename without illegal characters
         fname = clean_filename(partner["displayName"])
         if append_id:
-            fname = f"{fname}_{graph_id}"
+            fname = f"{fname}__{graph_id}"
         # Save Compliance policy as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, partner)

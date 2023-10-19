@@ -38,7 +38,7 @@ def savebackup(path, output, token, append_id):
         # Get filename without illegal characters
         fname = clean_filename(token_name)
         if append_id:
-            fname = f"{fname}_{graph_id}"
+            fname = f"{fname}__{graph_id}"
 
         # Save token as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, vpp_token)

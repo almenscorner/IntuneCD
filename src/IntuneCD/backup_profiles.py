@@ -33,9 +33,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     configpath = path + "/" + "Device Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        data, "deviceManagement/deviceConfigurations/", "/assignments", token
-    )
+    assignment_responses = batch_assignment(data, "deviceManagement/deviceConfigurations/", "/assignments", token)
 
     for profile in data["value"]:
         if prefix and not check_prefix_match(profile["displayName"], prefix):
@@ -54,11 +52,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         print("Backing up profile: " + profile["displayName"])
 
         # Get filename without illegal characters
-        fname = clean_filename(
-            f"{profile['displayName']}_{str(profile['@odata.type']).split('.')[2]}"
-        )
+        fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type']).split('.')[2]}")
         if append_id:
-            fname = f"{fname}_{graph_id}"
+            fname = f"{fname}__{graph_id}"
 
         # If profile is custom macOS or iOS, decode the payload
         if (profile["@odata.type"] == "#microsoft.graph.macOSCustomConfiguration") or (
@@ -70,9 +66,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 os.makedirs(configpath + "/" + "mobileconfig/")
             # Save decoded payload as .mobileconfig
             results["config_count"] += 1
-            f = open(
-                configpath + "/" + "mobileconfig/" + profile["payloadFileName"], "w"
-            )
+            f = open(configpath + "/" + "mobileconfig/" + profile["payloadFileName"], "w")
             f.write(decoded)
             # Save Device Configuration as JSON or YAML depending on configured
             # value in "-o"

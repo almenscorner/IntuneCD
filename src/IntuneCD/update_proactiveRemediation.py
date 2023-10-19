@@ -27,9 +27,7 @@ from .clean_filename import clean_filename
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScripts"
 
 
-def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
-):
+def update(path, token, assignment=False, report=False, create_groups=False, remove=False):
     """
     This function updates all Proactive Remediation in Intune if,
     the configuration in Intune differs from the JSON/YAML file.
@@ -81,9 +79,7 @@ def update(
                     print("-" * 90)
                     q_param = None
                     # Get Powershell script details
-                    mem_data = makeapirequest(
-                        ENDPOINT + "/" + data["value"]["id"], token, q_param
-                    )
+                    mem_data = makeapirequest(ENDPOINT + "/" + data["value"]["id"], token, q_param)
                     mem_id = data["value"]["id"]
                     # Remove keys before using DeepDiff
                     mem_data = remove_keys(mem_data)
@@ -92,8 +88,12 @@ def update(
 
                     # Check if script data is saved and read the file
                     fname = filename.split(".")[0]
-                    # Get id from filename
-                    fname_id = filename.split("_")[-1].replace(".json", "").replace(".yaml", "")
+                    # Get id from filename if there is any
+                    fname_id = filename.split("__")
+                    if len(fname_id) > 1:
+                        fname_id = fname_id[1].replace(".json", "").replace(".yaml", "")
+                    else:
+                        fname_id = ""
                     # Get all remediation scripts and detection scripts files
                     script_files = os.listdir(f"{configpath}/Script Data")
                     # Filter out files that matches the id
@@ -107,20 +107,14 @@ def update(
                         elif "RemediationScript" in f:
                             remediation_script_name = f"{configpath}/Script Data/{f}"
 
-                    if os.path.exists(detection_script_name) and os.path.exists(
-                        remediation_script_name
-                    ):
+                    if os.path.exists(detection_script_name) and os.path.exists(remediation_script_name):
                         with open(detection_script_name, "r") as df:
                             repo_detection_config = df.read()
                         with open(remediation_script_name, "r") as rf:
                             repo_remediation_config = rf.read()
 
-                        mem_detection_config = base64.b64decode(
-                            mem_data["detectionScriptContent"]
-                        ).decode("utf-8")
-                        mem_remediation_config = base64.b64decode(
-                            mem_data["remediationScriptContent"]
-                        ).decode("utf-8")
+                        mem_detection_config = base64.b64decode(mem_data["detectionScriptContent"]).decode("utf-8")
+                        mem_remediation_config = base64.b64decode(mem_data["remediationScriptContent"]).decode("utf-8")
 
                         ddiff = DeepDiff(
                             mem_detection_config,
@@ -146,17 +140,11 @@ def update(
                         if cdiff or ddiff or rdiff and report is False:
                             detection_bytes = repo_detection_config.encode("utf-8")
                             remediation_bytes = repo_remediation_config.encode("utf-8")
-                            repo_data["detectionScriptContent"] = base64.b64encode(
-                                detection_bytes
-                            ).decode("utf-8")
-                            repo_data["remediationScriptContent"] = base64.b64encode(
-                                remediation_bytes
-                            ).decode("utf-8")
+                            repo_data["detectionScriptContent"] = base64.b64encode(detection_bytes).decode("utf-8")
+                            repo_data["remediationScriptContent"] = base64.b64encode(remediation_bytes).decode("utf-8")
                             request_data = json.dumps(repo_data)
                             q_param = None
-                            makeapirequestPatch(
-                                ENDPOINT + "/" + mem_id, token, q_param, request_data
-                            )
+                            makeapirequestPatch(ENDPOINT + "/" + mem_id, token, q_param, request_data)
 
                         diff_config = DiffSummary(
                             data=cdiff,
@@ -180,12 +168,8 @@ def update(
                             notify=False,
                         )
 
-                        diff_config.diffs += (
-                            diff_detection.diffs + diff_remediation.diffs
-                        )
-                        diff_config.count += (
-                            diff_detection.count + diff_remediation.count
-                        )
+                        diff_config.diffs += diff_detection.diffs + diff_remediation.diffs
+                        diff_config.count += diff_detection.count + diff_remediation.count
 
                         diff_summary.append(diff_config)
 
@@ -194,9 +178,7 @@ def update(
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(
-                            assign_obj, mem_assign_obj, token, create_groups
-                        )
+                        update = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
                         if update is not None:
                             request_data = {"deviceHealthScriptAssignments": update}
                             post_assignment_update(
@@ -211,10 +193,7 @@ def update(
                 # and assign
                 else:
                     print("-" * 90)
-                    print(
-                        "Proactive Remediation not found, creating: "
-                        + repo_data["displayName"]
-                    )
+                    print("Proactive Remediation not found, creating: " + repo_data["displayName"])
                     if report is False:
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(
@@ -225,9 +204,7 @@ def update(
                             status_code=201,
                         )
                         mem_assign_obj = []
-                        assignment = update_assignment(
-                            assign_obj, mem_assign_obj, token, create_groups
-                        )
+                        assignment = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
                         if assignment is not None:
                             request_data = {"deviceHealthScriptAssignments": assignment}
                             post_assignment_update(
@@ -237,23 +214,15 @@ def update(
                                 "assign",
                                 token,
                             )
-                        print(
-                            "Proactive Remediation created with id: "
-                            + post_request["id"]
-                        )
+                        print("Proactive Remediation created with id: " + post_request["id"])
 
         # If any Proactive Remediations are left in mem_proactiveRemediation, remove them from Intune as they are not in the repo
         if mem_proactiveRemediation.get("value", None) is not None and remove is True:
             for val in mem_proactiveRemediation["value"]:
                 if val.get("publisher", None) != "Microsoft":
                     print("-" * 90)
-                    print(
-                        "Removing Proactive Remediation from Intune: "
-                        + val["displayName"]
-                    )
+                    print("Removing Proactive Remediation from Intune: " + val["displayName"])
                     if report is False:
-                        makeapirequestDelete(
-                            f"{ENDPOINT}/{val['id']}", token, status_code=200
-                        )
+                        makeapirequestDelete(f"{ENDPOINT}/{val['id']}", token, status_code=200)
 
     return diff_summary

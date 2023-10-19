@@ -31,9 +31,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     intents = makeapirequest(BASE_ENDPOINT + "/intents", token)
     templates = makeapirequest(TEMPLATE_ENDPOINT, token)
 
-    assignment_responses = batch_assignment(
-        intents, "deviceManagement/intents/", "/assignments", token
-    )
+    assignment_responses = batch_assignment(intents, "deviceManagement/intents/", "/assignments", token)
     intent_responses = batch_intents(intents, token)
 
     if intent_responses:
@@ -51,9 +49,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
             configpath = path + "/" + "Management Intents/" + template_type + "/"
 
             if "assignments" not in exclude:
-                assignments = get_object_assignment(
-                    intent_value["id"], assignment_responses
-                )
+                assignments = get_object_assignment(intent_value["id"], assignment_responses)
                 if assignments:
                     intent_value["assignments"] = assignments
 
@@ -65,7 +61,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
             # Get filename without illegal characters
             fname = clean_filename(intent_value["displayName"])
             if append_id:
-                fname = f"{fname}_{graph_id}"
+                fname = f"{fname}__{graph_id}"
             # Save Intent as JSON or YAML depending on configured value in "-o"
             save_output(output, configpath, fname, intent_value)
 

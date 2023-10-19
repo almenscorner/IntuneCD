@@ -37,12 +37,8 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         for script in data["value"]:
             script_ids.append(script["id"])
 
-        assignment_responses = batch_assignment(
-            data, "deviceManagement/deviceManagementScripts/", "/assignments", token
-        )
-        script_data_responses = batch_request(
-            script_ids, "deviceManagement/deviceManagementScripts/", "", token
-        )
+        assignment_responses = batch_assignment(data, "deviceManagement/deviceManagementScripts/", "/assignments", token)
+        script_data_responses = batch_request(script_ids, "deviceManagement/deviceManagementScripts/", "", token)
 
         for script_data in script_data_responses:
             if prefix and not check_prefix_match(script_data["displayName"], prefix):
@@ -50,9 +46,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
             results["config_count"] += 1
             if "assignments" not in exclude:
-                assignments = get_object_assignment(
-                    script_data["id"], assignment_responses
-                )
+                assignments = get_object_assignment(script_data["id"], assignment_responses)
                 if assignments:
                     script_data["assignments"] = assignments
 
@@ -63,8 +57,11 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
             # Get filename without illegal characters
             fname = clean_filename(script_data["displayName"])
+            script_file_name = script_data["fileName"]
             if append_id:
-                fname += "_" + graph_id
+                fname = f"{fname}__{graph_id}"
+                script_name = script_data["fileName"].replace(".ps1", "")
+                script_file_name = f"{script_name}__{graph_id}.ps1"
             # Save Powershell script as JSON or YAML depending on configured value
             # in "-o"
             save_output(output, configpath, fname, script_data)
@@ -76,7 +73,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 if not os.path.exists(configpath + "Script Data/"):
                     os.makedirs(configpath + "Script Data/")
                 decoded = base64.b64decode(script_data["scriptContent"]).decode("utf-8")
-                f = open(configpath + "Script Data/" + script_data["fileName"], "w")
+                f = open(configpath + "Script Data/" + script_file_name, "w")
                 f.write(decoded)
 
     return results
