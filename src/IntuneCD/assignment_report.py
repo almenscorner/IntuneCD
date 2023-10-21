@@ -31,10 +31,14 @@ def get_group_report(path, output):
                 if type(data) is dict and data.get("assignments"):
                     for assignment in data["assignments"]:
                         if assignment["target"].get("groupName"):
+                            intent_string = assignment.get("intent", "")
+                            config_type = ""
+                            if data.get("@odata.type"):
+                                config_type = f'{data["@odata.type"].split(".")[2]}'
                             if data.get("displayName"):
-                                name = data["displayName"]
+                                payload_data = {"name": data["displayName"], "type": config_type, "intent": intent_string}
                             elif data.get("name"):
-                                name = data["name"]
+                                payload_data = {"name": data["name"], "type": config_type, "intent": intent_string}
                             data = {
                                 "groupName": assignment["target"]["groupName"],
                                 "groupType": assignment["target"].get("groupType"),
@@ -46,20 +50,20 @@ def get_group_report(path, output):
 
                             if not groups:
                                 groups.append(data)
-                                data["assignedTo"][payload_type] = [name]
+                                data["assignedTo"][payload_type] = [payload_data]
                                 payload_added = True
                             else:
                                 for item in groups:
                                     if item["groupName"] == data["groupName"]:
                                         if not payload_added and item["assignedTo"].get(payload_type):
-                                            item["assignedTo"][payload_type].append(name)
+                                            item["assignedTo"][payload_type].append(payload_data)
                                             payload_added = True
                                         elif not payload_added and not item["assignedTo"].get(payload_type):
-                                            item["assignedTo"][payload_type] = [name]
+                                            item["assignedTo"][payload_type] = [payload_data]
                                             payload_added = True
 
                                 if not payload_added:
-                                    data["assignedTo"][payload_type] = [name]
+                                    data["assignedTo"][payload_type] = [payload_data]
                                     groups.append(data)
 
     def collect_groups(path):

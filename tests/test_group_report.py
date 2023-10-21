@@ -14,12 +14,12 @@ class TestGetGroupReport(unittest.TestCase):
         self.directory.makedir("Compliance Policies/Policies")
         self.directory.write(
             "Device Configurations/test.json",
-            '{"displayName": "testconfig", "assignments": [{"target": {"groupName": "test1", "groupType": "DynamicMembership", "membershipRule": "test"}}]} ',
+            '{"displayName": "testconfig","assignments": [{"target": {"groupName": "test1","groupType": "DynamicMembership","membershipRule": "test"}}]}',
             encoding="utf-8",
         )
         self.directory.write(
             "Compliance Policies/Policies/test.json",
-            '{"displayName": "testconfig", "assignments": [{"target": {"groupName": "test1", "groupType": "DynamicMembership", "membershipRule": "test"}}]} ',
+            '{"@odata.type": "#type.super.duper","displayName": "testconfig","assignments": [{"intent": "force","target": {"groupName": "test1","groupType": "DynamicMembership","membershipRule": "test"}}]}',
             encoding="utf-8",
         )
 
@@ -32,8 +32,8 @@ class TestGetGroupReport(unittest.TestCase):
         expected_output = [
             {
                 "assignedTo": {
-                    "Compliance Policies": ["testconfig"],
-                    "Device Configurations": ["testconfig"],
+                    "Compliance Policies": [{"name": "testconfig", "type": "duper", "intent": "force"}],
+                    "Device Configurations": [{"name": "testconfig", "type": "", "intent": ""}],
                 },
                 "groupName": "test1",
                 "groupType": "DynamicMembership",
@@ -41,41 +41,29 @@ class TestGetGroupReport(unittest.TestCase):
             }
         ]
         get_group_report(self.directory.path, "json")
-        with open(
-            os.path.join(self.directory.path, "Assignment Report", "report.json"), "r"
-        ) as f:
+        with open(os.path.join(self.directory.path, "Assignment Report", "report.json"), "r") as f:
             actual_output = eval(f.read())
         self.assertEqual(actual_output, expected_output)
 
     def test_get_group_report_no_files(self):
         # Test that the function returns an empty list when no files are found
-        with open(
-            os.path.join(self.directory.path, "Device Configurations", "test.json"), "r"
-        ) as f:
+        with open(os.path.join(self.directory.path, "Device Configurations", "test.json"), "r") as f:
             data = json.load(f)
-        with open(
-            os.path.join(self.directory.path, "Device Configurations", "test.json"), "w"
-        ) as f:
+        with open(os.path.join(self.directory.path, "Device Configurations", "test.json"), "w") as f:
             data.pop("assignments")
             data = json.dump(data, f)
         with open(
-            os.path.join(
-                self.directory.path, "Compliance Policies/Policies", "test.json"
-            ),
+            os.path.join(self.directory.path, "Compliance Policies/Policies", "test.json"),
             "r",
         ) as f:
             data = json.load(f)
         with open(
-            os.path.join(
-                self.directory.path, "Compliance Policies/Policies", "test.json"
-            ),
+            os.path.join(self.directory.path, "Compliance Policies/Policies", "test.json"),
             "w",
         ) as f:
             data.pop("assignments")
             data = json.dump(data, f)
 
         get_group_report(self.directory.path, "json")
-        path_exists = os.path.exists(
-            os.path.join(self.directory.path, "Assignment Report")
-        )
+        path_exists = os.path.exists(os.path.join(self.directory.path, "Assignment Report"))
         self.assertEqual(path_exists, False)
