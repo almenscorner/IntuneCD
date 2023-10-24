@@ -5,17 +5,17 @@
 This module backs up all Configuration Policies in Intune.
 """
 
-from src.IntuneCD.intunecdlib.check_prefix import check_prefix_match
-from src.IntuneCD.intunecdlib.clean_filename import clean_filename
-from src.IntuneCD.intunecdlib.graph_batch import (
+from ..intunecdlib.check_prefix import check_prefix_match
+from ..intunecdlib.clean_filename import clean_filename
+from ..intunecdlib.graph_batch import (
     batch_assignment,
     batch_request,
     get_object_assignment,
     get_object_details,
 )
-from src.IntuneCD.intunecdlib.graph_request import makeapirequest
-from src.IntuneCD.intunecdlib.remove_keys import remove_keys
-from src.IntuneCD.intunecdlib.save_output import save_output
+from ..intunecdlib.graph_request import makeapirequest
+from ..intunecdlib.remove_keys import remove_keys
+from ..intunecdlib.save_output import save_output
 
 # Set MS Graph base endpoint
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"

@@ -11,19 +11,18 @@ import os
 
 from deepdiff import DeepDiff
 
-from src.IntuneCD.intunecdlib.diff_summary import DiffSummary
-from src.IntuneCD.intunecdlib.graph_batch import (
+from ..intunecdlib.diff_summary import DiffSummary
+from ..intunecdlib.graph_batch import (
     batch_assignment,
     batch_intents,
     get_object_assignment,
 )
-from src.IntuneCD.intunecdlib.graph_request import (
+from ..intunecdlib.graph_request import (
     makeapirequest,
     makeapirequestDelete,
     makeapirequestPost,
 )
-from src.IntuneCD.intunecdlib.load_file import load_file
-
+from ..intunecdlib.load_file import load_file
 from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph base endpoint

@@ -5,12 +5,12 @@
 This module backs up all Windows Quality Update Profiles in Intune.
 """
 
-from src.IntuneCD.intunecdlib.check_prefix import check_prefix_match
-from src.IntuneCD.intunecdlib.clean_filename import clean_filename
-from src.IntuneCD.intunecdlib.graph_batch import batch_assignment, get_object_assignment
-from src.IntuneCD.intunecdlib.graph_request import makeapirequest
-from src.IntuneCD.intunecdlib.remove_keys import remove_keys
-from src.IntuneCD.intunecdlib.save_output import save_output
+from ..intunecdlib.check_prefix import check_prefix_match
+from ..intunecdlib.clean_filename import clean_filename
+from ..intunecdlib.graph_batch import batch_assignment, get_object_assignment
+from ..intunecdlib.graph_request import makeapirequest
+from ..intunecdlib.remove_keys import remove_keys
+from ..intunecdlib.save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = (

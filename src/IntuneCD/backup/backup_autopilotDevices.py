@@ -5,9 +5,9 @@
 This module backs up all Autopilot devices in Intune.
 """
 
-from src.IntuneCD.intunecdlib.clean_filename import clean_filename
-from src.IntuneCD.intunecdlib.graph_request import makeapirequest
-from src.IntuneCD.intunecdlib.save_output import save_output
+from ..intunecdlib.clean_filename import clean_filename
+from ..intunecdlib.graph_request import makeapirequest
+from ..intunecdlib.save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = (

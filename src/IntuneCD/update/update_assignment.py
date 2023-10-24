@@ -10,7 +10,7 @@ import uuid
 
 from deepdiff import DeepDiff
 
-from src.IntuneCD.intunecdlib.graph_request import makeapirequest, makeapirequestPost
+from ..intunecdlib.graph_request import makeapirequest, makeapirequestPost
 
 
 def get_added_removed(diff_object) -> list:

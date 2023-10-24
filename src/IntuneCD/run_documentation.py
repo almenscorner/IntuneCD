@@ -27,7 +27,7 @@ from datetime import datetime
 
 from markdown_toclify import markdown_toclify
 
-from src.IntuneCD.intunecdlib.documentation_functions import (
+from .intunecdlib.documentation_functions import (
     document_configs,
     document_management_intents,
     get_md_files,

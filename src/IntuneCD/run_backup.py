@@ -27,8 +27,8 @@ import os
 import sys
 from io import StringIO
 
-from src.IntuneCD.intunecdlib.archive import move_to_archive
-from src.IntuneCD.intunecdlib.get_authparams import getAuth
+from .intunecdlib.archive import move_to_archive
+from .intunecdlib.get_authparams import getAuth
 
 REPO_DIR = os.environ.get("REPO_DIR")
 
@@ -179,161 +179,161 @@ def start():
         results = []
 
         if "AppConfigurations" not in exclude:
-            from src.IntuneCD.backup.backup_appConfiguration import savebackup
+            from .backup.backup_appConfiguration import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "AppProtection" not in exclude:
-            from src.IntuneCD.backup.backup_AppProtection import savebackup
+            from .backup.backup_AppProtection import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "APNs" not in exclude:
-            from src.IntuneCD.backup.backup_apns import savebackup
+            from .backup.backup_apns import savebackup
 
             results.append(savebackup(path, output, token))
 
         if "VPP" not in exclude:
-            from src.IntuneCD.backup.backup_vppTokens import savebackup
+            from .backup.backup_vppTokens import savebackup
 
             results.append(savebackup(path, output, token, append_id))
 
         if "Applications" not in exclude:
-            from src.IntuneCD.backup.backup_applications import savebackup
+            from .backup.backup_applications import savebackup
 
             results.append(savebackup(path, output, exclude, token, append_id))
 
         if "Compliance" not in exclude:
-            from src.IntuneCD.backup.backup_compliance import savebackup
+            from .backup.backup_compliance import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "DeviceManagementSettings" not in exclude:
-            from src.IntuneCD.backup.backup_deviceManagementSettings import savebackup
+            from .backup.backup_deviceManagementSettings import savebackup
 
             results.append(savebackup(path, output, token))
 
         if "DeviceCategories" not in exclude:
-            from src.IntuneCD.backup.backup_deviceCategories import savebackup
+            from .backup.backup_deviceCategories import savebackup
 
             results.append(savebackup(path, output, token, prefix, append_id))
 
         if "NotificationTemplate" not in exclude:
-            from src.IntuneCD.backup.backup_notificationTemplate import savebackup
+            from .backup.backup_notificationTemplate import savebackup
 
             results.append(savebackup(path, output, token, prefix, append_id))
 
         if "Profiles" not in exclude:
-            from src.IntuneCD.backup.backup_profiles import savebackup
+            from .backup.backup_profiles import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "GPOConfigurations" not in exclude:
-            from src.IntuneCD.backup.backup_groupPolicyConfiguration import savebackup
+            from .backup.backup_groupPolicyConfiguration import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "AppleEnrollmentProfile" not in exclude:
-            from src.IntuneCD.backup.backup_appleEnrollmentProfile import savebackup
+            from .backup.backup_appleEnrollmentProfile import savebackup
 
             results.append(savebackup(path, output, token, prefix, append_id))
 
         if "WindowsEnrollmentProfile" not in exclude:
-            from src.IntuneCD.backup.backup_windowsEnrollmentProfile import savebackup
+            from .backup.backup_windowsEnrollmentProfile import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "EnrollmentStatusPage" not in exclude:
-            from src.IntuneCD.backup.backup_enrollmentStatusPage import savebackup
+            from .backup.backup_enrollmentStatusPage import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "EnrollmentConfigurations" not in exclude:
-            from src.IntuneCD.backup.backup_enrollmentConfigurations import savebackup
+            from .backup.backup_enrollmentConfigurations import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if args.autopilot == "True":
-            from src.IntuneCD.backup.backup_autopilotDevices import savebackup
+            from .backup.backup_autopilotDevices import savebackup
 
             savebackup(path, output, token)
 
         if "Filters" not in exclude:
-            from src.IntuneCD.backup.backup_assignmentFilters import savebackup
+            from .backup.backup_assignmentFilters import savebackup
 
             results.append(savebackup(path, output, token, prefix, append_id))
 
         if "ManagedGooglePlay" not in exclude:
-            from src.IntuneCD.backup.backup_managedGPlay import savebackup
+            from .backup.backup_managedGPlay import savebackup
 
             results.append(savebackup(path, output, token, append_id))
 
         if "Intents" not in exclude:
-            from src.IntuneCD.backup.backup_managementIntents import savebackup
+            from .backup.backup_managementIntents import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "CompliancePartner" not in exclude:
-            from src.IntuneCD.backup.backup_compliancePartner import savebackup
+            from .backup.backup_compliancePartner import savebackup
 
             results.append(savebackup(path, output, token, append_id))
 
         if "ManagementPartner" not in exclude:
-            from src.IntuneCD.backup.backup_managementPartner import savebackup
+            from .backup.backup_managementPartner import savebackup
 
             results.append(savebackup(path, output, token, append_id))
 
         if "RemoteAssistancePartner" not in exclude:
-            from src.IntuneCD.backup.backup_remoteAssistancePartner import savebackup
+            from .backup.backup_remoteAssistancePartner import savebackup
 
             results.append(savebackup(path, output, token, append_id))
 
         if "ProactiveRemediation" not in exclude:
-            from src.IntuneCD.backup.backup_proactiveRemediation import savebackup
+            from .backup.backup_proactiveRemediation import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "PowershellScripts" not in exclude:
-            from src.IntuneCD.backup.backup_powershellScripts import savebackup
+            from .backup.backup_powershellScripts import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "ShellScripts" not in exclude:
-            from src.IntuneCD.backup.backup_shellScripts import savebackup
+            from .backup.backup_shellScripts import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "CustomAttributes" not in exclude:
-            from src.IntuneCD.backup.backup_customAttributeShellScript import savebackup
+            from .backup.backup_customAttributeShellScript import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "ConfigurationPolicies" not in exclude:
-            from src.IntuneCD.backup.backup_configurationPolicies import savebackup
+            from .backup.backup_configurationPolicies import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "ConditionalAccess" not in exclude:
-            from src.IntuneCD.backup.backup_conditionalAccess import savebackup
+            from .backup.backup_conditionalAccess import savebackup
 
             results.append(savebackup(path, output, token, prefix, append_id))
 
         if "WindowsDriverUpdates" not in exclude:
-            from src.IntuneCD.backup.backup_windowsDriverUpdates import savebackup
+            from .backup.backup_windowsDriverUpdates import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "WindowsFeatureUpdates" not in exclude:
-            from src.IntuneCD.backup.backup_windowsFeatureUpdates import savebackup
+            from .backup.backup_windowsFeatureUpdates import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
         if "WindowsQualityUpdates" not in exclude:
-            from src.IntuneCD.backup.backup_windowsQualityUpdates import savebackup
+            from .backup.backup_windowsQualityUpdates import savebackup
 
             results.append(savebackup(path, output, exclude, token, prefix, append_id))
 
-        from src.IntuneCD.intunecdlib.assignment_report import get_group_report
+        from .intunecdlib.assignment_report import get_group_report
 
         get_group_report(path, output)
 

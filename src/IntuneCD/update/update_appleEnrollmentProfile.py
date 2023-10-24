@@ -10,11 +10,11 @@ import os
 
 from deepdiff import DeepDiff
 
-from src.IntuneCD.intunecdlib.check_file import check_file
-from src.IntuneCD.intunecdlib.diff_summary import DiffSummary
-from src.IntuneCD.intunecdlib.graph_request import makeapirequest, makeapirequestPatch
-from src.IntuneCD.intunecdlib.load_file import load_file
-from src.IntuneCD.intunecdlib.remove_keys import remove_keys
+from ..intunecdlib.check_file import check_file
+from ..intunecdlib.diff_summary import DiffSummary
+from ..intunecdlib.graph_request import makeapirequest, makeapirequestPatch
+from ..intunecdlib.load_file import load_file
+from ..intunecdlib.remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSettings/"
