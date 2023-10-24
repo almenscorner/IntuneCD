@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to batch requests to the Graph Batch endpoint. Two additional functions,
@@ -7,6 +8,7 @@ the batch request.
 """
 
 import json
+
 from .graph_request import makeapirequestPost
 
 
@@ -29,10 +31,10 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
     batch_list = [data[i : i + batch_count] for i in range(0, len(data), batch_count)]
 
     # Build a body for each ID in the list
-    for i in range(0, len(batch_list)):
+    for i, batch in enumerate(batch_list):
         query_data = {"requests": []}
-        for id in batch_list[i]:
-            body = {"id": batch_id, "method": method, "url": url + id + extra_url}
+        for b_id in batch:
+            body = {"id": batch_id, "method": method, "url": url + b_id + extra_url}
 
             batch_id += 1
             query_data["requests"].append(body)
@@ -50,6 +52,60 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
                 responses.append(resp["body"])
 
     return responses
+
+
+def get_group_names(responses, group_ids, token):
+    """get all group names."""
+    group_responses = batch_request(
+        group_ids,
+        "groups/",
+        "?$select=displayName,id,groupTypes,membershipRule",
+        token,
+    )
+    for value in responses:
+        if value is None or "value" not in value:
+            continue
+
+        for val in value["value"]:
+            if "groupId" not in val["target"]:
+                continue
+
+            for g_id in group_responses:
+                if g_id.get("id") == val["target"]["groupId"]:
+                    val["target"]["groupName"] = g_id.get("displayName", "")
+                    if "DynamicMembership" in g_id.get("groupTypes", []):
+                        val["target"]["groupType"] = "DynamicMembership"
+                        val["target"]["membershipRule"] = g_id.get(
+                            "membershipRule", None
+                        )
+                    else:
+                        val["target"]["groupType"] = "StaticMembership"
+                    break
+
+
+def get_filter_name(val, filter_responses):
+    """Get the name of the filter."""
+    for f_id in filter_responses:
+        if f_id["id"] == val["target"]["deviceAndAppManagementAssignmentFilterId"]:
+            val["target"]["deviceAndAppManagementAssignmentFilterId"] = f_id[
+                "displayName"
+            ]
+            break
+
+
+def get_filter_names(responses, filter_ids, token):
+    """Get all filter names."""
+    filter_responses = batch_request(
+        filter_ids,
+        "deviceManagement/assignmentFilters/",
+        "?$select=displayName",
+        token,
+    )
+    for value in responses:
+        if value["value"]:
+            for val in value["value"]:
+                if "deviceAndAppManagementAssignmentFilterId" in val["target"]:
+                    get_filter_name(val, filter_responses)
 
 
 def batch_assignment(data, url, extra_url, token, app_protection=False) -> list:
@@ -70,106 +126,72 @@ def batch_assignment(data, url, extra_url, token, app_protection=False) -> list:
 
     # If getting App Protection Assignments, get the platform
     if app_protection is True:
-        for id in data["value"]:
+        for a_id in data["value"]:
             if (
-                id["@odata.type"]
+                a_id["@odata.type"]
                 == "#microsoft.graph.mdmWindowsInformationProtectionPolicy"
             ):
-                data_ids.append(f"mdmWindowsInformationProtectionPolicies/{id['id']}")
+                data_ids.append(f"mdmWindowsInformationProtectionPolicies/{a_id['id']}")
             if (
-                id["@odata.type"]
+                a_id["@odata.type"]
                 == "#microsoft.graph.windowsInformationProtectionPolicy"
             ):
-                data_ids.append(f"windowsInformationProtectionPolicies/{id['id']}")
+                data_ids.append(f"windowsInformationProtectionPolicies/{a_id['id']}")
             else:
-                data_ids.append(f"{str(id['@odata.type']).split('.')[2]}s/{id['id']}")
+                data_ids.append(
+                    f"{str(a_id['@odata.type']).split('.')[2]}s/{a_id['id']}"
+                )
     # Else, just add the objects ID to the list
     else:
-        for id in data["value"]:
-            data_ids.append(id["id"])
+        for a_id in data["value"]:
+            data_ids.append(a_id["id"])
     # If we have any IDs, batch request the assignments
     if data_ids:
         responses = batch_request(data_ids, url, extra_url, token)
-        if responses:
-            if extra_url == "?$expand=assignments":
-                response_values = []
-                for value in responses:
-                    if value:
-                        response_values.append(
-                            {
-                                "value": value["assignments"],
-                                "@odata.context": value["assignments@odata.context"],
-                            }
-                        )
-                responses = response_values
+        if not responses:
+            return
 
-            group_ids = [
-                val
-                for list in responses
-                if list and "value" in list
-                for val in list["value"]
-                for keys, val in val.items()
-                if "target" in keys
-                for keys, val in val.items()
-                if "groupId" in keys
-            ]
-            filter_ids = [
-                val
-                for list in responses
-                if list and "value" in list
-                for val in list["value"]
-                for keys, val in val.items()
-                if "target" in keys
-                for keys, val in val.items()
-                if "deviceAndAppManagementAssignmentFilterId" in keys
-                if val is not None
-            ]
+        if extra_url == "?$expand=assignments":
+            response_values = []
+            for value in responses:
+                if value:
+                    response_values.append(
+                        {
+                            "value": value["assignments"],
+                            "@odata.context": value["assignments@odata.context"],
+                        }
+                    )
+            responses = response_values
+
+        group_ids = [
+            val
+            for list in responses
+            if list and "value" in list
+            for val in list["value"]
+            for keys, val in val.items()
+            if "target" in keys
+            for keys, val in val.items()
+            if "groupId" in keys
+        ]
+        filter_ids = [
+            val
+            for list in responses
+            if list and "value" in list
+            for val in list["value"]
+            for keys, val in val.items()
+            if "target" in keys
+            for keys, val in val.items()
+            if "deviceAndAppManagementAssignmentFilterId" in keys
+            if val is not None
+        ]
 
         # Batch get name of the groups
         if group_ids:
-            group_responses = batch_request(
-                group_ids,
-                "groups/",
-                "?$select=displayName,id,groupTypes,membershipRule",
-                token,
-            )
-            for value in responses:
-                if value is not None and "value" in value:
-                    for val in value["value"]:
-                        if "groupId" in val["target"]:
-                            for id in group_responses:
-                                if id["id"] == val["target"]["groupId"]:
-                                    val["target"]["groupName"] = id["displayName"]
-                                    if "DynamicMembership" in id["groupTypes"]:
-                                        val["target"]["groupType"] = "DynamicMembership"
-                                        val["target"]["membershipRule"] = id[
-                                            "membershipRule"
-                                        ]
-                                    else:
-                                        val["target"]["groupType"] = "StaticMembership"
+            get_group_names(responses, group_ids, token)
 
         # Batch get name of the Filters
         if filter_ids:
-            filter_responses = batch_request(
-                filter_ids,
-                "deviceManagement/assignmentFilters/",
-                "?$select=displayName",
-                token,
-            )
-            for value in responses:
-                if value["value"]:
-                    for val in value["value"]:
-                        if "deviceAndAppManagementAssignmentFilterId" in val["target"]:
-                            for id in filter_responses:
-                                if (
-                                    id["id"]
-                                    == val["target"][
-                                        "deviceAndAppManagementAssignmentFilterId"
-                                    ]
-                                ):
-                                    val["target"][
-                                        "deviceAndAppManagementAssignmentFilterId"
-                                    ] = id["displayName"]
+            get_filter_names(responses, filter_ids, token)
 
         return responses
 
@@ -249,11 +271,11 @@ def batch_intents(data, token) -> dict:
     return intent_values
 
 
-def get_object_assignment(id, responses) -> list:
+def get_object_assignment(o_id, responses) -> list:
     """
     Get the object assignment for the object ID.
 
-    :param id: Id of the object to get the assignment for
+    :param o_id: Id of the object to get the assignment for
     :param responses: List of responses from the batch request
     :return: List of assignments for the object
     """
@@ -263,7 +285,7 @@ def get_object_assignment(id, responses) -> list:
         val
         for list in responses
         if list and "value" in list
-        if id in list["@odata.context"]
+        if o_id in list["@odata.context"]
         for val in list["value"]
     ]
     for value in assignments_list:
@@ -274,11 +296,11 @@ def get_object_assignment(id, responses) -> list:
     return assignments_list
 
 
-def get_object_details(id, responses) -> list:
+def get_object_details(o_id, responses) -> list:
     """
     Get the object details for the object ID.
 
-    :param id: Id of the object to get the details for
+    :param o_id: Id of the object to get the details for
     :param responses: List of responses from the batch request
     :return: List of details for the object
     """
@@ -286,7 +308,7 @@ def get_object_details(id, responses) -> list:
     details = [
         val
         for list in responses
-        if id in list["@odata.context"]
+        if o_id in list["@odata.context"]
         for val in list["value"]
     ]
     return details

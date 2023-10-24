@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up profiles."""
 
 
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
+
 from testfixtures import TempDirectory
+
 from src.IntuneCD.backup_profiles import savebackup
 
 BATCH_ASSIGNMENT = [{"value": [{"target": {"groupName": "Group1"}}]}]
 OBJECT_ASSIGNMENT = [{"target": {"groupName": "Group1"}}]
 
 
-class TestBackupProfiles(unittest.TestCase):
+class TestBackupCustomProfiles(unittest.TestCase):
     """Test class for backup_profiles."""
 
     def setUp(self):
@@ -24,11 +26,15 @@ class TestBackupProfiles(unittest.TestCase):
         self.exclude = []
         self.append_id = False
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_profiles.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_profiles.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_profiles.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_profiles.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
@@ -56,10 +62,20 @@ class TestBackupProfiles(unittest.TestCase):
             ]
         }
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+        )
 
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/test_macOSCustomConfiguration.json").exists())
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig").exists())
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_macOSCustomConfiguration.json"
+            ).exists()
+        )
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig"
+            ).exists()
+        )
         self.assertEqual(2, self.count["config_count"])
 
     def test_backup_ios_custom_profile(self):
@@ -77,10 +93,20 @@ class TestBackupProfiles(unittest.TestCase):
             ]
         }
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+        )
 
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/test_iosCustomConfiguration.json").exists())
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig").exists())
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_iosCustomConfiguration.json"
+            ).exists()
+        )
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/mobileconfig/test.mobileconfig"
+            ).exists()
+        )
         self.assertEqual(2, self.count["config_count"])
 
     def test_backup_windows_custom_profile_encrypted(self):
@@ -113,9 +139,15 @@ class TestBackupProfiles(unittest.TestCase):
 
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+        )
 
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json").exists())
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json"
+            ).exists()
+        )
         self.assertEqual(1, self.count["config_count"])
 
     def test_backup_windows_custom_profile_not_encrypted(self):
@@ -148,10 +180,48 @@ class TestBackupProfiles(unittest.TestCase):
 
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+        )
 
-        self.assertTrue(Path(f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json").exists())
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json"
+            ).exists()
+        )
         self.assertEqual(1, self.count["config_count"])
+
+
+class TestBackupStandardProfiles(unittest.TestCase):
+    """Test class for backup_profiles."""
+
+    def setUp(self):
+        self.directory = TempDirectory()
+        self.directory.create()
+        self.token = "token"
+        self.exclude = []
+        self.append_id = False
+
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup_profiles.batch_assignment"
+        )
+        self.batch_assignment = self.batch_assignment_patch.start()
+        self.batch_assignment.return_value = BATCH_ASSIGNMENT
+
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup_profiles.get_object_assignment"
+        )
+        self.object_assignment = self.object_assignment_patch.start()
+        self.object_assignment.return_value = OBJECT_ASSIGNMENT
+
+        self.makeapirequest_patch = patch("src.IntuneCD.backup_profiles.makeapirequest")
+        self.makeapirequest = self.makeapirequest_patch.start()
+
+    def tearDown(self):
+        self.directory.cleanup()
+        self.batch_assignment.stop()
+        self.object_assignment.stop()
+        self.makeapirequest.stop()
 
     def test_backup_non_custom_profile(self):
         """The file should be created and the count should be 1."""
@@ -166,10 +236,14 @@ class TestBackupProfiles(unittest.TestCase):
             ]
         }
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.exclude, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+        )
 
         self.assertTrue(
-            Path(f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration.json").exists()
+            Path(
+                f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration.json"
+            ).exists()
         )
         self.assertEqual(1, self.count["config_count"])
 
@@ -198,10 +272,14 @@ class TestBackupProfiles(unittest.TestCase):
             ]
         }
 
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", True)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", True
+        )
 
         self.assertTrue(
-            Path(f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration__0.json").exists()
+            Path(
+                f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration__0.json"
+            ).exists()
         )
 
 

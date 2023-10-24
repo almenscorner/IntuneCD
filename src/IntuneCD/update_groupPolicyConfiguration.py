@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all group policy configurations in Intune.
@@ -8,18 +9,19 @@ import json
 import os
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
+from .diff_summary import DiffSummary
+from .graph_batch import batch_assignment, get_object_assignment
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .graph_batch import batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
-from .diff_summary import DiffSummary
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/groupPolicyConfigurations"
@@ -30,6 +32,8 @@ presentation_odata_bind = "https://graph.microsoft.com/beta/deviceManagement/gro
 
 
 class definition_values_json:
+    """Class for creating json for definition values."""
+
     def __init__(self, definition: dict, presentation: dict):
         self.definition = definition
         self.presentation = presentation
@@ -49,17 +53,17 @@ class definition_values_json:
         Returns:
             dict: The json for the definition value.
         """
-        id = self.definition["definition"]["id"]
+        d_id = self.definition["definition"]["id"]
 
         presentation_values = []
 
         for presentation in self.definition["presentationValues"]:
-            if presentation["presentation"].get("required", False) == True:
+            if presentation["presentation"].get("required", False) is True:
                 default_presentation = {
                     "@odata.type": presentation["@odata.type"],
                     "value": presentation["value"],
                     "presentation@odata.bind": presentation_odata_bind.replace(
-                        "{id}", id
+                        "{id}", d_id
                     ).replace("{pid}", presentation["presentation"]["id"]),
                 }
 
@@ -68,7 +72,7 @@ class definition_values_json:
         self.request_json[f"{scenario}"].append(
             {
                 "enabled": self.definition["enabled"],
-                "definition@odata.bind": definition_odata_bind.replace("{id}", id),
+                "definition@odata.bind": definition_odata_bind.replace("{id}", d_id),
                 "presentationValues": presentation_values,
             }
         )
@@ -90,19 +94,19 @@ class definition_values_json:
         Returns:
             dict: The json for the presentation value.
         """
-        id = self.definition["definition"]["id"]
+        d_id = self.definition["definition"]["id"]
         pvid = self.presentation["presentation"]["id"]
 
         self.request_json[f"{scenario}"].append(
             {
                 "id": defval_id,
                 "enabled": self.definition["enabled"],
-                "definition@odata.bind": definition_odata_bind.replace("{id}", id),
+                "definition@odata.bind": definition_odata_bind.replace("{id}", d_id),
                 "presentationValues": [
                     {
                         "@odata.type": self.presentation["@odata.type"],
                         "presentation@odata.bind": presentation_odata_bind.replace(
-                            "{id}", id
+                            "{id}", d_id
                         ).replace("{pid}", pvid),
                     }
                 ],
@@ -124,6 +128,8 @@ class definition_values_json:
 
 
 def custom_ingestion_match(data, token):
+    """Match definitions from custom ingestion to definitions in Intune."""
+
     match = 0
     categories = makeapirequest(
         "https://graph.microsoft.com/beta/deviceManagement/groupPolicyCategories?$expand=definitions($select=id, displayName, categoryPath, classType)&$select=id, displayName&$filter=ingestionSource eq 'custom'",
@@ -147,11 +153,12 @@ def custom_ingestion_match(data, token):
 
     if match == len(data["definitionValues"]):
         return data
-    else:
-        return False
+
+    return False
 
 
 def find_matching_presentations(repo_data, data):
+    """Search for matching presentation values in repo data and Intune data."""
     for repo_def in repo_data.get("definitionValues", []):
         for mem_def in data.get("definitionValues", []):
             for repo_pres in repo_def.get("presentationValues", []):
@@ -254,9 +261,10 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
             print("Adding definition values")
             if report is False:
                 post_definition_values(definition, mem_id, "added", None, token)
-                for presentation in definition.get("presentationValues", []):
-                    if presentation["presentation"].get("required", False) == False:
-                        print("Adding presentation values")
+            for presentation in definition.get("presentationValues", []):
+                if presentation["presentation"].get("required", False) is False:
+                    print("Adding presentation values")
+                    if report is False:
                         post_presentation_values(
                             definition, presentation, mem_id, "updated", None, token
                         )
@@ -384,20 +392,20 @@ def update(
             definition_endpoint = (
                 f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
             )
-            # Get definitions
             definitions = makeapirequest(definition_endpoint, token)
-            # IF definitions exist, continue
-            if definitions:
-                # Add definitions to profile
-                profile["definitionValues"] = definitions["value"]
-                # Get presentation values for definitions
-                for definition in profile["definitionValues"]:
-                    presentation_endpoint = (
-                        f"{ENDPOINT}/{profile['id']}/definitionValues/{definition['id']}/"
-                        f"presentationValues?$expand=presentation "
-                    )
-                    presentation = makeapirequest(presentation_endpoint, token)
-                    definition["presentationValues"] = presentation["value"]
+
+            if not definitions:
+                continue
+
+            profile["definitionValues"] = definitions["value"]
+
+            for definition in profile["definitionValues"]:
+                presentation_endpoint = (
+                    f"{ENDPOINT}/{profile['id']}/definitionValues/{definition['id']}/"
+                    f"presentationValues?$expand=presentation "
+                )
+                presentation = makeapirequest(presentation_endpoint, token)
+                definition["presentationValues"] = presentation["value"]
 
             mem_configs.append(profile)
 
@@ -407,7 +415,7 @@ def update(
             if file is False:
                 continue
 
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
             assign_obj = {}
@@ -417,7 +425,7 @@ def update(
             repo_data.pop("assignments", None)
             # If configurations was found in Intune, continue
             if mem_configs:
-                for val in mem_configs:
+                for val in mem_configs[:]:
                     # If display name and type matches, add Intune data to data variable
                     if (
                         repo_data["displayName"] == val["displayName"]
@@ -491,11 +499,11 @@ def update(
                 # If assignments should be updated, look for updates and push them to Intune
                 if assignment and report is False:
                     mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                    update = update_assignment(
+                    assignment_update = update_assignment(
                         assign_obj, mem_assign_obj, token, create_groups
                     )
-                    if update is not None:
-                        request_data = {"assignments": update}
+                    if assignment_update is not None:
+                        request_data = {"assignments": assignment_update}
                         post_assignment_update(
                             request_data,
                             mem_id,
@@ -542,7 +550,7 @@ def update(
                         for presentation in definition["presentationValues"]:
                             if (
                                 presentation["presentation"].get("required", False)
-                                == False
+                                is False
                             ):
                                 post_presentation_values(
                                     definition,

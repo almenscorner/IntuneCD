@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up Group Policy Configurations in Intune.
 """
 
-from .clean_filename import clean_filename
-from .graph_request import makeapirequest
-from .graph_batch import batch_assignment, get_object_assignment
-from .save_output import save_output
-from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
+from .clean_filename import clean_filename
+from .graph_batch import batch_assignment, get_object_assignment
+from .graph_request import makeapirequest
+from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/groupPolicyConfigurations"
@@ -30,14 +31,18 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     configpath = path + "/" + "Group Policy Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceManagement/groupPolicyConfigurations/", "/assignments", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/groupPolicyConfigurations/", "/assignments", token
+    )
 
     for profile in data["value"]:
         if prefix and not check_prefix_match(profile["displayName"], prefix):
             continue
 
         results["config_count"] += 1
-        definition_endpoint = f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
+        definition_endpoint = (
+            f"{ENDPOINT}/{profile['id']}/definitionValues?$expand=definition"
+        )
         # Get definitions
         definitions = makeapirequest(definition_endpoint, token)
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Apple Enrollment profiles in Intune.
@@ -8,11 +9,12 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch
-from .remove_keys import remove_keys
+
 from .check_file import check_file
-from .load_file import load_file
 from .diff_summary import DiffSummary
+from .graph_request import makeapirequest, makeapirequestPatch
+from .load_file import load_file
+from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSettings/"
@@ -35,8 +37,8 @@ def update(path, token, report):
         # Get IDs of all Apple Enrollment Profiles and add them to a list
         ids = []
         mem_data_accounts = makeapirequest(ENDPOINT, token)
-        for id in mem_data_accounts["value"]:
-            ids.append(id["id"])
+        for a_id in mem_data_accounts["value"]:
+            ids.append(a_id["id"])
 
         for profile in ids:
             for filename in os.listdir(configpath):
@@ -45,7 +47,7 @@ def update(path, token, report):
                     continue
                 # Check which format the file is saved as then open file, load
                 # data and set query parameter
-                with open(file) as f:
+                with open(file, encoding="utf-8") as f:
                     repo_data = load_file(filename, f)
                     q_param = {
                         "$filter": "displayName eq "

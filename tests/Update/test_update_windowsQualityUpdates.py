@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating Windows Quality Updates."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
+
 from src.IntuneCD.update_windowsQualityUpdates import update
 
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Windows Enrollment Status Page Profiles in Intune.
@@ -8,18 +9,19 @@ import json
 import os
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
+from .diff_summary import DiffSummary
+from .graph_batch import batch_assignment, get_object_assignment
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .graph_batch import batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
-from .diff_summary import DiffSummary
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
 ENDPOINT = (
@@ -60,7 +62,7 @@ def update(
             if file is False:
                 continue
             # Check which format the file is saved as then open file, load data and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 # Create object to pass in to assignment function
@@ -82,7 +84,7 @@ def update(
                 # If Enrollment Status Page Profile exists, continue
                 if data["value"]:
                     print("-" * 90)
-                    mem_id = data["value"]["id"]
+                    mem_id = data.get("value").get("id")
                     # Remove keys before using DeepDiff
                     mem_data["value"][0] = remove_keys(mem_data["value"][0])
 
@@ -99,12 +101,12 @@ def update(
                             app_request = makeapirequest(APP_ENDPOINT, token, q_param)
                             if app_request["value"]:
                                 app_ids.append(app_request["value"][0]["id"])
+                            else:
+                                print("No app found with name: " + app["name"])
 
                         if app_ids:
                             repo_data.pop("selectedMobileAppNames", None)
                             repo_data["selectedMobileAppIds"] = app_ids
-                        else:
-                            print("No app found with name: " + app["name"])
 
                     diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
                         "values_changed", {}
@@ -130,11 +132,13 @@ def update(
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(
+                        assignment_update = update_assignment(
                             assign_obj, mem_assign_obj, token, create_groups
                         )
-                        if update is not None:
-                            target = [{"target": t["target"]} for t in update]
+                        if assignment_update is not None:
+                            target = [
+                                {"target": t["target"]} for t in assignment_update
+                            ]
                             request_data = {
                                 "enrollmentConfigurationAssignments": target
                             }

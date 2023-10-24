@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
+
 from src.IntuneCD.update_deviceManagementSettings import update
 
 

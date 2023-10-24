@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module moves files to archive during backup if they have been removed from Intune.
@@ -6,7 +7,6 @@ This module moves files to archive during backup if they have been removed from 
 
 import os
 import shutil
-
 from datetime import datetime
 
 # Folders to exclude from archving
@@ -63,7 +63,7 @@ def move_to_archive(path, created_files, output) -> None:
                     archive(path, file, root)
 
     # Check if Management Intents folder exists
-    if os.path.exists(f"{path}/Management Intents") == True:
+    if os.path.exists(f"{path}/Management Intents") is True:
         for root, dirs, files in os.walk(f"{path}/Management Intents", topdown=True):
             for file in files:
                 if file.endswith(".yaml") or file.endswith(".json"):

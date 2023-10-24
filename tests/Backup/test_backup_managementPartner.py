@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up management partner."""
 
 import json
-import yaml
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 from testfixtures import TempDirectory
+
 from src.IntuneCD.backup_managementPartner import savebackup
 
 
@@ -52,11 +54,13 @@ class TestBackupManagementPartner(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "yaml", self.token, self.append_id)
 
-        with open(self.saved_path + "yaml", "r") as f:
+        with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(Path(f"{self.directory.path}/Partner Connections/Management").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Partner Connections/Management").exists()
+        )
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count["config_count"])
 
@@ -65,10 +69,12 @@ class TestBackupManagementPartner(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, self.append_id)
 
-        with open(self.saved_path + "json", "r") as f:
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             self.saved_data = json.load(f)
 
-        self.assertTrue(Path(f"{self.directory.path}/Partner Connections/Management").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Partner Connections/Management").exists()
+        )
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count["config_count"])
 
@@ -84,7 +90,11 @@ class TestBackupManagementPartner(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, True)
 
-        self.assertTrue(Path(f"{self.directory.path}/Partner Connections/Management/test__0.json").exists())
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Partner Connections/Management/test__0.json"
+            ).exists()
+        )
 
 
 if __name__ == "__main__":

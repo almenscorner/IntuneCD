@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating App Protections."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.update_appProtection import update
 
+from src.IntuneCD.update_appProtection import update
 
 BATCH_ASSIGNMENT = [{"value": [{"id": "0", "target": {"groupName": "test1"}}]}]
 

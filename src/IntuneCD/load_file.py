@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to load a file into a dictionary.
 """
 
 import json
+
 import yaml
 
 

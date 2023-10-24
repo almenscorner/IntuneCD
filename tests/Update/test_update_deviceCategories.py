@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import os
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
+
 from src.IntuneCD.update_deviceCategories import update
 
 
@@ -13,13 +15,33 @@ class TestUpdatedeviceCategories(unittest.TestCase):
         self.directory = TempDirectory()
         self.directory.create()
         self.directory.makedir("Device Categories")
-        self.directory.write("Device Categories/test.json", '{"test": "test"}', encoding="utf-8")
-        self.directory.write("Device Categories/test.txt", '{"test": "test"}', encoding="utf-8")
+        self.directory.write(
+            "Device Categories/test.json", '{"test": "test"}', encoding="utf-8"
+        )
+        self.directory.write(
+            "Device Categories/test.txt", '{"test": "test"}', encoding="utf-8"
+        )
         self.token = "token"
-        self.mem_data = {"value": [{"@odata.type": "test", "id": "0", "displayName": "test", "testvalue": "test"}]}
-        self.repo_data = {"@odata.type": "test", "id": "0", "displayName": "test", "testvalue": "test1"}
+        self.mem_data = {
+            "value": [
+                {
+                    "@odata.type": "test",
+                    "id": "0",
+                    "displayName": "test",
+                    "testvalue": "test",
+                }
+            ]
+        }
+        self.repo_data = {
+            "@odata.type": "test",
+            "id": "0",
+            "displayName": "test",
+            "testvalue": "test1",
+        }
 
-        self.makeapirequest_patch = patch("src.IntuneCD.update_deviceCategories.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.update_deviceCategories.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
@@ -27,14 +49,20 @@ class TestUpdatedeviceCategories(unittest.TestCase):
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
-        self.makeapirequestPatch_patch = patch("src.IntuneCD.update_deviceCategories.makeapirequestPatch")
+        self.makeapirequestPatch_patch = patch(
+            "src.IntuneCD.update_deviceCategories.makeapirequestPatch"
+        )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
-        self.makeapirequestPost_patch = patch("src.IntuneCD.update_deviceCategories.makeapirequestPost")
+        self.makeapirequestPost_patch = patch(
+            "src.IntuneCD.update_deviceCategories.makeapirequestPost"
+        )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
-        self.makeapirequestDelete_patch = patch("src.IntuneCD.update_deviceCategories.makeapirequestDelete")
+        self.makeapirequestDelete_patch = patch(
+            "src.IntuneCD.update_deviceCategories.makeapirequestDelete"
+        )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 
     def tearDown(self):

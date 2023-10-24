@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Device Categories in Intune.
@@ -8,12 +9,17 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost, makeapirequestDelete
-from .remove_keys import remove_keys
-from .load_file import load_file
+
 from .check_file import check_file
 from .diff_summary import DiffSummary
-
+from .graph_request import (
+    makeapirequest,
+    makeapirequestDelete,
+    makeapirequestPatch,
+    makeapirequestPost,
+)
+from .load_file import load_file
+from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCategories"
@@ -41,7 +47,7 @@ def update(path, token, report, remove):
                 continue
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 category_value = {}
@@ -58,7 +64,9 @@ def update(path, token, report, remove):
                     category_id = category_value["id"]
                     category_value = remove_keys(category_value)
 
-                    diff = DeepDiff(category_value, repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(category_value, repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
                     # If any changed values are found, push them to Intune
                     if diff and report is False:
@@ -82,7 +90,10 @@ def update(path, token, report, remove):
                 # If Category does not exist, create it
                 else:
                     print("-" * 90)
-                    print("Device Category not found, creating category: " + repo_data["displayName"])
+                    print(
+                        "Device Category not found, creating category: "
+                        + repo_data["displayName"]
+                    )
                     if report is False:
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(
@@ -98,7 +109,9 @@ def update(path, token, report, remove):
         if mem_data.get("value", None) is not None and remove is True:
             for val in mem_data["value"]:
                 print("-" * 90)
-                print("Removing Device Configuration from Intune: " + val["displayName"])
+                print(
+                    "Removing Device Configuration from Intune: " + val["displayName"]
+                )
                 if report is False:
                     makeapirequestDelete(
                         f"{ENDPOINT}/{val['id']}",

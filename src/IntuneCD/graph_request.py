@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module contains the functions to make API requests to the Microsoft Graph API.
@@ -6,6 +7,7 @@ This module contains the functions to make API requests to the Microsoft Graph A
 
 import json
 import time
+
 import requests
 
 
@@ -19,38 +21,48 @@ def makeapirequest(endpoint, token, q_param=None):
     :return: The response from the request.
     """
 
+    retry_codes = [504, 502, 503]
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer {0}".format(token["access_token"]),
     }
 
     if q_param is not None:
-        response = requests.get(endpoint, headers=headers, params=q_param)
-        if response.status_code == 504 or response.status_code == 502 or response.status_code == 503:
-            print("Ran into issues with Graph request, waiting 10 seconds and trying again...")
+        response = requests.get(endpoint, headers=headers, params=q_param, timeout=120)
+        if response.status_code in retry_codes:
+            print(
+                "Ran into issues with Graph request, waiting 10 seconds and trying again..."
+            )
             time.sleep(10)
-            response = requests.get(endpoint, headers=headers)
+            response = requests.get(endpoint, headers=headers, timeout=120)
         elif response.status_code == 429:
-            print(f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds")
+            print(
+                f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds"
+            )
             while response.status_code == 429:
                 time.sleep(int(response.headers["Retry-After"]))
-                response = requests.get(endpoint, headers=headers)
+                response = requests.get(endpoint, headers=headers, timeout=120)
     else:
-        response = requests.get(endpoint, headers=headers)
-        if response.status_code == 504 or response.status_code == 502 or response.status_code == 503:
+        response = requests.get(endpoint, headers=headers, timeout=120)
+        if response.status_code in retry_codes:
             retry_count = 0
             while retry_count < 3:
-                print("Ran into issues with Graph request, waiting 10 seconds and trying again...")
+                print(
+                    "Ran into issues with Graph request, waiting 10 seconds and trying again..."
+                )
                 time.sleep(10)
-                response = requests.get(endpoint, headers=headers)
+                response = requests.get(endpoint, headers=headers, timeout=120)
                 if response.status_code == 200:
                     break
                 retry_count += 1
         elif response.status_code == 429:
-            print(f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds")
+            print(
+                f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds"
+            )
             while response.status_code == 429:
                 time.sleep(int(response.headers["Retry-After"]))
-                response = requests.get(endpoint, headers=headers)
+                response = requests.get(endpoint, headers=headers, timeout=120)
 
     if response.status_code == 200:
         json_data = json.loads(response.text)
@@ -65,15 +77,19 @@ def makeapirequest(endpoint, token, q_param=None):
 
         return json_data
 
-    elif response.status_code == 404:
+    if response.status_code == 404:
         print("Resource not found in Microsoft Graph: " + endpoint)
     elif ("assignmentFilters" in endpoint) and ("FeatureNotEnabled" in response.text):
         print("Assignment filters not enabled in tenant, skipping")
     else:
-        raise Exception("Request failed with ", response.status_code, " - ", response.text)
+        raise requests.exceptions.HTTPError(
+            "Request failed with {} - {}".format(response.status_code, response.text)
+        )
 
 
-def makeapirequestPatch(patchEndpoint, token, q_param=None, jdata=None, status_code=200):
+def makeapirequestPatch(
+    patchEndpoint, token, q_param=None, jdata=None, status_code=200
+):
     """
     This function makes a PATCH request to the Microsoft Graph API.
 
@@ -90,16 +106,24 @@ def makeapirequestPatch(patchEndpoint, token, q_param=None, jdata=None, status_c
     }
 
     if q_param is not None:
-        response = requests.patch(patchEndpoint, headers=headers, params=q_param, data=jdata)
+        response = requests.patch(
+            patchEndpoint, headers=headers, params=q_param, data=jdata, timeout=120
+        )
     else:
-        response = requests.patch(patchEndpoint, headers=headers, data=jdata)
+        response = requests.patch(
+            patchEndpoint, headers=headers, data=jdata, timeout=120
+        )
     if response.status_code == status_code:
         pass
     else:
-        raise Exception("Request failed with ", response.status_code, " - ", response.text)
+        raise requests.exceptions.HTTPError(
+            "Request failed with {} - {}".format(response.status_code, response.text)
+        )
 
 
-def makeapirequestDelete(deleteEndpoint, token, q_param=None, jdata=None, status_code=200):
+def makeapirequestDelete(
+    deleteEndpoint, token, q_param=None, jdata=None, status_code=200
+):
     """
     This function makes a DELETE request to the Microsoft Graph API.
 
@@ -116,13 +140,19 @@ def makeapirequestDelete(deleteEndpoint, token, q_param=None, jdata=None, status
     }
 
     if q_param is not None:
-        response = requests.delete(deleteEndpoint, headers=headers, params=q_param, data=jdata)
+        response = requests.delete(
+            deleteEndpoint, headers=headers, params=q_param, data=jdata, timeout=120
+        )
     else:
-        response = requests.delete(deleteEndpoint, headers=headers, data=jdata)
+        response = requests.delete(
+            deleteEndpoint, headers=headers, data=jdata, timeout=120
+        )
     if response.status_code == status_code:
         pass
     else:
-        raise Exception("Request failed with ", response.status_code, " - ", response.text)
+        raise requests.exceptions.HTTPError(
+            "Request failed with {} - {}".format(response.status_code, response.text)
+        )
 
 
 def makeapirequestPost(patchEndpoint, token, q_param=None, jdata=None, status_code=200):
@@ -142,26 +172,39 @@ def makeapirequestPost(patchEndpoint, token, q_param=None, jdata=None, status_co
     }
 
     if q_param is not None:
-        response = requests.post(patchEndpoint, headers=headers, params=q_param, data=jdata)
+        response = requests.post(
+            patchEndpoint, headers=headers, params=q_param, data=jdata, timeout=120
+        )
     else:
-        response = requests.post(patchEndpoint, headers=headers, data=jdata)
+        response = requests.post(
+            patchEndpoint, headers=headers, data=jdata, timeout=120
+        )
     if response.status_code == status_code:
         if response.text:
             json_data = json.loads(response.text)
             return json_data
-        else:
-            pass
+
     elif response.status_code == 504:
-        print("Ran into issues with Graph request, waiting 10 seconds and trying again...")
+        print(
+            "Ran into issues with Graph request, waiting 10 seconds and trying again..."
+        )
         time.sleep(10)
-        response = requests.post(patchEndpoint, headers=headers, data=jdata)
+        response = requests.post(
+            patchEndpoint, headers=headers, data=jdata, timeout=120
+        )
     elif response.status_code == 429:
-        print(f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds")
+        print(
+            f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds"
+        )
         while response.status_code == 429:
             time.sleep(int(response.headers["Retry-After"]))
-            response = requests.post(patchEndpoint, headers=headers, data=jdata)
+            response = requests.post(
+                patchEndpoint, headers=headers, data=jdata, timeout=120
+            )
     else:
-        raise Exception("Request failed with ", response.status_code, " - ", response.text)
+        raise requests.exceptions.HTTPError(
+            "Request failed with {} - {}".format(response.status_code, response.text)
+        )
 
 
 def makeapirequestPut(patchEndpoint, token, q_param=None, jdata=None, status_code=200):
@@ -181,10 +224,14 @@ def makeapirequestPut(patchEndpoint, token, q_param=None, jdata=None, status_cod
     }
 
     if q_param is not None:
-        response = requests.put(patchEndpoint, headers=headers, params=q_param, data=jdata)
+        response = requests.put(
+            patchEndpoint, headers=headers, params=q_param, data=jdata, timeout=120
+        )
     else:
-        response = requests.put(patchEndpoint, headers=headers, data=jdata)
+        response = requests.put(patchEndpoint, headers=headers, data=jdata, timeout=120)
     if response.status_code == status_code:
         pass
     else:
-        raise Exception("Request failed with ", response.status_code, " - ", response.text)
+        raise requests.exceptions.HTTPError(
+            "Request failed with {} - {}".format(response.status_code, response.text)
+        )

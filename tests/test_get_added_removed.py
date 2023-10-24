@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the get_added_removed function.
@@ -27,7 +28,12 @@ class TestCleanFilename(unittest.TestCase):
 
         result = get_added_removed(self.object)
 
-        self.assertEqual(result, ["intent: apply, Filter ID: 1234, Filter Type: device, target: All Devices"])
+        self.assertEqual(
+            result,
+            [
+                "intent: apply, Filter ID: 1234, Filter Type: device, target: All Devices"
+            ],
+        )
 
 
 if __name__ == "__main__":

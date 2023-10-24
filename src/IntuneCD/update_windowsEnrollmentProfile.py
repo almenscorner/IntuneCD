@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Windows Enrollment Profiles in Intune.
@@ -8,18 +9,19 @@ import json
 import os
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
+from .diff_summary import DiffSummary
+from .graph_batch import batch_assignment, get_object_assignment
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .graph_batch import batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
-from .diff_summary import DiffSummary
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDeploymentProfiles"
@@ -58,7 +60,7 @@ def update(
                 continue
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 # Create object to pass in to assignment function
@@ -77,7 +79,7 @@ def update(
                 # If Windows Enrollment Profile exists, continue
                 if data["value"]:
                     print("-" * 90)
-                    mem_id = data["value"]["id"]
+                    mem_id = data.get("value").get("id")
                     # Remove keys before using DeepDiff
                     data["value"] = remove_keys(data["value"])
 
@@ -107,11 +109,11 @@ def update(
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(
+                        assignment_update = update_assignment(
                             assign_obj, mem_assign_obj, token, create_groups
                         )
-                        if update is not None:
-                            for target in update:
+                        if assignment_update is not None:
+                            for target in assignment_update:
                                 request_data = {"target": target["target"]}
                                 post_assignment_update(
                                     request_data,

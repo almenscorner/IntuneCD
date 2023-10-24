@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Windows Driver Update Profiles in Intune.
 """
 
-from .clean_filename import clean_filename
-from .graph_request import makeapirequest
-from .graph_batch import batch_assignment, get_object_assignment
-from .save_output import save_output
-from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
+from .clean_filename import clean_filename
+from .graph_batch import batch_assignment, get_object_assignment
+from .graph_request import makeapirequest
+from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/windowsDriverUpdateProfiles"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/windowsDriverUpdateProfiles"
+)
 
 
 # Get all Windows Driver Profiles and save them in specified path

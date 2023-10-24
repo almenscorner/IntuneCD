@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Notification Templates in Intune.
 """
 
+from .check_prefix import check_prefix_match
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .save_output import save_output
 from .remove_keys import remove_keys
-from .check_prefix import check_prefix_match
+from .save_output import save_output
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/notificationMessageTemplates"
+)
 
 
 # Get all Notification Templates and save them in specified path

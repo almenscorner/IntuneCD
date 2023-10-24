@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up remote assistance partner."""
 
 import json
-import yaml
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 from testfixtures import TempDirectory
+
 from src.IntuneCD.backup_deviceManagementSettings import savebackup
 
 DEVICE_MANAGEMENT_SETTINGS = {
@@ -60,12 +62,12 @@ class TestBackupDeviceManagementSettings(unittest.TestCase):
     def tearDown(self):
         self.directory.cleanup()
 
-    def test_backup_yml(self, mock_data, mock_makeapirequest):
+    def test_backup_yml(self, _, __):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(self.directory.path, "yaml", self.token)
 
-        with open(self.saved_path + "yaml", "r") as f:
+        with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
@@ -75,12 +77,12 @@ class TestBackupDeviceManagementSettings(unittest.TestCase):
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count["config_count"])
 
-    def test_backup_json(self, mock_data, mock_makeapirequest):
+    def test_backup_json(self, _, __):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(self.directory.path, "json", self.token)
 
-        with open(self.saved_path + "json", "r") as f:
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             self.saved_data = json.load(f)
 
         self.assertTrue(

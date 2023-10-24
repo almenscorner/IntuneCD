@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Autopilot devices in Intune.
@@ -9,7 +10,9 @@ from .graph_request import makeapirequest
 from .save_output import save_output
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDeviceIdentities"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDeviceIdentities"
+)
 
 
 # Get all Autopilot devices and save them in specified path
@@ -27,7 +30,6 @@ def savebackup(path, output, token):
     data = makeapirequest(ENDPOINT, token)
 
     for device in data["value"]:
-
         # Get filename without illegal characters
         fname = clean_filename(device["id"])
         # Save Autopilot device as JSON or YAML depending on configured

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating Enrollment Status Page profiles."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
+
 from src.IntuneCD.update_enrollmentStatusPage import update
 
 

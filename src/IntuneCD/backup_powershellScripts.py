@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Powershell scripts in Intune.
 """
 
-import os
 import base64
+import os
 
-from .clean_filename import clean_filename
-from .graph_request import makeapirequest
-from .graph_batch import batch_assignment, get_object_assignment, batch_request
-from .save_output import save_output
-from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
+from .clean_filename import clean_filename
+from .graph_batch import batch_assignment, batch_request, get_object_assignment
+from .graph_request import makeapirequest
+from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts/"
@@ -37,8 +38,12 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         for script in data["value"]:
             script_ids.append(script["id"])
 
-        assignment_responses = batch_assignment(data, "deviceManagement/deviceManagementScripts/", "/assignments", token)
-        script_data_responses = batch_request(script_ids, "deviceManagement/deviceManagementScripts/", "", token)
+        assignment_responses = batch_assignment(
+            data, "deviceManagement/deviceManagementScripts/", "/assignments", token
+        )
+        script_data_responses = batch_request(
+            script_ids, "deviceManagement/deviceManagementScripts/", "", token
+        )
 
         for script_data in script_data_responses:
             if prefix and not check_prefix_match(script_data["displayName"], prefix):
@@ -46,7 +51,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
             results["config_count"] += 1
             if "assignments" not in exclude:
-                assignments = get_object_assignment(script_data["id"], assignment_responses)
+                assignments = get_object_assignment(
+                    script_data["id"], assignment_responses
+                )
                 if assignments:
                     script_data["assignments"] = assignments
 
@@ -73,7 +80,11 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 if not os.path.exists(configpath + "Script Data/"):
                     os.makedirs(configpath + "Script Data/")
                 decoded = base64.b64decode(script_data["scriptContent"]).decode("utf-8")
-                f = open(configpath + "Script Data/" + script_file_name, "w")
+                f = open(
+                    configpath + "Script Data/" + script_file_name,
+                    "w",
+                    encoding="utf-8",
+                )
                 f.write(decoded)
 
     return results

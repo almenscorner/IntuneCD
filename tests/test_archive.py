@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the archive function.
 """
 
-import unittest
 import os
+import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
+
 from src.IntuneCD.archive import move_to_archive
 
 

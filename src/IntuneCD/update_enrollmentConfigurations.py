@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module updates Enrollment Configurations in Intune.
@@ -9,24 +10,29 @@ import os
 import re
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
+from .diff_summary import DiffSummary
+from .graph_batch import batch_assignment, get_object_assignment
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
-from .graph_batch import batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .diff_summary import DiffSummary
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+)
 
 
-def update(path, token, assignment=False, report=False, create_groups=False, remove=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """_summary_
 
     Args:
@@ -58,7 +64,7 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 continue
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 # Create object to pass in to assignment function
@@ -75,9 +81,15 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 data = {"value": ""}
                 if intune_data["value"]:
                     for val in intune_data["value"]:
-                        if val["@odata.type"] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration":
+                        if (
+                            val["@odata.type"]
+                            == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+                        ):
                             continue
-                        if repo_data["@odata.type"] == "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration":
+                        if (
+                            repo_data["@odata.type"]
+                            == "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration"
+                        ):
                             if (
                                 repo_data["@odata.type"] == val["@odata.type"]
                                 and repo_data["displayName"] == val["displayName"]
@@ -97,15 +109,20 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 if data["value"]:
                     print("-" * 90)
                     # Get Enrollment Configuration data from Intune
-                    mem_id = data["value"]["id"]
-                    mem_priority = data["value"]["priority"]
+                    mem_id = data.get("value").get("id")
+                    mem_priority = data.get("value").get("priority")
                     repo_priority = repo_data["priority"]
                     # Remove keys from data that should not be compared
                     data["value"] = remove_keys(data["value"])
-                    if repo_priority != mem_priority and mem_priority != 0:
-                        mem_priority = makeapirequest(f"{ENDPOINT}/{mem_id}?$select=priority", token).get("priority", "")
+                    if mem_priority not in (repo_priority, 0):
+                        mem_priority = makeapirequest(
+                            f"{ENDPOINT}/{mem_id}?$select=priority", token
+                        ).get("priority", "")
                         if repo_priority != mem_priority:
-                            print(f"Updating Enrollment Config {config_type} Priority: " + repo_data["displayName"])
+                            print(
+                                f"Updating Enrollment Config {config_type} Priority: "
+                                + repo_data["displayName"]
+                            )
                             # Update Enrollment Configuration
                             if report is False:
                                 request_data = json.dumps({"priority": repo_priority})
@@ -120,7 +137,9 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                     # Compare data from Intune with data from file
                     repo_data.pop("priority", None)
                     data["value"].pop("priority", None)
-                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
                     # If data differs, continue
                     if diff and report is False:
@@ -147,9 +166,13 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
-                        if update is not None:
-                            request_data = {"enrollmentConfigurationAssignments": update}
+                        assignement_update = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
+                        if assignement_update is not None:
+                            request_data = {
+                                "enrollmentConfigurationAssignments": assignement_update
+                            }
                             post_assignment_update(
                                 request_data,
                                 mem_id,
@@ -161,12 +184,18 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 # If Enrollment Configuration does not exist, continue
                 else:
                     print("-" * 90)
-                    print(f"Creating Enrollment Config {config_type}: " + repo_data["displayName"])
+                    print(
+                        f"Creating Enrollment Config {config_type}: "
+                        + repo_data["displayName"]
+                    )
                     # Create Enrollment Configuration
                     if report is False:
                         platform_types = ["android", "androidForWork"]
 
-                        if repo_data["@odata.type"] == "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration":
+                        if (
+                            repo_data["@odata.type"]
+                            == "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration"
+                        ):
                             if repo_data["platformType"] in platform_types:
                                 for platform in platform_types:
                                     repo_data["platformType"] = platform
@@ -198,9 +227,13 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                             )
 
                         mem_assign_obj = []
-                        assignment = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
                         if assignment is not None:
-                            request_data = {"enrollmentConfigurationAssignments": assignment}
+                            request_data = {
+                                "enrollmentConfigurationAssignments": assignment
+                            }
                             post_assignment_update(
                                 request_data,
                                 post_request["id"],
@@ -208,19 +241,28 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                                 "assign",
                                 token,
                             )
-                        print(f"Enrollment Config {config_type} created with id: " + post_request["id"])
+                        print(
+                            f"Enrollment Config {config_type} created with id: "
+                            + post_request["id"]
+                        )
 
         # If any Enrollment Configurations are left in intune_data, remove them from Intune as they are not in the repo
         if intune_data.get("value", None) is not None and remove is True:
             for val in intune_data["value"]:
                 if (
-                    val["@odata.type"] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+                    val["@odata.type"]
+                    == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
                     or val["displayName"] == "All users and all devices"
                 ):
                     continue
                 print("-" * 90)
-                print("Removing Enrollment Configuration from Intune: " + val["displayName"])
+                print(
+                    "Removing Enrollment Configuration from Intune: "
+                    + val["displayName"]
+                )
                 if report is False:
-                    makeapirequestDelete(f"{ENDPOINT}/{val['id']}", token, status_code=200)
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=200
+                    )
 
     return diff_summary

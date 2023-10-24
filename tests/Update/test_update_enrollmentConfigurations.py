@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating Enrollment Configurations."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
+
 from src.IntuneCD.update_enrollmentConfigurations import update
 
 
@@ -161,6 +163,8 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
         self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_priority(self):
+        """The count should be 1 and the makeapirequestPost should be called."""
+
         self.repo_data["priority"] = 2
 
         self.count = update(

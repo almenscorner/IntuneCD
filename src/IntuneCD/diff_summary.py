@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to get diff summary from the diff.
 """
 
 import re
-
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -48,7 +48,9 @@ class DiffSummary:
         if self.diffs and not self.message:
             print(f"Updating {self.type}: {self.name}, values changed:")
             for item in self.diffs:
-                print(f"Setting: {item['setting']}, New Value: {item['new_val']}, Old Value: {item['old_val']}")
+                print(
+                    f"Setting: {item['setting']}, New Value: {item['new_val']}, Old Value: {item['old_val']}"
+                )
         elif self.data and self.message:
             self.diffs = [self.message]
             print(self.message)

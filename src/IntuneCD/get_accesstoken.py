@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module contains the functions used to get the access token for MS Graph.
@@ -38,10 +39,10 @@ def obtain_accesstoken_app(TENANT_NAME, CLIENT_ID, CLIENT_SECRET):
         if not token:
             token = app.acquire_token_for_client(scopes=SCOPE)
             if not token:
-                raise Exception("No token returned")
+                raise ValueError("No token returned")
 
-    except Exception as e:
-        raise Exception("Error obtaining access token: " + str(e))
+    except (ValueError, Exception) as e:
+        raise ValueError("Error obtaining access token: " + str(e))
 
     return token
 
@@ -62,7 +63,7 @@ def obtain_accesstoken_cert(TENANT_NAME, CLIENT_ID, THUMBPRINT, KEY_FILE):
         client_id=CLIENT_ID,
         client_credential={
             "thumbprint": THUMBPRINT,
-            "private_key": open(KEY_FILE).read(),
+            "private_key": open(KEY_FILE, encoding="utf-8").read(),
         },
         authority=AUTHORITY + TENANT_NAME,
     )
@@ -77,10 +78,10 @@ def obtain_accesstoken_cert(TENANT_NAME, CLIENT_ID, THUMBPRINT, KEY_FILE):
         if not token:
             token = app.acquire_token_for_client(scopes=SCOPE)
             if not token:
-                raise Exception("No token returned")
+                raise ValueError("No token returned")
 
-    except Exception as e:
-        raise Exception("Error obtaining access token: " + str(e))
+    except (ValueError, Exception) as e:
+        raise ValueError("Error obtaining access token: " + str(e))
 
     return token
 
@@ -121,9 +122,9 @@ def obtain_accesstoken_interactive(TENANT_NAME, CLIENT_ID):
         )
 
         if not token:
-            raise Exception("No token returned")
+            raise ValueError("No token returned")
 
-    except Exception as e:
-        raise Exception("Error obtaining access token: " + str(e))
+    except (ValueError, Exception) as e:
+        raise ValueError("Error obtaining access token: " + str(e))
 
     return token

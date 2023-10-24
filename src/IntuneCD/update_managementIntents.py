@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Endpoint Security configurations (intents) in Intune,
 """
 
+import glob
 import json
 import os
-import glob
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPost, makeapirequestDelete
-from .graph_batch import batch_intents, batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .load_file import load_file
+
 from .diff_summary import DiffSummary
+from .graph_batch import batch_assignment, batch_intents, get_object_assignment
+from .graph_request import makeapirequest, makeapirequestDelete, makeapirequestPost
+from .load_file import load_file
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph base endpoint
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
@@ -56,7 +58,7 @@ def update(
 
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(filename) as f:
+            with open(filename, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 # Create object to pass in to assignment function
@@ -110,10 +112,10 @@ def update(
                         if diff and report is False:
                             # Create dict that we will use as the request json
                             if "value" not in repo_setting:
-                                type = "valueJson"
+                                intent_type = "valueJson"
                                 value = repo_setting["valueJson"]
                             else:
-                                type = "value"
+                                intent_type = "value"
                                 value = repo_setting["value"]
                             settings = {
                                 "settings": [
@@ -121,7 +123,7 @@ def update(
                                         "id": mem_setting_id,
                                         "definitionId": repo_setting["definitionId"],
                                         "@odata.type": repo_setting["@odata.type"],
-                                        type: value,
+                                        intent_type: value,
                                     }
                                 ]
                             }
@@ -151,11 +153,11 @@ def update(
                         mem_assign_obj = get_object_assignment(
                             mem_data["id"], mem_assignments
                         )
-                        update = update_assignment(
+                        assignment_update = update_assignment(
                             assign_obj, mem_assign_obj, token, create_groups
                         )
-                        if update is not None:
-                            request_data = {"assignments": update}
+                        if assignment_update is not None:
+                            request_data = {"assignments": assignment_update}
                             post_assignment_update(
                                 request_data,
                                 mem_data["id"],

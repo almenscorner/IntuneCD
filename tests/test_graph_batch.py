@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the graph_batch module.
 """
 
 import unittest
-
 from unittest.mock import patch
+
 from src.IntuneCD.graph_batch import (
-    batch_request,
     batch_assignment,
     batch_intents,
+    batch_request,
     get_object_assignment,
     get_object_details,
 )

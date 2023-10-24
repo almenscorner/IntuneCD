@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Shell scripts in Intune.
 """
 
-import os
 import base64
+import os
 
-from .clean_filename import clean_filename
-from .graph_request import makeapirequest
-from .graph_batch import batch_assignment, get_object_assignment, batch_request
-from .save_output import save_output
-from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
+from .clean_filename import clean_filename
+from .graph_batch import batch_assignment, batch_request, get_object_assignment
+from .graph_request import makeapirequest
+from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts/"
-ASSIGNMENT_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
+ASSIGNMENT_ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/deviceManagementScripts"
+)
 
 
 # Get all Shell scripts and save them in specified path
@@ -37,8 +40,12 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     for script in data["value"]:
         script_ids.append(script["id"])
 
-    assignment_responses = batch_assignment(data, "deviceManagement/deviceShellScripts/", "?$expand=assignments", token)
-    script_data_responses = batch_request(script_ids, "deviceManagement/deviceShellScripts/", "", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/deviceShellScripts/", "?$expand=assignments", token
+    )
+    script_data_responses = batch_request(
+        script_ids, "deviceManagement/deviceShellScripts/", "", token
+    )
 
     for script_data in script_data_responses:
         if prefix and not check_prefix_match(script_data["displayName"], prefix):
@@ -72,7 +79,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         if not os.path.exists(configpath + "Script Data/"):
             os.makedirs(configpath + "Script Data/")
         decoded = base64.b64decode(script_data["scriptContent"]).decode("utf-8")
-        f = open(configpath + "Script Data/" + script_file_name, "w")
+        f = open(configpath + "Script Data/" + script_file_name, "w", encoding="utf-8")
         f.write(decoded)
 
     return results

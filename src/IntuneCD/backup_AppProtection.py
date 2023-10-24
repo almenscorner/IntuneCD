@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all App Protection Polices in Intune.
 """
 
-from .clean_filename import clean_filename
-from .graph_request import makeapirequest
-from .graph_batch import batch_assignment, get_object_assignment
-from .save_output import save_output
-from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
+from .clean_filename import clean_filename
+from .graph_batch import batch_assignment, get_object_assignment
+from .graph_request import makeapirequest
+from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/managedAppPolicies"
@@ -30,7 +31,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     configpath = path + "/" + "App Protection/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceAppManagement/", "/assignments", token, app_protection=True)
+    assignment_responses = batch_assignment(
+        data, "deviceAppManagement/", "/assignments", token, app_protection=True
+    )
 
     # If profile is ManagedAppConfiguration, skip to next
     for profile in data["value"]:
@@ -53,9 +56,13 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         print("Backing up App Protection: " + profile["displayName"])
 
         if "targetedAppManagementLevels" in profile:
-            fname = clean_filename(f"{profile['displayName']}_{profile['targetedAppManagementLevels']}")
+            fname = clean_filename(
+                f"{profile['displayName']}_{profile['targetedAppManagementLevels']}"
+            )
         else:
-            fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}")
+            fname = clean_filename(
+                f"{profile['displayName']}_{str(profile['@odata.type'].split('.')[2])}"
+            )
 
         if append_id:
             fname = f"{fname}__{graph_id}"

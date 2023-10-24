@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Enrollment Configurations in Intune.
@@ -6,15 +7,17 @@ This module backs up all Enrollment Configurations in Intune.
 
 import re
 
-from .clean_filename import clean_filename
-from .graph_request import makeapirequest
-from .save_output import save_output
-from .remove_keys import remove_keys
-from .graph_batch import batch_assignment, get_object_assignment
 from .check_prefix import check_prefix_match
+from .clean_filename import clean_filename
+from .graph_batch import batch_assignment, get_object_assignment
+from .graph_request import makeapirequest
+from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations"
+)
 
 
 # Get all Enrollment Configurations and save them in specified path
@@ -31,13 +34,18 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     configpath = path + "/" + "Enrollment Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/deviceEnrollmentConfigurations/", "/assignments", token
+    )
 
     for config in data["value"]:
         if prefix and not check_prefix_match(config["displayName"], prefix):
             continue
 
-        if config["@odata.type"] == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration":
+        if (
+            config["@odata.type"]
+            == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
+        ):
             continue
         results["config_count"] += 1
         config_type = config.get("deviceEnrollmentConfigurationType", None)
@@ -53,7 +61,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 config["assignments"] = assignments
 
         graph_id = config["id"]
-        fname = clean_filename(f"{config['displayName']}_{str(config['@odata.type']).split('.')[2]}")
+        fname = clean_filename(
+            f"{config['displayName']}_{str(config['@odata.type']).split('.')[2]}"
+        )
         if append_id:
             fname = f"{fname}__{graph_id}"
 

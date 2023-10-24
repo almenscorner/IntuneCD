@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Conditional Access in Intune.
 """
 
+from .check_prefix import check_prefix_match
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .save_output import save_output
 from .remove_keys import remove_keys
-from .check_prefix import check_prefix_match
+from .save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/identity/conditionalAccess/policies"
@@ -38,7 +39,9 @@ def savebackup(path, output, token, prefix, append_id):
 
             policy = makeapirequest(f"{ENDPOINT}/{policy['id']}", token)
             if policy["grantControls"]:
-                policy["grantControls"].pop("authenticationStrength@odata.context", None)
+                policy["grantControls"].pop(
+                    "authenticationStrength@odata.context", None
+                )
 
             graph_id = policy["id"]
             policy = remove_keys(policy)

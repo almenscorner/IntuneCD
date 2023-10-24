@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
+
 from src.IntuneCD.update_groupPolicyConfiguration import update
 
 
 class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
+    """Test class for update_groupPolicyConfiguration."""
+
     def setUp(self):
         self.directory = TempDirectory()
         self.directory.create()
@@ -154,6 +158,8 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.makeapirequestDelete_patch.stop()
 
     def test_update_with_diffs_and_assignment(self):
+        """The count should be 3 and the post_assignment_update and makeapirequestPatch should be called."""
+
         self.count = update(
             self.directory.path, self.token, assignment=True, report=False, remove=False
         )
@@ -163,6 +169,8 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 2)
 
     def test_update_with_diffs_and_assignment_report_mode(self):
+        """The count should be 3 and the post_assignment_update and makeapirequestPost should be called."""
+
         self.count = update(
             self.directory.path,
             self.token,
@@ -176,6 +184,8 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 0)
 
     def test_update_with_diffs_and_required_presentation(self):
+        """The count should be 3 and the post_assignment_update and makeapirequestPost should be called."""
+
         self.repo_data_base["definitionValues"][0]["presentationValues"][0][
             "presentation"
         ]["required"] = True
@@ -195,6 +205,8 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 2)
 
     def test_update_no_diffs_and_assignment(self):
+        """The count should be 0, the post_assignment_update should be called"""
+
         self.repo_data_base["description"] = "test"
         self.repo_data_base["definitionValues"][0]["presentationValues"][0][
             "values"
@@ -210,6 +222,8 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 0)
 
     def test_update_with_diffs_no_assignment(self):
+        """The count should be 3 and the makeapirequestPost should be called."""
+
         self.count = update(
             self.directory.path,
             self.token,
@@ -223,6 +237,8 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 2)
 
     def test_update_config_not_found_with_assignment(self):
+        """post_assignment_update should be called and makeapirequestPost should be called."""
+
         self.repo_data_base["displayName"] = "test1"
         self.count = update(
             self.directory.path, self.token, assignment=True, report=False, remove=False
@@ -232,6 +248,8 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 3)
 
     def test_update_config_not_found_and_required_presentation(self):
+        """post_assignment_update should be called and makeapirequestPost should be called."""
+
         self.repo_data_base["displayName"] = "test1"
         self.repo_data_base["definitionValues"][0]["presentationValues"][0][
             "presentation"
@@ -251,6 +269,8 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 2)
 
     def test_update_config_not_found_custom(self):
+        """makeapirequestPost should be called."""
+
         self.repo_data_base["policyConfigurationIngestionType"] = "custom"
         self.repo_data_base["displayName"] = "test1"
         self.repo_data_base["definitionValues"][0]["definition"]["classType"] = "test"

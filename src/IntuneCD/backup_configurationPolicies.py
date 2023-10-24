@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Configuration Policies in Intune.
 """
 
+from .check_prefix import check_prefix_match
 from .clean_filename import clean_filename
-from .graph_request import makeapirequest
 from .graph_batch import (
     batch_assignment,
-    get_object_assignment,
     batch_request,
+    get_object_assignment,
     get_object_details,
 )
-from .save_output import save_output
+from .graph_request import makeapirequest
 from .remove_keys import remove_keys
-from .check_prefix import check_prefix_match
+from .save_output import save_output
 
 # Set MS Graph base endpoint
 BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
@@ -38,7 +39,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     for policy in policies["value"]:
         policy_ids.append(policy["id"])
 
-    assignment_responses = batch_assignment(policies, "deviceManagement/configurationPolicies/", "/assignments", token)
+    assignment_responses = batch_assignment(
+        policies, "deviceManagement/configurationPolicies/", "/assignments", token
+    )
     policy_settings_batch = batch_request(
         policy_ids,
         "deviceManagement/configurationPolicies/",
@@ -69,7 +72,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
         # Get filename without illegal characters
         # fname = clean_filename(name)
-        fname = clean_filename(f"{name}_{str(policy['technologies']).split(',')[-1]}")
+        fname = clean_filename(
+            f"{name}_{str(policy['technologies']).rsplit(',', 1)[-1]}"
+        )
         if append_id:
             fname = f"{fname}__{graph_id}"
         # Save Configuration Policy as JSON or YAML depending on configured

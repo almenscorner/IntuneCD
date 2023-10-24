@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up Apple Push Notification setting in Intune.
@@ -6,8 +7,8 @@ This module backs up Apple Push Notification setting in Intune.
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .save_output import save_output
 from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = (

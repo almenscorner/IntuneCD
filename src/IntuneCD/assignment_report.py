@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module creates a report of all groups found and their assginment.
@@ -7,9 +8,9 @@ This module creates a report of all groups found and their assginment.
 import os
 import platform
 
-from .save_output import save_output
 from .check_file import check_file
 from .load_file import load_file
+from .save_output import save_output
 
 
 def get_group_report(path, output):
@@ -25,46 +26,57 @@ def get_group_report(path, output):
 
     def process_file(path, name, payload_type, groups):
         file_check = check_file(path, name)
-        if file_check:
-            with open(os.path.join(path, name), "r") as f:
-                data = load_file(name, f)
-                if type(data) is dict and data.get("assignments"):
-                    for assignment in data["assignments"]:
-                        if assignment["target"].get("groupName"):
-                            intent_string = assignment.get("intent", "")
-                            config_type = ""
-                            if data.get("@odata.type"):
-                                config_type = f'{data["@odata.type"].split(".")[2]}'
-                            if data.get("displayName"):
-                                payload_data = {"name": data["displayName"], "type": config_type, "intent": intent_string}
-                            elif data.get("name"):
-                                payload_data = {"name": data["name"], "type": config_type, "intent": intent_string}
-                            data = {
-                                "groupName": assignment["target"]["groupName"],
-                                "groupType": assignment["target"].get("groupType"),
-                                "membershipRule": assignment["target"].get("membershipRule", None),
-                                "assignedTo": {},
-                            }
+        if not file_check:
+            return
 
-                            payload_added = False  # flag to track whether payload_type has been added
+        with open(os.path.join(path, name), "r", encoding="utf-8") as f:
+            data = load_file(name, f)
+            if not isinstance(data, dict) or not data.get("assignments"):
+                return
 
-                            if not groups:
-                                groups.append(data)
-                                data["assignedTo"][payload_type] = [payload_data]
-                                payload_added = True
+        for assignment in data["assignments"]:
+            if not assignment["target"].get("groupName"):
+                continue
+
+            intent_string = assignment.get("intent", "")
+            config_type = ""
+            if data.get("@odata.type"):
+                config_type = f'{data["@odata.type"].split(".")[2]}'
+            payload_name = data.get("displayName", data.get("name", ""))
+            payload_data = {
+                "name": payload_name,
+                "type": config_type,
+                "intent": intent_string,
+            }
+
+            group_data = {
+                "groupName": assignment["target"]["groupName"],
+                "groupType": assignment["target"].get("groupType"),
+                "membershipRule": assignment["target"].get("membershipRule", None),
+                "assignedTo": {},
+            }
+
+            payload_added = False  # flag to track whether payload_type has been added
+
+            if not groups:
+                groups.append(group_data)
+                group_data["assignedTo"][payload_type] = [payload_data]
+                payload_added = True
+            else:
+                for item in groups:
+                    if item["groupName"] == group_data["groupName"]:
+                        if not payload_added:
+                            if item["assignedTo"].get(payload_type):
+                                item["assignedTo"][payload_type].append(payload_data)
                             else:
-                                for item in groups:
-                                    if item["groupName"] == data["groupName"]:
-                                        if not payload_added and item["assignedTo"].get(payload_type):
-                                            item["assignedTo"][payload_type].append(payload_data)
-                                            payload_added = True
-                                        elif not payload_added and not item["assignedTo"].get(payload_type):
-                                            item["assignedTo"][payload_type] = [payload_data]
-                                            payload_added = True
+                                item["assignedTo"][payload_type] = [payload_data]
+                            payload_added = True
+                            break
 
-                                if not payload_added:
-                                    data["assignedTo"][payload_type] = [payload_data]
-                                    groups.append(data)
+                if not payload_added:
+                    group_data["assignedTo"][payload_type] = [payload_data]
+                    groups.append(group_data)
+                    break
 
     def collect_groups(path):
         exclude = set(

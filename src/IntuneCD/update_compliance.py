@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Compliance Policies in Intune.
@@ -8,19 +9,19 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import (
-    makeapirequest,
-    makeapirequestPatch,
-    makeapirequestPost,
-    makeapirequestDelete,
-)
-from .graph_batch import batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .remove_keys import remove_keys
-from .load_file import load_file
+
 from .check_file import check_file
 from .diff_summary import DiffSummary
-
+from .graph_batch import batch_assignment, get_object_assignment
+from .graph_request import (
+    makeapirequest,
+    makeapirequestDelete,
+    makeapirequestPatch,
+    makeapirequestPost,
+)
+from .load_file import load_file
+from .remove_keys import remove_keys
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePolicies"
@@ -62,7 +63,7 @@ def update(
                 continue
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 # Create object to pass in to assignment function
@@ -84,15 +85,17 @@ def update(
 
                 if data["value"]:
                     print("-" * 90)
-                    mem_id = data["value"]["id"]
+                    mem_id = data.get("value", {}).get("id", None)
                     data["value"] = remove_keys(data["value"])
 
-                    if data["value"]["scheduledActionsForRule"]:
-                        for rule in data["value"]["scheduledActionsForRule"]:
+                    if data.get("value", {}).get("scheduledActionsForRule"):
+                        for rule in data.get("value").get("scheduledActionsForRule"):
                             remove_keys(rule)
-                        for scheduled_config in data["value"][
-                            "scheduledActionsForRule"
-                        ][0]["scheduledActionConfigurations"]:
+                        for scheduled_config in (
+                            data.get("value")
+                            .get("scheduledActionsForRule", [])[0]
+                            .get("scheduledActionConfigurations", [])
+                        ):
                             remove_keys(scheduled_config)
 
                     diff = DeepDiff(
@@ -127,7 +130,7 @@ def update(
 
                     if repo_data["scheduledActionsForRule"]:
                         for mem_rule, repo_rule in zip(
-                            data["value"]["scheduledActionsForRule"],
+                            data.get("value").get("scheduledActionsForRule"),
                             repo_data["scheduledActionsForRule"],
                         ):
                             rdiff = DeepDiff(
@@ -166,11 +169,11 @@ def update(
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(
+                        assignment_update = update_assignment(
                             assign_obj, mem_assign_obj, token, create_groups
                         )
-                        if update is not None:
-                            request_data = {"assignments": update}
+                        if assignment_update is not None:
+                            request_data = {"assignments": assignment_update}
                             post_assignment_update(
                                 request_data,
                                 mem_id,

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to get the access token for the tenant.
@@ -6,8 +7,6 @@ This module is used to get the access token for the tenant.
 
 import json
 import os
-import subprocess
-import json
 
 from .get_accesstoken import (
     obtain_accesstoken_app,
@@ -33,7 +32,7 @@ def getAuth(mode, localauth, certauth, interactiveauth, tenant):
         CLIENT_ID = os.environ.get("CLIENT_ID")
 
         if not all([KEY_FILE, THUMBPRINT, TENANT_NAME, CLIENT_ID]):
-            raise Exception("One or more os.environ variables not set")
+            raise ValueError("One or more os.environ variables not set")
         return obtain_accesstoken_cert(TENANT_NAME, CLIENT_ID, THUMBPRINT, KEY_FILE)
 
     if interactiveauth:
@@ -41,14 +40,14 @@ def getAuth(mode, localauth, certauth, interactiveauth, tenant):
         CLIENT_ID = os.environ.get("CLIENT_ID")
 
         if not all([TENANT_NAME, CLIENT_ID]):
-            raise Exception("One or more os.environ variables not set")
+            raise ValueError("One or more os.environ variables not set")
 
         return obtain_accesstoken_interactive(TENANT_NAME, CLIENT_ID)
 
     if mode:
         if mode == "devtoprod":
             if localauth:
-                with open(localauth) as json_data:
+                with open(localauth, encoding="utf-8") as json_data:
                     auth_dict = json.load(json_data)
                 tenant_TENANT_NAME = auth_dict["params"][tenant + "_TENANT_NAME"]
                 tenant_CLIENT_ID = auth_dict["params"][tenant + "_CLIENT_ID"]
@@ -58,7 +57,7 @@ def getAuth(mode, localauth, certauth, interactiveauth, tenant):
                 tenant_CLIENT_ID = os.environ.get(tenant + "_CLIENT_ID")
                 tenant_CLIENT_SECRET = os.environ.get(tenant + "_CLIENT_SECRET")
             if not all([tenant_TENANT_NAME, tenant_CLIENT_ID, tenant_CLIENT_SECRET]):
-                raise Exception(
+                raise ValueError(
                     "One or more os.environ variables for " + tenant + " not set"
                 )
 
@@ -66,10 +65,9 @@ def getAuth(mode, localauth, certauth, interactiveauth, tenant):
                 tenant_TENANT_NAME, tenant_CLIENT_ID, tenant_CLIENT_SECRET
             )
 
-        elif mode == "standalone":
-
+        if mode == "standalone":
             if localauth:
-                with open(localauth) as json_data:
+                with open(localauth, encoding="utf-8") as json_data:
                     auth_dict = json.load(json_data)
                 TENANT_NAME = auth_dict["params"]["TENANT_NAME"]
                 CLIENT_ID = auth_dict["params"]["CLIENT_ID"]
@@ -79,6 +77,6 @@ def getAuth(mode, localauth, certauth, interactiveauth, tenant):
                 CLIENT_ID = os.environ.get("CLIENT_ID")
                 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
             if not all([TENANT_NAME, CLIENT_ID, CLIENT_SECRET]):
-                raise Exception("One or more os.environ variables not set")
+                raise ValueError("One or more os.environ variables not set")
 
             return obtain_accesstoken_app(TENANT_NAME, CLIENT_ID, CLIENT_SECRET)

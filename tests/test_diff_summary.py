@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the get_diff_output function.
 """
 
 import unittest
+from unittest.mock import patch
 
 from src.IntuneCD.diff_summary import DiffSummary
-from unittest.mock import patch
 
 
 @patch("src.IntuneCD.diff_summary.datetime", return_value="2021-01-01 00:00:00")
@@ -27,7 +28,9 @@ class TestGetDiffOutput(unittest.TestCase):
                     "new_val": "True",
                     "old_val": "False",
                     "setting": "cameraBlocked",
-                    "change_date": str(mock_datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                    "change_date": str(
+                        mock_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    ),
                 }
             ],
         )
@@ -48,13 +51,17 @@ class TestGetDiffOutput(unittest.TestCase):
                     "new_val": "True",
                     "old_val": "False",
                     "setting": "cameraBlocked",
-                    "change_date": str(mock_datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                    "change_date": str(
+                        mock_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    ),
                 },
                 {
                     "new_val": "True",
                     "old_val": "False",
                     "setting": "cameraBlocked2",
-                    "change_date": str(mock_datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                    "change_date": str(
+                        mock_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    ),
                 },
             ],
         )

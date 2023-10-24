@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Conditional Access Policy's in Intune.
@@ -8,13 +9,14 @@ import json
 import os
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
 
@@ -45,7 +47,7 @@ def update(path, token, report, remove):
                 continue
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
                 repo_data["conditions"].pop("users", None)
 
@@ -62,13 +64,13 @@ def update(path, token, report, remove):
                         continue
                     print("-" * 90)
 
-                    data["value"]["conditions"].pop("users", None)
-                    if data["value"]["grantControls"]:
-                        data["value"]["grantControls"].pop(
+                    data.get("value").get("conditions").pop("users", None)
+                    if data.get("value").get("grantControls"):
+                        data.get("value").get("grantControls").pop(
                             "authenticationStrength@odata.context", None
                         )
 
-                    mem_id = data["value"]["id"]
+                    mem_id = data.get("value").get("id")
                     # Remove keys before using DeepDiff
                     data["value"] = remove_keys(data["value"])
 
@@ -88,16 +90,16 @@ def update(path, token, report, remove):
                                 if repo_data["grantControls"].get(
                                     "authenticationStrength"
                                 ):
-                                    id = (
+                                    g_id = (
                                         repo_data["grantControls"]
                                         .get("authenticationStrength", {})
                                         .get("id")
                                     )
                                     repo_data["grantControls"][
                                         "authenticationStrength"
-                                    ] = ({"id": id} if id else None)
+                                    ] = ({"id": g_id} if g_id else None)
                                     repo_data["grantControls"]["operator"] = (
-                                        "AND" if id else None
+                                        "AND" if g_id else None
                                     )
 
                             request_data = json.dumps(repo_data)
@@ -128,16 +130,16 @@ def update(path, token, report, remove):
                         # If authenticationStrength is set, set operator to AND and remove unnecessary keys
                         if repo_data.get("grantControls"):
                             if repo_data["grantControls"].get("authenticationStrength"):
-                                id = (
+                                g_id = (
                                     repo_data["grantControls"]
                                     .get("authenticationStrength", {})
                                     .get("id")
                                 )
                                 repo_data["grantControls"]["authenticationStrength"] = (
-                                    {"id": id} if id else None
+                                    {"id": g_id} if g_id else None
                                 )
                                 repo_data["grantControls"]["operator"] = (
-                                    "AND" if id else None
+                                    "AND" if g_id else None
                                 )
 
                         request_json = json.dumps(repo_data)

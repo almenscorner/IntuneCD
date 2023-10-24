@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Notification Templates in Intune.
@@ -8,16 +9,17 @@ import json
 import os
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
+from .diff_summary import DiffSummary
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
-from .diff_summary import DiffSummary
 
 # Set MS Graph endpoint
 ENDPOINT = (
@@ -48,7 +50,7 @@ def update(path, token, report, remove):
                 continue
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 data = {"value": ""}
@@ -66,7 +68,7 @@ def update(path, token, report, remove):
                     # Get Notification Template data from Intune
                     q_param = "?$expand=localizedNotificationMessages"
                     mem_template_data = makeapirequest(
-                        ENDPOINT + "/" + data["value"]["id"], token, q_param
+                        ENDPOINT + "/" + data.get("value").get("id"), token, q_param
                     )
                     # Create dict to compare Intune data with JSON/YAML data
                     repo_template_data = {

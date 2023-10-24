@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up all Compliance Partners in Intune.
@@ -6,11 +7,13 @@ This module backs up all Compliance Partners in Intune.
 
 from .clean_filename import clean_filename
 from .graph_request import makeapirequest
-from .save_output import save_output
 from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/complianceManagementPartners"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceManagement/complianceManagementPartners"
+)
 
 
 # Get all Compliance Partners and save them in specified path

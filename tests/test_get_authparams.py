@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the get_authparams function.
 """
 
 import unittest
-
 from unittest.mock import patch
+
 from testfixtures import TempDirectory
+
 from src.IntuneCD.get_authparams import getAuth
 
 
@@ -45,13 +47,7 @@ class TestGetAuth(unittest.TestCase):
     def tearDown(self):
         self.directory.cleanup()
 
-    def test_get_auth_devtoprod_env_dev_app(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_devtoprod_env_dev_app(self, _, __, ___, ____):
         """The auth params should be returned."""
         with patch.dict(
             "os.environ",
@@ -70,13 +66,7 @@ class TestGetAuth(unittest.TestCase):
             )
             self.assertEqual(result, "token")
 
-    def test_get_auth_devtoprod_env_prod(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_devtoprod_env_prod(self, _, __, ___, ____):
         """The auth params should be returned."""
         with patch.dict(
             "os.environ",
@@ -95,13 +85,7 @@ class TestGetAuth(unittest.TestCase):
             )
             self.assertEqual(result, "token")
 
-    def test_get_auth_devtoprod_localauth_dev(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_devtoprod_localauth_dev(self, _, __, ___, ____):
         """The auth params should be returned."""
         result = getAuth(
             "devtoprod",
@@ -112,13 +96,7 @@ class TestGetAuth(unittest.TestCase):
         )
         self.assertEqual(result, "token")
 
-    def test_get_auth_devtoprod_localauth_prod(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_devtoprod_localauth_prod(self, _, __, ___, ____):
         """The auth params should be returned."""
         result = getAuth(
             "devtoprod",
@@ -129,13 +107,7 @@ class TestGetAuth(unittest.TestCase):
         )
         self.assertEqual(result, "token")
 
-    def test_get_auth_standalone_env(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_standalone_env(self, _, __, ___, ____):
         """The auth params should be returned."""
         with patch.dict(
             "os.environ",
@@ -150,13 +122,7 @@ class TestGetAuth(unittest.TestCase):
             )
             self.assertEqual(result, "token")
 
-    def test_get_auth_standalone_localauth(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_standalone_localauth(self, _, __, ___, ____):
         """The auth params should be returned."""
         result = getAuth(
             "standalone",
@@ -167,13 +133,7 @@ class TestGetAuth(unittest.TestCase):
         )
         self.assertEqual(result, "token")
 
-    def test_get_auth_devtoprod_missing_env_dev(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_devtoprod_missing_env_dev(self, _, __, ___, ____):
         """Exception should be raised due to missing env."""
         with patch.dict(
             "os.environ", {"DEV_CLIENT_ID": "test", "DEV_CLIENT_SECRET": "test"}
@@ -187,13 +147,7 @@ class TestGetAuth(unittest.TestCase):
                     tenant="DEV",
                 )
 
-    def test_get_auth_devtoprod_missing_env_prod(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_devtoprod_missing_env_prod(self, _, __, ___, ____):
         """Exception should be raised due to missing env."""
         with patch.dict(
             "os.environ", {"PROD_CLIENT_ID": "test", "PROD_CLIENT_SECRET": "test"}
@@ -207,13 +161,7 @@ class TestGetAuth(unittest.TestCase):
                     tenant="PROD",
                 )
 
-    def test_get_auth_standalone_missing_env(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_standalone_missing_env(self, _, __, ___, ____):
         """Exception should be raised due to missing env."""
         with patch.dict("os.environ", {"CLIENT_ID": "test", "CLIENT_SECRET": "test"}):
             with self.assertRaises(Exception):
@@ -225,13 +173,7 @@ class TestGetAuth(unittest.TestCase):
                     tenant=None,
                 )
 
-    def test_get_auth_cert(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_cert(self, _, __, ___, ____):
         """The auth params should be returned."""
         with patch.dict(
             "os.environ",
@@ -247,19 +189,12 @@ class TestGetAuth(unittest.TestCase):
             )
             self.assertEqual(result, "token")
 
-    def test_get_auth_cert_missing_env(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_cert_missing_env(self, _, __, ___, ____):
         """The auth params should be returned."""
         with patch.dict(
             "os.environ",
             {"CLIENT_ID": "test", "TENANT_NAME": "test", "KEY_FILE": "test"},
         ):
-
             with self.assertRaises(Exception):
                 getAuth(
                     None,
@@ -269,13 +204,7 @@ class TestGetAuth(unittest.TestCase):
                     tenant=None,
                 )
 
-    def test_get_auth_interactive(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_interactive(self, _, __, ___, ____):
         """The auth params should be returned."""
         with patch.dict(
             "os.environ",
@@ -291,19 +220,12 @@ class TestGetAuth(unittest.TestCase):
             )
             self.assertEqual(result, "token")
 
-    def test_get_auth_interactive_missing_env(
-        self,
-        mock_getAuth,
-        mock_obtain_accesstoken_app,
-        mock_obtain_accesstoken_cert,
-        mock_obtain_accesstoken_interactive,
-    ):
+    def test_get_auth_interactive_missing_env(self, _, __, ___, ____):
         """The auth params should be returned."""
         with patch.dict(
             "os.environ",
             {"CLIENT_ID": "test"},
         ):
-
             with self.assertRaises(Exception):
                 getAuth(
                     None,

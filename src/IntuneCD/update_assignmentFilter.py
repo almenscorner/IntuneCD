@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all Filters in Intune.
@@ -8,12 +9,12 @@ import json
 import os
 
 from deepdiff import DeepDiff
-from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
-from .remove_keys import remove_keys
-from .load_file import load_file
+
 from .check_file import check_file
 from .diff_summary import DiffSummary
-
+from .graph_request import makeapirequest, makeapirequestPatch, makeapirequestPost
+from .load_file import load_file
+from .remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/assignmentFilters"
@@ -41,7 +42,7 @@ def update(path, token, report):
                 continue
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 filter_value = {}

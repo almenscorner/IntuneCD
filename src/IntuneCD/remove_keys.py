@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to remove keys from the data.
@@ -19,7 +20,7 @@ def remove_keys(data):
         "certificate",
         "createdDateTime",
         "lastModifiedDateTime",
-        "isDefault" "deployedAppCount",
+        "isDefault",
         "isAssigned",
         "@odata.context",
         "scheduledActionConfigurations@odata.context",

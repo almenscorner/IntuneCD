@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all App Protection Policies in Intune.
@@ -8,24 +9,27 @@ import json
 import os
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
+from .diff_summary import DiffSummary
+from .graph_batch import batch_assignment, get_object_assignment
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .graph_batch import batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .remove_keys import remove_keys
-from .diff_summary import DiffSummary
-from .check_file import check_file
 from .load_file import load_file
+from .remove_keys import remove_keys
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False, remove=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all App Protection Polices in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -43,7 +47,9 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
         # Get App Protections
         mem_data = makeapirequest(f"{ENDPOINT}managedAppPolicies", token)
         # Get current assignments
-        mem_assignments = batch_assignment(mem_data, "deviceAppManagement/", "/assignments", token, app_protection=True)
+        mem_assignments = batch_assignment(
+            mem_data, "deviceAppManagement/", "/assignments", token, app_protection=True
+        )
 
         for filename in os.listdir(configpath):
             file = check_file(configpath, filename)
@@ -51,13 +57,19 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 continue
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 if repo_data:
-                    if repo_data["@odata.type"] == "#microsoft.graph.mdmWindowsInformationProtectionPolicy":
+                    if (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.mdmWindowsInformationProtectionPolicy"
+                    ):
                         platform = "mdmWindowsInformationProtectionPolicies"
-                    elif repo_data["@odata.type"] == "#microsoft.graph.windowsInformationProtectionPolicy":
+                    elif (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.windowsInformationProtectionPolicy"
+                    ):
                         platform = "windowsInformationProtectionPolicies"
                     else:
                         platform = f"{str(repo_data['@odata.type']).split('.')[2]}s"
@@ -72,26 +84,38 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 data = {"value": ""}
                 if mem_data["value"]:
                     for val in mem_data["value"]:
-                        if "targetedAppManagementLevels" in val and "targetedAppManagementLevels" in repo_data:
+                        if (
+                            "targetedAppManagementLevels" in val
+                            and "targetedAppManagementLevels" in repo_data
+                        ):
                             if (
-                                repo_data["targetedAppManagementLevels"] == val["targetedAppManagementLevels"]
+                                repo_data["targetedAppManagementLevels"]
+                                == val["targetedAppManagementLevels"]
                                 and repo_data["displayName"] == val["displayName"]
                             ):
                                 data["value"] = val
                                 mem_data["value"].remove(val)
-                        elif repo_data["@odata.type"] == val["@odata.type"] and repo_data["displayName"] == val["displayName"]:
+                        elif (
+                            repo_data["@odata.type"] == val["@odata.type"]
+                            and repo_data["displayName"] == val["displayName"]
+                        ):
                             data["value"] = val
                             mem_data["value"].remove(val)
 
                 if data["value"]:
                     print("-" * 90)
-                    mem_id = data["value"]["id"]
+                    mem_id = data.get("value", {}).get("id", None)
                     # Remove keys before using DeepDiff
                     data["value"] = remove_keys(data["value"])
 
-                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
-                    if repo_data["@odata.type"] == "#microsoft.graph.windowsInformationProtectionPolicy":
+                    if (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.windowsInformationProtectionPolicy"
+                    ):
                         response_code = 200
                     else:
                         response_code = 204
@@ -117,9 +141,11 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
-                        if update is not None:
-                            request_data = {"assignments": update}
+                        assignment_update = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
+                        if assignment_update is not None:
+                            request_data = {"assignments": assignment_update}
                             post_assignment_update(
                                 request_data,
                                 mem_id,
@@ -132,7 +158,10 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 # If App Protection does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print("App Protection not found, creating policy: " + repo_data["displayName"])
+                    print(
+                        "App Protection not found, creating policy: "
+                        + repo_data["displayName"]
+                    )
                     if report is False:
                         request_json = json.dumps(repo_data)
                         post_request = makeapirequestPost(
@@ -143,7 +172,9 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                             status_code=201,
                         )
                         mem_assign_obj = []
-                        assignment = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
                         if assignment is not None:
                             request_data = {"assignments": assignment}
                             post_assignment_update(

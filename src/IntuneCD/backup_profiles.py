@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module backs up Device Configurations in Intune.
 """
 
-import os
 import base64
+import os
 
-from .clean_filename import clean_filename
-from .graph_request import makeapirequest
-from .graph_batch import batch_assignment, get_object_assignment
-from .save_output import save_output
-from .remove_keys import remove_keys
 from .check_prefix import check_prefix_match
+from .clean_filename import clean_filename
+from .graph_batch import batch_assignment, get_object_assignment
+from .graph_request import makeapirequest
+from .remove_keys import remove_keys
+from .save_output import save_output
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
@@ -33,7 +34,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     configpath = path + "/" + "Device Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
-    assignment_responses = batch_assignment(data, "deviceManagement/deviceConfigurations/", "/assignments", token)
+    assignment_responses = batch_assignment(
+        data, "deviceManagement/deviceConfigurations/", "/assignments", token
+    )
 
     for profile in data["value"]:
         if prefix and not check_prefix_match(profile["displayName"], prefix):
@@ -52,7 +55,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         print("Backing up profile: " + profile["displayName"])
 
         # Get filename without illegal characters
-        fname = clean_filename(f"{profile['displayName']}_{str(profile['@odata.type']).split('.')[2]}")
+        fname = clean_filename(
+            f"{profile['displayName']}_{str(profile['@odata.type']).split('.')[2]}"
+        )
         if append_id:
             fname = f"{fname}__{graph_id}"
 
@@ -66,7 +71,11 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 os.makedirs(configpath + "/" + "mobileconfig/")
             # Save decoded payload as .mobileconfig
             results["config_count"] += 1
-            f = open(configpath + "/" + "mobileconfig/" + profile["payloadFileName"], "w")
+            f = open(
+                configpath + "/" + "mobileconfig/" + profile["payloadFileName"],
+                "w",
+                encoding="utf-8",
+            )
             f.write(decoded)
             # Save Device Configuration as JSON or YAML depending on configured
             # value in "-o"
@@ -76,34 +85,34 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
         # If Device Configuration is custom Win10 and the OMA settings are
         # encrypted, get them in plain text
-        elif profile["@odata.type"] == "#microsoft.graph.windows10CustomConfiguration":
-            if profile["omaSettings"]:
-                if profile["omaSettings"][0]["isEncrypted"] is True:
-                    omas = []
-                    for setting in profile["omaSettings"]:
-                        if setting["isEncrypted"]:
-                            decoded_oma = {}
-                            oma_value = makeapirequest(
-                                ENDPOINT
-                                + "/"
-                                + pid
-                                + "/getOmaSettingPlainTextValue(secretReferenceValueId='"
-                                + setting["secretReferenceValueId"]
-                                + "')",
-                                token,
-                            )
-                            decoded_oma["@odata.type"] = setting["@odata.type"]
-                            decoded_oma["displayName"] = setting["displayName"]
-                            decoded_oma["description"] = setting["description"]
-                            decoded_oma["omaUri"] = setting["omaUri"]
-                            decoded_oma["value"] = oma_value
-                            decoded_oma["isEncrypted"] = False
-                            decoded_oma["secretReferenceValueId"] = None
-                            decoded_omas = decoded_oma
-                            omas.append(decoded_omas)
+        elif profile[
+            "@odata.type"
+        ] == "#microsoft.graph.windows10CustomConfiguration" and profile.get(
+            "omaSettings"
+        ):
+            omas = []
+            for setting in profile["omaSettings"]:
+                if setting.get("isEncrypted"):
+                    decoded_oma = {}
+                    decoded_oma["@odata.type"] = setting["@odata.type"]
+                    decoded_oma["displayName"] = setting["displayName"]
+                    decoded_oma["description"] = setting["description"]
+                    decoded_oma["omaUri"] = setting["omaUri"]
+                    decoded_oma["isEncrypted"] = False
+                    decoded_oma["secretReferenceValueId"] = None
+                    oma_value = makeapirequest(
+                        ENDPOINT
+                        + "/"
+                        + pid
+                        + "/getOmaSettingPlainTextValue(secretReferenceValueId='"
+                        + setting["secretReferenceValueId"]
+                        + "')",
+                        token,
+                    )
+                    decoded_oma["value"] = oma_value
+                    omas.append(decoded_oma)
 
-                    profile.pop("omaSettings")
-                    profile["omaSettings"] = omas
+            profile["omaSettings"] = omas
 
             # Save Device Configuration as JSON or YAML depending on configured
             # value in "-o"

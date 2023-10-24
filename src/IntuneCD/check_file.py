@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to check if a file is a YAML or JSON file.
@@ -21,5 +22,4 @@ def check_file(configpath, filename):
         return file
     if file.endswith(".json"):
         return file
-    else:
-        return False
+    return False

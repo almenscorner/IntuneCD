@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module contains all functions for the documentation.
 """
 
+import base64
 import binascii
-import yaml
+import glob
 import json
 import os
-import glob
-import re
 import platform
-import base64
+import re
 
+import yaml
 from pytablewriter import MarkdownTableWriter
 
 
@@ -23,9 +24,9 @@ def md_file(outpath):
     :param outpath: The path to save the Markdown document to
     """
     if not os.path.exists(f"{outpath}"):
-        open(outpath, "w+").close()
+        open(outpath, "w+", encoding="utf-8").close()
     else:
-        open(outpath, "w").close()
+        open(outpath, "w", encoding="utf-8").close()
 
 
 def write_table(data):
@@ -78,9 +79,15 @@ def assignment_table(data):
         target = ""
         intent = ""
         for assignment in assignments:
-            if assignment["target"]["@odata.type"] == "#microsoft.graph.allDevicesAssignmentTarget":
+            if (
+                assignment["target"]["@odata.type"]
+                == "#microsoft.graph.allDevicesAssignmentTarget"
+            ):
                 target = "All Devices"
-            if assignment["target"]["@odata.type"] == "#microsoft.graph.allLicensedUsersAssignmentTarget":
+            if (
+                assignment["target"]["@odata.type"]
+                == "#microsoft.graph.allLicensedUsersAssignmentTarget"
+            ):
                 target = "All Users"
             if "groupName" in assignment["target"]:
                 target = assignment["target"]["groupName"]
@@ -94,16 +101,24 @@ def assignment_table(data):
                     [
                         intent,
                         target,
-                        assignment["target"]["deviceAndAppManagementAssignmentFilterType"],
-                        assignment["target"]["deviceAndAppManagementAssignmentFilterId"],
+                        assignment["target"][
+                            "deviceAndAppManagementAssignmentFilterType"
+                        ],
+                        assignment["target"][
+                            "deviceAndAppManagementAssignmentFilterId"
+                        ],
                     ]
                 )
             else:
                 assignment_list.append(
                     [
                         target,
-                        assignment["target"]["deviceAndAppManagementAssignmentFilterType"],
-                        assignment["target"]["deviceAndAppManagementAssignmentFilterId"],
+                        assignment["target"][
+                            "deviceAndAppManagementAssignmentFilterType"
+                        ],
+                        assignment["target"][
+                            "deviceAndAppManagementAssignmentFilterId"
+                        ],
                     ]
                 )
 
@@ -127,14 +142,14 @@ def remove_characters(string):
 
 
 def is_base64(s):
+    """Check if a string is a valid base64-encoded string"""
     try:
         # Attempt to decode the string
-        if type(s) is str:
-            s = s.encode("utf-8")
-            base64.b64decode(s)
-            return True
-    except binascii.Error:
-        # If decoding fails, it's not base64 encoded
+        decoded = base64.b64decode(s)
+        # If decoding succeeds and the decoded bytes match the original string, it's a valid base64-encoded string
+        return decoded == s.encode()
+    except (TypeError, binascii.Error):
+        # If decoding fails, it's not a valid base64-encoded string
         return False
 
 
@@ -147,8 +162,8 @@ def decode_base64(data):
 
     try:
         return base64.b64decode(data).decode("utf-8")
-    except Exception:
-        return data
+    except (base64.binascii.Error, UnicodeDecodeError):
+        raise ValueError("Unable to decode data")
 
 
 def clean_list(data, decode):
@@ -158,13 +173,12 @@ def clean_list(data, decode):
     :return: The list of strings
     """
 
-    def list_to_string(l) -> str:
+    def list_to_string(item_list) -> str:
         string = ""
-        for i in l:
+        for i in item_list:
             if isinstance(i, (str, int, bool)):
-                if decode:
-                    if is_base64(i):
-                        i = decode_base64(i)
+                if decode and is_base64(i):
+                    i = decode_base64(i)
                 string += f"<li> {i} </li>"
             elif isinstance(i, dict):
                 string += dict_to_string(i)
@@ -181,79 +195,40 @@ def clean_list(data, decode):
                 string += list_to_string(val)
                 string += "</ul>"
             elif isinstance(val, dict):
-                string += f"**{key}:** <ul>"
-                for k, v in val.items():
-                    if isinstance(v, list):
-                        string += list_to_string(v)
-                    elif isinstance(v, dict):
-                        for k2, v2 in v.items():
-                            if isinstance(v2, list):
-                                string += f"**{k2}:** <ul>"
-                                string += list_to_string(v2)
-                                string += "</ul>"
-                            elif isinstance(v2, (str, bool, int)):
-                                if decode:
-                                    if is_base64(v2):
-                                        v2 = decode_base64(v2)
-                                string += f"**{k2}:** {v2}</br>"
-                            else:
-                                if decode:
-                                    if is_base64(v2):
-                                        v2 = decode_base64(v2)
-                                string += f"**{k2}:** {v2}</br>"
-                    else:
-                        if decode:
-                            if is_base64(v):
-                                v = decode_base64(v)
-                        string += f"**{k}:** {v}</br>"
-                string += "</ul>"
+                string += dict_to_ul(val)
             else:
-                if decode:
-                    if is_base64(val):
-                        val = decode_base64(val)
-                string += f"**{key}:** {val}<br/>"
+                string += simple_value_to_string(key, val)
 
         string += "<br/>"
 
         return string
 
-    def dict_to_table(d) -> str:
+    def dict_to_ul(val) -> str:
         string = ""
-        for key, val in d.items():
-            if isinstance(val, list) and val:
-                string += f"**{key}:** <ul>"
-                string += list_to_string(val)
+        for k, v in val.items():
+            if isinstance(v, list):
+                string += f"**{k}:** <ul>"
+                string += list_to_string(v)
                 string += "</ul>"
-            elif isinstance(val, dict) and val:
-                for k, v in val.items():
-                    if isinstance(v, list) and v:
-                        string += f"{k} <ul>"
-                        string += list_to_string(v)
-                        string += "</ul>"
-                    elif isinstance(v, dict):
-                        string += f"**{k}** <ul>"
-                        string += dict_to_string(v)
-                        string += "</ul>"
-                    else:
-                        if decode:
-                            if is_base64(v):
-                                v = decode_base64(v)
-                        string += f"**{k}:** {v}</br>"
+            elif isinstance(v, dict):
+                string += f"**{k}:** <ul>"
+                string += dict_to_ul(v)
+                string += "</ul>"
             else:
-                if decode:
-                    if is_base64(val):
-                        val = decode_base64(val)
-                string += f"**{key}:** {val}</br>"
-
+                string += simple_value_to_string(k, v)
         return string
 
-    def list_string(l) -> str:
+    def simple_value_to_string(key, val) -> str:
+        if decode and is_base64(val):
+            val = decode_base64(val)
+        return f"**{key}:** {val}<br/>"
+
+    def list_string(item_list) -> str:
         string = ""
-        for i in l:
+        for i in item_list:
             if isinstance(i, (str, int, bool)):
-                if decode:
-                    if is_base64(i):
-                        i = decode_base64(i)
+                if decode and is_base64(i):
+                    i = decode_base64(i)
                 string += f"{i}<br/>"
             if isinstance(i, list):
                 string += list_to_string(i)
@@ -263,13 +238,12 @@ def clean_list(data, decode):
         return string
 
     def string(s) -> str:
-        if decode:
-            if is_base64(s):
-                s = decode_base64(s)
+        if decode and is_base64(s):
+            s = decode_base64(s)
         if len(s) > 200:
-            string = f"<details><summary>Click to expand...</summary>{item}</details>"
+            string = f"<details><summary>Click to expand...</summary>{s}</details>"
         else:
-            string = item
+            string = s
 
         return string
 
@@ -279,7 +253,7 @@ def clean_list(data, decode):
         if isinstance(item, list):
             values.append(list_string(item))
         elif isinstance(item, dict):
-            values.append(dict_to_table(item))
+            values.append(dict_to_ul(item))
         elif isinstance(item, str):
             values.append(string(item))
         elif isinstance(item, (bool, int)):
@@ -307,21 +281,25 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup, de
         if split:
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
-        with open(outpath, "a") as md:
+        with open(outpath, "a", encoding="utf-8") as md:
             md.write("# " + header + "\n")
 
         pattern = configpath + "*/*"
         for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
-            if filename.endswith(".md") or os.path.isdir(filename) or filename == ".DS_Store":
+            if (
+                filename.endswith(".md")
+                or os.path.isdir(filename)
+                or filename == ".DS_Store"
+            ):
                 continue
 
             # Check which format the file is saved as then open file, load data and set query parameter
-            with open(filename) as f:
+            with open(filename, encoding="utf-8") as f:
                 if filename.endswith(".yaml"):
                     data = json.dumps(yaml.safe_load(f))
                     repo_data = json.loads(data)
                 elif filename.endswith(".json"):
-                    f = open(filename)
+                    f = open(filename, encoding="utf-8")
                     repo_data = json.load(f)
 
                 # Create assignments table
@@ -337,9 +315,11 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup, de
 
                 # Write configuration Markdown table
                 config_table_list = []
-                for key, value in zip(repo_data.keys(), clean_list(repo_data.values(), decode)):
+                for key, value in zip(
+                    repo_data.keys(), clean_list(repo_data.values(), decode)
+                ):
                     if cleanup:
-                        if not value and type(value) is not bool:
+                        if not value and not isinstance(value, bool):
                             continue
 
                     if key == "@odata.type":
@@ -363,7 +343,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup, de
                 config_table = write_table(config_table_list)
 
                 # Write data to file
-                with open(outpath, "a") as md:
+                with open(outpath, "a", encoding="utf-8") as md:
                     if "displayName" in repo_data:
                         md.write("## " + repo_data["displayName"] + "\n")
                     if "name" in repo_data:
@@ -392,7 +372,7 @@ def document_management_intents(configpath, outpath, header, split):
         if split:
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
-        with open(outpath, "a") as md:
+        with open(outpath, "a", encoding="utf-8") as md:
             md.write("# " + header + "\n")
 
         pattern = configpath + "*/*"
@@ -405,12 +385,12 @@ def document_management_intents(configpath, outpath, header, split):
                 continue
 
             # Check which format the file is saved as then open file, load data and set query parameter
-            with open(filename) as f:
+            with open(filename, encoding="utf-8") as f:
                 if filename.endswith(".yaml"):
                     data = json.dumps(yaml.safe_load(f))
                     repo_data = json.loads(data)
                 elif filename.endswith(".json"):
-                    f = open(filename)
+                    f = open(filename, encoding="utf-8")
                     repo_data = json.load(f)
 
                 # Create assignments table
@@ -421,7 +401,9 @@ def document_management_intents(configpath, outpath, header, split):
                 intent_settings_list = []
                 for setting in repo_data["settingsDelta"]:
                     setting_definition = setting["definitionId"].split("_")[1]
-                    setting_definition = setting_definition[0].upper() + setting_definition[1:]
+                    setting_definition = (
+                        setting_definition[0].upper() + setting_definition[1:]
+                    )
                     setting_definition = re.findall("[A-Z][^A-Z]*", setting_definition)
                     setting_definition = " ".join(setting_definition)
 
@@ -448,7 +430,9 @@ def document_management_intents(configpath, outpath, header, split):
 
                 intent_table_list = []
 
-                for key, value in zip(repo_data.keys(), clean_list(repo_data.values(), decode=False)):
+                for key, value in zip(
+                    repo_data.keys(), clean_list(repo_data.values(), decode=False)
+                ):
                     key = key[0].upper() + key[1:]
                     key = re.findall("[A-Z][^A-Z]*", key)
                     key = " ".join(key)
@@ -469,7 +453,7 @@ def document_management_intents(configpath, outpath, header, split):
 
                 config_table = write_table(table)
                 # Write data to file
-                with open(outpath, "a") as md:
+                with open(outpath, "a", encoding="utf-8") as md:
                     if "displayName" in repo_data:
                         md.write("## " + repo_data["displayName"] + "\n")
                     if "name" in repo_data:
@@ -489,8 +473,8 @@ def get_md_files(configpath):
     :return: List of Markdown files
     """
     slash = "/"
-    os = platform.uname().system
-    if os == "Windows":
+    client_os = platform.uname().system
+    if client_os == "Windows":
         slash = "\\"
     md_files = []
     patterns = ["*/*.md", "*/*/*.md", "*/*/*/*.md"]

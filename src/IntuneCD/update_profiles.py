@@ -1,27 +1,30 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# pylint: disable=unsupported-assignment-operation
 
 """
 This module is used to update all Device Configuration Profiles in Intune.
 """
 
+import base64
 import json
 import os
-import base64
 import plistlib
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
+from .diff_summary import DiffSummary
+from .graph_batch import batch_assignment, get_object_assignment
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .graph_batch import batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .check_file import check_file
 from .load_file import load_file
 from .remove_keys import remove_keys
-from .diff_summary import DiffSummary
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
@@ -55,7 +58,7 @@ def update(
             file = check_file(configpath, filename)
             if file is False:
                 continue
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
                 # Create object to pass in to assignment function
@@ -77,7 +80,7 @@ def update(
 
                 if data["value"]:
                     print("-" * 90)
-                    mem_id = data["value"]["id"]
+                    mem_id = data.get("value").get("id")
                     # Remove keys before using DeepDiff
                     data["value"] = remove_keys(data["value"])
 
@@ -101,10 +104,12 @@ def update(
                             ) as f:
                                 repo_payload_config = plistlib.load(f)
 
-                            decoded = base64.b64decode(data["value"]["payload"]).decode(
-                                "utf-8"
+                            decoded = base64.b64decode(
+                                data.get("value").get("payload")
+                            ).decode("utf-8")
+                            f = open(
+                                configpath + "temp.mobileconfig", "w", encoding="utf-8"
                             )
-                            f = open(configpath + "temp.mobileconfig", "w")
                             f.write(decoded)
                             with open(configpath + "temp.mobileconfig", "rb") as f:
                                 mem_payload_config = plistlib.load(f)
@@ -166,16 +171,16 @@ def update(
                     # If Device Configuration is custom Win10, compare the OMA
                     # settings
                     elif (
-                        data["value"]["@odata.type"]
+                        data.get("value").get("@odata.type")
                         == "#microsoft.graph.windows10CustomConfiguration"
                     ):
                         print(
                             "Checking if Win10 Custom Profile: "
                             + repo_data["displayName"]
-                            + " has any upates"
+                            + " has any updates"
                         )
                         omas = []
-                        for setting in data["value"]["omaSettings"]:
+                        for setting in data.get("value").get("omaSettings"):
                             if setting["isEncrypted"]:
                                 decoded_oma = {}
                                 oma_value = makeapirequest(
@@ -203,7 +208,8 @@ def update(
 
                         repo_omas = []
                         for mem_omaSetting, repo_omaSetting in zip(
-                            data["value"]["omaSettings"], repo_data["omaSettings"]
+                            data.get("value").get("omaSettings"),
+                            repo_data["omaSettings"],
                         ):
                             diff = DeepDiff(
                                 mem_omaSetting,
@@ -215,7 +221,7 @@ def update(
                             # If any changed values are found, push them to
                             # Intune
                             if diff:
-                                if type(repo_omaSetting["value"]) is dict:
+                                if isinstance(repo_omaSetting["value"], dict):
                                     repo_omaSetting = remove_keys(repo_omaSetting)
                                     repo_omaSetting["value"] = repo_omaSetting["value"][
                                         "value"
@@ -249,7 +255,7 @@ def update(
 
                     # Updating Windows update rings is currently not supported
                     elif (
-                        data["value"]["@odata.type"]
+                        data.get("value").get("@odata.type")
                         == "#microsoft.graph.windowsUpdateForBusinessConfiguration"
                     ):
                         continue
@@ -282,11 +288,11 @@ def update(
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(
+                        assignment_update = update_assignment(
                             assign_obj, mem_assign_obj, token, create_groups
                         )
-                        if update is not None:
-                            request_data = {"assignments": update}
+                        if assignment_update is not None:
+                            request_data = {"assignments": assignment_update}
                             post_assignment_update(
                                 request_data,
                                 mem_id,
@@ -305,7 +311,7 @@ def update(
                     ):
                         repo_omas = []
                         for repo_omaSetting in repo_data["omaSettings"]:
-                            if type(repo_omaSetting["value"]) is dict:
+                            if isinstance(repo_omaSetting["value"], dict):
                                 repo_omaSetting = remove_keys(repo_omaSetting)
                                 repo_omaSetting["value"] = repo_omaSetting["value"][
                                     "value"

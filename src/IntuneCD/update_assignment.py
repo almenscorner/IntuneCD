@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module contains the functions used to update assignments in Intune.
@@ -6,7 +7,9 @@ This module contains the functions used to update assignments in Intune.
 
 import json
 import uuid
+
 from deepdiff import DeepDiff
+
 from .graph_request import makeapirequest, makeapirequestPost
 
 
@@ -83,105 +86,97 @@ def update_assignment(repo, mem, token, create_groups) -> list:
     diff = DeepDiff(mem, repo, ignore_order=True)
     added = diff.get("iterable_item_added", {})
     update = False
-    if diff:
-        for val in repo:
-            # Request group id based on group name
-            if "groupName" in val["target"]:
-                request = makeapirequest(
-                    "https://graph.microsoft.com/beta/groups",
-                    token,
-                    {
-                        "$filter": "displayName eq "
-                        + "'"
-                        + val["target"]["groupName"]
-                        + "'"
-                    },
-                )
-                if request["value"]:
+
+    if not diff:
+        return None
+
+    for val in repo:
+        # Request group id based on group name
+        if "groupName" in val["target"]:
+            request = makeapirequest(
+                "https://graph.microsoft.com/beta/groups",
+                token,
+                {"$filter": "displayName eq " + "'" + val["target"]["groupName"] + "'"},
+            )
+            if request["value"]:
+                val["target"].pop("groupName")
+                val["target"].pop("groupType", None)
+                val["target"].pop("membershipRule", None)
+                val["target"]["groupId"] = request["value"][0]["id"]
+            else:
+                if create_groups:
+                    group_data = {
+                        "description": "Created by IntuneCD",
+                        "displayName": val["target"]["groupName"],
+                        "securityEnabled": True,
+                        "mailEnabled": False,
+                        "mailNickname": uuid.uuid4().hex,
+                    }
+                    if val["target"]["groupType"] == "DynamicMembership":
+                        group_data["groupTypes"] = ["DynamicMembership"]
+                        group_data["membershipRule"] = val["target"]["membershipRule"]
+                        group_data["membershipRuleProcessingState"] = "On"
+
+                    request = makeapirequestPost(
+                        "https://graph.microsoft.com/beta/groups",
+                        token,
+                        None,
+                        json.dumps(group_data),
+                        201,
+                    )
                     val["target"].pop("groupName")
                     val["target"].pop("groupType", None)
                     val["target"].pop("membershipRule", None)
-                    val["target"]["groupId"] = request["value"][0]["id"]
-                else:
-                    if create_groups:
-                        group_data = {
-                            "description": "Created by IntuneCD",
-                            "displayName": val["target"]["groupName"],
-                            "securityEnabled": True,
-                            "mailEnabled": False,
-                            "mailNickname": uuid.uuid4().hex,
-                        }
-                        if val["target"]["groupType"] == "DynamicMembership":
-                            group_data["groupTypes"] = ["DynamicMembership"]
-                            group_data["membershipRule"] = val["target"][
-                                "membershipRule"
-                            ]
-                            group_data["membershipRuleProcessingState"] = "On"
+                    val["target"]["groupId"] = request["id"]
 
-                        request = makeapirequestPost(
-                            "https://graph.microsoft.com/beta/groups",
-                            token,
-                            None,
-                            json.dumps(group_data),
-                            201,
-                        )
-                        val["target"].pop("groupName")
-                        val["target"].pop("groupType", None)
-                        val["target"].pop("membershipRule", None)
-                        val["target"]["groupId"] = request["id"]
+        # Request filter id based on filter name
+        if val["target"]["deviceAndAppManagementAssignmentFilterId"]:
+            filters = makeapirequest(
+                "https://graph.microsoft.com/beta/deviceManagement/assignmentFilters",
+                token,
+            )
+            for intune_filter in filters["value"]:
+                if (
+                    val["target"]["deviceAndAppManagementAssignmentFilterId"]
+                    == intune_filter["displayName"]
+                ):
+                    val["target"][
+                        "deviceAndAppManagementAssignmentFilterId"
+                    ] = intune_filter["id"]
 
-            # Request filter id based on filter name
-            if val["target"]["deviceAndAppManagementAssignmentFilterId"]:
-                filters = makeapirequest(
-                    "https://graph.microsoft.com/beta/deviceManagement/assignmentFilters",
-                    token,
-                )
-                for filter in filters["value"]:
-                    if (
-                        val["target"]["deviceAndAppManagementAssignmentFilterId"]
-                        == filter["displayName"]
-                    ):
-                        val["target"][
-                            "deviceAndAppManagementAssignmentFilterId"
-                        ] = filter["id"]
+            # If filter is None, remove keys
+            if val["target"]["deviceAndAppManagementAssignmentFilterId"] is None:
+                val["target"].pop("deviceAndAppManagementAssignmentFilterId")
+                val["target"].pop("deviceAndAppManagementAssignmentFilterType")
 
-                # If filter is None, remove keys
-                if val["target"]["deviceAndAppManagementAssignmentFilterId"] is None:
-                    val["target"].pop("deviceAndAppManagementAssignmentFilterId")
-                    val["target"].pop("deviceAndAppManagementAssignmentFilterType")
+        if (
+            "groupId" in val["target"]
+            or "#microsoft.graph.allDevicesAssignmentTarget"
+            in val["target"]["@odata.type"]
+            or "#microsoft.graph.allLicensedUsersAssignmentTarget"
+            in val["target"]["@odata.type"]
+        ):
+            update = True
 
-        repo = [
-            val for val in repo if "target" in val and "groupName" not in val["target"]
-        ]
-
-        for val in repo:
-            if (
-                "groupId" in val["target"]
-                or "#microsoft.graph.allDevicesAssignmentTarget"
-                in val["target"]["@odata.type"]
-                or "#microsoft.graph.allLicensedUsersAssignmentTarget"
-                in val["target"]["@odata.type"]
-            ):
-                update = True
-
-        if update is True:
-            # Print added assignments
-            added = {
-                key: value
-                for key, value in added.items()
-                if "target" in value and "groupName" not in value["target"]
-            }
-            if added:
-                print("Updating assignments, added assignments:")
-                updates = get_added_removed(added)
-                for update in updates:
-                    print(update)
-                return repo
-            else:
-                return None
+    if update is True:
+        # Print added assignments
+        added = {
+            key: value
+            for key, value in added.items()
+            if "target" in value and "groupName" not in value["target"]
+        }
+        if added:
+            print("Updating assignments, added assignments:")
+            updates = get_added_removed(added)
+            for update in updates:
+                print(update)
+            return repo
+        return None
 
 
-def post_assignment_update(object, id, url, extra_url, token, status_code=200):
+def post_assignment_update(
+    assignment_object, a_id, url, extra_url, token, status_code=200
+):
     """
     This function is used to post assignment update to Intune.
 
@@ -194,8 +189,8 @@ def post_assignment_update(object, id, url, extra_url, token, status_code=200):
     :return:
     """
 
-    request_json = json.dumps(object)
-    url = f"https://graph.microsoft.com/beta/{url}/{id}/{extra_url}"
+    request_json = json.dumps(assignment_object)
+    url = f"https://graph.microsoft.com/beta/{url}/{a_id}/{extra_url}"
     makeapirequestPost(
         url, token, q_param=None, jdata=request_json, status_code=status_code
     )

@@ -1,33 +1,39 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module is used to update all App Configuration Assignments in Intune.
 """
 
+import base64
 import json
 import os
-import base64
 
 from deepdiff import DeepDiff
+
+from .check_file import check_file
+from .diff_summary import DiffSummary
+from .graph_batch import batch_assignment, get_object_assignment
 from .graph_request import (
     makeapirequest,
+    makeapirequestDelete,
     makeapirequestPatch,
     makeapirequestPost,
-    makeapirequestDelete,
 )
-from .graph_batch import batch_assignment, get_object_assignment
-from .update_assignment import update_assignment, post_assignment_update
-from .remove_keys import remove_keys
-from .diff_summary import DiffSummary
-from .check_file import check_file
 from .load_file import load_file
+from .remove_keys import remove_keys
+from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
-ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfigurations"
+ENDPOINT = (
+    "https://graph.microsoft.com/beta/deviceAppManagement/mobileAppConfigurations"
+)
 APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
-def update(path, token, assignment=False, report=False, create_groups=False, remove=False):
+def update(
+    path, token, assignment=False, report=False, create_groups=False, remove=False
+):
     """
     This function updates all App Configuration Polices in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -59,7 +65,7 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
 
             # Check which format the file is saved as then open file, load data
             # and set query parameter
-            with open(file) as f:
+            with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
                 # Create object to pass in to assignment function
                 assign_obj = {}
@@ -71,13 +77,16 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 data = {"value": ""}
                 if mem_data["value"]:
                     for val in mem_data["value"]:
-                        if repo_data["@odata.type"] == val["@odata.type"] and repo_data["displayName"] == val["displayName"]:
+                        if (
+                            repo_data["@odata.type"] == val["@odata.type"]
+                            and repo_data["displayName"] == val["displayName"]
+                        ):
                             data["value"] = val
                             mem_data["value"].remove(val)
 
                 if data["value"]:
                     print("-" * 90)
-                    mem_id = data["value"]["id"]
+                    mem_id = data.get("value", {}).get("id", None)
                     # Remove keys before using DeepDiff
                     data = remove_keys(data)
                     repo_data.pop("targetedMobileApps", None)
@@ -87,7 +96,9 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                             json.dumps(repo_data["payloadJson"]).encode("utf-8")
                         ).decode("utf-8")
 
-                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get("values_changed", {})
+                    diff = DeepDiff(data["value"], repo_data, ignore_order=True).get(
+                        "values_changed", {}
+                    )
 
                     # If any changed values are found, push them to Intune
                     if diff and report is False:
@@ -111,9 +122,11 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
 
                     if assignment:
                         mem_assign_obj = get_object_assignment(mem_id, mem_assignments)
-                        update = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
-                        if update is not None:
-                            request_data = {"assignments": update}
+                        assignment_update = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
+                        if assignment_update is not None:
+                            request_data = {"assignments": assignment_update}
                             post_assignment_update(
                                 request_data,
                                 mem_id,
@@ -125,7 +138,10 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 # If App Configuration does not exist, create it and assign
                 else:
                     print("-" * 90)
-                    print("App Configuration not found, creating: " + repo_data["displayName"])
+                    print(
+                        "App Configuration not found, creating: "
+                        + repo_data["displayName"]
+                    )
 
                     if repo_data.get("payloadJson"):
                         repo_data["payloadJson"] = base64.b64encode(
@@ -138,7 +154,9 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                         q_param = {
                             "$filter": "(isof("
                             + "'"
-                            + str(repo_data["targetedMobileApps"]["type"]).replace("#", "")
+                            + str(repo_data["targetedMobileApps"]["type"]).replace(
+                                "#", ""
+                            )
                             + "'"
                             + "))",
                             "$search": f'"{repo_data["targetedMobileApps"]["appName"]}"',
@@ -160,7 +178,9 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                             status_code=201,
                         )
                         mem_assign_obj = []
-                        assignment = update_assignment(assign_obj, mem_assign_obj, token, create_groups)
+                        assignment = update_assignment(
+                            assign_obj, mem_assign_obj, token, create_groups
+                        )
                         if assignment is not None:
                             request_data = {"assignments": assignment}
                             post_assignment_update(
@@ -170,9 +190,13 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                                 "/microsoft.graph.managedDeviceMobileAppConfiguration/assign",
                                 token,
                             )
-                        print("App Configuration created with id: " + post_request["id"])
+                        print(
+                            "App Configuration created with id: " + post_request["id"]
+                        )
                     else:
-                        print("App configured in App Configuration profile could not be found, skipping creation")
+                        print(
+                            "App configured in App Configuration profile could not be found, skipping creation"
+                        )
 
         # If any App Configurations are left in mem_data, remove them from Intune as they are not in the repo
         if mem_data.get("value", None) is not None and remove is True:
@@ -180,6 +204,8 @@ def update(path, token, assignment=False, report=False, create_groups=False, rem
                 print("-" * 90)
                 print("Removing App Configuration from Intune: " + val["displayName"])
                 if report is False:
-                    makeapirequestDelete(f"{ENDPOINT}/{val['id']}", token, status_code=200)
+                    makeapirequestDelete(
+                        f"{ENDPOINT}/{val['id']}", token, status_code=200
+                    )
 
     return diff_summary
