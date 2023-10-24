@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_conditionalAccess import savebackup
+from src.IntuneCD.backup.backup_conditionalAccess import savebackup
 
 CA_POLICY = {
     "value": [
@@ -31,7 +31,7 @@ CA_POLICY = {
 }
 
 
-@patch("src.IntuneCD.backup_conditionalAccess.savebackup")
+@patch("src.IntuneCD.backup.backup_conditionalAccess.savebackup")
 class TestBackupConditionalAccess(unittest.TestCase):
     """Test class for backup_conditionalAccess."""
 
@@ -74,7 +74,7 @@ class TestBackupConditionalAccess(unittest.TestCase):
         }
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_conditionalAccess.makeapirequest"
+            "src.IntuneCD.backup.backup_conditionalAccess.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = [self.policy, self.policy["value"][0]]

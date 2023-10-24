@@ -8,7 +8,7 @@ This module tests the graph_batch module.
 import unittest
 from unittest.mock import patch
 
-from src.IntuneCD.graph_batch import (
+from src.IntuneCD.intunecdlib.graph_batch import (
     batch_assignment,
     batch_intents,
     batch_request,
@@ -78,27 +78,33 @@ class TestGraphBatch(unittest.TestCase):
         ]
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.graph_batch.makeapirequestPost"
+            "src.IntuneCD.intunecdlib.graph_batch.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
 
         self.get_object_details_patch = patch(
-            "src.IntuneCD.graph_batch.get_object_details"
+            "src.IntuneCD.intunecdlib.graph_batch.get_object_details"
         )
         self.get_object_details = self.get_object_details_patch.start()
 
         self.get_object_assignment_patch = patch(
-            "src.IntuneCD.graph_batch.get_object_assignment"
+            "src.IntuneCD.intunecdlib.graph_batch.get_object_assignment"
         )
         self.get_object_assignment = self.get_object_assignment_patch.start()
 
-        self.batch_intents_patch = patch("src.IntuneCD.graph_batch.batch_intents")
+        self.batch_intents_patch = patch(
+            "src.IntuneCD.intunecdlib.graph_batch.batch_intents"
+        )
         self.batch_intents = self.batch_intents_patch.start()
 
-        self.batch_assignment_patch = patch("src.IntuneCD.graph_batch.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.intunecdlib.graph_batch.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
 
-        self.batch_request_patch = patch("src.IntuneCD.graph_batch.batch_request")
+        self.batch_request_patch = patch(
+            "src.IntuneCD.intunecdlib.graph_batch.batch_request"
+        )
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.side_effect = (
             self.responses,

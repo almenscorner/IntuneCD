@@ -12,10 +12,10 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.save_output import save_output
+from src.IntuneCD.intunecdlib.save_output import save_output
 
 
-@patch("src.IntuneCD.save_output")
+@patch("src.IntuneCD.intunecdlib.save_output")
 class TestSaveOutput(unittest.TestCase):
     """Test class for save_output."""
 

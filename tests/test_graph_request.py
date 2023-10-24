@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
-from src.IntuneCD.graph_request import (
+from src.IntuneCD.intunecdlib.graph_request import (
     makeapirequest,
     makeapirequestDelete,
     makeapirequestPatch,
@@ -39,7 +39,7 @@ def _mock_response(
     return mock_resp
 
 
-@patch("src.IntuneCD.graph_request.makeapirequest")
+@patch("src.IntuneCD.intunecdlib.graph_request.makeapirequest")
 @patch("requests.get")
 @patch("time.sleep", return_value=None)
 class TestGraphRequestGet(unittest.TestCase):
@@ -196,7 +196,7 @@ class TestGraphRequestGet(unittest.TestCase):
         self.assertEqual(1, mock_get.call_count)
 
 
-@patch("src.IntuneCD.graph_request.makeapirequestPatch")
+@patch("src.IntuneCD.intunecdlib.graph_request.makeapirequestPatch")
 @patch("requests.patch")
 class TestGraphRequestPatch(unittest.TestCase):
     """Test class for graph_request."""
@@ -247,7 +247,7 @@ class TestGraphRequestPatch(unittest.TestCase):
         self.assertEqual(1, mock_patch.call_count)
 
 
-@patch("src.IntuneCD.graph_request.makeapirequestPost")
+@patch("src.IntuneCD.intunecdlib.graph_request.makeapirequestPost")
 @patch("requests.post")
 @patch("time.sleep", return_value=None)
 class TestGraphRequestPost(unittest.TestCase):
@@ -329,7 +329,7 @@ class TestGraphRequestPost(unittest.TestCase):
         self.assertEqual(1, mock_patch.call_count)
 
 
-@patch("src.IntuneCD.graph_request.makeapirequestPut")
+@patch("src.IntuneCD.intunecdlib.graph_request.makeapirequestPut")
 @patch("requests.put")
 class TestGraphRequestPut(unittest.TestCase):
     """Test class for graph_request."""
@@ -380,7 +380,7 @@ class TestGraphRequestPut(unittest.TestCase):
         self.assertEqual(1, mock_patch.call_count)
 
 
-@patch("src.IntuneCD.graph_request.makeapirequestDelete")
+@patch("src.IntuneCD.intunecdlib.graph_request.makeapirequestDelete")
 @patch("requests.delete")
 class TestGraphRequestDelete(unittest.TestCase):
     """Test class for graph_request."""

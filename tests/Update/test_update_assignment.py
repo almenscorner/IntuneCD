@@ -2,7 +2,7 @@
 import unittest
 from unittest.mock import patch
 
-from src.IntuneCD.update_assignment import get_added_removed, update_assignment
+from src.IntuneCD.update.update_assignment import get_added_removed, update_assignment
 
 
 class TestUpdateAssignment(unittest.TestCase):
@@ -35,12 +35,12 @@ class TestUpdateAssignment(unittest.TestCase):
         ]
         self.request_data = {"value": [{"id": "12345", "displayName": "test"}]}
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_assignment.makeapirequest"
+            "src.IntuneCD.update.update_assignment.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_assignment.makeapirequestPost"
+            "src.IntuneCD.update.update_assignment.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
 

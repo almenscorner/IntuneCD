@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_proactiveRemediation import savebackup
+from src.IntuneCD.backup.backup_proactiveRemediation import savebackup
 
 BATCH_ASSIGNMENT = [{"value": [{"id": "0", "target": {"groupName": "Group1"}}]}]
 OBJECT_ASSIGNMENT = [{"target": {"groupName": "Group1"}}]
@@ -48,25 +48,25 @@ class TestBackupProactiveRemediation(unittest.TestCase):
         ]
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_proactiveRemediation.batch_assignment"
+            "src.IntuneCD.backup.backup_proactiveRemediation.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_proactiveRemediation.get_object_assignment"
+            "src.IntuneCD.backup.backup_proactiveRemediation.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
         self.batch_request_patch = patch(
-            "src.IntuneCD.backup_proactiveRemediation.batch_request"
+            "src.IntuneCD.backup.backup_proactiveRemediation.batch_request"
         )
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.return_value = self.batch_request_data
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_proactiveRemediation.makeapirequest"
+            "src.IntuneCD.backup.backup_proactiveRemediation.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.script_policy_data
@@ -131,7 +131,7 @@ class TestBackupProactiveRemediation(unittest.TestCase):
         """Microsoft should not be backed up."""
 
         with patch(
-            "src.IntuneCD.backup_proactiveRemediation.batch_request",
+            "src.IntuneCD.backup.backup_proactiveRemediation.batch_request",
             side_effect=[[{"publisher": "Microsoft"}]],
         ):
             self.count = savebackup(
@@ -149,7 +149,7 @@ class TestBackupProactiveRemediation(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         with patch(
-            "src.IntuneCD.backup_proactiveRemediation.makeapirequest",
+            "src.IntuneCD.backup.backup_proactiveRemediation.makeapirequest",
             return_value={"value": []},
         ):
             self.count = savebackup(

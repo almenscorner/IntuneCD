@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_configurationPolicies import savebackup
+from src.IntuneCD.backup.backup_configurationPolicies import savebackup
 
 BATCH_REQUEST = [
     {
@@ -94,25 +94,25 @@ class TestBackupConfigurationPolicy(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_configurationPolicies.batch_assignment"
+            "src.IntuneCD.backup.backup_configurationPolicies.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
         self.batch_request_patch = patch(
-            "src.IntuneCD.backup_configurationPolicies.batch_request"
+            "src.IntuneCD.backup.backup_configurationPolicies.batch_request"
         )
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.return_value = BATCH_REQUEST
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_configurationPolicies.get_object_assignment"
+            "src.IntuneCD.backup.backup_configurationPolicies.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_configurationPolicies.makeapirequest"
+            "src.IntuneCD.backup.backup_configurationPolicies.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.configuration_policy

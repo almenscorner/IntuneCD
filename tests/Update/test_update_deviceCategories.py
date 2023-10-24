@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.update_deviceCategories import update
+from src.IntuneCD.update.update_deviceCategories import update
 
 
 class TestUpdatedeviceCategories(unittest.TestCase):
@@ -40,28 +40,30 @@ class TestUpdatedeviceCategories(unittest.TestCase):
         }
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_deviceCategories.makeapirequest"
+            "src.IntuneCD.update.update_deviceCategories.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
-        self.load_file_patch = patch("src.IntuneCD.update_deviceCategories.load_file")
+        self.load_file_patch = patch(
+            "src.IntuneCD.update.update_deviceCategories.load_file"
+        )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_deviceCategories.makeapirequestPatch"
+            "src.IntuneCD.update.update_deviceCategories.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_deviceCategories.makeapirequestPost"
+            "src.IntuneCD.update.update_deviceCategories.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_deviceCategories.makeapirequestDelete"
+            "src.IntuneCD.update.update_deviceCategories.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

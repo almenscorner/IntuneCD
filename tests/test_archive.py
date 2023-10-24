@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.archive import move_to_archive
+from src.IntuneCD.intunecdlib.archive import move_to_archive
 
 
 class TestMoveToArchive(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestMoveToArchive(unittest.TestCase):
 
         self.createdFile = ["test.json"]
 
-        self.datetime = patch("src.IntuneCD.archive.datetime")
+        self.datetime = patch("src.IntuneCD.intunecdlib.archive.datetime")
         self.datetime = self.datetime.start()
         self.datetime.return_value = "2020-01-01_00-00-00"
 

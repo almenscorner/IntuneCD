@@ -4,7 +4,7 @@ from pathlib import Path
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.documentation_functions import (
+from src.IntuneCD.intunecdlib.documentation_functions import (
     assignment_table,
     clean_list,
     document_configs,

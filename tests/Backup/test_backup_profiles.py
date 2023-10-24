@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_profiles import savebackup
+from src.IntuneCD.backup.backup_profiles import savebackup
 
 BATCH_ASSIGNMENT = [{"value": [{"target": {"groupName": "Group1"}}]}]
 OBJECT_ASSIGNMENT = [{"target": {"groupName": "Group1"}}]
@@ -27,18 +27,20 @@ class TestBackupCustomProfiles(unittest.TestCase):
         self.append_id = False
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_profiles.batch_assignment"
+            "src.IntuneCD.backup.backup_profiles.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_profiles.get_object_assignment"
+            "src.IntuneCD.backup.backup_profiles.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_profiles.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup.backup_profiles.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
 
     def tearDown(self):
@@ -203,18 +205,20 @@ class TestBackupStandardProfiles(unittest.TestCase):
         self.append_id = False
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_profiles.batch_assignment"
+            "src.IntuneCD.backup.backup_profiles.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_profiles.get_object_assignment"
+            "src.IntuneCD.backup.backup_profiles.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_profiles.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup.backup_profiles.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
 
     def tearDown(self):

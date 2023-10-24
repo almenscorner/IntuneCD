@@ -7,7 +7,7 @@ This module tests the get_added_removed function.
 
 import unittest
 
-from src.IntuneCD.update_assignment import get_added_removed
+from src.IntuneCD.update.update_assignment import get_added_removed
 
 
 class TestCleanFilename(unittest.TestCase):

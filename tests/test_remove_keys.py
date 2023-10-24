@@ -3,7 +3,7 @@
 
 import unittest
 
-from src.IntuneCD.remove_keys import remove_keys
+from src.IntuneCD.intunecdlib.remove_keys import remove_keys
 
 
 class TestRemoveKeys(unittest.TestCase):

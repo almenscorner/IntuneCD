@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_powershellScripts import savebackup
+from src.IntuneCD.backup.backup_powershellScripts import savebackup
 
 BATCH_ASSIGNMENT = [{"value": [{"id": "0", "target": {"groupName": "Group1"}}]}]
 OBJECT_ASSIGNMENT = [{"target": {"groupName": "Group1"}}]
@@ -47,25 +47,25 @@ class TestBackupPowershellScript(unittest.TestCase):
         ]
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_powershellScripts.batch_assignment"
+            "src.IntuneCD.backup.backup_powershellScripts.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_powershellScripts.get_object_assignment"
+            "src.IntuneCD.backup.backup_powershellScripts.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
         self.batch_request_patch = patch(
-            "src.IntuneCD.backup_powershellScripts.batch_request"
+            "src.IntuneCD.backup.backup_powershellScripts.batch_request"
         )
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.return_value = self.batch_request_data
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_powershellScripts.makeapirequest"
+            "src.IntuneCD.backup.backup_powershellScripts.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.script_policy_data

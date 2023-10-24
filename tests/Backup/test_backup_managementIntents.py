@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_managementIntents import savebackup
+from src.IntuneCD.backup.backup_managementIntents import savebackup
 
 BATCH_ASSIGNMENT = [{"value": [{"id": "0", "target": {"groupName": "Group1"}}]}]
 OBJECT_ASSIGNMENT = [{"target": {"groupName": "Group1"}}]
@@ -65,25 +65,25 @@ class TestBackupManagementIntent(unittest.TestCase):
         }
 
         self.batch_intent_patch = patch(
-            "src.IntuneCD.backup_managementIntents.batch_intents"
+            "src.IntuneCD.backup.backup_managementIntents.batch_intents"
         )
         self.batch_intent = self.batch_intent_patch.start()
         self.batch_intent.return_value = self.batch_intent_data
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_managementIntents.batch_assignment"
+            "src.IntuneCD.backup.backup_managementIntents.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_managementIntents.get_object_assignment"
+            "src.IntuneCD.backup.backup_managementIntents.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_managementIntents.makeapirequest"
+            "src.IntuneCD.backup.backup_managementIntents.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = self.intent, self.template

@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.update_enrollmentConfigurations import update
+from src.IntuneCD.update.update_enrollmentConfigurations import update
 
 
 class TestUpdateEnrollmentStatusPage(unittest.TestCase):
@@ -54,50 +54,50 @@ class TestUpdateEnrollmentStatusPage(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.batch_assignment"
+            "src.IntuneCD.update.update_enrollmentConfigurations.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.get_object_assignment"
+            "src.IntuneCD.update.update_enrollmentConfigurations.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.makeapirequest"
+            "src.IntuneCD.update.update_enrollmentConfigurations.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.update_assignment"
+            "src.IntuneCD.update.update_enrollmentConfigurations.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
 
         self.load_file_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.load_file"
+            "src.IntuneCD.update.update_enrollmentConfigurations.load_file"
         )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.post_assignment_update"
+            "src.IntuneCD.update.update_enrollmentConfigurations.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.makeapirequestPatch"
+            "src.IntuneCD.update.update_enrollmentConfigurations.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.makeapirequestPost"
+            "src.IntuneCD.update.update_enrollmentConfigurations.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_enrollmentConfigurations.makeapirequestDelete"
+            "src.IntuneCD.update.update_enrollmentConfigurations.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

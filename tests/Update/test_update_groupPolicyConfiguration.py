@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.update_groupPolicyConfiguration import update
+from src.IntuneCD.update.update_groupPolicyConfiguration import update
 
 
 class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
@@ -95,27 +95,27 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.batch_assignment"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.get_object_assignment"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.update_assignment"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.post_assignment_update"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.makeapirequest"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = (
@@ -125,23 +125,23 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
             self.definition_value,
         )
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.makeapirequestPatch"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.makeapirequestPost"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
 
         self.load_file_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.load_file"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.load_file"
         )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data_base
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_groupPolicyConfiguration.makeapirequestDelete"
+            "src.IntuneCD.update.update_groupPolicyConfiguration.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

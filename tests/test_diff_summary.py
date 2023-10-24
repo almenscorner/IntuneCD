@@ -8,10 +8,12 @@ This module tests the get_diff_output function.
 import unittest
 from unittest.mock import patch
 
-from src.IntuneCD.diff_summary import DiffSummary
+from src.IntuneCD.intunecdlib.diff_summary import DiffSummary
 
 
-@patch("src.IntuneCD.diff_summary.datetime", return_value="2021-01-01 00:00:00")
+@patch(
+    "src.IntuneCD.intunecdlib.diff_summary.datetime", return_value="2021-01-01 00:00:00"
+)
 class TestGetDiffOutput(unittest.TestCase):
     """Test class for get_diff_output."""
 

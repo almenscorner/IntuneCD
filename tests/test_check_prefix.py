@@ -7,7 +7,7 @@ This module tests the check_file function.
 
 import unittest
 
-from src.IntuneCD.check_prefix import check_prefix_match
+from src.IntuneCD.intunecdlib.check_prefix import check_prefix_match
 
 
 class TestCheckFile(unittest.TestCase):

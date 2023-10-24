@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_notificationTemplate import savebackup
+from src.IntuneCD.backup.backup_notificationTemplate import savebackup
 
 
 class TestBackupNotificationTemplate(unittest.TestCase):
@@ -79,7 +79,7 @@ class TestBackupNotificationTemplate(unittest.TestCase):
         }
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_notificationTemplate.makeapirequest",
+            "src.IntuneCD.backup.backup_notificationTemplate.makeapirequest",
             side_effect=[self.message_template, self.localized_messages],
         )
         self.makeapirequest = self.patch_makeapirequest.start()

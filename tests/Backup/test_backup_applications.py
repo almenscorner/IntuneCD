@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_applications import savebackup
+from src.IntuneCD.backup.backup_applications import savebackup
 
 
 class TestBackupApplications(unittest.TestCase):
@@ -47,19 +47,19 @@ class TestBackupApplications(unittest.TestCase):
         self.object_assignment_data = [{"target": {"groupName": "Group1"}}]
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.backup_applications.batch_assignment"
+            "src.IntuneCD.backup.backup_applications.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = self.batch_assignment_data
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.backup_applications.get_object_assignment"
+            "src.IntuneCD.backup.backup_applications.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = self.object_assignment_data
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.backup_applications.makeapirequest"
+            "src.IntuneCD.backup.backup_applications.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
 

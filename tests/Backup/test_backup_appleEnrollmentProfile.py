@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_appleEnrollmentProfile import savebackup
+from src.IntuneCD.backup.backup_appleEnrollmentProfile import savebackup
 
 
 class TestBackupAppleEnrollmentProfile(unittest.TestCase):
@@ -64,12 +64,12 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         ]
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_appleEnrollmentProfile.makeapirequest"
+            "src.IntuneCD.backup.backup_appleEnrollmentProfile.makeapirequest"
         )
         self.makeapirequest = self.patch_makeapirequest.start()
 
         self.patch_batch_request = patch(
-            "src.IntuneCD.backup_appleEnrollmentProfile.batch_request"
+            "src.IntuneCD.backup.backup_appleEnrollmentProfile.batch_request"
         )
         self.batch_request = self.patch_batch_request.start()
 

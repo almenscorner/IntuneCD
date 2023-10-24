@@ -9,7 +9,7 @@ import unittest
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.check_file import check_file
+from src.IntuneCD.intunecdlib.check_file import check_file
 
 
 class TestCheckFile(unittest.TestCase):

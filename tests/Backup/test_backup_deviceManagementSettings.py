@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_deviceManagementSettings import savebackup
+from src.IntuneCD.backup.backup_deviceManagementSettings import savebackup
 
 DEVICE_MANAGEMENT_SETTINGS = {
     "deviceComplianceCheckinThresholdDays": 30,
@@ -30,9 +30,9 @@ DEVICE_MANAGEMENT_SETTINGS = {
 }
 
 
-@patch("src.IntuneCD.backup_deviceManagementSettings.savebackup")
+@patch("src.IntuneCD.backup.backup_deviceManagementSettings.savebackup")
 @patch(
-    "src.IntuneCD.backup_deviceManagementSettings.makeapirequest",
+    "src.IntuneCD.backup.backup_deviceManagementSettings.makeapirequest",
     return_value=DEVICE_MANAGEMENT_SETTINGS,
 )
 class TestBackupDeviceManagementSettings(unittest.TestCase):

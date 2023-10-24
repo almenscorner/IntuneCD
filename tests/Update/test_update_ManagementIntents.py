@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.update_managementIntents import update
+from src.IntuneCD.update.update_managementIntents import update
 
 
 class TestUpdateManagementIntents(unittest.TestCase):
@@ -74,49 +74,51 @@ class TestUpdateManagementIntents(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_managementIntents.batch_assignment"
+            "src.IntuneCD.update.update_managementIntents.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
 
         self.batch_intents_patch = patch(
-            "src.IntuneCD.update_managementIntents.batch_intents"
+            "src.IntuneCD.update.update_managementIntents.batch_intents"
         )
         self.batch_intents = self.batch_intents_patch.start()
         self.batch_intents.return_value = self.batch_intent_data
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_managementIntents.get_object_assignment"
+            "src.IntuneCD.update.update_managementIntents.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_managementIntents.makeapirequest"
+            "src.IntuneCD.update.update_managementIntents.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_managementIntents.update_assignment"
+            "src.IntuneCD.update.update_managementIntents.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
 
-        self.load_file_patch = patch("src.IntuneCD.update_managementIntents.load_file")
+        self.load_file_patch = patch(
+            "src.IntuneCD.update.update_managementIntents.load_file"
+        )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_managementIntents.post_assignment_update"
+            "src.IntuneCD.update.update_managementIntents.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_managementIntents.makeapirequestPost"
+            "src.IntuneCD.update.update_managementIntents.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_managementIntents.makeapirequestDelete"
+            "src.IntuneCD.update.update_managementIntents.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

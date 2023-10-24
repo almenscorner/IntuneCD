@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.update_assignmentFilter import update
+from src.IntuneCD.update.update_assignmentFilter import update
 
 
 class TestUpdateAssignmentFilter(unittest.TestCase):
@@ -35,22 +35,24 @@ class TestUpdateAssignmentFilter(unittest.TestCase):
         }
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_assignmentFilter.makeapirequest"
+            "src.IntuneCD.update.update_assignmentFilter.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
-        self.load_file_patch = patch("src.IntuneCD.update_assignmentFilter.load_file")
+        self.load_file_patch = patch(
+            "src.IntuneCD.update.update_assignmentFilter.load_file"
+        )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_assignmentFilter.makeapirequestPatch"
+            "src.IntuneCD.update.update_assignmentFilter.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_assignmentFilter.makeapirequestPost"
+            "src.IntuneCD.update.update_assignmentFilter.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}

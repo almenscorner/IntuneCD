@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_managedGPlay import savebackup
+from src.IntuneCD.backup.backup_managedGPlay import savebackup
 
 
 class TestBackupManagedGPlay(unittest.TestCase):
@@ -40,7 +40,7 @@ class TestBackupManagedGPlay(unittest.TestCase):
         }
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_managedGPlay.makeapirequest",
+            "src.IntuneCD.backup.backup_managedGPlay.makeapirequest",
             return_value=self.managed_gplay,
         )
         self.makeapirequest = self.patch_makeapirequest.start()

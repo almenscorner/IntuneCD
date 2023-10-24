@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.update_compliance import update
+from src.IntuneCD.update.update_compliance import update
 
 
 class TestUpdateCompliance(unittest.TestCase):
@@ -53,48 +53,48 @@ class TestUpdateCompliance(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_compliance.batch_assignment"
+            "src.IntuneCD.update.update_compliance.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_compliance.get_object_assignment"
+            "src.IntuneCD.update.update_compliance.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_compliance.makeapirequest"
+            "src.IntuneCD.update.update_compliance.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_compliance.update_assignment"
+            "src.IntuneCD.update.update_compliance.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
 
-        self.load_file_patch = patch("src.IntuneCD.update_compliance.load_file")
+        self.load_file_patch = patch("src.IntuneCD.update.update_compliance.load_file")
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_compliance.post_assignment_update"
+            "src.IntuneCD.update.update_compliance.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_compliance.makeapirequestPatch"
+            "src.IntuneCD.update.update_compliance.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_compliance.makeapirequestPost"
+            "src.IntuneCD.update.update_compliance.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_compliance.makeapirequestDelete"
+            "src.IntuneCD.update.update_compliance.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

@@ -6,7 +6,7 @@ import unittest
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.assignment_report import get_group_report
+from src.IntuneCD.intunecdlib.assignment_report import get_group_report
 
 
 class TestGetGroupReport(unittest.TestCase):

@@ -18,6 +18,8 @@ repos:
       - id: no-commit-to-branch
       - id: trailing-whitespace
         args: ["--markdown-linebreak-ext=md"]
+      - id: name-tests-test
+        args: ["--pytest-test-first"]
   - repo: https://github.com/ambv/black
     rev: 23.10.0
     hooks:
@@ -34,3 +36,11 @@ repos:
     rev: v3.0.1
     hooks:
       - id: pylint
+  - repo: local
+    hooks:
+      - id: pytest-check
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true

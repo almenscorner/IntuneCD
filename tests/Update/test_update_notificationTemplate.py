@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.update_notificationTemplate import update
+from src.IntuneCD.update.update_notificationTemplate import update
 
 
 class TestUpdateNotificationTemplates(unittest.TestCase):
@@ -67,30 +67,30 @@ class TestUpdateNotificationTemplates(unittest.TestCase):
         }
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_notificationTemplate.makeapirequest"
+            "src.IntuneCD.update.update_notificationTemplate.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.load_file_patch = patch(
-            "src.IntuneCD.update_notificationTemplate.load_file"
+            "src.IntuneCD.update.update_notificationTemplate.load_file"
         )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_notificationTemplate.makeapirequestPatch"
+            "src.IntuneCD.update.update_notificationTemplate.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_notificationTemplate.makeapirequestPost"
+            "src.IntuneCD.update.update_notificationTemplate.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_notificationTemplate.makeapirequestDelete"
+            "src.IntuneCD.update.update_notificationTemplate.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

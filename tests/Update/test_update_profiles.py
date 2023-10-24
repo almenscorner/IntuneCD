@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.update_profiles import update
+from src.IntuneCD.update.update_profiles import update
 
 
 class TestUpdateProfiles(unittest.TestCase):
@@ -48,51 +48,53 @@ class TestUpdateProfiles(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_profiles.batch_assignment"
+            "src.IntuneCD.update.update_profiles.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_profiles.get_object_assignment"
+            "src.IntuneCD.update.update_profiles.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
 
-        self.makeapirequest_patch = patch("src.IntuneCD.update_profiles.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.update.update_profiles.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data_base
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_profiles.update_assignment"
+            "src.IntuneCD.update.update_profiles.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
 
-        self.load_file_patch = patch("src.IntuneCD.update_profiles.load_file")
+        self.load_file_patch = patch("src.IntuneCD.update.update_profiles.load_file")
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data_base
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_profiles.post_assignment_update"
+            "src.IntuneCD.update.update_profiles.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_profiles.makeapirequestPatch"
+            "src.IntuneCD.update.update_profiles.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_profiles.makeapirequestPost"
+            "src.IntuneCD.update.update_profiles.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
-        self.plistlib_patch = patch("src.IntuneCD.update_profiles.plistlib")
+        self.plistlib_patch = patch("src.IntuneCD.update.update_profiles.plistlib")
         self.plistlib = self.plistlib_patch.start()
         self.plistlib.load.return_value = {"PayloadContent": [{"test": "test"}]}
         self.plistlib.dumps.return_value = b"test"
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_profiles.makeapirequestDelete"
+            "src.IntuneCD.update.update_profiles.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

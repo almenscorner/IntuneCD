@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_assignmentFilters import savebackup
+from src.IntuneCD.backup.backup_assignmentFilters import savebackup
 
 
 class TestBackupAssignmentFilters(unittest.TestCase):
@@ -44,7 +44,7 @@ class TestBackupAssignmentFilters(unittest.TestCase):
         }
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_assignmentFilters.makeapirequest",
+            "src.IntuneCD.backup.backup_assignmentFilters.makeapirequest",
             return_value=self.assignment_filter,
         )
         self.makeapirequest = self.patch_makeapirequest.start()

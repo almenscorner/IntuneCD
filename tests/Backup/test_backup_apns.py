@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_apns import savebackup
+from src.IntuneCD.backup.backup_apns import savebackup
 
 
 class TestBackupAPNS(unittest.TestCase):
@@ -45,7 +45,9 @@ class TestBackupAPNS(unittest.TestCase):
             "certificate": None,
         }
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_apns.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup.backup_apns.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
 
     def tearDown(self):

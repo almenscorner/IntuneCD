@@ -10,14 +10,21 @@ from unittest.mock import patch
 
 from testfixtures import TempDirectory
 
-from src.IntuneCD.get_authparams import getAuth
+from src.IntuneCD.intunecdlib.get_authparams import getAuth
 
 
-@patch("src.IntuneCD.get_authparams.getAuth")
-@patch("src.IntuneCD.get_authparams.obtain_accesstoken_app", return_value="token")
-@patch("src.IntuneCD.get_authparams.obtain_accesstoken_cert", return_value="token")
+@patch("src.IntuneCD.intunecdlib.get_authparams.getAuth")
 @patch(
-    "src.IntuneCD.get_authparams.obtain_accesstoken_interactive", return_value="token"
+    "src.IntuneCD.intunecdlib.get_authparams.obtain_accesstoken_app",
+    return_value="token",
+)
+@patch(
+    "src.IntuneCD.intunecdlib.get_authparams.obtain_accesstoken_cert",
+    return_value="token",
+)
+@patch(
+    "src.IntuneCD.intunecdlib.get_authparams.obtain_accesstoken_interactive",
+    return_value="token",
 )
 class TestGetAuth(unittest.TestCase):
     """Test class for get_auth."""

@@ -7,7 +7,7 @@ This module tests the clean_filename function.
 
 import unittest
 
-from src.IntuneCD.clean_filename import clean_filename
+from src.IntuneCD.intunecdlib.clean_filename import clean_filename
 
 
 class TestCleanFilename(unittest.TestCase):

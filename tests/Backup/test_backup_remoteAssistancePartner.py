@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_remoteAssistancePartner import savebackup
+from src.IntuneCD.backup.backup_remoteAssistancePartner import savebackup
 
 
 class TestBackupCompliancePartner(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestBackupCompliancePartner(unittest.TestCase):
         }
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_remoteAssistancePartner.makeapirequest",
+            "src.IntuneCD.backup.backup_remoteAssistancePartner.makeapirequest",
             return_value=self.remote_assistance_partner,
         )
         self.makeapirequest = self.patch_makeapirequest.start()

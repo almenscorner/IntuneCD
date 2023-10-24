@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_vppTokens import savebackup
+from src.IntuneCD.backup.backup_vppTokens import savebackup
 
 
 class TestBackupVPPTokens(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestBackupVPPTokens(unittest.TestCase):
         }
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_vppTokens.makeapirequest",
+            "src.IntuneCD.backup.backup_vppTokens.makeapirequest",
             return_value=self.vpp_token,
         )
         self.makeapirequest = self.patch_makeapirequest.start()

@@ -11,7 +11,7 @@ from unittest.mock import patch
 import yaml
 from testfixtures import TempDirectory
 
-from src.IntuneCD.backup_deviceCategories import savebackup
+from src.IntuneCD.backup.backup_deviceCategories import savebackup
 
 
 class TestBackupdeviceCategories(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestBackupdeviceCategories(unittest.TestCase):
         }
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_deviceCategories.makeapirequest",
+            "src.IntuneCD.backup.backup_deviceCategories.makeapirequest",
             return_value=self.deviceCategories,
         )
         self.makeapirequest = self.patch_makeapirequest.start()
