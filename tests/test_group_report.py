@@ -1,12 +1,17 @@
-import unittest
+# -*- coding: utf-8 -*-
+import ast
 import json
 import os
+import unittest
 
 from testfixtures import TempDirectory
-from src.IntuneCD.assignment_report import get_group_report
+
+from src.IntuneCD.intunecdlib.assignment_report import get_group_report
 
 
 class TestGetGroupReport(unittest.TestCase):
+    """Test class for get_group_report."""
+
     def setUp(self):
         self.directory = TempDirectory()
         self.directory.create()
@@ -14,26 +19,33 @@ class TestGetGroupReport(unittest.TestCase):
         self.directory.makedir("Compliance Policies/Policies")
         self.directory.write(
             "Device Configurations/test.json",
-            '{"displayName": "testconfig", "assignments": [{"target": {"groupName": "test1", "groupType": "DynamicMembership", "membershipRule": "test"}}]} ',
+            '{"displayName": "testconfig","assignments": [{"target": {"groupName": "test1","groupType": "DynamicMembership","membershipRule": "test"}}]}',
             encoding="utf-8",
         )
         self.directory.write(
             "Compliance Policies/Policies/test.json",
-            '{"displayName": "testconfig", "assignments": [{"target": {"groupName": "test1", "groupType": "DynamicMembership", "membershipRule": "test"}}]} ',
+            '{"@odata.type": "#type.super.duper","displayName": "testconfig","assignments": [{"intent": "force","target": {"groupName": "test1","groupType": "DynamicMembership","membershipRule": "test"}}]}',
             encoding="utf-8",
         )
 
     def tearDown(self):
+        """Remove the test folder and all its contents"""
         # Remove the test folder and all its contents
         self.directory.cleanup()
 
     def test_get_group_report(self):
+        """The folder should be created and the file should have the expected contents"""
+
         # Test that the function returns the expected output for the sample file
         expected_output = [
             {
                 "assignedTo": {
-                    "Compliance Policies": ["testconfig"],
-                    "Device Configurations": ["testconfig"],
+                    "Compliance Policies": [
+                        {"name": "testconfig", "type": "duper", "intent": "force"}
+                    ],
+                    "Device Configurations": [
+                        {"name": "testconfig", "type": "", "intent": ""}
+                    ],
                 },
                 "groupName": "test1",
                 "groupType": "DynamicMembership",
@@ -42,27 +54,36 @@ class TestGetGroupReport(unittest.TestCase):
         ]
         get_group_report(self.directory.path, "json")
         with open(
-            os.path.join(self.directory.path, "Assignment Report", "report.json"), "r"
+            os.path.join(self.directory.path, "Assignment Report", "report.json"),
+            "r",
+            encoding="utf-8",
         ) as f:
-            actual_output = eval(f.read())
+            actual_output = ast.literal_eval(f.read())
         self.assertEqual(actual_output, expected_output)
 
     def test_get_group_report_no_files(self):
+        """The folder should not be created and the file should not be created"""
+
         # Test that the function returns an empty list when no files are found
         with open(
-            os.path.join(self.directory.path, "Device Configurations", "test.json"), "r"
+            os.path.join(self.directory.path, "Device Configurations", "test.json"),
+            "r",
+            encoding="utf-8",
         ) as f:
             data = json.load(f)
         with open(
-            os.path.join(self.directory.path, "Device Configurations", "test.json"), "w"
+            os.path.join(self.directory.path, "Device Configurations", "test.json"),
+            "w",
+            encoding="utf-8",
         ) as f:
             data.pop("assignments")
-            data = json.dump(data, f)
+            json.dump(data, f)
         with open(
             os.path.join(
                 self.directory.path, "Compliance Policies/Policies", "test.json"
             ),
             "r",
+            encoding="utf-8",
         ) as f:
             data = json.load(f)
         with open(
@@ -70,9 +91,10 @@ class TestGetGroupReport(unittest.TestCase):
                 self.directory.path, "Compliance Policies/Policies", "test.json"
             ),
             "w",
+            encoding="utf-8",
         ) as f:
             data.pop("assignments")
-            data = json.dump(data, f)
+            json.dump(data, f)
 
         get_group_report(self.directory.path, "json")
         path_exists = os.path.exists(

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up Managed Google Play."""
 
 import json
-import yaml
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 from testfixtures import TempDirectory
-from src.IntuneCD.backup_managedGPlay import savebackup
+
+from src.IntuneCD.backup.backup_managedGPlay import savebackup
 
 
 class TestBackupManagedGPlay(unittest.TestCase):
@@ -20,7 +22,9 @@ class TestBackupManagedGPlay(unittest.TestCase):
         self.directory.create()
         self.token = "token"
         self.append_id = False
-        self.saved_path = f"{self.directory.path}/Managed Google Play/awesome@gmail.com."
+        self.saved_path = (
+            f"{self.directory.path}/Managed Google Play/awesome@gmail.com."
+        )
         self.expected_data = {
             "bindStatus": "boundAndValidated",
             "lastAppSyncDateTime": "2022-01-28T12:28:48.975089Z",
@@ -36,7 +40,7 @@ class TestBackupManagedGPlay(unittest.TestCase):
         }
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_managedGPlay.makeapirequest",
+            "src.IntuneCD.backup.backup_managedGPlay.makeapirequest",
             return_value=self.managed_gplay,
         )
         self.makeapirequest = self.patch_makeapirequest.start()
@@ -50,7 +54,7 @@ class TestBackupManagedGPlay(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "yaml", self.token, self.append_id)
 
-        with open(self.saved_path + "yaml", "r") as f:
+        with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
@@ -63,7 +67,7 @@ class TestBackupManagedGPlay(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, self.append_id)
 
-        with open(self.saved_path + "json", "r") as f:
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             saved_data = json.load(f)
 
         self.assertTrue(Path(f"{self.directory.path}/Managed Google Play").exists())
@@ -82,7 +86,11 @@ class TestBackupManagedGPlay(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, True)
 
-        self.assertTrue(Path(f"{self.directory.path}/Managed Google Play/awesome@gmail.com__0.json").exists())
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Managed Google Play/awesome@gmail.com__0.json"
+            ).exists()
+        )
 
 
 if __name__ == "__main__":

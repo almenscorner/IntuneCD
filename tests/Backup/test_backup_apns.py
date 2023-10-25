@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up APNS."""
 
 import json
-import yaml
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 from testfixtures import TempDirectory
-from src.IntuneCD.backup_apns import savebackup
+
+from src.IntuneCD.backup.backup_apns import savebackup
 
 
 class TestBackupAPNS(unittest.TestCase):
@@ -43,7 +45,9 @@ class TestBackupAPNS(unittest.TestCase):
             "certificate": None,
         }
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_apns.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup.backup_apns.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
 
     def tearDown(self):
@@ -56,7 +60,7 @@ class TestBackupAPNS(unittest.TestCase):
         self.makeapirequest.return_value = self.apns
         self.count = savebackup(self.directory.path, "yaml", self.token)
 
-        with open(self.saved_path + "yaml", "r") as f:
+        with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
@@ -70,7 +74,7 @@ class TestBackupAPNS(unittest.TestCase):
         self.makeapirequest.return_value = self.apns
         self.count = savebackup(self.directory.path, "json", self.token)
 
-        with open(self.saved_path + "json", "r") as f:
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             saved_data = json.load(f)
 
         self.assertTrue(Path(f"{self.directory.path}/Apple Push Notification").exists())

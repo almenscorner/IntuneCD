@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the match function.
@@ -6,7 +7,7 @@ This module tests the match function.
 
 import unittest
 
-from src.IntuneCD.backup_applications import match
+from src.IntuneCD.backup.backup_applications import match
 
 
 class TestMatch(unittest.TestCase):

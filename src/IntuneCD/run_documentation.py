@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
           ..
         ....
        .::::
-      .:::::            ___       _                     ____ ____  
+      .:::::            ___       _                     ____ ____
      .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
     .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
-   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| | 
+   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| |
   ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
-        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___ 
+        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___
         ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
         :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
         ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
@@ -19,17 +20,18 @@
 This module contains the functions to run the documentation.
 """
 
-import os
-import json
 import argparse
-
+import json
+import os
 from datetime import datetime
+
 from markdown_toclify import markdown_toclify
-from .documentation_functions import (
+
+from .intunecdlib.documentation_functions import (
     document_configs,
     document_management_intents,
-    md_file,
     get_md_files,
+    md_file,
 )
 
 REPO_DIR = os.environ.get("REPO_DIR")

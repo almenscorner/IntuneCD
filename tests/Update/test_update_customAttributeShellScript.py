@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating Custom Attribute Shell Scripts."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.update_customAttributeShellScript import update
+
+from src.IntuneCD.update.update_customAttributeShellScript import update
 
 
 class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
@@ -61,50 +63,50 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.batch_assignment"
+            "src.IntuneCD.update.update_customAttributeShellScript.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.get_object_assignment"
+            "src.IntuneCD.update.update_customAttributeShellScript.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.makeapirequest"
+            "src.IntuneCD.update.update_customAttributeShellScript.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.update_assignment"
+            "src.IntuneCD.update.update_customAttributeShellScript.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
 
         self.load_file_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.load_file"
+            "src.IntuneCD.update.update_customAttributeShellScript.load_file"
         )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.post_assignment_update"
+            "src.IntuneCD.update.update_customAttributeShellScript.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.makeapirequestPatch"
+            "src.IntuneCD.update.update_customAttributeShellScript.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.makeapirequestPost"
+            "src.IntuneCD.update.update_customAttributeShellScript.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_customAttributeShellScript.makeapirequestDelete"
+            "src.IntuneCD.update.update_customAttributeShellScript.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

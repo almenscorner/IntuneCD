@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
           ..
         ....
        .::::
-      .:::::            ___       _                     ____ ____  
+      .:::::            ___       _                     ____ ____
      .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
     .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
-   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| | 
+   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| |
   ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
-        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___ 
+        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___
         ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
         :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
         ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
@@ -19,14 +20,14 @@
 This module contains the functions to run the update.
 """
 
+import argparse
+import base64
+import json
 import os
 import sys
-import base64
-import argparse
-import json
-
 from io import StringIO
-from .get_authparams import getAuth
+
+from .intunecdlib.get_authparams import getAuth
 
 REPO_DIR = os.environ.get("REPO_DIR")
 
@@ -168,28 +169,28 @@ def start():
         diff_summary = []
 
         if "AppConfigurations" not in exclude:
-            from .update_appConfiguration import update
+            from .update.update_appConfiguration import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "AppProtection" not in exclude:
-            from .update_appProtection import update
+            from .update.update_appProtection import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "Compliance" not in exclude:
-            from .update_compliance import update
+            from .update.update_compliance import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "DeviceManagementSettings" not in exclude and args.interactiveauth is True:
-            from .update_deviceManagementSettings import update
+            from .update.update_deviceManagementSettings import update
 
             diff_summary.append(update(path, token, report))
         else:
@@ -199,123 +200,123 @@ def start():
             )
 
         if "DeviceCategories" not in exclude:
-            from .update_deviceCategories import update
+            from .update.update_deviceCategories import update
 
             diff_summary.append(update(path, token, report, remove))
 
         if "NotificationTemplate" not in exclude:
-            from .update_notificationTemplate import update
+            from .update.update_notificationTemplate import update
 
             diff_summary.append(update(path, token, report, remove))
 
         if "Profiles" not in exclude:
-            from .update_profiles import update
+            from .update.update_profiles import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "GPOConfigurations" not in exclude:
-            from .update_groupPolicyConfiguration import update
+            from .update.update_groupPolicyConfiguration import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "AppleEnrollmentProfile" not in exclude:
-            from .update_appleEnrollmentProfile import update
+            from .update.update_appleEnrollmentProfile import update
 
             diff_summary.append(update(path, token, report))
 
         if "WindowsEnrollmentProfile" not in exclude:
-            from .update_windowsEnrollmentProfile import update
+            from .update.update_windowsEnrollmentProfile import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "EnrollmentStatusPage" not in exclude:
-            from .update_enrollmentStatusPage import update
+            from .update.update_enrollmentStatusPage import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "EnrollmentConfigurations" not in exclude:
-            from .update_enrollmentConfigurations import update
+            from .update.update_enrollmentConfigurations import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "Filters" not in exclude:
-            from .update_assignmentFilter import update
+            from .update.update_assignmentFilter import update
 
             diff_summary.append(update(path, token, report))
 
         if "Intents" not in exclude:
-            from .update_managementIntents import update
+            from .update.update_managementIntents import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "ProactiveRemediation" not in exclude:
-            from .update_proactiveRemediation import update
+            from .update.update_proactiveRemediation import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "PowershellScripts" not in exclude:
-            from .update_powershellScripts import update
+            from .update.update_powershellScripts import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "ShellScripts" not in exclude:
-            from .update_shellScripts import update
+            from .update.update_shellScripts import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "CustomAttribute" not in exclude:
-            from .update_customAttributeShellScript import update
+            from .update.update_customAttributeShellScript import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "ConfigurationPolicies" not in exclude:
-            from .update_configurationPolicies import update
+            from .update.update_configurationPolicies import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "ConditionalAccess" not in exclude:
-            from .update_conditionalAccess import update
+            from .update.update_conditionalAccess import update
 
             diff_count += update(path, token, report, remove)
 
         if "WindowsDriverUpdateProfiles" not in exclude:
-            from .update_windowsDriverUpdates import update
+            from .update.update_windowsDriverUpdates import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "windowsFeatureUpdates" not in exclude:
-            from .update_windowsFeatureUpdates import update
+            from .update.update_windowsFeatureUpdates import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)
             )
 
         if "windowsQualityUpdates" not in exclude:
-            from .update_windowsQualityUpdates import update
+            from .update.update_windowsQualityUpdates import update
 
             diff_summary.append(
                 update(path, token, assignment, report, create_groups, remove)

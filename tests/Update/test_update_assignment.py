@@ -1,11 +1,8 @@
+# -*- coding: utf-8 -*-
 import unittest
-
 from unittest.mock import patch
-from src.IntuneCD.update_assignment import (
-    update_assignment,
-    get_added_removed,
-    post_assignment_update,
-)
+
+from src.IntuneCD.update.update_assignment import get_added_removed, update_assignment
 
 
 class TestUpdateAssignment(unittest.TestCase):
@@ -38,12 +35,12 @@ class TestUpdateAssignment(unittest.TestCase):
         ]
         self.request_data = {"value": [{"id": "12345", "displayName": "test"}]}
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_assignment.makeapirequest"
+            "src.IntuneCD.update.update_assignment.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_assignment.makeapirequestPost"
+            "src.IntuneCD.update.update_assignment.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
 
@@ -63,6 +60,7 @@ class TestUpdateAssignment(unittest.TestCase):
         )
 
     def test_update_assignment(self):
+        """Graph API should be called twice."""
         self.makeapirequest.return_value = self.request_data
 
         result = update_assignment(

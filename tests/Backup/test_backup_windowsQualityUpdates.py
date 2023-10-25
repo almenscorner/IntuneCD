@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up Windows Quality Update profiles."""
 
 import json
-import yaml
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 from testfixtures import TempDirectory
-from src.IntuneCD.backup_windowsQualityUpdates import savebackup
+
+from src.IntuneCD.backup.backup_windowsQualityUpdates import savebackup
 
 BATCH_ASSIGNMENT = [{"value": [{"id": "0", "target": {"groupName": "Group1"}}]}]
 OBJECT_ASSIGNMENT = [{"target": {"groupName": "Group1"}}]
@@ -31,15 +33,21 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
         }
         self.enrollment_profile = {"value": [{"displayName": "test", "id": "0"}]}
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_windowsQualityUpdates.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup.backup_windowsQualityUpdates.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_windowsQualityUpdates.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup.backup_windowsQualityUpdates.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_windowsQualityUpdates.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup.backup_windowsQualityUpdates.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.enrollment_profile
 
@@ -53,9 +61,11 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = "yaml"
-        count = savebackup(self.directory.path, output, self.exclude, self.token, "", self.append_id)
+        count = savebackup(
+            self.directory.path, output, self.exclude, self.token, "", self.append_id
+        )
 
-        with open(self.saved_path + output, "r") as f:
+        with open(self.saved_path + output, "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
@@ -67,9 +77,11 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = "json"
-        count = savebackup(self.directory.path, output, self.exclude, self.token, "", self.append_id)
+        count = savebackup(
+            self.directory.path, output, self.exclude, self.token, "", self.append_id
+        )
 
-        with open(self.saved_path + output, "r") as f:
+        with open(self.saved_path + output, "r", encoding="utf-8") as f:
             saved_data = json.load(f)
 
         self.assertTrue(f"{self.directory.path}/Quality Updates")
@@ -80,7 +92,9 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = {"value": []}
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+        )
 
         self.assertEqual(0, self.count["config_count"])
 
@@ -100,9 +114,13 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", True)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", True
+        )
 
-        self.assertTrue(Path(f"{self.directory.path}/Quality Updates/test__0.json").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Quality Updates/test__0.json").exists()
+        )
 
 
 if __name__ == "__main__":

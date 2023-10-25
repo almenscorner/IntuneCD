@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up Apple Enrollment Profile."""
 
 import json
-import yaml
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
-from src.IntuneCD.backup_appleEnrollmentProfile import savebackup
+
+import yaml
 from testfixtures import TempDirectory
+
+from src.IntuneCD.backup.backup_appleEnrollmentProfile import savebackup
 
 
 class TestBackupAppleEnrollmentProfile(unittest.TestCase):
@@ -29,7 +31,6 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             "configurationEndpointUrl": "https://appleconfigurator2.manage.microsoft.com/MDMServiceConfig?id=0",
             "enableAuthenticationViaCompanyPortal": False,
             "requireCompanyPortalOnSetupAssistantEnrolledDevices": False,
-            "isDefault": True,
         }
         self.token_response = {
             "@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceManagement/depOnboardingSettings",
@@ -62,10 +63,14 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
             }
         ]
 
-        self.patch_makeapirequest = patch("src.IntuneCD.backup_appleEnrollmentProfile.makeapirequest")
+        self.patch_makeapirequest = patch(
+            "src.IntuneCD.backup.backup_appleEnrollmentProfile.makeapirequest"
+        )
         self.makeapirequest = self.patch_makeapirequest.start()
 
-        self.patch_batch_request = patch("src.IntuneCD.backup_appleEnrollmentProfile.batch_request")
+        self.patch_batch_request = patch(
+            "src.IntuneCD.backup.backup_appleEnrollmentProfile.batch_request"
+        )
         self.batch_request = self.patch_batch_request.start()
 
     def tearDown(self):
@@ -77,13 +82,17 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.makeapirequest.return_value = self.token_response
         self.batch_request.return_value = self.batch_intune
-        self.count = savebackup(self.directory.path, "yaml", self.token, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "yaml", self.token, "", self.append_id
+        )
 
-        with open(self.saved_path + "yaml", "r") as f:
+        with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(Path(f"{self.directory.path}/Enrollment Profiles/Apple").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Enrollment Profiles/Apple").exists()
+        )
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count["config_count"])
 
@@ -91,13 +100,17 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.makeapirequest.return_value = self.token_response
         self.batch_request.return_value = self.batch_intune
-        self.count = savebackup(self.directory.path, "json", self.token, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "", self.append_id
+        )
 
-        with open(self.saved_path + "json", "r") as f:
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
-        self.assertTrue(Path(f"{self.directory.path}/Enrollment Profiles/Apple").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Enrollment Profiles/Apple").exists()
+        )
         self.assertEqual(self.expected_data, self.saved_data)
         self.assertEqual(1, self.count["config_count"])
 
@@ -105,7 +118,9 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = {"value": []}
-        self.count = savebackup(self.directory.path, "json", self.token, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "", self.append_id
+        )
 
         self.assertEqual(0, self.count["config_count"])
 
@@ -113,7 +128,9 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = {"value": []}
-        self.count = savebackup(self.directory.path, "json", self.token, "test", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "test", self.append_id
+        )
 
         self.assertEqual(0, self.count["config_count"])
 
@@ -124,7 +141,11 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, "", True)
 
-        self.assertTrue(Path(f"{self.directory.path}/Enrollment Profiles/Apple/test__0.json").exists())
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Enrollment Profiles/Apple/test__0.json"
+            ).exists()
+        )
 
 
 if __name__ == "__main__":

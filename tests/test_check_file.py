@@ -1,4 +1,5 @@
 #!/usr/bin/env/python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the check_file function.
@@ -7,7 +8,8 @@ This module tests the check_file function.
 import unittest
 
 from testfixtures import TempDirectory
-from src.IntuneCD.check_file import check_file
+
+from src.IntuneCD.intunecdlib.check_file import check_file
 
 
 class TestCheckFile(unittest.TestCase):
@@ -23,9 +25,13 @@ class TestCheckFile(unittest.TestCase):
         self.d = self.directory.makedir("fake_path")
 
         self.yaml_file = self.directory.write(self.yaml, "yaml", encoding="utf-8")
-        self.json_file = self.directory.write(self.json, '{"data": "fake_data"}', encoding="utf-8")
+        self.json_file = self.directory.write(
+            self.json, '{"data": "fake_data"}', encoding="utf-8"
+        )
         self.md_file = self.directory.write(self.md, "md", encoding="utf-8")
-        self.DS_Store_file = self.directory.write(self.DS_Store, "DS_Store", encoding="utf-8")
+        self.DS_Store_file = self.directory.write(
+            self.DS_Store, "DS_Store", encoding="utf-8"
+        )
 
     def tearDown(self):
         self.directory.cleanup()

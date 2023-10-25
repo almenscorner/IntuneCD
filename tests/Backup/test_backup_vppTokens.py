@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up VPP Tokens."""
 
 import json
-import yaml
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 from testfixtures import TempDirectory
-from src.IntuneCD.backup_vppTokens import savebackup
+
+from src.IntuneCD.backup.backup_vppTokens import savebackup
 
 
 class TestBackupVPPTokens(unittest.TestCase):
@@ -22,10 +24,12 @@ class TestBackupVPPTokens(unittest.TestCase):
         self.append_id = False
         self.saved_path = f"{self.directory.path}/Apple VPP Tokens/test."
         self.expected_data = {"tokenName": "test", "displayName": "test"}
-        self.vpp_token = {"value": [{"id": "0", "tokenName": "test", "displayName": "test"}]}
+        self.vpp_token = {
+            "value": [{"id": "0", "tokenName": "test", "displayName": "test"}]
+        }
 
         self.patch_makeapirequest = patch(
-            "src.IntuneCD.backup_vppTokens.makeapirequest",
+            "src.IntuneCD.backup.backup_vppTokens.makeapirequest",
             return_value=self.vpp_token,
         )
         self.makeapirequest = self.patch_makeapirequest.start()
@@ -39,7 +43,7 @@ class TestBackupVPPTokens(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "yaml", self.token, self.append_id)
 
-        with open(self.saved_path + "yaml", "r") as f:
+        with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             self.saved_data = json.loads(data)
 
@@ -52,7 +56,7 @@ class TestBackupVPPTokens(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, self.append_id)
 
-        with open(self.saved_path + "json", "r") as f:
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             self.saved_data = json.load(f)
 
         self.assertTrue(Path(f"{self.directory.path}/Apple VPP Tokens").exists())
@@ -71,7 +75,9 @@ class TestBackupVPPTokens(unittest.TestCase):
 
         self.count = savebackup(self.directory.path, "json", self.token, True)
 
-        self.assertTrue(Path(f"{self.directory.path}/Apple VPP Tokens/test__0.json").exists())
+        self.assertTrue(
+            Path(f"{self.directory.path}/Apple VPP Tokens/test__0.json").exists()
+        )
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.update_deviceManagementSettings import update
+
+from src.IntuneCD.update.update_deviceManagementSettings import update
 
 
 class TestUpdateDeviceManagementSettings(unittest.TestCase):
@@ -51,24 +53,24 @@ class TestUpdateDeviceManagementSettings(unittest.TestCase):
         }
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_deviceManagementSettings.makeapirequest"
+            "src.IntuneCD.update.update_deviceManagementSettings.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.load_file_patch = patch(
-            "src.IntuneCD.update_deviceManagementSettings.load_file"
+            "src.IntuneCD.update.update_deviceManagementSettings.load_file"
         )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_deviceManagementSettings.makeapirequestPatch"
+            "src.IntuneCD.update.update_deviceManagementSettings.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_deviceManagementSettings.makeapirequestPost"
+            "src.IntuneCD.update.update_deviceManagementSettings.makeapirequestPost"
         )
 
     def tearDown(self):

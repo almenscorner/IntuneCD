@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the archive function.
 """
 
-import unittest
 import os
+import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.archive import move_to_archive
+
+from src.IntuneCD.intunecdlib.archive import move_to_archive
 
 
 class TestMoveToArchive(unittest.TestCase):
@@ -41,7 +43,7 @@ class TestMoveToArchive(unittest.TestCase):
 
         self.createdFile = ["test.json"]
 
-        self.datetime = patch("src.IntuneCD.archive.datetime")
+        self.datetime = patch("src.IntuneCD.intunecdlib.archive.datetime")
         self.datetime = self.datetime.start()
         self.datetime.return_value = "2020-01-01_00-00-00"
 

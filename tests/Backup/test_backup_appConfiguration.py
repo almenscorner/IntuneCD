@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests backing up App Configuration."""
 
 import json
-import yaml
 import unittest
-
 from pathlib import Path
 from unittest.mock import patch
+
+import yaml
 from testfixtures import TempDirectory
-from src.IntuneCD.backup_appConfiguration import savebackup
+
+from src.IntuneCD.backup.backup_appConfiguration import savebackup
 
 BATCH_ASSIGNMENT = [{"value": [{"id": "0", "target": {"groupName": "Group1"}}]}]
 OBJECT_ASSIGNMENT = [{"target": {"groupName": "Group1"}}]
@@ -24,7 +26,9 @@ class TestBackupAppConfig(unittest.TestCase):
         self.token = "token"
         self.exclude = []
         self.append_id = False
-        self.saved_path = f"{self.directory.path}/App Configuration/test_iosMobileAppConfiguration."
+        self.saved_path = (
+            f"{self.directory.path}/App Configuration/test_iosMobileAppConfiguration."
+        )
         self.expected_data = {
             "@odata.type": "#microsoft.graph.iosMobileAppConfiguration",
             "assignments": [{"target": {"groupName": "Group1"}}],
@@ -71,15 +75,21 @@ class TestBackupAppConfig(unittest.TestCase):
             "revokeLicenseActionResults": [],
         }
 
-        self.batch_assignment_patch = patch("src.IntuneCD.backup_appConfiguration.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.backup.backup_appConfiguration.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
-        self.object_assignment_patch = patch("src.IntuneCD.backup_appConfiguration.get_object_assignment")
+        self.object_assignment_patch = patch(
+            "src.IntuneCD.backup.backup_appConfiguration.get_object_assignment"
+        )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
-        self.makeapirequest_patch = patch("src.IntuneCD.backup_appConfiguration.makeapirequest")
+        self.makeapirequest_patch = patch(
+            "src.IntuneCD.backup.backup_appConfiguration.makeapirequest"
+        )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.side_effect = self.app_config, self.app_data
 
@@ -92,9 +102,11 @@ class TestBackupAppConfig(unittest.TestCase):
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.exclude, self.token, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "yaml", self.exclude, self.token, "", self.append_id
+        )
 
-        with open(self.saved_path + "yaml", "r") as f:
+        with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
@@ -105,9 +117,11 @@ class TestBackupAppConfig(unittest.TestCase):
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+        )
 
-        with open(self.saved_path + "json", "r") as f:
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             saved_data = json.load(f)
 
         self.assertTrue(Path(f"{self.directory.path}/App Configuration").exists())
@@ -117,7 +131,9 @@ class TestBackupAppConfig(unittest.TestCase):
     def test_backup_with_no_returned_data(self):
         """The count should be 0 if no data is returned."""
         self.makeapirequest.side_effect = [{"value": []}]
-        self.count = savebackup(self.directory.path, "json", self.exclude, self.token, "", self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+        )
 
         self.assertEqual(0, self.count["config_count"])
 
@@ -137,9 +153,15 @@ class TestBackupAppConfig(unittest.TestCase):
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.exclude, self.token, "", True)
+        self.count = savebackup(
+            self.directory.path, "yaml", self.exclude, self.token, "", True
+        )
 
-        self.assertTrue(Path(f"{self.directory.path}/App Configuration/test_iosMobileAppConfiguration__0.yaml").exists())
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/App Configuration/test_iosMobileAppConfiguration__0.yaml"
+            ).exists()
+        )
 
 
 if __name__ == "__main__":

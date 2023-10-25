@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the graph_batch module.
 """
 
 import unittest
-
 from unittest.mock import patch
-from src.IntuneCD.graph_batch import (
-    batch_request,
+
+from src.IntuneCD.intunecdlib.graph_batch import (
     batch_assignment,
     batch_intents,
+    batch_request,
     get_object_assignment,
     get_object_details,
 )
@@ -77,27 +78,33 @@ class TestGraphBatch(unittest.TestCase):
         ]
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.graph_batch.makeapirequestPost"
+            "src.IntuneCD.intunecdlib.graph_batch.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
 
         self.get_object_details_patch = patch(
-            "src.IntuneCD.graph_batch.get_object_details"
+            "src.IntuneCD.intunecdlib.graph_batch.get_object_details"
         )
         self.get_object_details = self.get_object_details_patch.start()
 
         self.get_object_assignment_patch = patch(
-            "src.IntuneCD.graph_batch.get_object_assignment"
+            "src.IntuneCD.intunecdlib.graph_batch.get_object_assignment"
         )
         self.get_object_assignment = self.get_object_assignment_patch.start()
 
-        self.batch_intents_patch = patch("src.IntuneCD.graph_batch.batch_intents")
+        self.batch_intents_patch = patch(
+            "src.IntuneCD.intunecdlib.graph_batch.batch_intents"
+        )
         self.batch_intents = self.batch_intents_patch.start()
 
-        self.batch_assignment_patch = patch("src.IntuneCD.graph_batch.batch_assignment")
+        self.batch_assignment_patch = patch(
+            "src.IntuneCD.intunecdlib.graph_batch.batch_assignment"
+        )
         self.batch_assignment = self.batch_assignment_patch.start()
 
-        self.batch_request_patch = patch("src.IntuneCD.graph_batch.batch_request")
+        self.batch_request_patch = patch(
+            "src.IntuneCD.intunecdlib.graph_batch.batch_request"
+        )
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.side_effect = (
             self.responses,
@@ -155,6 +162,51 @@ class TestGraphBatch(unittest.TestCase):
         ]
         self.result = batch_assignment(
             self.batch_assignment_data, "test", "test", self.token
+        )
+
+        self.assertEqual(self.result, self.expected_result)
+
+    def test_batch_assignment_expand_assignments(self):
+        """The batch assignment function should return the expected result."""
+
+        self.responses = [
+            {
+                "assignments@odata.context": "test",
+                "assignments": [
+                    {
+                        "target": {
+                            "groupId": "0",
+                            "deviceAndAppManagementAssignmentFilterId": "0",
+                        }
+                    }
+                ],
+            }
+        ]
+
+        self.batch_request.side_effect = (
+            self.responses,
+            self.group_responses,
+            self.filter_responses,
+        )
+
+        self.expected_result = [
+            {
+                "@odata.context": "test",
+                "value": [
+                    {
+                        "target": {
+                            "deviceAndAppManagementAssignmentFilterId": "test",
+                            "groupId": "0",
+                            "groupName": "test",
+                            "groupType": "DynamicMembership",
+                            "membershipRule": "test",
+                        }
+                    }
+                ],
+            }
+        ]
+        self.result = batch_assignment(
+            self.batch_assignment_data, "test", "?$expand=assignments", self.token
         )
 
         self.assertEqual(self.result, self.expected_result)

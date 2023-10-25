@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating Conditional Access."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.update_conditionalAccess import update
+
+from src.IntuneCD.update.update_conditionalAccess import update
 
 
 class TestUpdateConditionalAccess(unittest.TestCase):
@@ -69,28 +71,30 @@ class TestUpdateConditionalAccess(unittest.TestCase):
         }
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_conditionalAccess.makeapirequest"
+            "src.IntuneCD.update.update_conditionalAccess.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
-        self.load_file_patch = patch("src.IntuneCD.update_conditionalAccess.load_file")
+        self.load_file_patch = patch(
+            "src.IntuneCD.update.update_conditionalAccess.load_file"
+        )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_conditionalAccess.makeapirequestPatch"
+            "src.IntuneCD.update.update_conditionalAccess.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_conditionalAccess.makeapirequestPost"
+            "src.IntuneCD.update.update_conditionalAccess.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_conditionalAccess.makeapirequestDelete"
+            "src.IntuneCD.update.update_conditionalAccess.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

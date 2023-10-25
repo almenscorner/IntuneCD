@@ -1,4 +1,5 @@
 #!/usr/bin/env/python3
+# -*- coding: utf-8 -*-
 
 """
 This module tests the check_file function.
@@ -6,8 +7,7 @@ This module tests the check_file function.
 
 import unittest
 
-from testfixtures import TempDirectory
-from src.IntuneCD.check_prefix import check_prefix_match
+from src.IntuneCD.intunecdlib.check_prefix import check_prefix_match
 
 
 class TestCheckFile(unittest.TestCase):

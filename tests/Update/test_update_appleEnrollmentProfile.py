@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating Apple Enrollment Profiles."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.update_appleEnrollmentProfile import update
+
+from src.IntuneCD.update.update_appleEnrollmentProfile import update
 
 
 class TestUpdateAppleEnrollmentProfile(unittest.TestCase):
@@ -41,19 +43,19 @@ class TestUpdateAppleEnrollmentProfile(unittest.TestCase):
         }
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_appleEnrollmentProfile.makeapirequest"
+            "src.IntuneCD.update.update_appleEnrollmentProfile.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.load_file_patch = patch(
-            "src.IntuneCD.update_appleEnrollmentProfile.load_file"
+            "src.IntuneCD.update.update_appleEnrollmentProfile.load_file"
         )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_appleEnrollmentProfile.makeapirequestPatch"
+            "src.IntuneCD.update.update_appleEnrollmentProfile.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 

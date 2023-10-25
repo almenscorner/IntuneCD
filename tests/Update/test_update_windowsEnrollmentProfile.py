@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating Windows Enrollment Profiles."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.update_windowsEnrollmentProfile import update
+
+from src.IntuneCD.update.update_windowsEnrollmentProfile import update
 
 
 class TestUpdateWindowsEnrollmentProfile(unittest.TestCase):
@@ -43,51 +45,51 @@ class TestUpdateWindowsEnrollmentProfile(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.batch_assignment"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.get_object_assignment"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.makeapirequest"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.update_assignment"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
         self.update_assignment.return_value = [{"target": {"groupName": "test"}}]
 
         self.load_file_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.load_file"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.load_file"
         )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.post_assignment_update"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.makeapirequestPatch"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.makeapirequestPost"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_windowsEnrollmentProfile.makeapirequestDelete"
+            "src.IntuneCD.update.update_windowsEnrollmentProfile.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

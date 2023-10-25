@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating Windows Quality Updates."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.update_windowsQualityUpdates import update
+
+from src.IntuneCD.update.update_windowsQualityUpdates import update
 
 
 class TestUpdateWindowsQualityUpdates(unittest.TestCase):
@@ -44,51 +46,51 @@ class TestUpdateWindowsQualityUpdates(unittest.TestCase):
         }
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.batch_assignment"
+            "src.IntuneCD.update.update_windowsQualityUpdates.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.get_object_assignment"
+            "src.IntuneCD.update.update_windowsQualityUpdates.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.makeapirequest"
+            "src.IntuneCD.update.update_windowsQualityUpdates.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.mem_data
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.update_assignment"
+            "src.IntuneCD.update.update_windowsQualityUpdates.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
         self.update_assignment.return_value = [{"target": {"groupName": "test"}}]
 
         self.load_file_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.load_file"
+            "src.IntuneCD.update.update_windowsQualityUpdates.load_file"
         )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = self.repo_data
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.post_assignment_update"
+            "src.IntuneCD.update.update_windowsQualityUpdates.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.makeapirequestPatch"
+            "src.IntuneCD.update.update_windowsQualityUpdates.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.makeapirequestPost"
+            "src.IntuneCD.update.update_windowsQualityUpdates.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_windowsQualityUpdates.makeapirequestDelete"
+            "src.IntuneCD.update.update_windowsQualityUpdates.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """This module tests updating App Protections."""
 
 import unittest
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
-from unittest.mock import patch
-from src.IntuneCD.update_appProtection import update
 
+from src.IntuneCD.update.update_appProtection import update
 
 BATCH_ASSIGNMENT = [{"value": [{"id": "0", "target": {"groupName": "test1"}}]}]
 
@@ -30,19 +31,19 @@ class TestUpdateAppProtection(unittest.TestCase):
         self.token = "token"
 
         self.batch_assignment_patch = patch(
-            "src.IntuneCD.update_appProtection.batch_assignment"
+            "src.IntuneCD.update.update_appProtection.batch_assignment"
         )
         self.batch_assignment = self.batch_assignment_patch.start()
         self.batch_assignment.return_value = BATCH_ASSIGNMENT
 
         self.object_assignment_patch = patch(
-            "src.IntuneCD.update_appProtection.get_object_assignment"
+            "src.IntuneCD.update.update_appProtection.get_object_assignment"
         )
         self.object_assignment = self.object_assignment_patch.start()
         self.object_assignment.return_value = OBJECT_ASSIGNMENT
 
         self.makeapirequest_patch = patch(
-            "src.IntuneCD.update_appProtection.makeapirequest"
+            "src.IntuneCD.update.update_appProtection.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = {
@@ -59,12 +60,14 @@ class TestUpdateAppProtection(unittest.TestCase):
         }
 
         self.update_assignment_patch = patch(
-            "src.IntuneCD.update_appProtection.update_assignment"
+            "src.IntuneCD.update.update_appProtection.update_assignment"
         )
         self.update_assignment = self.update_assignment_patch.start()
         self.update_assignment.return_value = UPDATE_ASSIGNMENT
 
-        self.load_file_patch = patch("src.IntuneCD.update_appProtection.load_file")
+        self.load_file_patch = patch(
+            "src.IntuneCD.update.update_appProtection.load_file"
+        )
         self.load_file = self.load_file_patch.start()
         self.load_file.return_value = {
             "@odata.type": "#test.test.test",
@@ -76,23 +79,23 @@ class TestUpdateAppProtection(unittest.TestCase):
         }
 
         self.post_assignment_update_patch = patch(
-            "src.IntuneCD.update_appProtection.post_assignment_update"
+            "src.IntuneCD.update.update_appProtection.post_assignment_update"
         )
         self.post_assignment_update = self.post_assignment_update_patch.start()
 
         self.makeapirequestPatch_patch = patch(
-            "src.IntuneCD.update_appProtection.makeapirequestPatch"
+            "src.IntuneCD.update.update_appProtection.makeapirequestPatch"
         )
         self.makeapirequestPatch = self.makeapirequestPatch_patch.start()
 
         self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.update_appProtection.makeapirequestPost"
+            "src.IntuneCD.update.update_appProtection.makeapirequestPost"
         )
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
         self.makeapirequestPost.return_value = {"id": "0"}
 
         self.makeapirequestDelete_patch = patch(
-            "src.IntuneCD.update_appProtection.makeapirequestDelete"
+            "src.IntuneCD.update.update_appProtection.makeapirequestDelete"
         )
         self.makeapirequestDelete = self.makeapirequestDelete_patch.start()
 

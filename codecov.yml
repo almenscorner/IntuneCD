@@ -2,5 +2,5 @@ ignore:
   - "src/IntuneCD/run_backup.py"
   - "src/IntuneCD/run_update.py"
   - "src/IntuneCD/run_documentation.py"
-  - "src/IntuneCD/get_accesstoken.py"
-  - "src/IntuneCD/backup_autopilotDevices.py"
+  - "src/IntuneCD/intunecdlib/get_accesstoken.py"
+  - "src/IntuneCD/backup/backup_autopilotDevices.py"
