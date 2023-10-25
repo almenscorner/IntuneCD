@@ -166,6 +166,51 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
+    def test_batch_assignment_expand_assignments(self):
+        """The batch assignment function should return the expected result."""
+
+        self.responses = [
+            {
+                "assignments@odata.context": "test",
+                "assignments": [
+                    {
+                        "target": {
+                            "groupId": "0",
+                            "deviceAndAppManagementAssignmentFilterId": "0",
+                        }
+                    }
+                ],
+            }
+        ]
+
+        self.batch_request.side_effect = (
+            self.responses,
+            self.group_responses,
+            self.filter_responses,
+        )
+
+        self.expected_result = [
+            {
+                "@odata.context": "test",
+                "value": [
+                    {
+                        "target": {
+                            "deviceAndAppManagementAssignmentFilterId": "test",
+                            "groupId": "0",
+                            "groupName": "test",
+                            "groupType": "DynamicMembership",
+                            "membershipRule": "test",
+                        }
+                    }
+                ],
+            }
+        ]
+        self.result = batch_assignment(
+            self.batch_assignment_data, "test", "?$expand=assignments", self.token
+        )
+
+        self.assertEqual(self.result, self.expected_result)
+
     def test_batch_assignment_appProtection_mdmWindowsInformationProtectionPolicy(self):
         """The batch assignment function should return the expected result for the platform."""
 
