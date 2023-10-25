@@ -236,6 +236,31 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         self.assertEqual(self.post_assignment_update.call_count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 2)
 
+    def test_update_with_diffs_no_assignment_no_definition_values(self):
+        """The count should be 3 and the makeapirequestPost should be called."""
+
+        self.definition_value = {"value": []}
+        self.presentation_value = {"value": []}
+
+        self.makeapirequest.side_effect = (
+            self.mem_data_base,
+            self.definition_value,
+            self.presentation_value,
+            self.definition_value,
+        )
+
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
+
+        self.assertEqual(self.count[0].count, 1)
+        self.assertEqual(self.post_assignment_update.call_count, 0)
+        self.assertEqual(self.makeapirequestPost.call_count, 1)
+
     def test_update_config_not_found_with_assignment(self):
         """post_assignment_update should be called and makeapirequestPost should be called."""
 
@@ -266,6 +291,52 @@ class TestUpdateGroupPolicyConfiguration(unittest.TestCase):
         )
 
         self.assertEqual(self.post_assignment_update.call_count, 1)
+        self.assertEqual(self.makeapirequestPost.call_count, 2)
+
+    def test_update_with_no_diffs_no_assignment_custom(self):
+        """The count should be 3 and the makeapirequestPost should be called."""
+
+        self.repo_data_base["policyConfigurationIngestionType"] = "custom"
+        self.repo_data_base["definitionValues"][0]["definition"]["classType"] = "test"
+        self.repo_data_base["definitionValues"][0]["definition"][
+            "categoryPath"
+        ] = "test"
+        self.mem_data_base["value"][0]["policyConfigurationIngestionType"] = "custom"
+        self.definition_value["value"][0]["definition"]["classType"] = "test"
+        self.definition_value["value"][0]["definition"]["categoryPath"] = "test"
+        self.custom_category = {
+            "value": [
+                {
+                    "definitions": [
+                        {
+                            "id": "test",
+                            "categoryPath": "test",
+                            "classType": "test",
+                            "displayName": "test",
+                        }
+                    ]
+                }
+            ]
+        }
+
+        self.makeapirequest.side_effect = [
+            self.mem_data_base,
+            self.definition_value,
+            self.presentation_value,
+            self.custom_category,
+            self.definition_value,
+        ]
+
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=False,
+            report=False,
+            remove=False,
+        )
+
+        self.assertEqual(self.count[0].count, 3)
+        self.assertEqual(self.post_assignment_update.call_count, 0)
         self.assertEqual(self.makeapirequestPost.call_count, 2)
 
     def test_update_config_not_found_custom(self):
