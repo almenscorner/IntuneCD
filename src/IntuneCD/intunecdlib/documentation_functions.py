@@ -145,7 +145,10 @@ def is_base64(s):
     """Check if a string is a valid base64-encoded string"""
     try:
         # Attempt to decode the string
-        decoded = base64.b64decode(s)
+        if isinstance(s, str):
+            decoded = base64.b64decode(s.encode())
+        else:
+            decoded = base64.b64decode(s)
         # If decoding succeeds and the decoded bytes match the original string, it's a valid base64-encoded string
         return decoded == s.encode()
     except (TypeError, binascii.Error):
