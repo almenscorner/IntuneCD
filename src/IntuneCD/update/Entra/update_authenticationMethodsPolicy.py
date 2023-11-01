@@ -49,17 +49,17 @@ def update(path, token, report):
 
         if entra_data:
             print("-" * 90)
+            entra_data.pop("authenticationMethodConfigurations", None)
+            repo_data.pop("authenticationMethodConfigurations", None)
             diff = DeepDiff(
-                entra_data["registrationEnforcement"],
-                repo_data["registrationEnforcement"],
+                entra_data,
+                repo_data,
                 ignore_order=True,
             ).get("values_changed", {})
 
             # If any changed values are found, push them to Entra
             if diff and report is False:
-                request_data = json.dumps(
-                    {"registrationEnforcement": repo_data["registrationEnforcement"]}
-                )
+                request_data = json.dumps(repo_data)
                 makeapirequestPatch(
                     BASE_ENDPOINT,
                     token,
@@ -71,7 +71,7 @@ def update(path, token, report):
             diff_config = DiffSummary(
                 data=diff,
                 name="",
-                type="Authentication Methods",
+                type="Authentication Methods Policy",
             )
 
             diff_summary.append(diff_config)

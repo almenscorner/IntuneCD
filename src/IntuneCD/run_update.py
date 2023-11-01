@@ -118,6 +118,8 @@ def start():
             "entraRoamingSettings",
             "entraSecurityDefaults",
             "entraSSPR",
+            "entraAuthenticationMethodsConfigurations",
+            "entraDomains",
         ],
         nargs="+",
     )
