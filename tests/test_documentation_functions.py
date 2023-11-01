@@ -125,7 +125,7 @@ class TestDocumentationFunctions(unittest.TestCase):
             '{"@odata.type":"test","test":"test","name":"test","description":"test","testvals":"1,2","testbool":false,"testlist":["test"],"testlistdict":[{"test":{"test":{"test":["1"],"testb64":"dW5pY29ybg=="}}}],"testdict2":{"test":{"test":{"test":["1"]}}},"testdictlist":{"test":["a","b","c"]},"assignments":[{"intent":"apply","target":{"@odata.type":"#test","groupName":"test-group","deviceAndAppManagementAssignmentFilterId":"test-filter","deviceAndAppManagementAssignmentFilterType":"test"}}]}',
             encoding="utf-8",
         )
-        self.expected_data = "#test##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter|###Configuration|setting|value||------------|-------------------------------------------------------------------------------------||Odatatype|test||Test|test||Name|test||Testvals|1,2||Testbool|False||Testlist|test<br/>||Testlistdict|**test:**<ul>**test:**<ul><li>1</li></ul>**testb64:**dW5pY29ybg==<br/></ul><br/>||Testdict2|**test:**<ul>**test:**<ul>**test:**<ul><li>1</li></ul></ul></ul>||Testdictlist|**test:**<ul><li>a</li><li>b</li><li>c</li></ul>|"
+        self.expected_data = "##test###testDescription:test####Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter|####Configuration|setting|value||------------|-------------------------------------------------------------------------------------||Odatatype|test||Test|test||Name|test||Testvals|1,2||Testbool|False||Testlist|test<br/>||Testlistdict|**test:**<ul>**test:**<ul><li>1</li></ul>**testb64:**dW5pY29ybg==<br/></ul><br/>||Testdict2|**test:**<ul>**test:**<ul>**test:**<ul><li>1</li></ul></ul></ul>||Testdictlist|**test:**<ul><li>a</li><li>b</li><li>c</li></ul>|"
 
         document_configs(
             f"{self.directory.path}/config",
@@ -150,7 +150,7 @@ class TestDocumentationFunctions(unittest.TestCase):
             '{"test": "test", "name": "test", "description": "test", "settingsDelta": [{"test": "test", "definitionId": "deviceConfiguration--macOSEndpointProtectionConfiguration_fileVaultNumberOfTimesUserCanIgnore","valueJson": "1","value": 1}], "assignments": [{"intent": "apply", "target": {"@odata.type": "#test", "groupName": "test-group", "deviceAndAppManagementAssignmentFilterId": "test-filter", "deviceAndAppManagementAssignmentFilterType": "test"}}]}',
             encoding="utf-8",
         )
-        self.expected_data = "#intent##testDescription:test###Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter|###Configuration|setting|value||------------------------------------------|-----||Test|test||Name|test||FileVaultNumberOfTimesUserCanIgnore|1|"
+        self.expected_data = "##intent###testDescription:test####Assignments|intent|target|filtertype|filtername||------|----------|-----------|-----------||apply|test-group|test|test-filter|####Configuration|setting|value||------------------------------------------|-----||Test|test||Name|test||FileVaultNumberOfTimesUserCanIgnore|1|"
 
         document_management_intents(
             f"{self.directory.path}/intent/",
