@@ -25,15 +25,13 @@ def savebackup(path, output, token):
 
     results = {"config_count": 0, "outputs": []}
 
-    configpath = path + "/" + "Entra/External Collaboration Settings/"
+    configpath = path + "/" + "Entra/Authentication Flows Policy/"
     data = makeapirequest(ENDPOINT, token)
 
     if data:
         results["config_count"] += 1
         data = remove_keys(data)
-        print(
-            "Backing up Entra External Collaboration Settings Authentication Flow Policy"
-        )
+        print("Backing up Entra Authentication Flows Policy")
 
         # Get filename without illegal characters
         fname = "authentication_flows_policy"
