@@ -34,7 +34,7 @@ def savebackup(path, output, token):
         print("Backing up Entra Password Reset Policies")
 
         # Get filename without illegal characters
-        fname = "sspr"
+        fname = "password_reset_policies"
         # Save APNs as JSON or YAML depending on configured value in "-o"
         save_output(output, configpath, fname, data)
 
