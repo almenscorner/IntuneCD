@@ -5,7 +5,9 @@
 This module backs up Applications in Entra.
 """
 
+from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
 # Set MS Graph endpoint
@@ -28,15 +30,16 @@ def savebackup(path, output, token):
     data = makeapirequest(ENDPOINT, token)
 
     if data:
-        results["config_count"] += 1
-        data = data["value"]
-        print("Backing up Entra Applications")
+        for app in data["value"]:
+            results["config_count"] += 1
+            data = remove_keys(app)
+            print(f'Backing up Entra Application {app["displayName"]}')
 
-        # Get filename without illegal characters
-        fname = "applications"
-        # Save APNs as JSON or YAML depending on configured value in "-o"
-        save_output(output, configpath, fname, data)
+            # Get filename without illegal characters
+            fname = clean_filename(app["displayName"])
+            # Save APNs as JSON or YAML depending on configured value in "-o"
+            save_output(output, configpath, fname, data)
 
-        results["outputs"].append(fname)
+            results["outputs"].append(fname)
 
     return results
