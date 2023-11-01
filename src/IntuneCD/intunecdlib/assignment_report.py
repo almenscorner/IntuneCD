@@ -79,11 +79,7 @@ def get_group_report(path, output):
                     break
 
     def collect_groups(path):
-        exclude = set(
-            [
-                "__archive__",
-            ]
-        )
+        exclude = set(["__archive__", "Entra"])
         groups = []
         slash = "/"
         run_os = platform.uname().system
