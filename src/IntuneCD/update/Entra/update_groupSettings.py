@@ -5,8 +5,8 @@
 This module is used to update all Group Settings in Entra.
 """
 
-import glob
 import json
+import os
 
 from deepdiff import DeepDiff
 
@@ -29,51 +29,44 @@ def update(path, token, report):
 
     diff_summary = []
     # Set Group Settings path
-    configpath = path + "/Entra/Group Settings/" + "group_settings.*"
+    configpath = path + "/Entra/Group Settings/"
+    if os.path.exists(configpath):
+        for filename in os.listdir(configpath):
+            file = check_file(configpath, filename)
+            if file is False:
+                continue
+            with open(file, encoding="utf-8") as f:
+                repo_data = load_file(filename, f)
 
-    file = glob.glob(configpath)
-    # If group settings path exists, continue
-    if file:
-        # get all Group Settings
-        entra_data = makeapirequest(BASE_ENDPOINT, token)
+            entra_data = makeapirequest(BASE_ENDPOINT, token)
 
-        file = check_file(path + "/Entra/Group Settings/", file[0].split("/")[-1])
-        if file is False:
-            return diff_summary
-        # Check which format the file is saved as then open file, load data
-        # and set query parameter
-        with open(file, encoding="utf-8") as f:
-            repo_data = load_file(file, f)
+            if entra_data.get("value"):
+                print("-" * 90)
+                for entra_value in entra_data["value"]:
+                    if repo_data["templateId"] == entra_value["templateId"]:
+                        diff = DeepDiff(
+                            entra_value["values"],
+                            repo_data["values"],
+                            ignore_order=True,
+                        ).get("values_changed", {})
 
-        if entra_data.get("value"):
-            print("-" * 90)
-            for repo_setting, group_setting in zip(
-                repo_data["value"], entra_data["value"]
-            ):
-                if group_setting["id"] == repo_setting["id"]:
-                    diff = DeepDiff(
-                        group_setting["values"],
-                        repo_setting["values"],
-                        ignore_order=True,
-                    ).get("values_changed", {})
+                        # If any changed values are found, push them to Entra
+                        if diff and report is False:
+                            request_data = json.dumps(repo_data)
+                            makeapirequestPatch(
+                                BASE_ENDPOINT + "/" + entra_value["id"],
+                                token,
+                                q_param=None,
+                                jdata=request_data,
+                                status_code=204,
+                            )
 
-                    # If any changed values are found, push them to Entra
-                    if diff and report is False:
-                        request_data = json.dumps(repo_setting)
-                        makeapirequestPatch(
-                            BASE_ENDPOINT + "/" + repo_setting["id"],
-                            token,
-                            q_param=None,
-                            jdata=request_data,
-                            status_code=204,
+                        diff_config = DiffSummary(
+                            data=diff,
+                            name=repo_data["displayName"],
+                            type="Group Settings",
                         )
 
-                    diff_config = DiffSummary(
-                        data=diff,
-                        name=repo_setting["displayName"],
-                        type="Group Settings",
-                    )
-
-                    diff_summary.append(diff_config)
+                        diff_summary.append(diff_config)
 
     return diff_summary
