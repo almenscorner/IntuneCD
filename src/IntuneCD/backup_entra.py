@@ -30,6 +30,11 @@ def backup_entra(results, path, output, token, azure_token, args, exclude):
 
         results.append(savebackup(path, output, token))
 
+    if "entraDomains" not in exclude:
+        from .backup.Entra.backup_domains import savebackup
+
+        results.append(savebackup(path, output, token))
+
     if "entraExternalIdentitiesPolicy" not in exclude:
         from .backup.Entra.backup_externalIdentitiesPolicy import savebackup
 
@@ -54,11 +59,6 @@ def backup_entra(results, path, output, token, azure_token, args, exclude):
         from .backup.Entra.backup_securityDefaults import savebackup
 
         results.append(savebackup(path, output, token))
-
-    if "entraUserSettings" not in exclude:
-        from .backup.Entra.backup_userSettings import savebackup
-
-        results.append(savebackup(path, output, azure_token))
 
     if "entraSSPR" not in exclude:
         from .backup.Entra.backup_SSPR import savebackup

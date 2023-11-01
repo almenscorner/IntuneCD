@@ -12,8 +12,13 @@ def update_entra(diff_summary, path, token, azure_token, report, args, exclude):
             "***Device Registration Policy is only available with interactive auth***"
         )
 
-    if "entraAuthenticationMethods" not in exclude:
-        from .update.Entra.update_authenticationMethods import update
+    if "entraAuthenticationMethodsPolicy" not in exclude:
+        from .update.Entra.update_authenticationMethodsPolicy import update
+
+        diff_summary.append(update(path, token, report))
+
+    if "entraAuthenticationMethodsConfigurations" not in exclude:
+        from .update.Entra.update_authenticationMethodsConfigurations import update
 
         diff_summary.append(update(path, token, report))
 
@@ -24,6 +29,11 @@ def update_entra(diff_summary, path, token, azure_token, report, args, exclude):
 
     if "entraAuthenticationFlowsPolicy" not in exclude:
         from .update.Entra.update_authenticationFlowsPolicy import update
+
+        diff_summary.append(update(path, token, report))
+
+    if "entraDomains" not in exclude:
+        from .update.Entra.update_domains import update
 
         diff_summary.append(update(path, token, report))
 
