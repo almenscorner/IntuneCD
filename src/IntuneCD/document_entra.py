@@ -27,9 +27,39 @@ def document_entra(configpath, outpath, maxlength, split, cleanup, decode):
     )
 
     document_configs(
+        f"{configpath}/Entra/Authentication Flows Policy",
+        outpath,
+        "Authentication Flows Policy",
+        maxlength,
+        split,
+        cleanup,
+        decode,
+    )
+
+    document_configs(
+        f"{configpath}/Entra/Authorization Policy",
+        outpath,
+        "Authorization Policy",
+        maxlength,
+        split,
+        cleanup,
+        decode,
+    )
+
+    document_configs(
         f"{configpath}/Entra/Device Registration Policy",
         outpath,
         "Device Registration Policy",
+        maxlength,
+        split,
+        cleanup,
+        decode,
+    )
+
+    document_configs(
+        f"{configpath}/Entra/Domains",
+        outpath,
+        "Domains",
         maxlength,
         split,
         cleanup,
@@ -80,16 +110,6 @@ def document_entra(configpath, outpath, maxlength, split, cleanup, decode):
         f"{configpath}/Entra/Security Defaults",
         outpath,
         "Security Defaults",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    document_configs(
-        f"{configpath}/Entra/User Settings",
-        outpath,
-        "User Settings",
         maxlength,
         split,
         cleanup,
