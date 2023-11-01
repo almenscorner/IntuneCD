@@ -198,6 +198,7 @@ def start():
         args.localauth,
         args.certauth,
         args.interactiveauth,
+        args.entrabackup,
         tenant="DEV",
     )
 

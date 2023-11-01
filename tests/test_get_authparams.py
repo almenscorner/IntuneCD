@@ -69,6 +69,7 @@ class TestGetAuth(unittest.TestCase):
                 localauth=None,
                 certauth=None,
                 interactiveauth=None,
+                entra=False,
                 tenant="DEV",
             )
             self.assertEqual(result, "token")
@@ -88,6 +89,7 @@ class TestGetAuth(unittest.TestCase):
                 localauth=None,
                 certauth=None,
                 interactiveauth=None,
+                entra=False,
                 tenant="PROD",
             )
             self.assertEqual(result, "token")
@@ -99,6 +101,7 @@ class TestGetAuth(unittest.TestCase):
             localauth=self.auth_dev_json,
             certauth=None,
             interactiveauth=None,
+            entra=False,
             tenant="DEV",
         )
         self.assertEqual(result, "token")
@@ -110,6 +113,7 @@ class TestGetAuth(unittest.TestCase):
             localauth=self.auth_prod_json,
             certauth=None,
             interactiveauth=None,
+            entra=False,
             tenant="PROD",
         )
         self.assertEqual(result, "token")
@@ -125,6 +129,7 @@ class TestGetAuth(unittest.TestCase):
                 localauth=None,
                 certauth=None,
                 interactiveauth=None,
+                entra=False,
                 tenant=None,
             )
             self.assertEqual(result, "token")
@@ -136,6 +141,7 @@ class TestGetAuth(unittest.TestCase):
             localauth=self.auth_json,
             certauth=None,
             interactiveauth=None,
+            entra=False,
             tenant=None,
         )
         self.assertEqual(result, "token")
@@ -151,6 +157,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=None,
                     interactiveauth=None,
+                    entra=False,
                     tenant="DEV",
                 )
 
@@ -165,6 +172,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=None,
                     interactiveauth=None,
+                    entra=False,
                     tenant="PROD",
                 )
 
@@ -177,6 +185,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=None,
                     interactiveauth=None,
+                    entra=False,
                     tenant=None,
                 )
 
@@ -192,7 +201,12 @@ class TestGetAuth(unittest.TestCase):
             },
         ):
             result = getAuth(
-                None, localauth=None, certauth=True, interactiveauth=None, tenant=None
+                None,
+                localauth=None,
+                certauth=True,
+                interactiveauth=None,
+                tenant=None,
+                entra=False,
             )
             self.assertEqual(result, "token")
 
@@ -208,6 +222,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=True,
                     interactiveauth=None,
+                    entra=False,
                     tenant=None,
                 )
 
@@ -223,7 +238,12 @@ class TestGetAuth(unittest.TestCase):
             },
         ):
             result = getAuth(
-                None, localauth=None, certauth=None, interactiveauth=True, tenant=None
+                None,
+                localauth=None,
+                certauth=None,
+                interactiveauth=True,
+                tenant=None,
+                entra=False,
             )
             self.assertEqual(result, "token")
 
@@ -239,6 +259,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=None,
                     interactiveauth=True,
+                    entra=False,
                     tenant=None,
                 )
 
