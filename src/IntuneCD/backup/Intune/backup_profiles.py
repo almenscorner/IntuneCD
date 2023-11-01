@@ -20,7 +20,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfiguratio
 
 
 # Get all Device Configurations and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id):
+def savebackup(path, output, exclude, token, prefix, append_id, ignore_omasettings):
     """
     Saves all Device Configurations in Intune to a JSON or YAML file and custom macOS/iOS to .mobileconfig.
 
@@ -90,27 +90,31 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         ] == "#microsoft.graph.windows10CustomConfiguration" and profile.get(
             "omaSettings"
         ):
-            omas = []
-            for setting in profile["omaSettings"]:
-                if setting.get("isEncrypted"):
-                    decoded_oma = {}
-                    decoded_oma["@odata.type"] = setting["@odata.type"]
-                    decoded_oma["displayName"] = setting["displayName"]
-                    decoded_oma["description"] = setting["description"]
-                    decoded_oma["omaUri"] = setting["omaUri"]
-                    decoded_oma["isEncrypted"] = False
-                    decoded_oma["secretReferenceValueId"] = None
-                    oma_value = makeapirequest(
-                        ENDPOINT
-                        + "/"
-                        + pid
-                        + "/getOmaSettingPlainTextValue(secretReferenceValueId='"
-                        + setting["secretReferenceValueId"]
-                        + "')",
-                        token,
-                    )
-                    decoded_oma["value"] = oma_value
-                    omas.append(decoded_oma)
+            if not ignore_omasettings:
+                omas = []
+                for setting in profile["omaSettings"]:
+                    if setting.get("isEncrypted"):
+                        decoded_oma = {}
+                        decoded_oma["@odata.type"] = setting["@odata.type"]
+                        decoded_oma["displayName"] = setting["displayName"]
+                        decoded_oma["description"] = setting["description"]
+                        decoded_oma["omaUri"] = setting["omaUri"]
+                        decoded_oma["isEncrypted"] = False
+                        decoded_oma["secretReferenceValueId"] = None
+                        oma_value = makeapirequest(
+                            ENDPOINT
+                            + "/"
+                            + pid
+                            + "/getOmaSettingPlainTextValue(secretReferenceValueId='"
+                            + setting["secretReferenceValueId"]
+                            + "')",
+                            token,
+                        )
+                        decoded_oma["value"] = oma_value
+                        omas.append(decoded_oma)
+
+            else:
+                omas = profile["omaSettings"]
 
             profile["omaSettings"] = omas
 

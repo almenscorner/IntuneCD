@@ -133,6 +133,7 @@ def start():
             "entraSecurityDefaults",
             "entraSSPR",
             "entraUserSettings",
+            "entraDomains",
         ],
         nargs="+",
     )
@@ -165,6 +166,11 @@ def start():
     parser.add_argument(
         "--entrabackup",
         help="When set, backs up Entra configurations",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--ignore-omasettings",
+        help="When set, ignores encrypted OMA Settings configuration type. Useful if you only want read permissions to Graph API.",
         action="store_true",
     )
 

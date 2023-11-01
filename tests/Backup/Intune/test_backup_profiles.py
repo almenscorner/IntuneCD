@@ -65,7 +65,13 @@ class TestBackupCustomProfiles(unittest.TestCase):
         }
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+            self.directory.path,
+            "json",
+            self.token,
+            self.exclude,
+            "",
+            self.append_id,
+            False,
         )
 
         self.assertTrue(
@@ -96,7 +102,13 @@ class TestBackupCustomProfiles(unittest.TestCase):
         }
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+            self.directory.path,
+            "json",
+            self.token,
+            self.exclude,
+            "",
+            self.append_id,
+            False,
         )
 
         self.assertTrue(
@@ -142,7 +154,13 @@ class TestBackupCustomProfiles(unittest.TestCase):
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+            self.directory.path,
+            "json",
+            self.token,
+            self.exclude,
+            "",
+            self.append_id,
+            False,
         )
 
         self.assertTrue(
@@ -183,7 +201,13 @@ class TestBackupCustomProfiles(unittest.TestCase):
         self.makeapirequest.side_effect = self.profile, self.oma_values
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+            self.directory.path,
+            "json",
+            self.token,
+            self.exclude,
+            "",
+            self.append_id,
+            False,
         )
 
         self.assertTrue(
@@ -241,7 +265,13 @@ class TestBackupStandardProfiles(unittest.TestCase):
         }
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, self.exclude, "", self.append_id
+            self.directory.path,
+            "json",
+            self.token,
+            self.exclude,
+            "",
+            self.append_id,
+            False,
         )
 
         self.assertTrue(
@@ -261,6 +291,7 @@ class TestBackupStandardProfiles(unittest.TestCase):
             self.token,
             "test1",
             self.append_id,
+            False,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -277,7 +308,7 @@ class TestBackupStandardProfiles(unittest.TestCase):
         }
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
+            self.directory.path, "json", self.exclude, self.token, "", True, False
         )
 
         self.assertTrue(

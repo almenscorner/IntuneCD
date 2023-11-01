@@ -51,7 +51,11 @@ def backup_intune(results, path, output, exclude, token, prefix, append_id, args
     if "Profiles" not in exclude:
         from .backup.Intune.backup_profiles import savebackup
 
-        results.append(savebackup(path, output, exclude, token, prefix, append_id))
+        results.append(
+            savebackup(
+                path, output, exclude, token, prefix, append_id, args.ignore_omasettings
+            )
+        )
 
     if "GPOConfigurations" not in exclude:
         from .backup.Intune.backup_groupPolicyConfiguration import savebackup
