@@ -5,6 +5,7 @@
 This module backs up Group settings in Entra.
 """
 
+from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_request import makeapirequest
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
@@ -29,15 +30,16 @@ def savebackup(path, output, token):
     data = makeapirequest(ENDPOINT, token)
 
     if data:
-        results["config_count"] += 1
-        data = remove_keys(data)
-        print("Backing up Entra Group Settings")
+        for setting in data["value"]:
+            results["config_count"] += 1
+            data = remove_keys(setting)
+            print(f"Backing up Entra Group Setting {setting['displayName']}")
 
-        # Get filename without illegal characters
-        fname = "group_settings"
-        # Save APNs as JSON or YAML depending on configured value in "-o"
-        save_output(output, configpath, fname, data)
+            # Get filename without illegal characters
+            fname = clean_filename(setting["displayName"])
+            # Save APNs as JSON or YAML depending on configured value in "-o"
+            save_output(output, configpath, fname, data)
 
-        results["outputs"].append(fname)
+            results["outputs"].append(fname)
 
     return results
