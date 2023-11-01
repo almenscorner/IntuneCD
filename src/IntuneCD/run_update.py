@@ -29,6 +29,8 @@ from io import StringIO
 
 from .intunecdlib.get_accesstoken import obtain_azure_token
 from .intunecdlib.get_authparams import getAuth
+from .update_entra import update_entra
+from .update_intune import update_intune
 
 REPO_DIR = os.environ.get("REPO_DIR")
 
@@ -106,6 +108,16 @@ def start():
             "DeviceManagementSettings",
             "CustomAttributes",
             "DeviceCategories",
+            "entraAuthenticationFlowsPolicy",
+            "entraAuthenticationMethods",
+            "entraAuthorizationPolicy",
+            "entraB2BPolicy",
+            "entraDeviceRegistrationPolicy",
+            "entraExternalIdentitiesPolicy",
+            "entraGroupSettings",
+            "entraRoamingSettings",
+            "entraSecurityDefaults",
+            "entraSSPR",
         ],
         nargs="+",
     )
@@ -180,210 +192,22 @@ def start():
         if args.entraupdate:
             print("***Entra update***")
 
-            # Payloads that uses Graph API's
-
-            if args.interactiveauth:
-                from .update.Entra.update_deviceRegistrationPolicy import update
-
-                diff_summary.append(update(path, token, report))
-            else:
-                print(
-                    "***Device Registration Policy is only available with interactive auth***"
-                )
-
-            from .update.Entra.update_authenticationMethods import update
-
-            diff_summary.append(update(path, token, report))
-
-            from .update.Entra.update_authorizationPolicy import update
-
-            diff_summary.append(update(path, token, report))
-
-            from .update.Entra.update_authenticationFlowsPolicy import update
-
-            diff_summary.append(update(path, token, report))
-
-            from .update.Entra.update_externalIdentitiesPolicy import update
-
-            diff_summary.append(update(path, token, report))
-
-            from .update.Entra.update_b2bPolicy import update
-
-            diff_summary.append(update(path, azure_token, report))
-
-            from .update.Entra.update_groupSettings import update
-
-            diff_summary.append(update(path, token, report))
-
-            from .update.Entra.update_securityDefaults import update
-
-            diff_summary.append(update(path, token, report))
-
-            # Payloads that uses internal API's
-
-            from .update.Entra.update_roamingSettings import update
-
-            diff_summary.append(update(path, azure_token, report))
-
-            from .update.Entra.update_SSPR import update
-
-            diff_summary.append(update(path, azure_token, report))
+            update_entra(diff_summary, path, token, azure_token, report, args, exclude)
 
             print("-" * 90)
             print("***Intune update***")
 
-        if "AppConfigurations" not in exclude:
-            from .update.Intune.update_appConfiguration import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "AppProtection" not in exclude:
-            from .update.Intune.update_appProtection import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "Compliance" not in exclude:
-            from .update.Intune.update_compliance import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "DeviceManagementSettings" not in exclude and args.interactiveauth is True:
-            from .update.Intune.update_deviceManagementSettings import update
-
-            diff_summary.append(update(path, token, report))
-        else:
-            print("-" * 90)
-            print(
-                "***Device Management Settings is only available with interactive auth***"
-            )
-
-        if "DeviceCategories" not in exclude:
-            from .update.Intune.update_deviceCategories import update
-
-            diff_summary.append(update(path, token, report, remove))
-
-        if "NotificationTemplate" not in exclude:
-            from .update.Intune.update_notificationTemplate import update
-
-            diff_summary.append(update(path, token, report, remove))
-
-        if "Profiles" not in exclude:
-            from .update.Intune.update_profiles import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "GPOConfigurations" not in exclude:
-            from .update.Intune.update_groupPolicyConfiguration import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "AppleEnrollmentProfile" not in exclude:
-            from .update.Intune.update_appleEnrollmentProfile import update
-
-            diff_summary.append(update(path, token, report))
-
-        if "WindowsEnrollmentProfile" not in exclude:
-            from .update.Intune.update_windowsEnrollmentProfile import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "EnrollmentStatusPage" not in exclude:
-            from .update.Intune.update_enrollmentStatusPage import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "EnrollmentConfigurations" not in exclude:
-            from .update.Intune.update_enrollmentConfigurations import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "Filters" not in exclude:
-            from .update.Intune.update_assignmentFilter import update
-
-            diff_summary.append(update(path, token, report))
-
-        if "Intents" not in exclude:
-            from .update.Intune.update_managementIntents import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "ProactiveRemediation" not in exclude:
-            from .update.Intune.update_proactiveRemediation import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "PowershellScripts" not in exclude:
-            from .update.Intune.update_powershellScripts import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "ShellScripts" not in exclude:
-            from .update.Intune.update_shellScripts import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "CustomAttribute" not in exclude:
-            from .update.Intune.update_customAttributeShellScript import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "ConfigurationPolicies" not in exclude:
-            from .update.Intune.update_configurationPolicies import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "ConditionalAccess" not in exclude:
-            from .update.Intune.update_conditionalAccess import update
-
-            diff_count += update(path, token, report, remove)
-
-        if "WindowsDriverUpdateProfiles" not in exclude:
-            from .update.Intune.update_windowsDriverUpdates import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "windowsFeatureUpdates" not in exclude:
-            from .update.Intune.update_windowsFeatureUpdates import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
-            )
-
-        if "windowsQualityUpdates" not in exclude:
-            from .update.Intune.update_windowsQualityUpdates import update
-
-            diff_summary.append(
-                update(path, token, assignment, report, create_groups, remove)
+            update_intune(
+                diff_summary,
+                diff_count,
+                path,
+                token,
+                assignment,
+                report,
+                create_groups,
+                remove,
+                exclude,
+                args,
             )
 
         for sum in diff_summary:
