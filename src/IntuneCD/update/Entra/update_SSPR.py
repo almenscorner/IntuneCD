@@ -29,7 +29,7 @@ def update(path, token, report):
 
     diff_summary = []
     # Set SSPR Settings path
-    configpath = path + "/Entra/Password Reset Policies/" + "sspr.*"
+    configpath = path + "/Entra/Password Reset Policies/" + "password_reset_policies.*"
 
     file = glob.glob(configpath)
     # If SSPR path exists, continue

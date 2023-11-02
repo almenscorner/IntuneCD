@@ -29,9 +29,7 @@ def update(path, token, report):
 
     diff_summary = []
     # Set External Collaboration Settings path
-    configpath = (
-        path + "/Entra/External Collaboration Settings/" + "authorization_policy.*"
-    )
+    configpath = path + "/Entra/Authorization Policy/" + "authorization_policy.*"
 
     file = glob.glob(configpath)
     # If authorization policy path exists, continue
@@ -39,9 +37,7 @@ def update(path, token, report):
         # get all External Collaboration Settings
         entra_data = makeapirequest(BASE_ENDPOINT, token)
 
-        file = check_file(
-            path + "/Entra/External Collaboration Settings/", file[0].split("/")[-1]
-        )
+        file = check_file(path + "/Entra/Authorization Policy/", file[0].split("/")[-1])
         if file is False:
             return diff_summary
         # Check which format the file is saved as then open file, load data
