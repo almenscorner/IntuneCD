@@ -24,6 +24,12 @@ disable=
     unnecessary-lambda-assignment,
     wrong-import-position,
 ignore=
+    backup_intune.py,
+    backup_entra.py,
+    update_intune.py,
+    update_entra.py,
     run_backup.py,
     run_update.py,
+    document_intune.py,
+    document_entra.py,
     run_documentation.py,

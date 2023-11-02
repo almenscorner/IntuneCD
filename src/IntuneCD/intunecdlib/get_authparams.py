@@ -15,7 +15,7 @@ from .get_accesstoken import (
 )
 
 
-def getAuth(mode, localauth, certauth, interactiveauth, tenant):
+def getAuth(mode, localauth, certauth, interactiveauth, entra, tenant):
     """
     This function authenticates to MS Graph and returns the access token.
 
@@ -52,10 +52,15 @@ def getAuth(mode, localauth, certauth, interactiveauth, tenant):
                 tenant_TENANT_NAME = auth_dict["params"][tenant + "_TENANT_NAME"]
                 tenant_CLIENT_ID = auth_dict["params"][tenant + "_CLIENT_ID"]
                 tenant_CLIENT_SECRET = auth_dict["params"][tenant + "_CLIENT_SECRET"]
+                if entra:
+                    os.environ["TENANT_ID"] = auth_dict["params"][tenant + "_TENANT_ID"]
+                    os.environ["KEY"] = auth_dict["params"].get("KEY")
             else:
                 tenant_TENANT_NAME = os.environ.get(tenant + "_TENANT_NAME")
                 tenant_CLIENT_ID = os.environ.get(tenant + "_CLIENT_ID")
                 tenant_CLIENT_SECRET = os.environ.get(tenant + "_CLIENT_SECRET")
+                if entra:
+                    os.environ["TENANT_ID"] = os.environ.get(tenant + "_TENANT_ID")
             if not all([tenant_TENANT_NAME, tenant_CLIENT_ID, tenant_CLIENT_SECRET]):
                 raise ValueError(
                     "One or more os.environ variables for " + tenant + " not set"
@@ -72,10 +77,15 @@ def getAuth(mode, localauth, certauth, interactiveauth, tenant):
                 TENANT_NAME = auth_dict["params"]["TENANT_NAME"]
                 CLIENT_ID = auth_dict["params"]["CLIENT_ID"]
                 CLIENT_SECRET = auth_dict["params"]["CLIENT_SECRET"]
+                if entra:
+                    os.environ["TENANT_ID"] = auth_dict["params"]["TENANT_ID"]
+                    os.environ["KEY"] = auth_dict["params"].get("KEY")
             else:
                 TENANT_NAME = os.environ.get("TENANT_NAME")
                 CLIENT_ID = os.environ.get("CLIENT_ID")
                 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+                if entra:
+                    os.environ["TENANT_ID"] = os.environ.get("TENANT_ID")
             if not all([TENANT_NAME, CLIENT_ID, CLIENT_SECRET]):
                 raise ValueError("One or more os.environ variables not set")
 

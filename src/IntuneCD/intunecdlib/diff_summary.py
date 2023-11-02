@@ -46,7 +46,10 @@ class DiffSummary:
             self.diffs.append(vals)
 
         if self.diffs and not self.message:
-            print(f"Updating {self.type}: {self.name}, values changed:")
+            if self.name:
+                print(f"Updating {self.type}: {self.name}, values changed:")
+            else:
+                print(f"Updating {self.type}, values changed:")
             for item in self.diffs:
                 print(
                     f"Setting: {item['setting']}, New Value: {item['new_val']}, Old Value: {item['old_val']}"

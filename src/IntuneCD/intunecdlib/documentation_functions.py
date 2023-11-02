@@ -145,7 +145,10 @@ def is_base64(s):
     """Check if a string is a valid base64-encoded string"""
     try:
         # Attempt to decode the string
-        decoded = base64.b64decode(s)
+        if isinstance(s, str):
+            decoded = base64.b64decode(s.encode())
+        else:
+            decoded = base64.b64decode(s)
         # If decoding succeeds and the decoded bytes match the original string, it's a valid base64-encoded string
         return decoded == s.encode()
     except (TypeError, binascii.Error):
@@ -264,6 +267,18 @@ def clean_list(data, decode):
     return values
 
 
+def write_type_header(split, outpath, header):
+    """
+    This function writes the header to the Markdown document.
+
+    :param outpath: The path to save the Markdown document to
+    :param header: Header of the configuration being documented
+    """
+    if not split:
+        with open(outpath, "a", encoding="utf-8") as md:
+            md.write("# " + header + "\n")
+
+
 def document_configs(configpath, outpath, header, max_length, split, cleanup, decode):
     """
     This function documents the configuration.
@@ -282,7 +297,7 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup, de
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
         with open(outpath, "a", encoding="utf-8") as md:
-            md.write("# " + header + "\n")
+            md.write("## " + header + "\n")
 
         pattern = configpath + "*/*"
         for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
@@ -345,15 +360,26 @@ def document_configs(configpath, outpath, header, max_length, split, cleanup, de
                 # Write data to file
                 with open(outpath, "a", encoding="utf-8") as md:
                     if "displayName" in repo_data:
-                        md.write("## " + repo_data["displayName"] + "\n")
+                        md.write("### " + repo_data["displayName"] + "\n")
                     if "name" in repo_data:
-                        md.write("## " + repo_data["name"] + "\n")
+                        md.write("### " + repo_data["name"] + "\n")
+                    if "displayName" not in repo_data and "name" not in repo_data:
+                        # Remove the file extension
+                        filename_without_ext = os.path.splitext(filename)[0]
+                        # Get basename
+                        filename_without_ext = os.path.basename(filename_without_ext)
+                        # Replace underscores with spaces
+                        formatted_filename = filename_without_ext.replace(
+                            "_", " "
+                        ).title()
+                        if formatted_filename != header:
+                            md.write("### " + formatted_filename + "\n")
                     if description:
                         md.write(f"Description: {escape_markdown(description)} \n")
                     if assignments_table:
-                        md.write("### Assignments \n")
+                        md.write("#### Assignments \n")
                         md.write(str(assignments_table) + "\n")
-                    md.write("### Configuration \n")
+                    md.write("#### Configuration \n")
                     md.write(str(config_table) + "\n")
 
 
@@ -373,7 +399,7 @@ def document_management_intents(configpath, outpath, header, split):
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
         with open(outpath, "a", encoding="utf-8") as md:
-            md.write("# " + header + "\n")
+            md.write("## " + header + "\n")
 
         pattern = configpath + "*/*"
         for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
@@ -455,15 +481,15 @@ def document_management_intents(configpath, outpath, header, split):
                 # Write data to file
                 with open(outpath, "a", encoding="utf-8") as md:
                     if "displayName" in repo_data:
-                        md.write("## " + repo_data["displayName"] + "\n")
+                        md.write("### " + repo_data["displayName"] + "\n")
                     if "name" in repo_data:
-                        md.write("## " + repo_data["name"] + "\n")
+                        md.write("### " + repo_data["name"] + "\n")
                     if description:
                         md.write(f"Description: {escape_markdown(description)} \n")
                     if assignments_table:
-                        md.write("### Assignments \n")
+                        md.write("#### Assignments \n")
                         md.write(str(assignments_table) + "\n")
-                    md.write("### Configuration \n")
+                    md.write("#### Configuration \n")
                     md.write(str(config_table) + "\n")
 
 
