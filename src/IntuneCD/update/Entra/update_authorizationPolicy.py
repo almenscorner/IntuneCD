@@ -45,7 +45,7 @@ def update(path, token, report):
         with open(file, encoding="utf-8") as f:
             repo_data = load_file(file, f)
 
-        if entra_data.get("value"):
+        if entra_data and entra_data.get("value"):
             print("-" * 90)
             diff = DeepDiff(
                 entra_data["value"][0],

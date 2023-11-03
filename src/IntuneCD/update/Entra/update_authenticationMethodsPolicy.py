@@ -50,7 +50,10 @@ def update(path, token, report):
         if entra_data:
             print("-" * 90)
             entra_data.pop("authenticationMethodConfigurations", None)
+            entra_data.pop("policyMigrationState", None)
             repo_data.pop("authenticationMethodConfigurations", None)
+            repo_data.pop("policyMigrationState", None)
+
             diff = DeepDiff(
                 entra_data,
                 repo_data,
