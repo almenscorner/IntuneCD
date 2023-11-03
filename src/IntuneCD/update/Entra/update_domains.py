@@ -42,7 +42,7 @@ def update(path, token, report):
                 BASE_ENDPOINT, token, q_param=f"?$filter=id eq '{repo_data['id']}'"
             )
 
-            if entra_data.get("value"):
+            if entra_data and entra_data.get("value"):
                 print("-" * 90)
                 diff = DeepDiff(
                     entra_data["value"][0],

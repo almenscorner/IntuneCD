@@ -40,10 +40,10 @@ def update(path, token, report):
 
             entra_data = makeapirequest(BASE_ENDPOINT, token)
 
-            if entra_data.get("value"):
-                print("-" * 90)
+            if entra_data and entra_data.get("value"):
                 for entra_value in entra_data["value"]:
                     if repo_data["templateId"] == entra_value["templateId"]:
+                        print("-" * 90)
                         diff = DeepDiff(
                             entra_value["values"],
                             repo_data["values"],
