@@ -47,6 +47,8 @@ def update(path, token, report):
 
         if entra_data:
             print("-" * 90)
+            entra_data.pop("securityDefaultsUpsell", None)
+            repo_data.pop("securityDefaultsUpsell", None)
             diff = DeepDiff(
                 entra_data,
                 repo_data,
