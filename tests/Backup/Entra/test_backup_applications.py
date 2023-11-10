@@ -63,7 +63,7 @@ class TestBackupApplications(unittest.TestCase):
             data = json.dumps(yaml.safe_load(f))
             saved_data = json.loads(data)
 
-        self.assertTrue(Path(f"{self.directory.path}/Entra/applications").exists())
+        self.assertTrue(Path(f"{self.directory.path}/Entra/Applications").exists())
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, self.count["config_count"])
 
@@ -76,7 +76,7 @@ class TestBackupApplications(unittest.TestCase):
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             saved_data = json.load(f)
 
-        self.assertTrue(Path(f"{self.directory.path}/Entra/applications").exists())
+        self.assertTrue(Path(f"{self.directory.path}/Entra/Applications").exists())
         self.assertEqual(self.expected_data, saved_data)
         self.assertEqual(1, self.count["config_count"])
 
