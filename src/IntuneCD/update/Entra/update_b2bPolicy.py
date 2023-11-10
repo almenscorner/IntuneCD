@@ -7,6 +7,7 @@ This module is used to update all b2bpolicy Settings in Entra.
 
 import glob
 import json
+import os
 
 from deepdiff import DeepDiff
 
@@ -38,7 +39,13 @@ def update(path, token, report):
         entra_data = make_azure_request(token, ENDPOINT)
 
         file = check_file(
-            path + "/Entra/External Collaboration Settings/", file[0].split("/")[-1]
+            configpath,
+            os.path.join(
+                path,
+                "Entra",
+                "External Collaboration Settings",
+                file[0].split(os.sep)[-1],
+            ),
         )
         if file is False:
             return diff_summary

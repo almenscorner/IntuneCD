@@ -7,6 +7,7 @@ This module is used to update all Group Settings in Entra.
 
 import glob
 import json
+import os
 
 from deepdiff import DeepDiff
 
@@ -37,7 +38,10 @@ def update(path, token, report):
         # get all Group Settings
         entra_data = makeapirequest(ENDPOINT, token)
 
-        file = check_file(path + "/Entra/Security Defaults/", file[0].split("/")[-1])
+        file = check_file(
+            configpath,
+            os.path.join(path, "Entra", "Security Defaults", file[0].split(os.sep)[-1]),
+        )
         if file is False:
             return diff_summary
         # Check which format the file is saved as then open file, load data
