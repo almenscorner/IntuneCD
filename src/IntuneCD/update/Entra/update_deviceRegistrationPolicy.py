@@ -7,6 +7,7 @@ This module is used to update all Device Registration Policy in Entra.
 
 import glob
 import json
+import os
 
 from deepdiff import DeepDiff
 
@@ -40,7 +41,13 @@ def update(path, token, report):
         entra_data = makeapirequest(BASE_ENDPOINT, token)
 
         file = check_file(
-            path + "/Entra/Device Registration Policy/", file[0].split("/")[-1]
+            configpath,
+            os.path.join(
+                path,
+                "Entra",
+                "Device Registration Policy",
+                file[0].split(os.sep)[-1],
+            ),
         )
         if file is False:
             return diff_summary
