@@ -200,18 +200,18 @@ def start():
             print("-" * 90)
             print("***Intune update***")
 
-            update_intune(
-                diff_summary,
-                diff_count,
-                path,
-                token,
-                assignment,
-                report,
-                create_groups,
-                remove,
-                exclude,
-                args,
-            )
+        update_intune(
+            diff_summary,
+            diff_count,
+            path,
+            token,
+            assignment,
+            report,
+            create_groups,
+            remove,
+            exclude,
+            args,
+        )
 
         for sum in diff_summary:
             for config in sum:
