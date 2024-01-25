@@ -45,7 +45,10 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
         results["config_count"] += 1
 
-        if "assignments" not in exclude:
+        if (
+            "assignments" not in exclude
+            and profile["@odata.type"] != "#microsoft.graph.defaultManagedAppProtection"
+        ):
             assignments = get_object_assignment(profile["id"], assignment_responses)
             if assignments:
                 profile["assignments"] = assignments
