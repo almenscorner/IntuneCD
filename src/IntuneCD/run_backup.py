@@ -174,6 +174,11 @@ def start():
         help="When set, ignores encrypted OMA Settings configuration type. Useful if you only want read permissions to Graph API.",
         action="store_true",
     )
+    parser.add_argument(
+        "--activationlock",
+        help="When set, backs up Activation Lock Bypass Codes",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
