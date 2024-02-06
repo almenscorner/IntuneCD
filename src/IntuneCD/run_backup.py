@@ -134,6 +134,7 @@ def start():
             "entraSSPR",
             "entraUserSettings",
             "entraDomains",
+            "Roles",
         ],
         nargs="+",
     )
