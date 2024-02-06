@@ -9,6 +9,17 @@ def document_intune(configpath, outpath, maxlength, split, cleanup, decode):
     """
     This function is used to document Intune configuration.
     """
+
+    document_configs(
+        f"{configpath}/Roles",
+        outpath,
+        "Roles",
+        maxlength,
+        split,
+        cleanup,
+        decode,
+    )
+
     # Document App Configuration
     document_configs(
         f"{configpath}/App Configuration",

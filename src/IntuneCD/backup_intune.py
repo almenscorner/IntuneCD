@@ -3,6 +3,12 @@ def backup_intune(results, path, output, exclude, token, prefix, append_id, args
     """
     Imports all the backup functions and runs them
     """
+
+    if args.activationlock:
+        from .backup.Intune.backup_activationLock import savebackup
+
+        results.append(savebackup(path, output, token))
+
     if "AppConfigurations" not in exclude:
         from .backup.Intune.backup_appConfiguration import savebackup
 
@@ -161,3 +167,8 @@ def backup_intune(results, path, output, exclude, token, prefix, append_id, args
         from .backup.Intune.backup_windowsQualityUpdates import savebackup
 
         results.append(savebackup(path, output, exclude, token, prefix, append_id))
+
+    if "Roles" not in exclude:
+        from .backup.Intune.backup_roles import savebackup
+
+        results.append(savebackup(path, output, exclude, token, append_id))
