@@ -108,6 +108,7 @@ def start():
             "DeviceManagementSettings",
             "CustomAttributes",
             "DeviceCategories",
+            "Roles",
             "entraAuthenticationFlowsPolicy",
             "entraAuthenticationMethods",
             "entraAuthorizationPolicy",
