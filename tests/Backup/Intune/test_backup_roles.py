@@ -26,34 +26,54 @@ class TestBackupRoles(unittest.TestCase):
         self.expected_data = {
             "@odata.type": "#microsoft.graph.deviceAndAppManagementRoleDefinition",
             "displayName": "test",
-            "description": "test.",
-            "isBuiltInRoleDefinition": True,
-            "isBuiltIn": True,
-            "roleScopeTagIds": [],
-            "permissions": [
+            "description": "",
+            "isBuiltInRoleDefinition": False,
+            "isBuiltIn": False,
+            "roleScopeTagIds": ["0"],
+            "rolePermissions": [
                 {
-                    "actions": ["test"],
-                    "resourceActions": ["test"],
+                    "resourceActions": [
+                        {
+                            "allowedResourceActions": [
+                                "Microsoft.Intune_DeviceConfigurations_Read"
+                            ],
+                            "notAllowedResourceActions": [],
+                        }
+                    ]
                 }
             ],
             "roleAssignments": [
-                {"id": "test", "roleAssignments": {"displayName": "test", "id": "test"}}
+                {
+                    "displayName": "test",
+                    "description": "",
+                    "scopeMembers": ["admin"],
+                    "scopeType": "resourceScope",
+                    "members": ["test"],
+                }
             ],
         }
         self.role = {
             "value": [
                 {
                     "@odata.type": "#microsoft.graph.deviceAndAppManagementRoleDefinition",
-                    "id": "0",
                     "displayName": "test",
-                    "description": "test.",
-                    "isBuiltInRoleDefinition": True,
-                    "isBuiltIn": True,
-                    "roleScopeTagIds": [],
-                    "permissions": [
+                    "description": "",
+                    "id": "0",
+                    "isBuiltInRoleDefinition": False,
+                    "isBuiltIn": False,
+                    "roleScopeTagIds": ["0"],
+                    "permissions": [],
+                    "rolePermissions": [
                         {
-                            "actions": ["test"],
-                            "resourceActions": ["test"],
+                            "actions": [],
+                            "resourceActions": [
+                                {
+                                    "allowedResourceActions": [
+                                        "Microsoft.Intune_DeviceConfigurations_Read"
+                                    ],
+                                    "notAllowedResourceActions": [],
+                                }
+                            ],
                         }
                     ],
                 }
@@ -62,18 +82,26 @@ class TestBackupRoles(unittest.TestCase):
         self.assignment = {
             "value": [
                 {
-                    "id": "test",
-                    "roleAssignments": {
-                        "id": "test",
-                        "displayName": "test",
-                    },
+                    "id": "0",
+                    "displayName": "test",
+                    "description": "",
+                    "scopeMembers": ["1"],
+                    "scopeType": "resourceScope",
+                    "resourceScopes": ["222"],
+                    "members": ["111"],
                 }
             ]
         }
 
         self.patch_makeapirequest = patch(
             "src.IntuneCD.backup.Intune.backup_roles.makeapirequest",
-            side_effect=[self.role, self.assignment, self.assignment["value"][0]],
+            side_effect=[
+                self.role,
+                self.assignment,
+                self.assignment["value"][0],
+                {"displayName": "admin"},
+                {"displayName": "test"},
+            ],
         )
         self.makeapirequest = self.patch_makeapirequest.start()
 
