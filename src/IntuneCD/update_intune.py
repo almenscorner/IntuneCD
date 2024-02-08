@@ -15,6 +15,13 @@ def update_intune(
     Imports all the update functions and runs them
     """
 
+    if "ScopeTags" not in exclude:
+        from .update.Intune.update_scopeTags import update
+
+        diff_summary.append(
+            update(path, token, assignment, report, create_groups, remove)
+        )
+
     if "AppConfigurations" not in exclude:
         from .update.Intune.update_appConfiguration import update
 
