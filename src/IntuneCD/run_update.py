@@ -109,6 +109,7 @@ def start():
             "CustomAttributes",
             "DeviceCategories",
             "Roles",
+            "ScopeTags",
             "entraAuthenticationFlowsPolicy",
             "entraAuthenticationMethods",
             "entraAuthorizationPolicy",
