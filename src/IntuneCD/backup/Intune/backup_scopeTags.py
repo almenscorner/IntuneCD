@@ -6,10 +6,10 @@ This module backs up Scope Tags in Intune.
 """
 
 from ...intunecdlib.clean_filename import clean_filename
+from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
 from ...intunecdlib.graph_request import makeapirequest
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
-from ...intunecdlib.graph_batch import get_object_assignment, batch_assignment
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/roleScopeTags"
