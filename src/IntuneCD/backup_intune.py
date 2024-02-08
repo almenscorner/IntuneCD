@@ -172,3 +172,8 @@ def backup_intune(results, path, output, exclude, token, prefix, append_id, args
         from .backup.Intune.backup_roles import savebackup
 
         results.append(savebackup(path, output, exclude, token, append_id))
+
+    if "ScopeTags" not in exclude:
+        from .backup.Intune.backup_scopeTags import savebackup
+
+        results.append(savebackup(path, output, exclude, token, append_id))
