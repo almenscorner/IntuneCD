@@ -377,3 +377,14 @@ def document_intune(configpath, outpath, maxlength, split, cleanup, decode):
         cleanup,
         decode,
     )
+
+    # Document Scope Tags
+    document_configs(
+        f"{configpath}/Scope Tags",
+        outpath,
+        "Scope Tags",
+        maxlength,
+        split,
+        cleanup,
+        decode,
+    )
