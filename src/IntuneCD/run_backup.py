@@ -135,6 +135,7 @@ def start():
             "entraUserSettings",
             "entraDomains",
             "Roles",
+            "ScopeTags",
         ],
         nargs="+",
     )
