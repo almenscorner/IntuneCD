@@ -39,7 +39,10 @@ def savebackup(path, output, exclude, token, append_id):
                 f"https://graph.microsoft.com/beta/groups/{group}",
                 token,
                 "?$select=displayName",
-            )["displayName"]
+            )
+
+            if group_name:
+                group_name = group_name["displayName"]
 
             groups.append(group_name)
 
