@@ -77,34 +77,22 @@ class TestGraphBatch(unittest.TestCase):
             }
         ]
 
-        self.makeapirequestPost_patch = patch(
-            "src.IntuneCD.intunecdlib.graph_batch.makeapirequestPost"
-        )
+        self.makeapirequestPost_patch = patch("src.IntuneCD.intunecdlib.graph_batch.makeapirequestPost")
         self.makeapirequestPost = self.makeapirequestPost_patch.start()
 
-        self.get_object_details_patch = patch(
-            "src.IntuneCD.intunecdlib.graph_batch.get_object_details"
-        )
+        self.get_object_details_patch = patch("src.IntuneCD.intunecdlib.graph_batch.get_object_details")
         self.get_object_details = self.get_object_details_patch.start()
 
-        self.get_object_assignment_patch = patch(
-            "src.IntuneCD.intunecdlib.graph_batch.get_object_assignment"
-        )
+        self.get_object_assignment_patch = patch("src.IntuneCD.intunecdlib.graph_batch.get_object_assignment")
         self.get_object_assignment = self.get_object_assignment_patch.start()
 
-        self.batch_intents_patch = patch(
-            "src.IntuneCD.intunecdlib.graph_batch.batch_intents"
-        )
+        self.batch_intents_patch = patch("src.IntuneCD.intunecdlib.graph_batch.batch_intents")
         self.batch_intents = self.batch_intents_patch.start()
 
-        self.batch_assignment_patch = patch(
-            "src.IntuneCD.intunecdlib.graph_batch.batch_assignment"
-        )
+        self.batch_assignment_patch = patch("src.IntuneCD.intunecdlib.graph_batch.batch_assignment")
         self.batch_assignment = self.batch_assignment_patch.start()
 
-        self.batch_request_patch = patch(
-            "src.IntuneCD.intunecdlib.graph_batch.batch_request"
-        )
+        self.batch_request_patch = patch("src.IntuneCD.intunecdlib.graph_batch.batch_request")
         self.batch_request = self.batch_request_patch.start()
         self.batch_request.side_effect = (
             self.responses,
@@ -123,14 +111,13 @@ class TestGraphBatch(unittest.TestCase):
     def test_batch_request(self):
         """The batch request function should return the expected result."""
 
-        self.expected_result = [
-            {"odata.count": 1, "value": [{"id": "0", "displayName": "test"}]}
-        ]
+        self.expected_result = [{"odata.count": 1, "value": [{"id": "0", "displayName": "test"}]}]
         self.makeapirequestPost.return_value = {
             "responses": [
                 {
                     "id": "5",
                     "status": 200,
+                    "headers": {},
                     "body": {
                         "odata.count": 1,
                         "value": [{"id": "0", "displayName": "test"}],
@@ -140,6 +127,52 @@ class TestGraphBatch(unittest.TestCase):
         }
         self.result = batch_request(self.batch_request_data, "test", "test", self.token)
 
+        self.assertEqual(self.result, self.expected_result)
+
+    def test_batch_request_429(self):
+        """The batch request function should return the expected result."""
+
+        self.expected_result = [
+            {"odata.count": 1, "value": [{"id": "1", "displayName": "test"}]},
+            {"odata.count": 1, "value": [{"id": "0", "displayName": "test"}]},
+        ]
+        self.makeapirequestPost.side_effect = (
+            {
+                "responses": [
+                    {
+                        "id": "5",
+                        "status": 429,
+                        "headers": {"Retry-After": 1},
+                        "body": {},
+                    },
+                    {
+                        "id": "4",
+                        "status": 200,
+                        "headers": {"Retry-After": 1},
+                        "body": {
+                            "odata.count": 1,
+                            "value": [{"id": "1", "displayName": "test"}],
+                        },
+                    },
+                ]
+            },
+            {
+                "responses": [
+                    {
+                        "id": "5",
+                        "status": 200,
+                        "headers": {},
+                        "body": {
+                            "odata.count": 1,
+                            "value": [{"id": "0", "displayName": "test"}],
+                        },
+                    }
+                ]
+            },
+        )
+        self.result = batch_request(self.batch_request_data, "test", "test", self.token)
+
+        self.assertEqual(self.makeapirequestPost.call_count, 2)
         self.assertEqual(self.result, self.expected_result)
 
     def test_batch_assignment(self):
@@ -160,9 +193,7 @@ class TestGraphBatch(unittest.TestCase):
                 ]
             }
         ]
-        self.result = batch_assignment(
-            self.batch_assignment_data, "test", "test", self.token
-        )
+        self.result = batch_assignment(self.batch_assignment_data, "test", "test", self.token)
 
         self.assertEqual(self.result, self.expected_result)
 
@@ -205,9 +236,7 @@ class TestGraphBatch(unittest.TestCase):
                 ],
             }
         ]
-        self.result = batch_assignment(
-            self.batch_assignment_data, "test", "?$expand=assignments", self.token
-        )
+        self.result = batch_assignment(self.batch_assignment_data, "test", "?$expand=assignments", self.token)
 
         self.assertEqual(self.result, self.expected_result)
 
@@ -238,9 +267,7 @@ class TestGraphBatch(unittest.TestCase):
                 ]
             }
         ]
-        self.result = batch_assignment(
-            self.batch_assignment_data, "test", "test", self.token, app_protection=True
-        )
+        self.result = batch_assignment(self.batch_assignment_data, "test", "test", self.token, app_protection=True)
 
         self.assertEqual(self.result, self.expected_result)
 
@@ -271,20 +298,14 @@ class TestGraphBatch(unittest.TestCase):
                 ]
             }
         ]
-        self.result = batch_assignment(
-            self.batch_assignment_data, "test", "test", self.token, app_protection=True
-        )
+        self.result = batch_assignment(self.batch_assignment_data, "test", "test", self.token, app_protection=True)
 
         self.assertEqual(self.result, self.expected_result)
 
     def test_batch_assignment_appProtection_iosManagedAppProtection(self):
         """The batch assignment function should return the expected result for the platform."""
 
-        self.batch_assignment_data = {
-            "value": [
-                {"id": "0", "@odata.type": "#microsoft.graph.iosManagedAppProtection"}
-            ]
-        }
+        self.batch_assignment_data = {"value": [{"id": "0", "@odata.type": "#microsoft.graph.iosManagedAppProtection"}]}
 
         self.expected_result = [
             {
@@ -301,9 +322,7 @@ class TestGraphBatch(unittest.TestCase):
                 ]
             }
         ]
-        self.result = batch_assignment(
-            self.batch_assignment_data, "test", "test", self.token, app_protection=True
-        )
+        self.result = batch_assignment(self.batch_assignment_data, "test", "test", self.token, app_protection=True)
 
         self.assertEqual(self.result, self.expected_result)
 
