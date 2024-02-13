@@ -61,11 +61,12 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 app_names = []
                 for app_id in app_ids:
                     app_data = makeapirequest(APP_ENDPOINT + "/" + app_id, token)
-                    app = {
-                        "name": app_data["displayName"],
-                        "type": app_data["@odata.type"],
-                    }
-                    app_names.append(app)
+                    if app_data:
+                        app = {
+                            "name": app_data["displayName"],
+                            "type": app_data["@odata.type"],
+                        }
+                        app_names.append(app)
                 if app_names:
                     profile.pop("selectedMobileAppIds", None)
                     profile["selectedMobileAppNames"] = app_names

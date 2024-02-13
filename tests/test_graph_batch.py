@@ -131,6 +131,7 @@ class TestGraphBatch(unittest.TestCase):
                 {
                     "id": "5",
                     "status": 200,
+                    "headers": {},
                     "body": {
                         "odata.count": 1,
                         "value": [{"id": "0", "displayName": "test"}],
@@ -140,6 +141,52 @@ class TestGraphBatch(unittest.TestCase):
         }
         self.result = batch_request(self.batch_request_data, "test", "test", self.token)
 
+        self.assertEqual(self.result, self.expected_result)
+
+    def test_batch_request_429(self):
+        """The batch request function should return the expected result."""
+
+        self.expected_result = [
+            {"odata.count": 1, "value": [{"displayName": "test", "id": "1"}]},
+            {"odata.count": 1, "value": [{"displayName": "test", "id": "0"}]},
+        ]
+        self.makeapirequestPost.side_effect = (
+            {
+                "responses": [
+                    {
+                        "id": "1",
+                        "status": 429,
+                        "headers": {"Retry-After": 1},
+                        "body": {},
+                    },
+                    {
+                        "id": "2",
+                        "status": 200,
+                        "headers": {"Retry-After": 1},
+                        "body": {
+                            "odata.count": 1,
+                            "value": [{"id": "1", "displayName": "test"}],
+                        },
+                    },
+                ]
+            },
+            {
+                "responses": [
+                    {
+                        "id": "1",
+                        "status": 200,
+                        "headers": {},
+                        "body": {
+                            "odata.count": 1,
+                            "value": [{"id": "0", "displayName": "test"}],
+                        },
+                    }
+                ]
+            },
+        )
+        self.result = batch_request(self.batch_request_data, "test", "test", self.token)
+
+        self.assertEqual(self.makeapirequestPost.call_count, 2)
         self.assertEqual(self.result, self.expected_result)
 
     def test_batch_assignment(self):

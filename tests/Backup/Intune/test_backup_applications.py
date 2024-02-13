@@ -4,6 +4,7 @@
 """This module tests backing up applications."""
 
 
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -104,6 +105,29 @@ class TestBackupApplications(unittest.TestCase):
             ).exists()
         )
         self.assertEqual(1, self.count["config_count"])
+
+    def test_backup_vpp_app_exclude_licensecount(self):
+        """The folder should be created, the file should be created, and the count should be 1."""
+
+        self.app_base_data["value"][0]["@odata.type"] = "#microsoft.graph.iosVppApp"
+        self.app_base_data["value"][0]["usedLicenseCount"] = "1"
+
+        self.makeapirequest.return_value = self.app_base_data
+
+        self.exclude = ["VPPusedLicenseCount"]
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, self.append_id
+        )
+
+        app_data = json.load(
+            open(
+                self.directory.path + "/Applications/iOS/test_iOSVppApp_test.json",
+                encoding="utf-8",
+            )
+        )
+
+        self.assertTrue(app_data.get("VPPusedlicenseCount") is None)
 
     def test_backup_win32_lob_app_and_displayVersion(self):
         """The folder should be created, the file should be created, and the count should be 1."""
