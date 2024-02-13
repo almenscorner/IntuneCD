@@ -4,9 +4,8 @@
 """This module tests backing up applications."""
 
 
-import unittest
 import json
-
+import unittest
 from pathlib import Path
 from unittest.mock import patch
 
@@ -122,7 +121,10 @@ class TestBackupApplications(unittest.TestCase):
         )
 
         app_data = json.load(
-            open(self.directory.path + "/Applications/iOS/test_iOSVppApp_test.json")
+            open(
+                self.directory.path + "/Applications/iOS/test_iOSVppApp_test.json",
+                encoding="utf-8",
+            )
         )
 
         self.assertTrue(app_data.get("VPPusedlicenseCount") is None)

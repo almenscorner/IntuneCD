@@ -108,7 +108,7 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
             for i in range(0, len(retry_pool), batch_count)
         ]
         for batch in batch_list:
-            batch_data = {"requests": [b for b in batch]}
+            batch_data = {"requests": list(batch)}
             json_data = json.dumps(batch_data)
             request = makeapirequestPost(
                 "https://graph.microsoft.com/beta/$batch", token, jdata=json_data
