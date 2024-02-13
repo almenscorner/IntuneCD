@@ -121,6 +121,9 @@ def savebackup(path, output, exclude, token, append_id):
         if app["@odata.type"] == "#microsoft.graph.webApp":
             platform = "Web App"
 
+        if app.get("usedLicenseCount") and "VPPusedLicenseCount" in exclude:
+            app.pop("usedLicenseCount", None)
+
         print(f"Backing up Application: {app['displayName']}")
 
         configpath = f"{path}/Applications/{platform}/"
