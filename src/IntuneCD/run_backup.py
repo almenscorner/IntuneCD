@@ -136,6 +136,7 @@ def start():
             "entraDomains",
             "Roles",
             "ScopeTags",
+            "VPPusedLicenseCount",
         ],
         nargs="+",
     )
