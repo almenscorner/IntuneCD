@@ -106,7 +106,7 @@ class TestBackupApplications(unittest.TestCase):
         )
         self.assertEqual(1, self.count["config_count"])
 
-    def test_backup_vpp_app_exclude_licensecout(self):
+    def test_backup_vpp_app_exclude_licensecount(self):
         """The folder should be created, the file should be created, and the count should be 1."""
 
         self.app_base_data["value"][0]["@odata.type"] = "#microsoft.graph.iosVppApp"
@@ -114,7 +114,7 @@ class TestBackupApplications(unittest.TestCase):
 
         self.makeapirequest.return_value = self.app_base_data
 
-        self.exclude = ["VPPusedlicenseCount"]
+        self.exclude = ["VPPusedLicenseCount"]
 
         self.count = savebackup(
             self.directory.path, "json", self.exclude, self.token, self.append_id
