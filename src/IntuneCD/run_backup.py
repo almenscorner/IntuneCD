@@ -137,6 +137,7 @@ def start():
             "Roles",
             "ScopeTags",
             "VPPusedLicenseCount",
+            "GPlaySyncTime",
         ],
         nargs="+",
     )

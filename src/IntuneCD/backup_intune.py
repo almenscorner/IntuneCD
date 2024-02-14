@@ -101,7 +101,7 @@ def backup_intune(results, path, output, exclude, token, prefix, append_id, args
     if "ManagedGooglePlay" not in exclude:
         from .backup.Intune.backup_managedGPlay import savebackup
 
-        results.append(savebackup(path, output, token, append_id))
+        results.append(savebackup(path, output, exclude, token, append_id))
 
     if "Intents" not in exclude:
         from .backup.Intune.backup_managementIntents import savebackup

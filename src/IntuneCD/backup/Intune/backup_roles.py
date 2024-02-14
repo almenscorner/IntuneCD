@@ -43,8 +43,7 @@ def savebackup(path, output, exclude, token, append_id):
 
             if group_name:
                 group_name = group_name["displayName"]
-
-            groups.append(group_name)
+                groups.append(group_name)
 
         return groups
 
