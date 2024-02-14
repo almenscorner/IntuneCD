@@ -21,6 +21,7 @@ class TestBackupManagedGPlay(unittest.TestCase):
         self.directory = TempDirectory()
         self.directory.create()
         self.token = "token"
+        self.exclude = []
         self.append_id = False
         self.saved_path = (
             f"{self.directory.path}/Managed Google Play/awesome@gmail.com."
@@ -52,7 +53,9 @@ class TestBackupManagedGPlay(unittest.TestCase):
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.token, self.append_id)
+        self.count = savebackup(
+            self.directory.path, "yaml", self.exclude, self.token, self.append_id
+        )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -65,7 +68,9 @@ class TestBackupManagedGPlay(unittest.TestCase):
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, self.append_id
+        )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             saved_data = json.load(f)
@@ -78,19 +83,36 @@ class TestBackupManagedGPlay(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = None
-        self.count = savebackup(self.directory.path, "json", self.token, self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, self.append_id
+        )
         self.assertEqual(0, self.count["config_count"])
 
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.token, True)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, True
+        )
 
         self.assertTrue(
             Path(
                 f"{self.directory.path}/Managed Google Play/awesome@gmail.com__0.json"
             ).exists()
         )
+
+    def test_backup_exclude_lastAppSyncDateTime(self):
+        """The lastAppSyncDateTime should be excluded from the saved data."""
+
+        self.exclude.append("GPlaySyncTime")
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, self.append_id
+        )
+
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
+            saved_data = json.load(f)
+
+        self.assertNotIn("lastAppSyncDateTime", saved_data)
 
 
 if __name__ == "__main__":
