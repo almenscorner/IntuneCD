@@ -15,7 +15,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/androidManagedStor
 
 
 # Get Managed Google Play information and save in specified path
-def savebackup(path, output, token, append_id):
+def savebackup(path, output, exclude, token, append_id):
     """
     Saves Managed Google Play information in Intune to a JSON or YAML file.
 
@@ -38,6 +38,9 @@ def savebackup(path, output, token, append_id):
         fname = clean_filename(data["ownerUserPrincipalName"])
         if append_id:
             fname = f"{fname}__{graph_id}"
+
+        if data.get("lastAppSyncDateTime") and "GPlaySyncTime" in exclude:
+            data.pop("lastAppSyncDateTime")
         # Save Managed Google Play as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, data)
