@@ -158,6 +158,11 @@ def start():
         help="When this parameter is set, the script will also update Entra configurations",
         action="store_true",
     )
+    parser.add_argument(
+        "--scopes",
+        help="The scopes to use when obtaining an access token interactively separated by space. Only used when using interactive auth. Default is: DeviceManagementApps.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.Read.All, DeviceManagementServiceConfig.ReadWrite.All, DeviceManagementRBAC.ReadWrite.All, Group.Read.All, Policy.ReadWrite.ConditionalAccess, Policy.Read.All",
+        nargs="+",
+    )
 
     args = parser.parse_args()
 
@@ -178,11 +183,24 @@ def start():
     else:
         args.mode = selected_mode(args.mode)
 
+    if not args.scopes:
+        args.scopes = [
+            "DeviceManagementApps.ReadWrite.All",
+            "DeviceManagementConfiguration.ReadWrite.All",
+            "DeviceManagementManagedDevices.Read.All",
+            "DeviceManagementServiceConfig.ReadWrite.All",
+            "DeviceManagementRBAC.ReadWrite.All",
+            "Group.Read.All",
+            "Policy.ReadWrite.ConditionalAccess",
+            "Policy.Read.All",
+        ]
+
     token = getAuth(
         args.mode,
         args.localauth,
         args.certauth,
         args.interactiveauth,
+        args.scopes,
         args.entraupdate,
         tenant="PROD",
     )
