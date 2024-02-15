@@ -9,5 +9,6 @@ ignore:
   - "src/IntuneCD/document_entra.py"
   - "src/IntuneCD/run_documentation.py"
   - "src/IntuneCD/intunecdlib/get_accesstoken.py"
+  - "src/IntuneCD/intunecdlib/logger.py"
   - "src/IntuneCD/backup/Intune/backup_autopilotDevices.py"
   - "src/IntuneCD/backup/Intune/backup_activationLock.py"
