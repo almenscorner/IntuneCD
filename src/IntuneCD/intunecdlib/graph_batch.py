@@ -11,6 +11,7 @@ import json
 import time
 
 from .graph_request import makeapirequestPost
+from .logger import log
 
 
 def create_batch_request(batch, batch_id, method, url, extra_url) -> tuple:
@@ -41,6 +42,7 @@ def handle_responses(
     """Handle the responses from the batch request.
 
     Args:
+        initial_request_data (list): List of initial requests
         request_data (list): List of responses from the batch request
         responses (list): List of responses from the batch request
         retry_pool (list): List of failed requests
@@ -53,10 +55,13 @@ def handle_responses(
         failed_batch_requests = []
         if resp["status"] == 200:
             responses.append(resp["body"])
+            retry_pool = [req for req in retry_pool if req["id"] != int(resp["id"])]
         elif resp["status"] in [429, 503]:
             if initial_request_data:
                 failed_batch_requests = [
-                    i for i in initial_request_data if i["id"] == int(resp["id"])
+                    i
+                    for i in initial_request_data
+                    if i["id"] == int(resp["id"]) and i not in retry_pool
                 ]
             retry_pool += failed_batch_requests
 
@@ -66,7 +71,7 @@ def handle_responses(
 
 
 def batch_request(data, url, extra_url, token, method="GET") -> list:
-    """_summary_
+    """Batch request to the Graph API.
 
     Args:
         data (list): List of IDs
@@ -78,13 +83,14 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
     Returns:
         list: List of responses from the batch request
     """
-    responses = []
-    batch_id = 1
-    batch_count = 20
-    retry_pool = []
-    wait_time = 0
+    responses = []  # list of responses
+    batch_id = 1  # batch id for the request
+    batch_count = 20  # max number of requests in a batch
+    retry_pool = []  # list of failed requests
+    wait_time = 0  # wait time for the next request if Retry-After is in the headers
     batch_list = [data[i : i + batch_count] for i in range(0, len(data), batch_count)]
-    initial_request_data = []
+    initial_request_data = []  # list of initial requests
+    failed_retry_requests = []  # list of failed requests after retries
 
     for batch in batch_list:
         query_data, batch_id = create_batch_request(
@@ -100,23 +106,60 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
             initial_request_data, request_data, responses, retry_pool
         )
 
+    max_retries = 5  # max number of retries
+    retry_count = 0  # current retry count
+
+    # If we have a retry pool, retry the failed requests
     if retry_pool:
-        if wait_time > 0:
-            time.sleep(wait_time)
-        batch_list = [
-            retry_pool[i : i + batch_count]
-            for i in range(0, len(retry_pool), batch_count)
-        ]
-        for batch in batch_list:
-            batch_data = {"requests": list(batch)}
-            json_data = json.dumps(batch_data)
-            request = makeapirequestPost(
-                "https://graph.microsoft.com/beta/$batch", token, jdata=json_data
+        while retry_count < max_retries and retry_pool:
+            log(
+                "batch_request",
+                f"Retrying failed requests, retry pool count: {str(len(retry_pool))}",
             )
-            request_data = sorted(request["responses"], key=lambda item: item.get("id"))
-            responses, _, _ = handle_responses(
-                initial_request_data, request_data, responses, retry_pool
-            )
+            # If we have a wait time in the headers, sleep for that time
+            if wait_time > 0:
+                time.sleep(wait_time)
+            # Else, sleep for 20 seconds
+            else:
+                log(
+                    "batch_request",
+                    "No wait time in headers, sleeping for 20 seconds...",
+                )
+                time.sleep(20)
+            # Split the retry pool into batches
+            batch_list = [
+                retry_pool[i : i + batch_count]
+                for i in range(0, len(retry_pool), batch_count)
+            ]
+            # Retry each batch
+            for batch in batch_list:
+                batch_data = {"requests": list(batch)}
+                json_data = json.dumps(batch_data)
+                request = makeapirequestPost(
+                    "https://graph.microsoft.com/beta/$batch", token, jdata=json_data
+                )
+                request_data = sorted(
+                    request["responses"], key=lambda item: item.get("id")
+                )
+                responses, retry_pool, _ = handle_responses(
+                    initial_request_data, request_data, responses, retry_pool
+                )
+                # If we still have a retry pool, get the failed requests
+                failed_retry_requests = [
+                    r for r in request["responses"] if r["status"] != 200
+                ]
+
+            retry_count += 1
+            log("batch_request", f"Retry count: {str(retry_count)}")
+
+            # If we still have a retry pool but the max retries has been reached, exit the loop
+            if retry_pool and retry_count == max_retries:
+                break
+
+        log(
+            "batch_request",
+            f"Failed requests after {str(retry_count)} retries: {str(len(failed_retry_requests))}",
+        )
 
     return responses
 
