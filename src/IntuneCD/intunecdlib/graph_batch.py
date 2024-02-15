@@ -48,7 +48,7 @@ def handle_responses(
     Returns:
         tuple: Tuple containing the responses, retry pool and wait time
     """
-    wait_time = 0
+    wait_time = 20
     for resp in request_data:
         failed_batch_requests = []
         if resp["status"] == 200:
@@ -82,6 +82,7 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
     batch_id = 1
     batch_count = 20
     retry_pool = []
+    retry_count = 10
     wait_time = 0
     batch_list = [data[i : i + batch_count] for i in range(0, len(data), batch_count)]
     initial_request_data = []
@@ -99,14 +100,23 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
         responses, retry_pool, wait_time = handle_responses(
             initial_request_data, request_data, responses, retry_pool
         )
-
-    if retry_pool:
+    
+    while retry_pool:
+        print(f"Ran into issues with {len(retry_pool)} batch item(s), waiting {wait_time} seconds and trying again...")
+        retry_count -= 1
+        if retry_count == 0:
+            print("-" * 90)
+            print("\tMaximim retry attempts reached")
+            print(f"\t{len(retry_pool)} calls failed")
+            print("-" * 90)
+            break
         if wait_time > 0:
             time.sleep(wait_time)
         batch_list = [
             retry_pool[i : i + batch_count]
             for i in range(0, len(retry_pool), batch_count)
         ]
+        retry_pool = []
         for batch in batch_list:
             batch_data = {"requests": list(batch)}
             json_data = json.dumps(batch_data)
@@ -114,7 +124,7 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
                 "https://graph.microsoft.com/beta/$batch", token, jdata=json_data
             )
             request_data = sorted(request["responses"], key=lambda item: item.get("id"))
-            responses, _, _ = handle_responses(
+            responses, retry_pool, wait_time = handle_responses(
                 initial_request_data, request_data, responses, retry_pool
             )
 
