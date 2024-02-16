@@ -17,7 +17,7 @@ ENDPOINT = (
 
 
 # Get all Compliance Partners and save them in specified path
-def savebackup(path, output, token, append_id):
+def savebackup(path, output, exclude, token, append_id):
     """
     Saves all Compliance Partners in Intune to a JSON or YAML file.
 
@@ -44,6 +44,12 @@ def savebackup(path, output, token, append_id):
         fname = clean_filename(partner["displayName"])
         if append_id:
             fname = f"{fname}__{graph_id}"
+
+        if (
+            partner.get("lastHeartbeatDateTime")
+            and "CompliancePartnerHeartbeat" in exclude
+        ):
+            partner.pop("lastHeartbeatDateTime", None)
         # Save Compliance policy as JSON or YAML depending on configured
         # value in "-o"
         save_output(output, configpath, fname, partner)

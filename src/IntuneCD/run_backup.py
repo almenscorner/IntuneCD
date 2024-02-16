@@ -138,6 +138,7 @@ def start():
             "ScopeTags",
             "VPPusedLicenseCount",
             "GPlaySyncTime",
+            "CompliancePartnerHeartbeat",
         ],
         nargs="+",
     )
