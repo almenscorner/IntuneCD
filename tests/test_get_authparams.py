@@ -69,6 +69,7 @@ class TestGetAuth(unittest.TestCase):
                 localauth=None,
                 certauth=None,
                 interactiveauth=None,
+                scopes=[],
                 entra=False,
                 tenant="DEV",
             )
@@ -89,6 +90,7 @@ class TestGetAuth(unittest.TestCase):
                 localauth=None,
                 certauth=None,
                 interactiveauth=None,
+                scopes=[],
                 entra=False,
                 tenant="PROD",
             )
@@ -101,6 +103,7 @@ class TestGetAuth(unittest.TestCase):
             localauth=self.auth_dev_json,
             certauth=None,
             interactiveauth=None,
+            scopes=[],
             entra=False,
             tenant="DEV",
         )
@@ -113,6 +116,7 @@ class TestGetAuth(unittest.TestCase):
             localauth=self.auth_prod_json,
             certauth=None,
             interactiveauth=None,
+            scopes=[],
             entra=False,
             tenant="PROD",
         )
@@ -129,6 +133,7 @@ class TestGetAuth(unittest.TestCase):
                 localauth=None,
                 certauth=None,
                 interactiveauth=None,
+                scopes=[],
                 entra=False,
                 tenant=None,
             )
@@ -141,6 +146,7 @@ class TestGetAuth(unittest.TestCase):
             localauth=self.auth_json,
             certauth=None,
             interactiveauth=None,
+            scopes=[],
             entra=False,
             tenant=None,
         )
@@ -157,6 +163,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=None,
                     interactiveauth=None,
+                    scopes=[],
                     entra=False,
                     tenant="DEV",
                 )
@@ -172,6 +179,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=None,
                     interactiveauth=None,
+                    scopes=[],
                     entra=False,
                     tenant="PROD",
                 )
@@ -185,6 +193,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=None,
                     interactiveauth=None,
+                    scopes=[],
                     entra=False,
                     tenant=None,
                 )
@@ -205,6 +214,7 @@ class TestGetAuth(unittest.TestCase):
                 localauth=None,
                 certauth=True,
                 interactiveauth=None,
+                scopes=[],
                 tenant=None,
                 entra=False,
             )
@@ -222,6 +232,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=True,
                     interactiveauth=None,
+                    scopes=[],
                     entra=False,
                     tenant=None,
                 )
@@ -242,6 +253,7 @@ class TestGetAuth(unittest.TestCase):
                 localauth=None,
                 certauth=None,
                 interactiveauth=True,
+                scopes=[],
                 tenant=None,
                 entra=False,
             )
@@ -259,6 +271,7 @@ class TestGetAuth(unittest.TestCase):
                     localauth=None,
                     certauth=None,
                     interactiveauth=True,
+                    scopes=[],
                     entra=False,
                     tenant=None,
                 )

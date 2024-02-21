@@ -158,8 +158,19 @@ def start():
         help="When this parameter is set, the script will also update Entra configurations",
         action="store_true",
     )
+    parser.add_argument(
+        "--scopes",
+        help="The scopes to use when obtaining an access token interactively separated by space. Only used when using interactive auth. Default is: DeviceManagementApps.ReadWrite.All, DeviceManagementConfiguration.ReadWrite.All, DeviceManagementManagedDevices.Read.All, DeviceManagementServiceConfig.ReadWrite.All, DeviceManagementRBAC.ReadWrite.All, Group.Read.All, Policy.ReadWrite.ConditionalAccess, Policy.Read.All",
+        nargs="+",
+    )
+    parser.add_argument(
+        "-v", "--verbose", help="Prints verbose output", action="store_true"
+    )
 
     args = parser.parse_args()
+
+    if args.verbose:
+        os.environ["VERBOSE"] = "True"
 
     def devtoprod():
         return "devtoprod"
@@ -178,11 +189,24 @@ def start():
     else:
         args.mode = selected_mode(args.mode)
 
+    if not args.scopes:
+        args.scopes = [
+            "DeviceManagementApps.ReadWrite.All",
+            "DeviceManagementConfiguration.ReadWrite.All",
+            "DeviceManagementManagedDevices.Read.All",
+            "DeviceManagementServiceConfig.ReadWrite.All",
+            "DeviceManagementRBAC.ReadWrite.All",
+            "Group.Read.All",
+            "Policy.ReadWrite.ConditionalAccess",
+            "Policy.Read.All",
+        ]
+
     token = getAuth(
         args.mode,
         args.localauth,
         args.certauth,
         args.interactiveauth,
+        args.scopes,
         args.entraupdate,
         tenant="PROD",
     )
@@ -290,6 +314,9 @@ def start():
                 args.create_groups,
                 args.remove,
             )
+
+    if "VERBOSE" in os.environ:
+        del os.environ["VERBOSE"]
 
 
 if __name__ == "__main__":

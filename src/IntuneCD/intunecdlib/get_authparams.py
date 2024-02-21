@@ -15,7 +15,7 @@ from .get_accesstoken import (
 )
 
 
-def getAuth(mode, localauth, certauth, interactiveauth, entra, tenant):
+def getAuth(mode, localauth, certauth, interactiveauth, scopes, entra, tenant):
     """
     This function authenticates to MS Graph and returns the access token.
 
@@ -42,7 +42,7 @@ def getAuth(mode, localauth, certauth, interactiveauth, entra, tenant):
         if not all([TENANT_NAME, CLIENT_ID]):
             raise ValueError("One or more os.environ variables not set")
 
-        return obtain_accesstoken_interactive(TENANT_NAME, CLIENT_ID)
+        return obtain_accesstoken_interactive(TENANT_NAME, CLIENT_ID, scopes)
 
     if mode:
         if mode == "devtoprod":

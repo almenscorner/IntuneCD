@@ -70,8 +70,14 @@ def update(path, token, report):
                         profile_data["value"][0], repo_data, ignore_order=True
                     ).get("values_changed", {})
 
+                    skip_diff = DeepDiff(
+                        profile_data["value"][0]["enabledSkipKeys"],
+                        repo_data["enabledSkipKeys"],
+                        ignore_order=True,
+                    )
+
                     # If any changed values are found, push them to Intune
-                    if diff and report is False:
+                    if diff or skip_diff and report is False:
                         request_data = json.dumps(repo_data)
                         q_param = None
                         makeapirequestPatch(

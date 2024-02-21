@@ -11,6 +11,7 @@ import json
 import time
 
 from .graph_request import makeapirequestPost
+from .logger import log
 
 
 def create_batch_request(batch, batch_id, method, url, extra_url) -> tuple:
@@ -41,6 +42,7 @@ def handle_responses(
     """Handle the responses from the batch request.
 
     Args:
+        initial_request_data (list): List of initial requests
         request_data (list): List of responses from the batch request
         responses (list): List of responses from the batch request
         retry_pool (list): List of failed requests
@@ -53,10 +55,13 @@ def handle_responses(
         failed_batch_requests = []
         if resp["status"] == 200:
             responses.append(resp["body"])
+            retry_pool = [req for req in retry_pool if req["id"] != int(resp["id"])]
         elif resp["status"] in [429, 503]:
             if initial_request_data:
                 failed_batch_requests = [
-                    i for i in initial_request_data if i["id"] == int(resp["id"])
+                    i
+                    for i in initial_request_data
+                    if i["id"] == int(resp["id"]) and i not in retry_pool
                 ]
             retry_pool += failed_batch_requests
 
@@ -65,44 +70,101 @@ def handle_responses(
     return responses, retry_pool, wait_time
 
 
-def batch_request(data, url, extra_url, token, method="GET") -> list:
-    """_summary_
+def create_batch_list(data, batch_count) -> list:
+    """Create a list of batches from the data.
 
     Args:
-        data (list): List of IDs
+        data (list): List of objects
+        batch_count (int): Number of objects to include in each batch
+
+    Returns:
+        list: List of batches
+    """
+    return [data[i : i + batch_count] for i in range(0, len(data), batch_count)]
+
+
+def process_batch(
+    batch,
+    batch_id,
+    method,
+    url,
+    extra_url,
+    token,
+    initial_request_data,
+    responses,
+    retry_pool,
+) -> tuple:
+    """Process the batch request.
+
+    Args:
+        batch (list): List of objects
+        batch_id (str): ID for the batch request
+        method (str): HTTP method to use
         url (str): MS graph endpoint for the object
         extra_url (str): Used if anything extra is needed for the url such as /assignments or ?$filter
         token (str): OAuth token used for authentication
-        method (str, optional): HTTP method to use. Defaults to "GET".
+        initial_request_data (list): List of initial requests
+        responses (list): List of responses from the batch request
+        retry_pool (list): List of failed requests
+
+    Returns:
+        tuple: Tuple containing the batch ID, responses, retry pool and wait time
+    """
+    query_data, batch_id = create_batch_request(batch, batch_id, method, url, extra_url)
+    json_data = json.dumps(query_data)
+    request = makeapirequestPost(
+        "https://graph.microsoft.com/beta/$batch", token, jdata=json_data
+    )
+    request_data = sorted(request["responses"], key=lambda item: item.get("id"))
+    initial_request_data += query_data["requests"]
+    responses, retry_pool, wait_time = handle_responses(
+        initial_request_data, request_data, responses, retry_pool
+    )
+    return batch_id, responses, retry_pool, wait_time
+
+
+def retry_failed_requests(
+    retry_pool,
+    wait_time,
+    max_retries,
+    max_wait_time,
+    token,
+    initial_request_data,
+    responses,
+    batch_count,
+) -> tuple:
+    """Retry failed requests.
+
+    Args:
+        retry_pool (list): List of failed requests
+        wait_time (int): Time to wait before retrying
+        max_retries (int): Maximum number of retries
+        max_wait_time (int): Maximum time to wait before retrying
+        token (str): OAuth token used for authentication
+        initial_request_data (list): List of initial requests
+        responses (list): List of responses from the batch request
+        batch_count (int): Number of objects to include in each batch
 
     Returns:
         list: List of responses from the batch request
     """
-    responses = []
-    batch_id = 1
-    batch_count = 20
-    retry_pool = []
-    wait_time = 0
-    batch_list = [data[i : i + batch_count] for i in range(0, len(data), batch_count)]
-    initial_request_data = []
-
-    for batch in batch_list:
-        query_data, batch_id = create_batch_request(
-            batch, batch_id, method, url, extra_url
+    retry_count = 0
+    failed_retry_requests = []
+    while retry_count < max_retries and retry_pool:
+        log(
+            "retry_failed_requests",
+            f"Retrying failed requests, retry pool count: {str(len(retry_pool))}",
         )
-        json_data = json.dumps(query_data)
-        request = makeapirequestPost(
-            "https://graph.microsoft.com/beta/$batch", token, jdata=json_data
-        )
-        request_data = sorted(request["responses"], key=lambda item: item.get("id"))
-        initial_request_data += query_data["requests"]
-        responses, retry_pool, wait_time = handle_responses(
-            initial_request_data, request_data, responses, retry_pool
-        )
-
-    if retry_pool:
         if wait_time > 0:
+            log("retry_failed_requests", f"Sleeping for {str(wait_time)} seconds...")
             time.sleep(wait_time)
+            wait_time = min(wait_time * 2, max_wait_time)
+        else:
+            log(
+                "retry_failed_requests",
+                "No wait time in headers, sleeping for 20 seconds...",
+            )
+            time.sleep(20)
         batch_list = [
             retry_pool[i : i + batch_count]
             for i in range(0, len(retry_pool), batch_count)
@@ -114,9 +176,70 @@ def batch_request(data, url, extra_url, token, method="GET") -> list:
                 "https://graph.microsoft.com/beta/$batch", token, jdata=json_data
             )
             request_data = sorted(request["responses"], key=lambda item: item.get("id"))
-            responses, _, _ = handle_responses(
+            responses, retry_pool, _ = handle_responses(
                 initial_request_data, request_data, responses, retry_pool
             )
+            failed_retry_requests = [
+                r for r in request["responses"] if r["status"] != 200
+            ]
+        retry_count += 1
+        log("retry_failed_requests", f"Retry count: {str(retry_count)}")
+        if retry_pool and retry_count == max_retries:
+            break
+    log(
+        "retry_failed_requests",
+        f"Failed requests after {str(retry_count)} retries: {str(len(failed_retry_requests))}",
+    )
+    return responses
+
+
+def batch_request(data, url, extra_url, token, method="GET") -> list:
+    """Batch request to the Graph API.
+
+    Args:
+        data (list): List of objects
+        url (str): MS graph endpoint for the object
+        extra_url (str): Used if anything extra is needed for the url such as /assignments or ?$filter
+        token (str): OAuth token used for authentication
+        method (str): HTTP method to use
+
+    Returns:
+        list: List of responses from the batch request
+    """
+    responses = []
+    batch_id = 1
+    batch_count = 20
+    retry_pool = []
+    wait_time = 0
+    initial_request_data = []
+
+    batch_list = create_batch_list(data, batch_count)
+    for batch in batch_list:
+        batch_id, responses, retry_pool, wait_time = process_batch(
+            batch,
+            batch_id,
+            method,
+            url,
+            extra_url,
+            token,
+            initial_request_data,
+            responses,
+            retry_pool,
+        )
+
+    max_retries = 10
+    max_wait_time = 60
+    if retry_pool:
+        responses = retry_failed_requests(
+            retry_pool,
+            wait_time,
+            max_retries,
+            max_wait_time,
+            token,
+            initial_request_data,
+            responses,
+            batch_count,
+        )
 
     return responses
 

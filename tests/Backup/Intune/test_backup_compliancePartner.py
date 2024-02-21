@@ -21,11 +21,13 @@ class TestBackupCompliancePartner(unittest.TestCase):
         self.directory = TempDirectory()
         self.directory.create()
         self.token = "token"
+        self.exclude = []
         self.append_id = False
         self.saved_path = f"{self.directory.path}/Partner Connections/Compliance/test."
         self.expected_data = {
             "@odata.type": "#microsoft.graph.complianceManagementPartner",
             "partnerState": "unavailable",
+            "lastHeartbeatDateTime": "2022-01-28T12:28:48.975089Z",
             "displayName": "test",
             "macOsOnboarded": True,
             "macOsEnrollmentAssignments": [
@@ -41,6 +43,7 @@ class TestBackupCompliancePartner(unittest.TestCase):
                     "@odata.type": "#microsoft.graph.complianceManagementPartner",
                     "id": "0",
                     "partnerState": "unavailable",
+                    "lastHeartbeatDateTime": "2022-01-28T12:28:48.975089Z",
                     "displayName": "test",
                     "macOsOnboarded": True,
                     "macOsEnrollmentAssignments": [
@@ -66,7 +69,9 @@ class TestBackupCompliancePartner(unittest.TestCase):
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.token, self.append_id)
+        self.count = savebackup(
+            self.directory.path, "yaml", self.exclude, self.token, self.append_id
+        )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -81,7 +86,9 @@ class TestBackupCompliancePartner(unittest.TestCase):
     def test_backup_json(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.token, self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, self.append_id
+        )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             self.saved_data = json.load(f)
@@ -96,19 +103,37 @@ class TestBackupCompliancePartner(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = {"value": [{"partnerState": "unknown"}]}
-        self.count = savebackup(self.directory.path, "json", self.token, self.append_id)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, self.append_id
+        )
         self.assertEqual(0, self.count["config_count"])
 
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.token, True)
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, True
+        )
 
         self.assertTrue(
             Path(
                 f"{self.directory.path}/Partner Connections/Compliance/test__0.json"
             ).exists()
         )
+
+    def test_backup_exclude_lastHeartbeatDateTime(self):
+        """The lastHeartbeatDateTime should be excluded from the saved data."""
+
+        self.exclude.append("CompliancePartnerHeartbeat")
+
+        self.count = savebackup(
+            self.directory.path, "json", self.exclude, self.token, self.append_id
+        )
+
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
+            saved_data = json.load(f)
+
+        self.assertNotIn("lastHeartbeatDateTime", saved_data)
 
 
 if __name__ == "__main__":

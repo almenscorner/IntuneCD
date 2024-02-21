@@ -32,6 +32,7 @@ class TestUpdateAppleEnrollmentProfile(unittest.TestCase):
                     "id": "0",
                     "displayName": "test",
                     "testvalue": "test",
+                    "enabledSkipKeys": ["test"],
                 }
             ]
         }
@@ -40,6 +41,7 @@ class TestUpdateAppleEnrollmentProfile(unittest.TestCase):
             "id": "0",
             "displayName": "test",
             "testvalue": "test1",
+            "enabledSkipKeys": ["test"],
         }
 
         self.makeapirequest_patch = patch(
@@ -79,10 +81,11 @@ class TestUpdateAppleEnrollmentProfile(unittest.TestCase):
         self.repo_data["testvalue2"] = "test2"
         self.mem_data["value"][0]["testvalue"] = "test"
         self.mem_data["value"][0]["testvalue2"] = "test1"
+        self.mem_data["value"][0]["enabledSkipKeys"] = ["test1"]
 
         self.count = update(self.directory.path, self.token, report=False)
 
-        self.assertEqual(self.count[0].count, 2)
+        self.assertEqual(self.count[0].count, 3)
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
 
     def test_update_with_no_diffs(self):

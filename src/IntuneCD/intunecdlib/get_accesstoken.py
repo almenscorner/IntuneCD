@@ -91,7 +91,7 @@ def obtain_accesstoken_cert(TENANT_NAME, CLIENT_ID, THUMBPRINT, KEY_FILE):
     return token
 
 
-def obtain_accesstoken_interactive(TENANT_NAME, CLIENT_ID):
+def obtain_accesstoken_interactive(TENANT_NAME, CLIENT_ID, scopes):
     """
     This function is used to get an access token to MS Graph interactivly.
 
@@ -108,17 +108,6 @@ def obtain_accesstoken_interactive(TENANT_NAME, CLIENT_ID):
     )
 
     token = None
-
-    # Set the requited scopes
-    scopes = [
-        "DeviceManagementApps.ReadWrite.All",
-        "DeviceManagementConfiguration.ReadWrite.All",
-        "DeviceManagementManagedDevices.Read.All",
-        "DeviceManagementServiceConfig.ReadWrite.All",
-        "Group.Read.All",
-        "Policy.ReadWrite.ConditionalAccess",
-        "Policy.Read.All",
-    ]
 
     try:
         # Get the token interactively

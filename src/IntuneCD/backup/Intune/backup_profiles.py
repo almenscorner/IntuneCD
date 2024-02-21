@@ -112,6 +112,8 @@ def savebackup(path, output, exclude, token, prefix, append_id, ignore_omasettin
                         )
                         decoded_oma["value"] = oma_value
                         omas.append(decoded_oma)
+                    else:
+                        omas.append(setting)
 
             else:
                 omas = profile["omaSettings"]

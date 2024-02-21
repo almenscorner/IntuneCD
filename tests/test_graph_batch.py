@@ -5,6 +5,7 @@
 This module tests the graph_batch module.
 """
 
+import os
 import unittest
 from unittest.mock import patch
 
@@ -22,6 +23,7 @@ class TestGraphBatch(unittest.TestCase):
 
     def setUp(self):
         self.token = "token"
+        os.environ["VERBOSE"] = "True"
         self.batch_request_data = ["1", "2", "3"]
         self.batch_assignment_data = {"value": [{"id": "0"}]}
         self.batch_intents_data = {
@@ -119,6 +121,7 @@ class TestGraphBatch(unittest.TestCase):
         self.batch_intents.stop()
         self.batch_assignment.stop()
         self.batch_request.stop()
+        del os.environ["VERBOSE"]
 
     def test_batch_request(self):
         """The batch request function should return the expected result."""
@@ -162,7 +165,53 @@ class TestGraphBatch(unittest.TestCase):
                     {
                         "id": "2",
                         "status": 200,
-                        "headers": {"Retry-After": 1},
+                        "headers": {},
+                        "body": {
+                            "odata.count": 1,
+                            "value": [{"id": "1", "displayName": "test"}],
+                        },
+                    },
+                ]
+            },
+            {
+                "responses": [
+                    {
+                        "id": "1",
+                        "status": 200,
+                        "headers": {},
+                        "body": {
+                            "odata.count": 1,
+                            "value": [{"id": "0", "displayName": "test"}],
+                        },
+                    }
+                ]
+            },
+        )
+        self.result = batch_request(self.batch_request_data, "test", "test", self.token)
+
+        self.assertEqual(self.makeapirequestPost.call_count, 2)
+        self.assertEqual(self.result, self.expected_result)
+
+    def test_batch_request_503(self):
+        """The batch request function should return the expected result."""
+
+        self.expected_result = [
+            {"odata.count": 1, "value": [{"displayName": "test", "id": "1"}]},
+            {"odata.count": 1, "value": [{"displayName": "test", "id": "0"}]},
+        ]
+        self.makeapirequestPost.side_effect = (
+            {
+                "responses": [
+                    {
+                        "id": "1",
+                        "status": 503,
+                        "headers": {},
+                        "body": {},
+                    },
+                    {
+                        "id": "2",
+                        "status": 200,
+                        "headers": {},
                         "body": {
                             "odata.count": 1,
                             "value": [{"id": "1", "displayName": "test"}],

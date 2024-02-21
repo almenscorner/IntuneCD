@@ -111,7 +111,7 @@ def backup_intune(results, path, output, exclude, token, prefix, append_id, args
     if "CompliancePartner" not in exclude:
         from .backup.Intune.backup_compliancePartner import savebackup
 
-        results.append(savebackup(path, output, token, append_id))
+        results.append(savebackup(path, output, exclude, token, append_id))
 
     if "ManagementPartner" not in exclude:
         from .backup.Intune.backup_managementPartner import savebackup
