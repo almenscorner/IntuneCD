@@ -11,7 +11,8 @@ import os
 from ...intunecdlib.check_prefix import check_prefix_match
 from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -20,7 +21,9 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceConfiguratio
 
 
 # Get all Device Configurations and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id, ignore_omasettings):
+def savebackup(
+    path, output, exclude, token, prefix, append_id, ignore_omasettings, audit
+):
     """
     Saves all Device Configurations in Intune to a JSON or YAML file and custom macOS/iOS to .mobileconfig.
 
@@ -83,6 +86,17 @@ def savebackup(path, output, exclude, token, prefix, append_id, ignore_omasettin
 
             results["outputs"].append(fname)
 
+            if audit:
+                audit_data = makeAuditRequest(
+                    graph_id,
+                    "",
+                    token,
+                )
+                if audit_data:
+                    process_audit_data(
+                        audit_data, path, f"{configpath}{fname}.{output}"
+                    )
+
         # If Device Configuration is custom Win10 and the OMA settings are
         # encrypted, get them in plain text
         elif profile[
@@ -126,11 +140,33 @@ def savebackup(path, output, exclude, token, prefix, append_id, ignore_omasettin
 
             results["outputs"].append(fname)
 
+            if audit:
+                audit_data = makeAuditRequest(
+                    graph_id,
+                    "",
+                    token,
+                )
+                if audit_data:
+                    process_audit_data(
+                        audit_data, path, f"{configpath}{fname}.{output}"
+                    )
+
         # If Device Configuration are not custom, save it as JSON or YAML
         # depending on configured value in "-o"
         else:
             save_output(output, configpath, fname, profile)
 
             results["outputs"].append(fname)
+
+            if audit:
+                audit_data = makeAuditRequest(
+                    graph_id,
+                    "",
+                    token,
+                )
+                if audit_data:
+                    process_audit_data(
+                        audit_data, path, f"{configpath}{fname}.{output}"
+                    )
 
     return results

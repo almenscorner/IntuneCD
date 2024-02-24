@@ -77,7 +77,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/iOS").exists())
@@ -95,7 +95,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/macOS").exists())
@@ -117,7 +117,7 @@ class TestBackupApplications(unittest.TestCase):
         self.exclude = ["VPPusedLicenseCount"]
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         app_data = json.load(
@@ -137,7 +137,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Windows").exists())
@@ -156,7 +156,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Windows").exists())
@@ -175,7 +175,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Windows").exists())
@@ -195,7 +195,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Android").exists())
@@ -214,7 +214,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Windows").exists())
@@ -234,7 +234,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(
@@ -255,7 +255,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Web App").exists())
@@ -273,7 +273,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/macOS").exists())
@@ -288,7 +288,7 @@ class TestBackupApplications(unittest.TestCase):
         """The count should be 0 if no data is returned."""
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id
+            self.directory.path, "json", self.exclude, self.token, self.append_id, False
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -299,7 +299,7 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, True
+            self.directory.path, "json", self.exclude, self.token, True, False
         )
 
         self.assertTrue(

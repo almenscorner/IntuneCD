@@ -6,7 +6,8 @@ This module backs up Device Management settings in Intune.
 """
 
 from ...intunecdlib.clean_filename import clean_filename
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -15,7 +16,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/settings"
 
 
 # Get settings and save in specified path
-def savebackup(path, output, token):
+def savebackup(path, output, audit, token):
     """
     Save Device Management Setting to a JSON or YAML file.
 
@@ -40,5 +41,17 @@ def savebackup(path, output, token):
         save_output(output, configpath, fname, data)
 
         results["outputs"].append(fname)
+
+        if audit:
+            graph_filter = (
+                "resources/any(s:s/auditResourceType eq 'DeviceManagementSettings')"
+            )
+            audit_data = makeAuditRequest(
+                "",
+                graph_filter,
+                token,
+            )
+            if audit_data:
+                process_audit_data(audit_data, path, f"{configpath}{fname}.{output}")
 
     return results

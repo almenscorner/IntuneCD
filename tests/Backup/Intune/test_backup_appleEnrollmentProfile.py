@@ -83,7 +83,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         self.makeapirequest.return_value = self.token_response
         self.batch_request.return_value = self.batch_intune
         self.count = savebackup(
-            self.directory.path, "yaml", self.token, "", self.append_id
+            self.directory.path, "yaml", self.token, "", self.append_id, False
         )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
@@ -101,7 +101,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         self.makeapirequest.return_value = self.token_response
         self.batch_request.return_value = self.batch_intune
         self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
+            self.directory.path, "json", self.token, "", self.append_id, False
         )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
@@ -119,7 +119,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
+            self.directory.path, "json", self.token, "", self.append_id, False
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -129,7 +129,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.token, "test", self.append_id
+            self.directory.path, "json", self.token, "test", self.append_id, False
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -139,7 +139,9 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         self.makeapirequest.return_value = self.token_response
         self.batch_request.return_value = self.batch_intune
 
-        self.count = savebackup(self.directory.path, "json", self.token, "", True)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "", True, False
+        )
 
         self.assertTrue(
             Path(

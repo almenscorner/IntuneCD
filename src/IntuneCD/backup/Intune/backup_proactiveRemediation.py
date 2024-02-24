@@ -15,7 +15,8 @@ from ...intunecdlib.graph_batch import (
     batch_request,
     get_object_assignment,
 )
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -24,7 +25,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScript
 
 
 # Get all Proactive Remediation and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id):
+def savebackup(path, output, exclude, token, prefix, append_id, audit):
     """
     Saves all Proactive Remediation in Intune to a JSON or YAML file and script files.
 
@@ -77,6 +78,17 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 save_output(output, configpath, fname, pr_details)
 
                 results["outputs"].append(fname)
+
+                if audit:
+                    audit_data = makeAuditRequest(
+                        graph_id,
+                        "",
+                        token,
+                    )
+                    if audit_data:
+                        process_audit_data(
+                            audit_data, path, f"{configpath}{fname}.{output}"
+                        )
 
                 if not os.path.exists(f"{configpath}/Script Data"):
                     os.makedirs(f"{configpath}/Script Data")

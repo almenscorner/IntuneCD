@@ -8,7 +8,8 @@ This module backs up all Apple Enrollment Profiles in Intune.
 from ...intunecdlib.check_prefix import check_prefix_match
 from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_request
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -17,7 +18,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/depOnboardingSetti
 
 
 # Get all Apple Enrollment Profiles and save them in specified path
-def savebackup(path, output, token, prefix, append_id):
+def savebackup(path, output, token, prefix, append_id, audit):
     """
     Saves all Apple Enrollment Profiles in Intune to a JSON or YAML file.
 
@@ -62,5 +63,16 @@ def savebackup(path, output, token, prefix, append_id):
                 save_output(output, configpath, fname, value)
 
                 results["outputs"].append(fname)
+
+                if audit:
+                    audit_data = makeAuditRequest(
+                        graph_id,
+                        "",
+                        token,
+                    )
+                    if audit_data:
+                        process_audit_data(
+                            audit_data, path, f"{configpath}{fname}.{output}"
+                        )
 
     return results

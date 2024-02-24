@@ -65,7 +65,7 @@ class TestBackupDeviceManagementSettings(unittest.TestCase):
     def test_backup_yml(self, _, __):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "yaml", self.token)
+        self.count = savebackup(self.directory.path, "yaml", False, self.token)
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -80,7 +80,7 @@ class TestBackupDeviceManagementSettings(unittest.TestCase):
     def test_backup_json(self, _, __):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.token)
+        self.count = savebackup(self.directory.path, "json", False, self.token)
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             self.saved_data = json.load(f)

@@ -191,6 +191,11 @@ def start():
     parser.add_argument(
         "-v", "--verbose", help="Prints verbose output", action="store_true"
     )
+    parser.add_argument(
+        "--audit",
+        help="When set, the script will process the audit data from Intune and commit the changes to the git repo using the name of the user who made the change and the date and time of the change",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 

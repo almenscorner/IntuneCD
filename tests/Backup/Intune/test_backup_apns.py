@@ -58,7 +58,7 @@ class TestBackupAPNS(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.makeapirequest.return_value = self.apns
-        self.count = savebackup(self.directory.path, "yaml", self.token)
+        self.count = savebackup(self.directory.path, "yaml", False, self.token)
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -72,7 +72,7 @@ class TestBackupAPNS(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.makeapirequest.return_value = self.apns
-        self.count = savebackup(self.directory.path, "json", self.token)
+        self.count = savebackup(self.directory.path, "json", False, self.token)
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             saved_data = json.load(f)
@@ -85,7 +85,7 @@ class TestBackupAPNS(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = None
-        self.count = savebackup(self.directory.path, "json", self.token)
+        self.count = savebackup(self.directory.path, "json", False, self.token)
         self.assertEqual(0, self.count["config_count"])
 
 

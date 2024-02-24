@@ -79,7 +79,13 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         """Test that the backup is saved as yml. And that the data is correct."""
         output = "yaml"
         savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
         with open(f"{self.saved_path}yaml", "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
@@ -89,7 +95,13 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         """Test that the backup is saved as json. And that the data is correct."""
         output = "json"
         savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
         with open(f"{self.saved_path}json", "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
@@ -102,7 +114,13 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
             "@odata.type"
         ] = "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
         count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
 
         self.assertEqual(0, count["config_count"])
@@ -112,7 +130,13 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
 
         self.makeapirequest.side_effect = [{"value": []}]
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -127,6 +151,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
             self.token,
             "test1",
             self.append_id,
+            False,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -134,7 +159,7 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
+            self.directory.path, "json", self.exclude, self.token, "", True, False
         )
 
         self.assertTrue(

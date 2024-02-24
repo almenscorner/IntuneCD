@@ -5,6 +5,7 @@
 This module contains the functions to make API requests to the Microsoft Graph API.
 """
 
+import datetime
 import json
 import time
 
@@ -235,3 +236,44 @@ def makeapirequestPut(patchEndpoint, token, q_param=None, jdata=None, status_cod
         raise requests.exceptions.HTTPError(
             "Request failed with {} - {}".format(response.status_code, response.text)
         )
+
+
+def makeAuditRequest(pid, graph_filter, token):
+    """
+    This function makes a GET request to the Microsoft Graph API to get the audit logs for a specific object.
+
+    :param pid: The ID of the object to get the audit logs for.
+    :param graph_filter: The filter to use for the request.
+    :param token: The token to use for authenticating the request.
+    """
+
+    # Get the current date and time and set time to 00:00:00
+    start_date = datetime.datetime.now().strftime("%Y-%m-%dT00:00:00.000Z")
+    # Get the current date and time
+    end_date = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    # Create query to get audit logs for the object
+    if not graph_filter:
+        graph_filter = f"resources/any(s:s/resourceId eq '{pid}')"
+    q_param = {
+        "$filter": f"{graph_filter} and activityDateTime gt {start_date} and activityDateTime le {end_date} and activityOperationType ne 'Get'",
+        "$select": "actor,activityDateTime,activityOperationType,activityResult",
+        "$orderby": "activityDateTime desc",
+    }
+
+    # Make the request to the Microsoft Graph API
+    endpoint = "https://graph.microsoft.com/v1.0/deviceManagement/auditEvents"
+    data = makeapirequest(endpoint, token, q_param)
+
+    # If there are audit logs, return the latest one
+    if data["value"]:
+        # is the actor an app or a user?
+        if data["value"][0]["actor"]["auditActorType"] == "ItPro":
+            actor = data["value"][0]["actor"].get("userPrincipalName")
+        else:
+            actor = data["value"][0]["actor"].get("applicationDisplayName")
+        return {
+            "actor": actor,
+            "activityDateTime": data["value"][0]["activityDateTime"],
+            "activityOperationType": data["value"][0]["activityOperationType"],
+            "activityResult": data["value"][0]["activityResult"],
+        }

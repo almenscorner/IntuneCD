@@ -89,7 +89,13 @@ class TestBackupCompliance(unittest.TestCase):
 
         output = "yaml"
         count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
 
         with open(self.saved_path + output, "r", encoding="utf-8") as f:
@@ -107,7 +113,13 @@ class TestBackupCompliance(unittest.TestCase):
 
         output = "json"
         count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
 
         with open(self.saved_path + output, "r", encoding="utf-8") as f:
@@ -124,7 +136,13 @@ class TestBackupCompliance(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -139,6 +157,7 @@ class TestBackupCompliance(unittest.TestCase):
             self.token,
             "test",
             self.append_id,
+            False,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -146,7 +165,7 @@ class TestBackupCompliance(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
+            self.directory.path, "json", self.exclude, self.token, "", True, False
         )
 
         self.assertTrue(

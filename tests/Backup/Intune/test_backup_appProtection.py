@@ -93,7 +93,13 @@ class TestBackupAppProtection(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "yaml", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "yaml",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
@@ -108,7 +114,13 @@ class TestBackupAppProtection(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
@@ -127,7 +139,13 @@ class TestBackupAppProtection(unittest.TestCase):
             ]
         }
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -138,7 +156,13 @@ class TestBackupAppProtection(unittest.TestCase):
         self.expected_data["targetedAppManagementLevels"] = "test"
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
 
         with open(
@@ -155,7 +179,13 @@ class TestBackupAppProtection(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -169,6 +199,7 @@ class TestBackupAppProtection(unittest.TestCase):
             self.token,
             "test1",
             self.append_id,
+            False,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -176,7 +207,7 @@ class TestBackupAppProtection(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
+            self.directory.path, "json", self.exclude, self.token, "", True, False
         )
 
         self.assertTrue(

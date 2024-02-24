@@ -54,7 +54,7 @@ class TestBackupdeviceCategories(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "yaml", self.token, "", self.append_id
+            self.directory.path, "yaml", self.token, "", self.append_id, False
         )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
@@ -69,7 +69,7 @@ class TestBackupdeviceCategories(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
+            self.directory.path, "json", self.token, "", self.append_id, False
         )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
@@ -84,7 +84,7 @@ class TestBackupdeviceCategories(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
+            self.directory.path, "json", self.token, "", self.append_id, False
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -93,14 +93,16 @@ class TestBackupdeviceCategories(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.token, "test", self.append_id
+            self.directory.path, "json", self.token, "test", self.append_id, False
         )
         self.assertEqual(0, self.count["config_count"])
 
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.token, "", True)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "", True, False
+        )
 
         self.assertTrue(
             Path(
