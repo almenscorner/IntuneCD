@@ -40,6 +40,21 @@ def _configure_git(audit_data, path):
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False
     )
 
+    # configure the user name for git commits
+    cmd = [
+        "git",
+        "-C",
+        path,
+        "config",
+        "--local",
+        "user.name",
+        f"{audit_data['actor']}",
+    ]
+    log("_configure_git", f"Running command {cmd} to configure git user name.")
+    subprocess.run(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False
+    )
+
 
 def _check_if_git_repo(path, file):
     cmd = ["git", "-C", path, "rev-parse", "--is-inside-work-tree"]
