@@ -29,9 +29,13 @@ def savebackup(path, output, token, prefix, append_id, audit):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Compliance Policies/Message Templates/"
     q_param = "?$expand=localizedNotificationMessages"
     data = makeapirequest(ENDPOINT, token, q_param)
+    if audit:
+        graph_filter = "componentName eq 'NotificationMessageTemplate'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for template in data["value"]:
         if prefix and not check_prefix_match(template["displayName"], prefix):
@@ -61,13 +65,10 @@ def savebackup(path, output, token, prefix, append_id, audit):
 
         results["outputs"].append(fname)
 
-        if audit:
-            audit_data = makeAuditRequest(
-                graph_id,
-                "",
-                token,
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
             )
-            if audit_data:
-                process_audit_data(audit_data, path, f"{configpath}{fname}.{output}")
 
     return results

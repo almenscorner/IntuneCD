@@ -34,12 +34,16 @@ def savebackup(
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Device Configurations/"
     data = makeapirequest(ENDPOINT, token)
 
     assignment_responses = batch_assignment(
         data, "deviceManagement/deviceConfigurations/", "/assignments", token
     )
+    if audit:
+        graph_filter = "componentName eq 'DeviceConfiguration'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for profile in data["value"]:
         if prefix and not check_prefix_match(profile["displayName"], prefix):
@@ -86,16 +90,11 @@ def savebackup(
 
             results["outputs"].append(fname)
 
-            if audit:
-                audit_data = makeAuditRequest(
-                    graph_id,
-                    "",
-                    token,
+            if audit_data:
+                compare_data = {"type": "resourceId", "value": graph_id}
+                process_audit_data(
+                    audit_data, compare_data, path, f"{configpath}{fname}.{output}"
                 )
-                if audit_data:
-                    process_audit_data(
-                        audit_data, path, f"{configpath}{fname}.{output}"
-                    )
 
         # If Device Configuration is custom Win10 and the OMA settings are
         # encrypted, get them in plain text
@@ -140,16 +139,11 @@ def savebackup(
 
             results["outputs"].append(fname)
 
-            if audit:
-                audit_data = makeAuditRequest(
-                    graph_id,
-                    "",
-                    token,
+            if audit_data:
+                compare_data = {"type": "resourceId", "value": graph_id}
+                process_audit_data(
+                    audit_data, compare_data, path, f"{configpath}{fname}.{output}"
                 )
-                if audit_data:
-                    process_audit_data(
-                        audit_data, path, f"{configpath}{fname}.{output}"
-                    )
 
         # If Device Configuration are not custom, save it as JSON or YAML
         # depending on configured value in "-o"
@@ -158,15 +152,10 @@ def savebackup(
 
             results["outputs"].append(fname)
 
-            if audit:
-                audit_data = makeAuditRequest(
-                    graph_id,
-                    "",
-                    token,
+            if audit_data:
+                compare_data = {"type": "resourceId", "value": graph_id}
+                process_audit_data(
+                    audit_data, compare_data, path, f"{configpath}{fname}.{output}"
                 )
-                if audit_data:
-                    process_audit_data(
-                        audit_data, path, f"{configpath}{fname}.{output}"
-                    )
 
     return results

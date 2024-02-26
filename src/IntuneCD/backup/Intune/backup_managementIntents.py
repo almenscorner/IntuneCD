@@ -33,6 +33,7 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Management Intents/"
     intents = makeapirequest(BASE_ENDPOINT + "/intents", token)
     templates = makeapirequest(TEMPLATE_ENDPOINT, token)
@@ -41,6 +42,9 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
         intents, "deviceManagement/intents/", "/assignments", token
     )
     intent_responses = batch_intents(intents, token)
+    if audit:
+        graph_filter = "componentName eq 'DeviceIntent'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     if intent_responses:
         for intent_value in intent_responses["value"]:
@@ -77,15 +81,10 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
 
             results["outputs"].append(fname)
 
-            if audit:
-                audit_data = makeAuditRequest(
-                    graph_id,
-                    "",
-                    token,
+            if audit_data:
+                compare_data = {"type": "resourceId", "value": graph_id}
+                process_audit_data(
+                    audit_data, compare_data, path, f"{configpath}{fname}.{output}"
                 )
-                if audit_data:
-                    process_audit_data(
-                        audit_data, path, f"{configpath}{fname}.{output}"
-                    )
 
     return results

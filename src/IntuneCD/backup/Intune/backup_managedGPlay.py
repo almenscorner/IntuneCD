@@ -26,8 +26,12 @@ def savebackup(path, output, exclude, token, append_id, audit):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = f"{path}/Managed Google Play/"
     data = makeapirequest(ENDPOINT, token)
+    if audit:
+        graph_filter = "resources/any(s:s/auditResourceType eq 'Microsoft.Management.Services.Api.AndroidManagedStoreAccountEnterpriseSettings')"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     if data:
         results["config_count"] += 1
@@ -48,14 +52,13 @@ def savebackup(path, output, exclude, token, append_id, audit):
 
         results["outputs"].append(fname)
 
-        if audit:
-            graph_filter = "resources/any(s:s/auditResourceType eq 'Microsoft.Management.Services.Api.AndroidManagedStoreAccountEnterpriseSettings')"
-            audit_data = makeAuditRequest(
-                "",
-                graph_filter,
-                token,
+        if audit_data:
+            compare_data = {
+                "type": "auditResourceType",
+                "value": "Microsoft.Management.Services.Api.AndroidManagedStoreAccountEnterpriseSettings",
+            }
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
             )
-            if audit_data:
-                process_audit_data(audit_data, path, f"{configpath}{fname}.{output}")
 
     return results

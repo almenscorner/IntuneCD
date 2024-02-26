@@ -27,13 +27,16 @@ def savebackup(path, output, exclude, token, append_id, audit):
     """
 
     results = {"config_count": 0, "outputs": []}
-
+    audit_data = None
     configpath = path + "/" + "Scope Tags/"
     data = makeapirequest(ENDPOINT, token)
 
     assignment_responses = batch_assignment(
         data, "deviceManagement/roleScopeTags/", "/assignments", token
     )
+    if audit:
+        graph_filter = "componentName eq 'RoleBasedAccessControl'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for tag in data["value"]:
         results["config_count"] += 1
@@ -57,13 +60,10 @@ def savebackup(path, output, exclude, token, append_id, audit):
 
         results["outputs"].append(fname)
 
-        if audit:
-            audit_data = makeAuditRequest(
-                tag_id,
-                "",
-                token,
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": tag_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
             )
-            if audit_data:
-                process_audit_data(audit_data, path, f"{configpath}{fname}.{output}")
 
     return results

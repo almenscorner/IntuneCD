@@ -49,11 +49,14 @@ def savebackup(path, output, exclude, token, append_id, audit):
     """
 
     results = {"config_count": 0, "outputs": []}
-
+    audit_data = None
     data = makeapirequest(ENDPOINT, token, q_param)
     assignment_responses = batch_assignment(
         data, "deviceAppManagement/mobileApps/", "/assignments", token
     )
+    if audit:
+        graph_filter = "componentName eq 'MobileApp'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for app in data["value"]:
         app_name = ""
@@ -64,6 +67,9 @@ def savebackup(path, output, exclude, token, append_id, audit):
             assignments = get_object_assignment(app["id"], assignment_responses)
             if assignments:
                 app["assignments"] = assignments
+
+        # if audit:
+        #    audit_data = get_audit_log(app["id"], audit_responses)
 
         graph_id = app["id"]
         app = remove_keys(app)
@@ -138,13 +144,10 @@ def savebackup(path, output, exclude, token, append_id, audit):
 
         results["outputs"].append(fname)
 
-        if audit:
-            audit_data = makeAuditRequest(
-                graph_id,
-                "",
-                token,
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
             )
-            if audit_data:
-                process_audit_data(audit_data, path, f"{configpath}{fname}.{output}")
 
     return results

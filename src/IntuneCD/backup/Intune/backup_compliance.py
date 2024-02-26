@@ -29,6 +29,7 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Compliance Policies/Policies/"
     q_param = {
         "$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"
@@ -38,6 +39,9 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
     assignment_responses = batch_assignment(
         data, "deviceManagement/deviceCompliancePolicies/", "/assignments", token
     )
+    if audit:
+        graph_filter = "componentName eq 'DeviceCompliancePolicy'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for policy in data["value"]:
         if prefix and not check_prefix_match(policy["displayName"], prefix):
@@ -78,13 +82,10 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
 
         results["outputs"].append(fname)
 
-        if audit:
-            audit_data = makeAuditRequest(
-                graph_id,
-                "",
-                token,
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
             )
-            if audit_data:
-                process_audit_data(audit_data, path, f"{configpath}{fname}.{output}")
 
     return results

@@ -49,9 +49,13 @@ def savebackup(path, output, exclude, token, append_id, audit):
         return groups
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Roles/"
     q_param = {"$filter": "isBuiltIn eq false"}
     data = makeapirequest(ENDPOINT, token, q_param)
+    if audit:
+        graph_filter = "componentName eq 'RoleBasedAccessControl'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for role in data["value"]:
         results["config_count"] += 1
@@ -107,13 +111,10 @@ def savebackup(path, output, exclude, token, append_id, audit):
 
         results["outputs"].append(fname)
 
-        if audit:
-            audit_data = makeAuditRequest(
-                graph_id,
-                "",
-                token,
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
             )
-            if audit_data:
-                process_audit_data(audit_data, path, f"{configpath}{fname}.{output}")
 
     return results

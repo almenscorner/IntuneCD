@@ -238,7 +238,7 @@ def makeapirequestPut(patchEndpoint, token, q_param=None, jdata=None, status_cod
         )
 
 
-def makeAuditRequest(pid, graph_filter, token):
+def makeAuditRequest(graph_filter, token):
     """
     This function makes a GET request to the Microsoft Graph API to get the audit logs for a specific object.
 
@@ -247,16 +247,21 @@ def makeAuditRequest(pid, graph_filter, token):
     :param token: The token to use for authenticating the request.
     """
 
-    # Get the current date and time and set time to 00:00:00
-    start_date = datetime.datetime.now().strftime("%Y-%m-%dT00:00:00.000Z")
+    audit_data = []
+    # Get the date and time 24 hours ago and format it
+    start_date = datetime.datetime.now() - datetime.timedelta(days=1)
+    start_date = start_date.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     # Get the current date and time
     end_date = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     # Create query to get audit logs for the object
-    if not graph_filter:
-        graph_filter = f"resources/any(s:s/resourceId eq '{pid}')"
+    # if not graph_filter:
+    #    graph_filter = f"resources/any(s:s/resourceId eq '{pid}')"
     q_param = {
-        "$filter": f"{graph_filter} and activityDateTime gt {start_date} and activityDateTime le {end_date} and activityOperationType ne 'Get'",
-        "$select": "actor,activityDateTime,activityOperationType,activityResult",
+        "$filter": (
+            f"{graph_filter} and activityDateTime gt {start_date} and activityDateTime le {end_date} and "
+            "activityOperationType ne 'Get'"
+        ),
+        "$select": "actor,activityDateTime,activityOperationType,activityResult,resources",
         "$orderby": "activityDateTime desc",
     }
 
@@ -266,14 +271,21 @@ def makeAuditRequest(pid, graph_filter, token):
 
     # If there are audit logs, return the latest one
     if data["value"]:
-        # is the actor an app or a user?
-        if data["value"][0]["actor"]["auditActorType"] == "ItPro":
-            actor = data["value"][0]["actor"].get("userPrincipalName")
-        else:
-            actor = data["value"][0]["actor"].get("applicationDisplayName")
-        return {
-            "actor": actor,
-            "activityDateTime": data["value"][0]["activityDateTime"],
-            "activityOperationType": data["value"][0]["activityOperationType"],
-            "activityResult": data["value"][0]["activityResult"],
-        }
+        for audit_log in data["value"]:
+            # is the actor an app or a user?
+            if audit_log["actor"]["auditActorType"] == "ItPro":
+                actor = audit_log["actor"].get("userPrincipalName")
+            else:
+                actor = audit_log["actor"].get("applicationDisplayName")
+            audit_data.append(
+                {
+                    "resourceId": audit_log["resources"][0]["resourceId"],
+                    "auditResourceType": audit_log["resources"][0]["auditResourceType"],
+                    "actor": actor,
+                    "activityDateTime": audit_log["activityDateTime"],
+                    "activityOperationType": audit_log["activityOperationType"],
+                    "activityResult": audit_log["activityResult"],
+                }
+            )
+
+    return audit_data

@@ -29,12 +29,16 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "App Protection/"
     data = makeapirequest(ENDPOINT, token)
 
     assignment_responses = batch_assignment(
         data, "deviceAppManagement/", "/assignments", token, app_protection=True
     )
+    if audit:
+        graph_filter = "componentName eq 'ManagedAppProtection'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     # If profile is ManagedAppConfiguration, skip to next
     for profile in data["value"]:
@@ -77,13 +81,10 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
 
         results["outputs"].append(fname)
 
-        if audit:
-            audit_data = makeAuditRequest(
-                graph_id,
-                "",
-                token,
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
             )
-            if audit_data:
-                process_audit_data(audit_data, path, f"{configpath}{fname}.{output}")
 
     return results

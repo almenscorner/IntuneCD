@@ -27,9 +27,12 @@ def savebackup(path, output, token, prefix, append_id, audit):
     """
 
     results = {"config_count": 0, "outputs": []}
-
+    audit_data = None
     configpath = path + "/" + "Device Categories/"
     data = makeapirequest(ENDPOINT, token)
+    if audit:
+        graph_filter = "componentName eq 'Enrollment'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     if data["value"]:
         for item in data["value"]:
@@ -50,15 +53,10 @@ def savebackup(path, output, token, prefix, append_id, audit):
 
             results["outputs"].append(fname)
 
-            if audit:
-                audit_data = makeAuditRequest(
-                    graph_id,
-                    "",
-                    token,
+            if audit_data:
+                compare_data = {"type": "resourceId", "value": graph_id}
+                process_audit_data(
+                    audit_data, compare_data, path, f"{configpath}{fname}.{output}"
                 )
-                if audit_data:
-                    process_audit_data(
-                        audit_data, path, f"{configpath}{fname}.{output}"
-                    )
 
     return results
