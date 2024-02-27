@@ -31,6 +31,19 @@ class TestBackupCompliancePartner(unittest.TestCase):
                 {"id": "0", "onboardingStatus": "onboarded", "displayName": "test"}
             ]
         }
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.patch_makeapirequest = patch(
             "src.IntuneCD.backup.Intune.backup_remoteAssistancePartner.makeapirequest",
@@ -38,9 +51,22 @@ class TestBackupCompliancePartner(unittest.TestCase):
         )
         self.makeapirequest = self.patch_makeapirequest.start()
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_remoteAssistancePartner.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
+        self.process_audit_data_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_remoteAssistancePartner.process_audit_data"
+        )
+        self.process_audit_data = self.process_audit_data_patch.start()
+
     def tearDown(self):
         self.directory.cleanup()
         self.makeapirequest.stop()
+        self.makeAuditRequest_patch.stop()
+        self.process_audit_data_patch.stop()
 
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -103,6 +129,17 @@ class TestBackupCompliancePartner(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(self.directory.path, "json", self.token, True, False)
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Partner Connections/Remote Assistance/test__0.json"
+            ).exists()
+        )
+
+    def test_backup_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(self.directory.path, "json", self.token, True, True)
 
         self.assertTrue(
             Path(

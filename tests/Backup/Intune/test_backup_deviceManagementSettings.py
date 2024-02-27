@@ -58,9 +58,35 @@ class TestBackupDeviceManagementSettings(unittest.TestCase):
             "enableEnhancedTroubleshootingExperience": False,
             "enableDeviceGroupMembershipReport": False,
         }
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
+
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_deviceManagementSettings.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
+        self.process_audit_data_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_deviceManagementSettings.process_audit_data"
+        )
+        self.process_audit_data = self.process_audit_data_patch.start()
 
     def tearDown(self):
         self.directory.cleanup()
+        self.makeAuditRequest_patch.stop()
+        self.process_audit_data_patch.stop()
 
     def test_backup_yml(self, _, __):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -81,6 +107,20 @@ class TestBackupDeviceManagementSettings(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(self.directory.path, "json", False, self.token)
+
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
+            self.saved_data = json.load(f)
+
+        self.assertTrue(
+            Path(f"{self.directory.path}/Device Management Settings").exists()
+        )
+        self.assertEqual(self.expected_data, self.saved_data)
+        self.assertEqual(1, self.count["config_count"])
+
+    def test_backup_audit(self, _, __):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(self.directory.path, "json", True, self.token)
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             self.saved_data = json.load(f)
