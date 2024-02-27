@@ -46,6 +46,19 @@ class TestBackupApplications(unittest.TestCase):
             }
         ]
         self.object_assignment_data = [{"target": {"groupName": "Group1"}}]
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.batch_assignment_patch = patch(
             "src.IntuneCD.backup.Intune.backup_applications.batch_assignment"
@@ -64,11 +77,18 @@ class TestBackupApplications(unittest.TestCase):
         )
         self.makeapirequest = self.makeapirequest_patch.start()
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_applications.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
         self.object_assignment.stop()
         self.makeapirequest.stop()
+        self.makeAuditRequest.stop()
 
     def test_backup_ios_vpp_app(self):
         """The folder should be created, the file should be created, and the count should be 1."""
@@ -77,7 +97,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/iOS").exists())
@@ -95,7 +121,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/macOS").exists())
@@ -117,7 +149,13 @@ class TestBackupApplications(unittest.TestCase):
         self.exclude = ["VPPusedLicenseCount"]
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         app_data = json.load(
@@ -137,7 +175,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Windows").exists())
@@ -156,7 +200,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Windows").exists())
@@ -175,7 +225,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Windows").exists())
@@ -195,7 +251,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Android").exists())
@@ -214,7 +276,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Windows").exists())
@@ -234,7 +302,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(
@@ -255,7 +329,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/Web App").exists())
@@ -273,7 +353,13 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
 
         self.assertTrue(Path(self.directory.path + "/Applications/macOS").exists())
@@ -288,7 +374,13 @@ class TestBackupApplications(unittest.TestCase):
         """The count should be 0 if no data is returned."""
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, self.append_id, False
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            self.append_id,
+            False,
+            False,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -299,7 +391,28 @@ class TestBackupApplications(unittest.TestCase):
         self.makeapirequest.return_value = self.app_base_data
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, True, False
+            self.directory.path, "json", self.exclude, self.token, True, False, False
+        )
+
+        self.assertTrue(
+            Path(
+                self.directory.path + "/Applications/iOS/test_iOSVppApp_test__0.json"
+            ).exists()
+        )
+
+    def test_backup_scope_tag_and_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+        self.app_base_data["value"][0]["@odata.type"] = "#microsoft.graph.iosVppApp"
+        self.makeapirequest.return_value = self.app_base_data
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            True,
+            False,
+            [{"id": 0, "displayName": "default"}],
         )
 
         self.assertTrue(

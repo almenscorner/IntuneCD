@@ -45,6 +45,19 @@ class TestBackupShellScript(unittest.TestCase):
                 "scriptContent": "WW91IGZvdW5kIGEgc2VjcmV0IG1lc3NhZ2UsIGhvb3JheSE=",
             }
         ]
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.batch_assignment_patch = patch(
             "src.IntuneCD.backup.Intune.backup_shellScripts.batch_assignment"
@@ -70,12 +83,19 @@ class TestBackupShellScript(unittest.TestCase):
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.script_policy_data
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_shellScripts.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
         self.object_assignment.stop()
         self.batch_request.stop()
         self.makeapirequest.stop()
+        self.makeAuditRequest.stop()
 
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -88,6 +108,7 @@ class TestBackupShellScript(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
@@ -109,6 +130,7 @@ class TestBackupShellScript(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
@@ -129,6 +151,7 @@ class TestBackupShellScript(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
 
         self.assertTrue(f"{self.directory.path}/Scripts/Shell/Script Data")
@@ -147,6 +170,7 @@ class TestBackupShellScript(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -162,6 +186,7 @@ class TestBackupShellScript(unittest.TestCase):
             "test1",
             self.append_id,
             False,
+            None,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -169,7 +194,7 @@ class TestBackupShellScript(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True, False
+            self.directory.path, "json", self.exclude, self.token, "", True, False, None
         )
 
         self.assertTrue(
@@ -178,6 +203,25 @@ class TestBackupShellScript(unittest.TestCase):
         self.assertTrue(
             Path(f"{self.directory.path}/Scripts/Shell/Script Data/test__0.sh").exists()
         )
+
+    def test_backup_scope_tag_and_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            True,
+            False,
+            [{"id": 0, "displayName": "default"}],
+        )
+
+        self.assertTrue(
+            Path(f"{self.directory.path}/Scripts/Shell/test__0.json").exists()
+        )
+        self.assertEqual(1, self.count["config_count"])
 
 
 if __name__ == "__main__":

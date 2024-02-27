@@ -11,6 +11,7 @@ from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -38,7 +39,7 @@ def match(platform, odata_input) -> bool:
 
 
 # Get all applications and save them in specified path
-def savebackup(path, output, exclude, token, append_id, audit):
+def savebackup(path, output, exclude, token, append_id, audit, scope_tags):
     """
     Saves all applications in Intune to a JSON or YAML file.
 
@@ -62,6 +63,9 @@ def savebackup(path, output, exclude, token, append_id, audit):
         app_name = ""
         platform = ""
         results["config_count"] += 1
+
+        if scope_tags:
+            app = get_scope_tags_name(app, scope_tags)
 
         if "assignments" not in exclude:
             assignments = get_object_assignment(app["id"], assignment_responses)

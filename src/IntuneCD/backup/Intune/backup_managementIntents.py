@@ -14,6 +14,7 @@ from ...intunecdlib.graph_batch import (
 )
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.save_output import save_output
 
 # Set MS Graph base endpoint
@@ -22,7 +23,7 @@ TEMPLATE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/templates
 
 
 # Get all Intents and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id, audit):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Intents in Intune to a JSON or YAML file.
 
@@ -59,6 +60,9 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
                     template_type = template["displayName"]
 
             configpath = path + "/" + "Management Intents/" + template_type + "/"
+
+            if scope_tags:
+                intent_value = get_scope_tags_name(intent_value, scope_tags)
 
             if "assignments" not in exclude:
                 assignments = get_object_assignment(

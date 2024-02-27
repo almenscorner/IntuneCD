@@ -17,6 +17,7 @@ from ...intunecdlib.graph_batch import (
 )
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -28,7 +29,7 @@ ASSIGNMENT_ENDPOINT = (
 
 
 # Get all Custom Attribute Shell scripts and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id, audit):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Custom Attribute Shell scripts in Intune to a JSON or YAML file and script files.
 
@@ -64,6 +65,10 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
             continue
 
         results["config_count"] += 1
+
+        if scope_tags:
+            script_data = get_scope_tags_name(script_data, scope_tags)
+
         if "assignments" not in exclude:
             assignments = get_object_assignment(script_data["id"], assignment_responses)
             if assignments:

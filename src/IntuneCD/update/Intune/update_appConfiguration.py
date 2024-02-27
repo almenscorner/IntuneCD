@@ -21,6 +21,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 from .update_assignment import post_assignment_update, update_assignment
 
@@ -32,7 +33,13 @@ APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
 def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
+    path,
+    token,
+    assignment=False,
+    report=False,
+    create_groups=False,
+    remove=False,
+    scope_tags=None,
 ):
     """
     This function updates all App Configuration Polices in Intune,
@@ -87,6 +94,9 @@ def update(
 
             if data["value"]:
                 print("-" * 90)
+                # Get scope tag ID
+                if scope_tags:
+                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 mem_id = data.get("value", {}).get("id", None)
                 # Remove keys before using DeepDiff
                 data = remove_keys(data)

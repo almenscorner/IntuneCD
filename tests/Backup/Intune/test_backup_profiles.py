@@ -26,6 +26,20 @@ class TestBackupCustomProfiles(unittest.TestCase):
         self.exclude = []
         self.append_id = False
 
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
+
         self.batch_assignment_patch = patch(
             "src.IntuneCD.backup.Intune.backup_profiles.batch_assignment"
         )
@@ -43,11 +57,18 @@ class TestBackupCustomProfiles(unittest.TestCase):
         )
         self.makeapirequest = self.makeapirequest_patch.start()
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_profiles.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
         self.object_assignment.stop()
         self.makeapirequest.stop()
+        self.makeAuditRequest.stop()
 
     def test_backup_macOS_custom_profile(self):
         """The folders and files should be created and the count should be 2."""
@@ -73,6 +94,7 @@ class TestBackupCustomProfiles(unittest.TestCase):
             self.append_id,
             False,
             False,
+            None,
         )
 
         self.assertTrue(
@@ -111,6 +133,7 @@ class TestBackupCustomProfiles(unittest.TestCase):
             self.append_id,
             False,
             False,
+            None,
         )
 
         self.assertTrue(
@@ -164,6 +187,7 @@ class TestBackupCustomProfiles(unittest.TestCase):
             self.append_id,
             False,
             False,
+            None,
         )
 
         self.assertTrue(
@@ -212,6 +236,7 @@ class TestBackupCustomProfiles(unittest.TestCase):
             self.append_id,
             False,
             False,
+            None,
         )
 
         self.assertTrue(
@@ -219,6 +244,33 @@ class TestBackupCustomProfiles(unittest.TestCase):
                 f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json"
             ).exists()
         )
+        self.assertEqual(1, self.count["config_count"])
+
+    def test_backup_scope_tags_and_audit(self):
+        """The folders and files should be created and the count should be 2."""
+
+        self.makeapirequest.return_value = {
+            "value": [
+                {
+                    "@odata.type": "#microsoft.graph.test",
+                    "id": "0",
+                    "displayName": "test",
+                }
+            ]
+        }
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.token,
+            self.exclude,
+            "",
+            self.append_id,
+            False,
+            False,
+            [{"id": 0, "displayName": "default"}],
+        )
+
         self.assertEqual(1, self.count["config_count"])
 
 
@@ -231,6 +283,20 @@ class TestBackupStandardProfiles(unittest.TestCase):
         self.token = "token"
         self.exclude = []
         self.append_id = False
+
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.batch_assignment_patch = patch(
             "src.IntuneCD.backup.Intune.backup_profiles.batch_assignment"
@@ -249,11 +315,18 @@ class TestBackupStandardProfiles(unittest.TestCase):
         )
         self.makeapirequest = self.makeapirequest_patch.start()
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_profiles.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
         self.object_assignment.stop()
         self.makeapirequest.stop()
+        self.makeAuditRequest.stop()
 
     def test_backup_non_custom_profile(self):
         """The file should be created and the count should be 1."""
@@ -277,6 +350,7 @@ class TestBackupStandardProfiles(unittest.TestCase):
             self.append_id,
             False,
             False,
+            None,
         )
 
         self.assertTrue(
@@ -298,6 +372,7 @@ class TestBackupStandardProfiles(unittest.TestCase):
             self.append_id,
             False,
             False,
+            None,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -322,6 +397,7 @@ class TestBackupStandardProfiles(unittest.TestCase):
             True,
             False,
             False,
+            None,
         )
 
         self.assertTrue(
@@ -329,6 +405,32 @@ class TestBackupStandardProfiles(unittest.TestCase):
                 f"{self.directory.path}/Device Configurations/test_macOSGeneralDeviceConfiguration__0.json"
             ).exists()
         )
+
+    def test_backup_scope_tags_and_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+        self.makeapirequest.return_value = {
+            "value": [
+                {
+                    "@odata.type": "#microsoft.graph.macOSGeneralDeviceConfiguration",
+                    "id": "0",
+                    "displayName": "test",
+                }
+            ]
+        }
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
+            True,
+            [{"id": 0, "displayName": "default"}],
+        )
+
+        self.assertEqual(1, self.count["config_count"])
 
 
 if __name__ == "__main__":

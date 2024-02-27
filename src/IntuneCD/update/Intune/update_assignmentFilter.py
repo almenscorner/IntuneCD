@@ -18,13 +18,14 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/assignmentFilters"
 
 
-def update(path, token, report):
+def update(path, token, report, scope_tags):
     """
     This function updates all Filters in Intune if the configuration in Intune differs from the JSON/YAML file.
 
@@ -39,7 +40,6 @@ def update(path, token, report):
     if os.path.exists(configpath):
         # get all filters
         mem_data = makeapirequest(ENDPOINT, token)
-
         for filename in os.listdir(configpath):
             file = check_file(configpath, filename)
             if file is False:
@@ -59,6 +59,8 @@ def update(path, token, report):
 
             if filter_value:
                 print("-" * 90)
+                if scope_tags:
+                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 filter_id = filter_value["id"]
                 filter_value = remove_keys(filter_value)
 

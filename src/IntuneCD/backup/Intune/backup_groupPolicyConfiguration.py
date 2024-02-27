@@ -10,6 +10,7 @@ from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -18,7 +19,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/groupPolicyConfigu
 
 
 # Get all Group Policy Configurations and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id, audit):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Group Policy Configurations in Intune to a JSON or YAML file.
 
@@ -61,6 +62,9 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
                 )
                 presentation = makeapirequest(presentation_endpoint, token)
                 definition["presentationValues"] = presentation["value"]
+
+        if scope_tags:
+            profile = get_scope_tags_name(profile, scope_tags)
 
         if "assignments" not in exclude:
             assignments = get_object_assignment(profile["id"], assignment_responses)

@@ -72,14 +72,19 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
         self.directory.cleanup()
         self.batch_assignment.stop()
         self.object_assignment.stop()
-        self.makeapirequest.stop()
 
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = "yaml"
         count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            None,
         )
 
         with open(self.saved_path + output, "r", encoding="utf-8") as f:
@@ -95,7 +100,13 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
 
         output = "json"
         count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            None,
         )
 
         with open(self.saved_path + output, "r", encoding="utf-8") as f:
@@ -110,7 +121,13 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
 
         self.makeapirequest.side_effect = [{"value": []}]
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            None,
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -125,6 +142,7 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
             self.token,
             "test1",
             self.append_id,
+            None,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -132,7 +150,26 @@ class TestBackupEnrollmentStatusPage(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
+            self.directory.path, "json", self.exclude, self.token, "", True, None
+        )
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Enrollment Profiles/Windows/ESP/test__0.json"
+            ).exists()
+        )
+
+    def test_backup_scope_tags(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            True,
+            [{"id": 0, "displayName": "default"}],
         )
 
         self.assertTrue(

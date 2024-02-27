@@ -21,6 +21,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 from .update_assignment import post_assignment_update, update_assignment
 
@@ -32,7 +33,13 @@ ASSIGNMENT_ENDPOINT = (
 
 
 def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
+    path,
+    token,
+    assignment=False,
+    report=False,
+    create_groups=False,
+    remove=False,
+    scope_tags=None,
 ):
     """
     This function updates all Custom Attribute Shell scripts in Intune if the configuration in Intune differs from the JSON/YAML file.
@@ -82,6 +89,8 @@ def update(
             # If Custom Attribute Shell script exists, continue
             if data["value"]:
                 print("-" * 90)
+                if scope_tags:
+                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 q_param = None
                 # Get Shell script details
                 mem_data = makeapirequest(

@@ -130,7 +130,7 @@ def update(
                         token,
                         q_param=None,
                         jdata=request_json,
-                        status_code=201,
+                        status_code=200,
                     )
                     mem_assign_obj = []
                     assignment = update_assignment(

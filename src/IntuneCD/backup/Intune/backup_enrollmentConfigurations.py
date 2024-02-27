@@ -12,6 +12,7 @@ from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -22,7 +23,7 @@ ENDPOINT = (
 
 
 # Get all Enrollment Configurations and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id, audit):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Enrollment Configurations in Intune to a JSON or YAML file.
 
@@ -59,6 +60,9 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
         config_type = " ".join(config_type)
 
         print(f"Backing up Enrollment Config {config_type}: " + config["displayName"])
+
+        if scope_tags:
+            config = get_scope_tags_name(config, scope_tags)
 
         if "assignments" not in exclude:
             assignments = get_object_assignment(config["id"], assignment_responses)

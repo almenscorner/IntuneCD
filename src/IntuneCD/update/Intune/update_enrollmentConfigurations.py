@@ -21,6 +21,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 from .update_assignment import post_assignment_update, update_assignment
 
@@ -31,7 +32,13 @@ ENDPOINT = (
 
 
 def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
+    path,
+    token,
+    assignment=False,
+    report=False,
+    create_groups=False,
+    remove=False,
+    scope_tags=None,
 ):
     """_summary_
 
@@ -49,7 +56,6 @@ def update(
     if os.path.exists(configpath):
         # Get Enrollment Configurations
         intune_data = makeapirequest(ENDPOINT, token)
-
         # Get current assignments
         mem_assignments = batch_assignment(
             intune_data,
@@ -108,6 +114,8 @@ def update(
             # If Enrollment Configuration exists, continue
             if data["value"]:
                 print("-" * 90)
+                if scope_tags:
+                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 # Get Enrollment Configuration data from Intune
                 mem_id = data.get("value").get("id")
                 mem_priority = data.get("value").get("priority")

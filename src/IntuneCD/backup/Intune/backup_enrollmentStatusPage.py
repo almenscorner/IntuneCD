@@ -9,6 +9,7 @@ from ...intunecdlib.check_prefix import check_prefix_match
 from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
 from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -20,7 +21,7 @@ APP_ENDPOINT = "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps"
 
 
 # Get all Windows Enrollment Status Page profiles and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id):
+def savebackup(path, output, exclude, token, prefix, append_id, scope_tags):
     """
     Saves all Windows Enrollment Status Page profiles in Intune to a JSON or YAML file.
 
@@ -47,6 +48,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
             == "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
         ):
             results["config_count"] += 1
+
+            if scope_tags:
+                profile = get_scope_tags_name(profile, scope_tags)
             if "assignments" not in exclude:
                 assignments = get_object_assignment(profile["id"], assignment_responses)
                 if assignments:

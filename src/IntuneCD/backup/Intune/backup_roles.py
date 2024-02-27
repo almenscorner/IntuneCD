@@ -8,6 +8,7 @@ This module backs up all Roles in Intune.
 from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -16,7 +17,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/roleDefinitions"
 
 
 # Get all Roles and save them in specified path
-def savebackup(path, output, exclude, token, append_id, audit):
+def savebackup(path, output, exclude, token, append_id, audit, scope_tags):
     """
     Saves all Roles in Intune to a JSON or YAML file.
 
@@ -61,6 +62,8 @@ def savebackup(path, output, exclude, token, append_id, audit):
         results["config_count"] += 1
         print("Backing up Role: " + role["displayName"])
 
+        if scope_tags:
+            role = get_scope_tags_name(role, scope_tags)
         if "assignments" not in exclude:
             assignments = makeapirequest(
                 ENDPOINT + f"/{role['id']}/roleAssignments", token

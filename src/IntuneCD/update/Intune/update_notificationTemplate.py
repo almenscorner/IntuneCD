@@ -19,6 +19,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 
 # Set MS Graph endpoint
@@ -27,7 +28,7 @@ ENDPOINT = (
 )
 
 
-def update(path, token, report, remove):
+def update(path, token, report, remove, scope_tags):
     """
     This function updates all Notification Templates in Intune,
     if the configuration in Intune differs from the JSON/YAML file.
@@ -65,6 +66,10 @@ def update(path, token, report, remove):
             # If Notification Template exists, continue
             if data["value"]:
                 print("-" * 90)
+                if scope_tags:
+                    repo_data["roleScopeTagIds"] = get_scope_tags_id(
+                        repo_data, scope_tags
+                    )
                 # Get Notification Template data from Intune
                 q_param = "?$expand=localizedNotificationMessages"
                 mem_template_data = makeapirequest(

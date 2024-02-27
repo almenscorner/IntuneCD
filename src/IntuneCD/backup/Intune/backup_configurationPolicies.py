@@ -15,6 +15,7 @@ from ...intunecdlib.graph_batch import (
 )
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -23,7 +24,7 @@ BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
 
 # Get all Configuration Policies and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id, audit):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Configuration Policies in Intune to a JSON or YAML file.
 
@@ -66,6 +67,9 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit):
 
         if settings:
             policy["settings"] = settings
+
+        if scope_tags:
+            policy = get_scope_tags_name(policy, scope_tags)
 
         if "assignments" not in exclude:
             assignments = get_object_assignment(policy["id"], assignment_responses)

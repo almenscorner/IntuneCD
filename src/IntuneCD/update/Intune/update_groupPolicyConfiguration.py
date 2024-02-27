@@ -20,6 +20,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 from .update_assignment import post_assignment_update, update_assignment
 
@@ -358,7 +359,13 @@ def update_definition(repo_data, data, mem_id, mem_def_ids, token, report=False)
 
 
 def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
+    path,
+    token,
+    assignment=False,
+    report=False,
+    create_groups=False,
+    remove=False,
+    scope_tags=None,
 ):
     """
     This function updates all Group Policy configurations in Intune,
@@ -438,6 +445,8 @@ def update(
             # If data was found, continue
             if data:
                 print("-" * 90)
+                if scope_tags:
+                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 mem_id = data["id"]
                 data = remove_keys(data)
 

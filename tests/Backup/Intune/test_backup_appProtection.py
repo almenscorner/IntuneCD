@@ -64,6 +64,19 @@ class TestBackupAppProtection(unittest.TestCase):
                 }
             ],
         }
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.batch_assignment_patch = patch(
             "src.IntuneCD.backup.Intune.backup_AppProtection.batch_assignment"
@@ -83,11 +96,18 @@ class TestBackupAppProtection(unittest.TestCase):
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.app_protection
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_AppProtection.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
         self.object_assignment.stop()
         self.makeapirequest.stop()
+        self.makeAuditRequest.stop()
 
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
@@ -100,6 +120,7 @@ class TestBackupAppProtection(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
@@ -121,6 +142,7 @@ class TestBackupAppProtection(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
@@ -146,6 +168,7 @@ class TestBackupAppProtection(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -163,6 +186,7 @@ class TestBackupAppProtection(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
 
         with open(
@@ -186,6 +210,7 @@ class TestBackupAppProtection(unittest.TestCase):
             "",
             self.append_id,
             False,
+            None,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -200,6 +225,7 @@ class TestBackupAppProtection(unittest.TestCase):
             "test1",
             self.append_id,
             False,
+            None,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -207,7 +233,7 @@ class TestBackupAppProtection(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True, False
+            self.directory.path, "json", self.exclude, self.token, "", True, False, None
         )
 
         self.assertTrue(
@@ -215,6 +241,26 @@ class TestBackupAppProtection(unittest.TestCase):
                 f"{self.directory.path}/App Protection/test_iosManagedAppProtection__T_0.json"
             ).exists()
         )
+
+    def test_backup_scope_tag_and_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            False,
+            True,
+            [{"id": 0, "displayName": "default"}],
+        )
+
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
+            self.saved_data = json.load(f)
+
+        self.assertTrue(Path(f"{self.directory.path}/App Protection").exists())
+        self.assertEqual(1, self.count["config_count"])
 
 
 if __name__ == "__main__":

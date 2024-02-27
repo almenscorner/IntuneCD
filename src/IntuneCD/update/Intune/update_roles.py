@@ -19,13 +19,14 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/roleDefinitions"
 
 
-def update(path, token, report, remove=False):
+def update(path, token, report, remove=False, scope_tags=None):
     """
     This function updates all Roles in Intune if the configuration in Intune differs from the JSON/YAML file.
 
@@ -62,6 +63,8 @@ def update(path, token, report, remove=False):
 
             if role_value:
                 print("-" * 90)
+                if scope_tags:
+                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 role_id = role_value["id"]
                 role_value = remove_keys(role_value)
 
