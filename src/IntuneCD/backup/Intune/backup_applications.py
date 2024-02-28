@@ -10,8 +10,8 @@ import re
 from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import (
     batch_assignment,
-    get_object_assignment,
     batch_request,
+    get_object_assignment,
 )
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
