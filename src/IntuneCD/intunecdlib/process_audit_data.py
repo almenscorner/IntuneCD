@@ -147,8 +147,9 @@ def _git_commit_changes(audit_record, path, file):
         "commit",
         "-m",
         (
-            f"Updated by {audit_record['actor']} on {audit_record['activityDateTime']}, "
-            f"change type: {audit_record['activityOperationType']}, result: {audit_record['activityResult']}"
+            f"{audit_record['activityOperationType']} by {audit_record['actor']}\n"
+            f"Date: {audit_record['activityDateTime']}\n"
+            f"result: {audit_record['activityResult']}"
         ),
     ]
 
