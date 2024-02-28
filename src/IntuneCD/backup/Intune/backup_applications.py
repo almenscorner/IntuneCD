@@ -8,7 +8,11 @@ This module backs up all App Protection Policies in Intune.
 import re
 
 from ...intunecdlib.clean_filename import clean_filename
-from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
+from ...intunecdlib.graph_batch import (
+    batch_assignment,
+    get_object_assignment,
+    batch_request,
+)
 from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
 from ...intunecdlib.process_audit_data import process_audit_data
 from ...intunecdlib.process_scope_tags import get_scope_tags_name
@@ -55,6 +59,11 @@ def savebackup(path, output, exclude, token, append_id, audit, scope_tags):
     assignment_responses = batch_assignment(
         data, "deviceAppManagement/mobileApps/", "/assignments", token
     )
+    app_ids = [app["id"] for app in data["value"]]
+    scope_tag_responses = batch_request(
+        app_ids, "deviceAppManagement/mobileApps/", "?$select=roleScopeTagIds,id", token
+    )
+
     if audit:
         graph_filter = "componentName eq 'MobileApp'"
         audit_data = makeAuditRequest(graph_filter, token)
@@ -63,6 +72,10 @@ def savebackup(path, output, exclude, token, append_id, audit, scope_tags):
         app_name = ""
         platform = ""
         results["config_count"] += 1
+
+        scope_tag_data = [v for v in scope_tag_responses if app["id"] == v["id"]]
+        if scope_tag_data:
+            app["roleScopeTagIds"] = scope_tag_data[0]["roleScopeTagIds"]
 
         if scope_tags:
             app = get_scope_tags_name(app, scope_tags)
