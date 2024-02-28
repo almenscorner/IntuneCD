@@ -7,9 +7,11 @@ This module contains the functions to make API requests to the Microsoft Graph A
 
 import datetime
 import json
+import os
 import time
-
 import requests
+
+from .logger import log
 
 
 def makeapirequest(endpoint, token, q_param=None):
@@ -248,11 +250,18 @@ def makeAuditRequest(graph_filter, token):
     """
 
     audit_data = []
+    if not os.getenv("AUDIT_DAYS_BACK"):
+        days_back = 1
+    else:
+        days_back = int(os.getenv("AUDIT_DAYS_BACK"))
+    log("makeAuditRequest", f"AUDIT_DAYS_BACK: {days_back}")
     # Get the date and time 24 hours ago and format it
-    start_date = datetime.datetime.now() - datetime.timedelta(days=1)
+    start_date = datetime.datetime.now() - datetime.timedelta(days=days_back)
     start_date = start_date.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    log("makeAuditRequest", f"Start date: {start_date}")
     # Get the current date and time
     end_date = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    log("makeAuditRequest", f"End date: {end_date}")
     # Create query to get audit logs for the object
     # if not graph_filter:
     #    graph_filter = f"resources/any(s:s/resourceId eq '{pid}')"
@@ -264,6 +273,7 @@ def makeAuditRequest(graph_filter, token):
         "$select": "actor,activityDateTime,activityOperationType,activityResult,resources",
         "$orderby": "activityDateTime desc",
     }
+    log("makeAuditRequest", f"Query parameters: {q_param}")
 
     # Make the request to the Microsoft Graph API
     endpoint = "https://graph.microsoft.com/v1.0/deviceManagement/auditEvents"
@@ -271,12 +281,14 @@ def makeAuditRequest(graph_filter, token):
 
     # If there are audit logs, return the latest one
     if data["value"]:
+        log("makeAuditRequest", f"Got {len(data['value'])} audit logs.")
         for audit_log in data["value"]:
             # is the actor an app or a user?
             if audit_log["actor"]["auditActorType"] == "ItPro":
                 actor = audit_log["actor"].get("userPrincipalName")
             else:
                 actor = audit_log["actor"].get("applicationDisplayName")
+            log("makeAuditRequest", f"Actor found: {actor}")
             audit_data.append(
                 {
                     "resourceId": audit_log["resources"][0]["resourceId"],
