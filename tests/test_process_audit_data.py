@@ -26,6 +26,7 @@ class TestProcessAuditData(unittest.TestCase):
         """
         self.record = {
             "activityDateTime": "2021-05-25T20:00:00Z",
+            "activityResourceType": "test",
             "userPrincipalName": "test",
             "actor": "test",
         }
@@ -84,6 +85,7 @@ class TestProcessAuditData(unittest.TestCase):
         mock_run.return_value.returncode = 0
         self.record = {
             "activityDateTime": "2021-05-25T20:00:00Z",
+            "auditResourceType": "test",
             "userPrincipalName": "test",
             "actor": "test",
             "activityOperationType": "test",
