@@ -162,6 +162,17 @@ class TestBackupNotificationTemplate(unittest.TestCase):
         )
         self.assertEqual(0, self.count["config_count"])
 
+    def test_backup_EnrollmentNotificationInternalMEO(self):
+        """The count should be 0 if no data is returned."""
+
+        self.message_template["value"][0][
+            "displayName"
+        ] = "EnrollmentNotificationInternalMEO"
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "", self.append_id, False, ""
+        )
+        self.assertEqual(0, self.count["config_count"])
+
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 

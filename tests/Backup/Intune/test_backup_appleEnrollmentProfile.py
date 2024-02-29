@@ -4,6 +4,7 @@
 """This module tests backing up Apple Enrollment Profile."""
 
 import json
+import os.path
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -153,12 +154,31 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
     def test_backup_with_prefix(self):
         """The count should be 0 if no data is returned."""
 
-        self.makeapirequest.return_value = {"value": []}
+        self.batch_intune[0]["value"][0]["displayName"] = "test - test1"
+        self.batch_request.return_value = self.batch_intune
         self.count = savebackup(
             self.directory.path, "json", self.token, "test", self.append_id, False
         )
 
-        self.assertEqual(0, self.count["config_count"])
+        self.assertEqual(1, self.count["config_count"])
+        self.assertTrue(
+            os.path.exists(
+                f"{self.directory.path}/Enrollment Profiles/Apple/test - test1.json"
+            )
+        )
+
+    def test_backup_with_prefix_no_match(self):
+        """The count should be 0 if no data is returned."""
+
+        self.makeapirequest.return_value = self.token_response
+        self.batch_request.return_value = self.batch_intune
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "prefix", self.append_id, False
+        )
+
+        self.assertFalse(
+            os.path.exists(f"{self.directory.path}/Enrollment Profiles/Apple/test.json")
+        )
 
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""

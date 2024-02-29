@@ -4,6 +4,7 @@
 """This module tests backing up profiles."""
 
 
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -197,6 +198,65 @@ class TestBackupCustomProfiles(unittest.TestCase):
         )
         self.assertEqual(1, self.count["config_count"])
 
+    def test_backup_windows_custom_profile_encrypted_ignore_omas(self):
+        """The file should be created and the count should be 1."""
+
+        self.profile = {
+            "value": [
+                {
+                    "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
+                    "id": "0",
+                    "displayName": "test",
+                    "omaSettings": [
+                        {
+                            "isEncrypted": True,
+                            "@odata.type": "#microsoft.graph.windows10OmaSetting",
+                            "secretReferenceValueId": "0",
+                            "omaUri": "test uri",
+                            "displayName": "test",
+                            "description": "",
+                            "value": "encrypted value",
+                        }
+                    ],
+                }
+            ]
+        }
+        self.oma_values = {
+            "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+            "value": "password",
+        }
+
+        self.makeapirequest.side_effect = self.profile, self.oma_values
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.token,
+            self.exclude,
+            "",
+            self.append_id,
+            True,
+            False,
+            None,
+        )
+
+        with open(
+            f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json",
+            "r",
+            encoding="utf-8",
+        ) as file:
+            data = file.read()
+            data = json.loads(data)
+            print(data)
+            self.assertTrue("password" not in data["omaSettings"][0]["value"])
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Configurations/test_windows10CustomConfiguration.json"
+            ).exists()
+        )
+        self.assertEqual(1, self.count["config_count"])
+
     def test_backup_windows_custom_profile_not_encrypted(self):
         """The file should be created and the count should be 1."""
 
@@ -246,15 +306,17 @@ class TestBackupCustomProfiles(unittest.TestCase):
         )
         self.assertEqual(1, self.count["config_count"])
 
-    def test_backup_scope_tags_and_audit(self):
+    def test_backup_scope_tags_and_audit_macOS_custom_profile(self):
         """The folders and files should be created and the count should be 2."""
 
         self.makeapirequest.return_value = {
             "value": [
                 {
-                    "@odata.type": "#microsoft.graph.test",
+                    "@odata.type": "#microsoft.graph.macOSCustomConfiguration",
                     "id": "0",
                     "displayName": "test",
+                    "payload": "SGkgdGhlcmUgcHJldHR5",
+                    "payloadFileName": "test.mobileconfig",
                 }
             ]
         }
@@ -267,7 +329,51 @@ class TestBackupCustomProfiles(unittest.TestCase):
             "",
             self.append_id,
             False,
+            True,
+            [{"id": 0, "displayName": "default"}],
+        )
+
+        self.assertEqual(2, self.count["config_count"])
+
+    def test_backup_scope_tags_and_audit_windows_custom_profile(self):
+        """The folders and files should be created and the count should be 2."""
+
+        self.profile = {
+            "value": [
+                {
+                    "@odata.type": "#microsoft.graph.windows10CustomConfiguration",
+                    "id": "0",
+                    "displayName": "test",
+                    "omaSettings": [
+                        {
+                            "isEncrypted": False,
+                            "@odata.type": "#microsoft.graph.windows10OmaSetting",
+                            "secretReferenceValueId": "0",
+                            "omaUri": "test uri",
+                            "displayName": "test",
+                            "description": "",
+                            "value": [],
+                        }
+                    ],
+                }
+            ]
+        }
+        self.oma_values = {
+            "@odata.context": "https://graph.microsoft.com/beta/$metadata#Edm.String",
+            "value": "password",
+        }
+
+        self.makeapirequest.side_effect = self.profile, self.oma_values
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.token,
+            self.exclude,
+            "",
+            self.append_id,
             False,
+            True,
             [{"id": 0, "displayName": "default"}],
         )
 
@@ -362,6 +468,32 @@ class TestBackupStandardProfiles(unittest.TestCase):
 
     def test_backup_with_prefix(self):
         """The count should be 0 if no data is returned."""
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "test1",
+            self.append_id,
+            False,
+            False,
+            None,
+        )
+        self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_prefix_no_match(self):
+        """The count should be 0 if no data is returned."""
+
+        self.makeapirequest.return_value = {
+            "value": [
+                {
+                    "@odata.type": "#microsoft.graph.macOSGeneralDeviceConfiguration",
+                    "id": "0",
+                    "displayName": "test",
+                }
+            ]
+        }
 
         self.count = savebackup(
             self.directory.path,

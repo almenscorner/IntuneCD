@@ -4,6 +4,7 @@
 """This module tests backing up compliance."""
 
 import json
+import os.path
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -172,7 +173,28 @@ class TestBackupCompliance(unittest.TestCase):
     def test_backup_with_prefix(self):
         """The count should be 0 if no data is returned."""
 
-        self.makeapirequest.return_value = {"value": []}
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "test",
+            self.append_id,
+            False,
+            None,
+        )
+        self.assertEqual(1, self.count["config_count"])
+        self.assertTrue(
+            os.path.exists(
+                f"{self.directory.path}/Compliance Policies/Policies/test_iosCompliancePolicy.json"
+            )
+        )
+
+    def test_backup_with_prefix_no_match(self):
+        """The count should be 0 if no data is returned."""
+
+        self.compliance_policy["value"][0]["displayName"] = "iosCompliancePolicy"
+        self.makeapirequest.return_value = self.compliance_policy
         self.count = savebackup(
             self.directory.path,
             "json",
@@ -208,7 +230,7 @@ class TestBackupCompliance(unittest.TestCase):
             self.token,
             "",
             True,
-            False,
+            True,
             [{"id": 0, "displayName": "default"}],
         )
 

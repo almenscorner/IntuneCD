@@ -214,7 +214,7 @@ class TestBackupShellScript(unittest.TestCase):
             self.token,
             "",
             True,
-            False,
+            True,
             [{"id": 0, "displayName": "default"}],
         )
 

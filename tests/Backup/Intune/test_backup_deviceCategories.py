@@ -4,6 +4,7 @@
 """This module tests backing up deviceCategories."""
 
 import json
+import os.path
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -112,7 +113,23 @@ class TestBackupdeviceCategories(unittest.TestCase):
     def test_backup_with_prefix(self):
         """The count should be 0 if no data is returned."""
 
-        self.makeapirequest.return_value = {"value": []}
+        self.deviceCategories["value"][0]["displayName"] = "test_Test1"
+        self.makeapirequest.return_value = self.deviceCategories
+
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "test", self.append_id, False, ""
+        )
+        self.assertEqual(1, self.count["config_count"])
+        self.assertTrue(
+            os.path.exists(f"{self.directory.path}/Device Categories/test_Test1.json")
+        )
+
+    def test_backup_with_prefix_no_match(self):
+        """The count should be 0 if no data is returned."""
+
+        self.deviceCategories["value"][0]["displayName"] = "category"
+        self.makeapirequest.return_value = self.deviceCategories
+
         self.count = savebackup(
             self.directory.path, "json", self.token, "test", self.append_id, False, ""
         )
