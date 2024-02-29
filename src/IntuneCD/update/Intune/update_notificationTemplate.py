@@ -54,6 +54,9 @@ def update(path, token, report, remove, scope_tags):
             with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             data = {"value": ""}
             if mem_data["value"]:
                 for val in mem_data["value"]:
@@ -66,10 +69,6 @@ def update(path, token, report, remove, scope_tags):
             # If Notification Template exists, continue
             if data["value"]:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data["roleScopeTagIds"] = get_scope_tags_id(
-                        repo_data, scope_tags
-                    )
                 # Get Notification Template data from Intune
                 q_param = "?$expand=localizedNotificationMessages"
                 mem_template_data = makeapirequest(

@@ -82,6 +82,9 @@ def update(
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             mem_data = {}
             for intent in intent_responses["value"]:
                 if (
@@ -98,8 +101,6 @@ def update(
             # If Intent exists, continue
             if mem_data:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 print(
                     "Checking if Intent: "
                     + repo_data["displayName"]

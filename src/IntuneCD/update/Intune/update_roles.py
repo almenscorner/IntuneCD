@@ -52,6 +52,9 @@ def update(path, token, report, remove=False, scope_tags=None):
             with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             role_value = {}
 
             # If Filter exists, continue
@@ -63,8 +66,6 @@ def update(path, token, report, remove=False, scope_tags=None):
 
             if role_value:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 role_id = role_value["id"]
                 role_value = remove_keys(role_value)
 

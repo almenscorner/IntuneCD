@@ -50,6 +50,9 @@ def update(path, token, report, remove, scope_tags):
             with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             category_value = {}
 
             # If Category exists, continue
@@ -61,8 +64,6 @@ def update(path, token, report, remove, scope_tags):
 
             if category_value:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 category_id = category_value["id"]
                 category_value = remove_keys(category_value)
 

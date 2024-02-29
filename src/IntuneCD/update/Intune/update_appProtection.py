@@ -87,6 +87,10 @@ def update(
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
 
+            # Get scope tag ID
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             # If App Protection exists, continue
             data = {"value": ""}
             if mem_data["value"]:
@@ -111,9 +115,6 @@ def update(
 
             if data["value"]:
                 print("-" * 90)
-                # Get scope tag ID
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 mem_id = data.get("value", {}).get("id", None)
                 # Remove keys before using DeepDiff
                 data["value"] = remove_keys(data["value"])

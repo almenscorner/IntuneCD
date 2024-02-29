@@ -79,6 +79,9 @@ def update(
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             config_type = repo_data.get("deviceEnrollmentConfigurationType", None)
             config_type = config_type[0].upper() + config_type[1:]
             config_type = re.findall("[A-Z][^A-Z]*", config_type)
@@ -114,8 +117,6 @@ def update(
             # If Enrollment Configuration exists, continue
             if data["value"]:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 # Get Enrollment Configuration data from Intune
                 mem_id = data.get("value").get("id")
                 mem_priority = data.get("value").get("priority")

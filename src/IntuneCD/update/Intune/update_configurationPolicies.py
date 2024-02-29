@@ -73,6 +73,9 @@ def update(
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             data = {"value": ""}
             if mem_data["value"]:
                 for val in mem_data["value"]:
@@ -97,8 +100,6 @@ def update(
             # If Filter exists, continue
             if data["value"]:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 # Get Filter data from Intune
                 mem_policy_data = makeapirequest(
                     ENDPOINT + "/" + data.get("value").get("id"), token

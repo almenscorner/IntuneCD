@@ -79,6 +79,9 @@ def update(
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             data = {"value": ""}
             if mem_shellScript["value"]:
                 for val in mem_shellScript["value"]:
@@ -89,8 +92,6 @@ def update(
             # If Custom Attribute Shell script exists, continue
             if data["value"]:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 q_param = None
                 # Get Shell script details
                 mem_data = makeapirequest(

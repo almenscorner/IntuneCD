@@ -77,6 +77,9 @@ def update(
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             data = {"value": ""}
             if mem_powershellScript["value"]:
                 for val in mem_powershellScript["value"]:
@@ -87,8 +90,6 @@ def update(
             # If Powershell script exists, continue
             if data["value"]:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 # Get Powershell script details
                 mem_data = makeapirequest(
                     ENDPOINT + "/" + data.get("value").get("id"), token

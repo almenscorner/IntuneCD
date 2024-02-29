@@ -430,6 +430,10 @@ def update(
             if "assignments" in repo_data:
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
+
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             # If configurations was found in Intune, continue
             if mem_configs:
                 for val in mem_configs[:]:
@@ -445,8 +449,6 @@ def update(
             # If data was found, continue
             if data:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 mem_id = data["id"]
                 data = remove_keys(data)
 

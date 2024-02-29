@@ -79,6 +79,9 @@ def update(
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
 
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
+
             # If Compliance Policy exists, continue
             data = {"value": ""}
             if mem_data["value"]:
@@ -92,8 +95,6 @@ def update(
 
             if data["value"]:
                 print("-" * 90)
-                if scope_tags:
-                    repo_data = get_scope_tags_id(repo_data, scope_tags)
                 mem_id = data.get("value", {}).get("id", None)
                 data["value"] = remove_keys(data["value"])
 
