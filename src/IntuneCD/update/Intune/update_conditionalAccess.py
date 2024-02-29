@@ -49,7 +49,7 @@ def update(path, token, report, remove):
             # and set query parameter
             with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
-                repo_data["conditions"].pop("users", None)
+                repo_data.get("conditions").pop("users", None)
 
             data = {"value": ""}
             if mem_data["value"]:
@@ -73,6 +73,18 @@ def update(path, token, report, remove):
                 mem_id = data.get("value").get("id")
                 # Remove keys before using DeepDiff
                 data["value"] = remove_keys(data["value"])
+
+                repo_data.pop("templateId", None)
+                data["value"].pop("templateId", None)
+
+                if repo_data.get("grantControls").get("authenticationStrength"):
+                    repo_data["grantControls"]["authenticationStrength"].pop(
+                        "combinationConfigurations@odata.context", None
+                    )
+                if data.get("value").get("grantControls").get("authenticationStrength"):
+                    data.get("value").get("grantControls").get(
+                        "authenticationStrength"
+                    ).pop("combinationConfigurations@odata.context", None)
 
                 diff = DeepDiff(data["value"], repo_data, ignore_order=True)
 

@@ -114,6 +114,7 @@ def update(path, token, report, remove=False, scope_tags=None):
                 print("-" * 90)
                 print("Role not found, creating role: " + repo_data["displayName"])
                 if report is False:
+                    repo_data.pop("roleAssignments", None)
                     request_json = json.dumps(repo_data)
                     post_request = makeapirequestPost(
                         ENDPOINT,
