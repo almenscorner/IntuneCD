@@ -98,7 +98,7 @@ def update_intune(
         from .update.Intune.update_enrollmentStatusPage import update
 
         diff_summary.append(
-            update(path, token, assignment, report, create_groups, remove)
+            update(path, token, assignment, report, create_groups, remove, scope_tags)
         )
 
     if "EnrollmentConfigurations" not in exclude:
