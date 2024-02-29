@@ -31,7 +31,6 @@ def savebackup(path, output, token, prefix, append_id, audit, scope_tags):
 
     results = {"config_count": 0, "outputs": []}
     audit_data = None
-    scope_tags = None
     configpath = path + "/" + "Compliance Policies/Message Templates/"
     q_param = "?$expand=localizedNotificationMessages"
     data = makeapirequest(ENDPOINT, token, q_param)
@@ -51,11 +50,11 @@ def savebackup(path, output, token, prefix, append_id, audit, scope_tags):
         q_param = "?$expand=localizedNotificationMessages"
         template_data = makeapirequest(ENDPOINT + "/" + template["id"], token, q_param)
 
-        graph_id = template_data["id"]
-        template_data = remove_keys(template_data)
-
         if scope_tags:
             template_data = get_scope_tags_name(template_data, scope_tags)
+
+        graph_id = template_data["id"]
+        template_data = remove_keys(template_data)
 
         for locale in template_data["localizedNotificationMessages"]:
             remove_keys(locale)
