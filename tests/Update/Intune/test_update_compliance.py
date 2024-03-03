@@ -204,6 +204,57 @@ class TestUpdateCompliance(unittest.TestCase):
         self.assertEqual(self.makeapirequestPatch.call_count, 1)
         self.assertEqual(self.post_assignment_update.call_count, 1)
 
+    def test_update_complianceScriptPolicy(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
+
+        self.repo_data["deviceComplianceScriptName"] = "test"
+        self.repo_data["deviceCompliancePolicyScript"] = {
+            "deviceComplianceScriptId": "1"
+        }
+        self.makeapirequest.side_effect = [
+            self.mem_data,
+            {
+                "value": [{"id": "0", "displayName": "test"}],
+            },
+        ]
+
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
+
+        self.assertEqual(self.count[0].count, 2)
+
+    def test_update_complianceScriptPolicy_platform(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
+
+        self.repo_data["platforms"] = "linux"
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
+
+        self.assertEqual(self.count, [])
+
+    def test_update_complianceScriptPolicy_not_found(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
+
+        self.repo_data["deviceComplianceScriptName"] = "test"
+        self.repo_data["displayName"] = "test1"
+        self.repo_data["deviceCompliancePolicyScript"] = {
+            "deviceComplianceScriptId": "1"
+        }
+        self.makeapirequest.side_effect = [
+            self.mem_data,
+            {
+                "value": [{"id": "0", "displayName": "test"}],
+            },
+        ]
+
+        self.count = update(
+            self.directory.path, self.token, assignment=True, remove=False
+        )
+
+        self.assertEqual(self.makeapirequestPost.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

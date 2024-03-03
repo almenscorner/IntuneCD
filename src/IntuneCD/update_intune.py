@@ -41,6 +41,23 @@ def update_intune(
             update(path, token, assignment, report, create_groups, remove, scope_tags)
         )
 
+    if "ReusablePolicySettings" not in exclude:
+        from .update.Intune.update_reusablePolicySettings import update
+
+        diff_summary.append(update(path, token, report, remove))
+
+    if "ComplianceScripts" not in exclude:
+        from .update.Intune.update_complianceScripts import update
+
+        diff_summary.append(update(path, token, report, remove, scope_tags))
+
+    if "DeviceCompliancePolicies" not in exclude:
+        from .update.Intune.update_compliancePolicies import update
+
+        diff_summary.append(
+            update(path, token, assignment, report, create_groups, remove, scope_tags)
+        )
+
     if "Compliance" not in exclude:
         from .update.Intune.update_compliance import update
 

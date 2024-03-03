@@ -55,6 +55,29 @@ def backup_intune(results, path, output, exclude, token, prefix, append_id, args
             savebackup(path, output, exclude, token, append_id, args.audit, scope_tags)
         )
 
+    if "DeviceCompliancePolicies" not in exclude:
+        from .backup.Intune.backup_compliancePolicies import savebackup
+
+        results.append(
+            savebackup(
+                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
+            )
+        )
+
+    if "ReusablePolicySettings" not in exclude:
+        from .backup.Intune.backup_reusablePolicySettings import savebackup
+
+        results.append(
+            savebackup(path, output, token, prefix, append_id, args.audit, scope_tags)
+        )
+
+    if "ComplianceScripts" not in exclude:
+        from .backup.Intune.backup_complianceScripts import savebackup
+
+        results.append(
+            savebackup(path, output, token, prefix, append_id, args.audit, scope_tags)
+        )
+
     if "Compliance" not in exclude:
         from .backup.Intune.backup_compliance import savebackup
 
