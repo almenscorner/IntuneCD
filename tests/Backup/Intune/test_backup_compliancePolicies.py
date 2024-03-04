@@ -316,6 +316,30 @@ class TestBackupCompliance(unittest.TestCase):
             ).exists()
         )
 
+    def test_backup_custom_detection_script_not_found(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+        self.makeapirequest.side_effect = [
+            self.compliance_policy,
+            {"value": []},
+            self.scheduled_actions,
+        ]
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            True,
+            True,
+            "",
+        )
+
+        self.assertEqual(
+            self.compliance_policy["value"][0]["detectionScriptName"], None
+        )
+        self.assertEqual(self.makeapirequest.call_count, 3)
+
 
 if __name__ == "__main__":
     unittest.main()

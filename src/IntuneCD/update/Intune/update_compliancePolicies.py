@@ -96,7 +96,9 @@ def _set_detection_script_id(data, token):
         script_id_path = script_id_path + ["simpleSettingValue", "value"]
         data = _set_value_from_path(data, script_id["value"][0]["id"], script_id_path)
 
-    return data
+        return data
+
+    return False
 
 
 def update(
@@ -190,6 +192,15 @@ def update(
                         .get("scheduledActionConfigurations", [])
                     ):
                         remove_keys(scheduled_config)
+
+                if "detectionScriptName" in repo_data:
+                    script_name = repo_data["detectionScriptName"]
+                    repo_data = _set_detection_script_id(repo_data, token)
+                    if repo_data is False:
+                        print(
+                            f"Detection script {script_name} not found, Compliance Policy not updated"
+                        )
+                        continue
 
                 diff = DeepDiff(
                     data["value"],
@@ -316,8 +327,15 @@ def update(
                     "Compliance Policy not found, creating Policy: " + repo_data["name"]
                 )
                 if report is False:
-                    if repo_data.get("detectionScriptName"):
+                    if "detectionScriptName" in repo_data:
+                        script_name = repo_data["detectionScriptName"]
                         repo_data = _set_detection_script_id(repo_data, token)
+                        if repo_data is False:
+                            print(
+                                f"Detection script {script_name} not found, Compliance Policy not created"
+                            )
+                            continue
+
                     repo_data = _remove_keys(repo_data)
                     request_json = json.dumps(repo_data)
                     post_request = makeapirequestPost(

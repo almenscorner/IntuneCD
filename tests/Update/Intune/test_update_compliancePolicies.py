@@ -323,6 +323,7 @@ class TestUpdateCompliancePolicies(unittest.TestCase):
 
         self.makeapirequest.side_effect = [
             self.mem_data,
+            {"value": [{"displayName": "test1", "id": "0"}]},
             {
                 "value": [
                     {
@@ -362,8 +363,27 @@ class TestUpdateCompliancePolicies(unittest.TestCase):
             self.directory.path, self.token, assignment=False, remove=True
         )
 
-        self.assertEqual(self.makeapirequestPost.call_count, 2)
-        self.assertEqual(self.post_assignment_update.call_count, 1)
+        self.assertEqual(self.makeapirequestPost.call_count, 0)
+        self.assertEqual(self.post_assignment_update.call_count, 0)
+
+    def test_update_with_detection_script_not_found_update(self):
+        """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""
+
+        # self.repo_data["name"] = "test1"
+        self.repo_data["detectionScriptName"] = "test1"
+        self.repo_data["settings"] = [self.script_settings]
+        self.makeapirequest.side_effect = [
+            self.mem_data,
+            {"value": [{"displayName": "test1", "id": "0"}]},
+            {"value": []},
+        ]
+
+        self.count = update(
+            self.directory.path, self.token, assignment=False, remove=True
+        )
+
+        self.assertEqual(self.makeapirequestPost.call_count, 0)
+        self.assertEqual(self.post_assignment_update.call_count, 0)
 
     def test_update_no_technology(self):
         """The count should be 0, the post_assignment_update and makeapirequestPatch should not be called."""

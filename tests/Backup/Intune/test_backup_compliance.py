@@ -240,6 +240,57 @@ class TestBackupCompliance(unittest.TestCase):
             ).exists()
         )
 
+    def test_backup_custom_compliance(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+        self.compliance_policy["value"][0]["deviceCompliancePolicyScript"] = {
+            "deviceComplianceScriptId": "0"
+        }
+        self.makeapirequest.side_effect = [
+            self.compliance_policy,
+            {"displayName": "test"},
+        ]
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            True,
+            True,
+            "",
+        )
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Compliance Policies/Policies/test_iosCompliancePolicy__0.json"
+            ).exists()
+        )
+        self.assertEqual(self.makeapirequest.call_count, 2)
+
+    def test_backup_custom_compliance_script_not_found(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+        self.compliance_policy["value"][0]["deviceCompliancePolicyScript"] = {
+            "deviceComplianceScriptId": "0"
+        }
+        self.makeapirequest.side_effect = [self.compliance_policy, {}]
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            True,
+            True,
+            "",
+        )
+
+        self.assertEqual(
+            self.compliance_policy["value"][0]["deviceComplianceScriptName"], None
+        )
+        self.assertEqual(self.makeapirequest.call_count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -39,7 +39,9 @@ def _set_compliance_script_id(data, token):
             "deviceComplianceScriptId"
         ] = compliance_script_id["value"][0]["id"]
 
-    return data
+        return data
+
+    return False
 
 
 def update(
@@ -125,8 +127,14 @@ def update(
                     ):
                         remove_keys(scheduled_config)
 
-                if repo_data.get("deviceComplianceScriptName"):
+                if "deviceComplianceScriptName" in repo_data:
+                    script_name = repo_data["deviceComplianceScriptName"]
                     repo_data = _set_compliance_script_id(repo_data, token)
+                    if repo_data is False:
+                        print(
+                            f"Compliance script {script_name} not found, Compliance Policy not updated"
+                        )
+                        continue
 
                 diff = DeepDiff(
                     data["value"],
@@ -220,8 +228,14 @@ def update(
                     + repo_data["displayName"]
                 )
                 if report is False:
-                    if repo_data.get("deviceComplianceScriptName"):
+                    if "deviceComplianceScriptName" in repo_data:
+                        script_name = repo_data["deviceComplianceScriptName"]
                         repo_data = _set_compliance_script_id(repo_data, token)
+                        if repo_data is False:
+                            print(
+                                f"Compliance script {script_name} not found, Compliance Policy not created"
+                            )
+                            continue
 
                     request_json = json.dumps(repo_data)
                     post_request = makeapirequestPost(
