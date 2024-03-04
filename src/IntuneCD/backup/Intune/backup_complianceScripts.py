@@ -65,7 +65,7 @@ def savebackup(path, output, token, prefix, append_id, audit, scope_tags):
             # Get filename without illegal characters
             fname = clean_filename(script_data["displayName"])
 
-            script_file_name = script_data["displayName"]
+            script_file_name = f"{script_data['displayName']}.ps1"
             if append_id:
                 fname = f"{fname}__{graph_id}"
                 script_name = script_data["displayName"].replace(".ps1", "")
