@@ -126,7 +126,7 @@ def start():
             "VPPusedLicenseCount",
             "GPlaySyncTime",
             "CompliancePartnerHeartbeat",
-            "DeviceCompliancePolicy",
+            "DeviceCompliancePolicies",
             "ComplianceScripts",
             "ReusablePolicySettings",
             "entraApplications",
