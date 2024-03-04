@@ -104,6 +104,8 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tag
                     policy["detectionScriptName"] = detection_script["value"][0][
                         "displayName"
                     ]
+                else:
+                    policy["detectionScriptName"] = None
 
         # get scheduledActionsForRule
         scheduledActionsForRule = makeapirequest(

@@ -68,6 +68,17 @@ def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tag
                 "scheduledActionConfigurations"
             ]:
                 remove_keys(scheduled_config)
+        if policy.get("deviceCompliancePolicyScript", None):
+            # Get the name of the script
+            script_name = makeapirequest(
+                "https://graph.microsoft.com/beta/deviceManagement/deviceComplianceScripts/"
+                + policy["deviceCompliancePolicyScript"]["deviceComplianceScriptId"],
+                token,
+            )
+            if script_name:
+                policy["deviceComplianceScriptName"] = script_name["displayName"]
+            else:
+                policy["deviceComplianceScriptName"] = None
 
         # Get filename without illegal characters
         fname = clean_filename(policy["displayName"])
