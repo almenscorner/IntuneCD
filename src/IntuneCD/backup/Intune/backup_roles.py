@@ -6,7 +6,9 @@ This module backs up all Roles in Intune.
 """
 
 from ...intunecdlib.clean_filename import clean_filename
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -15,7 +17,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/roleDefinitions"
 
 
 # Get all Roles and save them in specified path
-def savebackup(path, output, exclude, token, append_id):
+def savebackup(path, output, exclude, token, append_id, audit, scope_tags):
     """
     Saves all Roles in Intune to a JSON or YAML file.
 
@@ -48,14 +50,20 @@ def savebackup(path, output, exclude, token, append_id):
         return groups
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Roles/"
     q_param = {"$filter": "isBuiltIn eq false"}
     data = makeapirequest(ENDPOINT, token, q_param)
+    if audit:
+        graph_filter = "componentName eq 'RoleBasedAccessControl'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for role in data["value"]:
         results["config_count"] += 1
         print("Backing up Role: " + role["displayName"])
 
+        if scope_tags:
+            role = get_scope_tags_name(role, scope_tags)
         if "assignments" not in exclude:
             assignments = makeapirequest(
                 ENDPOINT + f"/{role['id']}/roleAssignments", token
@@ -105,5 +113,11 @@ def savebackup(path, output, exclude, token, append_id):
         save_output(output, configpath, fname, role)
 
         results["outputs"].append(fname)
+
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+            )
 
     return results

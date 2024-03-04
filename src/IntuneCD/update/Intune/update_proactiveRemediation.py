@@ -21,6 +21,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 from .update_assignment import post_assignment_update, update_assignment
 
@@ -29,7 +30,13 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScript
 
 
 def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
+    path,
+    token,
+    assignment=False,
+    report=False,
+    create_groups=False,
+    remove=False,
+    scope_tags=None,
 ):
     """
     This function updates all Proactive Remediation in Intune if,
@@ -69,6 +76,9 @@ def update(
             if "assignments" in repo_data:
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
+
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
 
             data = {"value": ""}
             if mem_proactiveRemediation["value"]:

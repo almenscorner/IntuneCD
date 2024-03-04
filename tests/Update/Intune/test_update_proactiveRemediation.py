@@ -319,6 +319,27 @@ class TestUpdateProactiveRemediation(unittest.TestCase):
 
         self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
+    def test_update_scope_tags(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
+
+        self.repo_data["testvalue"] = "test"
+        self.makeapirequest.side_effect = [
+            self.mem_remediationScript_data,
+            self.mem_data,
+        ]
+
+        self.count = update(
+            self.directory.path,
+            self.token,
+            assignment=True,
+            remove=False,
+            scope_tags=["test"],
+        )
+
+        self.assertEqual(self.count[0].count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
+        self.assertEqual(self.post_assignment_update.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

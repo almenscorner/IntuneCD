@@ -20,6 +20,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPut,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph endpoint
@@ -27,7 +28,13 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/configurationPolic
 
 
 def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
+    path,
+    token,
+    assignment=False,
+    report=False,
+    create_groups=False,
+    remove=False,
+    scope_tags=None,
 ):
     """
     This function updates all Settings Catalog configurations in Intune,
@@ -65,6 +72,9 @@ def update(
             if "assignments" in repo_data:
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
+
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
 
             data = {"value": ""}
             if mem_data["value"]:

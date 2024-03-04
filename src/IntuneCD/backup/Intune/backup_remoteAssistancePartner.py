@@ -6,7 +6,8 @@ This module backs up all Remote Assistance Partners in Intune.
 """
 
 from ...intunecdlib.clean_filename import clean_filename
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -15,7 +16,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/remoteAssistancePa
 
 
 # Get all Remote Assistance Partners and save them in specified path
-def savebackup(path, output, token, append_id):
+def savebackup(path, output, token, append_id, audit):
     """
     Saves all Remote Assistance Partners in Intune to a JSON or YAML file.
 
@@ -25,8 +26,12 @@ def savebackup(path, output, token, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Partner Connections/Remote Assistance/"
     data = makeapirequest(ENDPOINT, token)
+    if audit:
+        graph_filter = "componentName eq 'ManagedDevices'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for partner in data["value"]:
         if partner["onboardingStatus"] == "notOnboarded":
@@ -47,5 +52,11 @@ def savebackup(path, output, token, append_id):
         save_output(output, configpath, fname, partner)
 
         results["outputs"].append(fname)
+
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+            )
 
     return results

@@ -8,7 +8,9 @@ This module backs up all Windows Enrollment Profiles in Intune.
 from ...intunecdlib.check_prefix import check_prefix_match
 from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -17,7 +19,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/windowsAutopilotDe
 
 
 # Get all Windows Enrollment Profiles and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Windows Enrollment Profiles in Intune to a JSON or YAML file.
 
@@ -28,6 +30,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Enrollment Profiles/Windows/"
     data = makeapirequest(ENDPOINT, token)
 
@@ -37,12 +40,18 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         "/assignments",
         token,
     )
+    if audit:
+        graph_filter = "componentName eq 'Enrollment'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for profile in data["value"]:
         if prefix and not check_prefix_match(profile["displayName"], prefix):
             continue
 
         results["config_count"] += 1
+
+        if scope_tags:
+            profile = get_scope_tags_name(profile, scope_tags)
         if "assignments" not in exclude:
             assignments = get_object_assignment(profile["id"], assignment_responses)
             if assignments:
@@ -62,5 +71,11 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         save_output(output, configpath, fname, profile)
 
         results["outputs"].append(fname)
+
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+            )
 
     return results

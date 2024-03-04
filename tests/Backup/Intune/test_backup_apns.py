@@ -44,21 +44,47 @@ class TestBackupAPNS(unittest.TestCase):
             "certificateSerialNumber": "11000000000000",
             "certificate": None,
         }
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.makeapirequest_patch = patch(
             "src.IntuneCD.backup.Intune.backup_apns.makeapirequest"
         )
         self.makeapirequest = self.makeapirequest_patch.start()
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_apns.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
+        self.process_audit_data_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_apns.process_audit_data"
+        )
+        self.process_audit_data = self.process_audit_data_patch.start()
+
     def tearDown(self):
         self.directory.cleanup()
         self.makeapirequest_patch.stop()
+        self.makeAuditRequest_patch.stop()
+        self.process_audit_data_patch.stop()
 
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.makeapirequest.return_value = self.apns
-        self.count = savebackup(self.directory.path, "yaml", self.token)
+        self.count = savebackup(self.directory.path, "yaml", False, self.token)
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
             data = json.dumps(yaml.safe_load(f))
@@ -72,7 +98,7 @@ class TestBackupAPNS(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.makeapirequest.return_value = self.apns
-        self.count = savebackup(self.directory.path, "json", self.token)
+        self.count = savebackup(self.directory.path, "json", False, self.token)
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
             saved_data = json.load(f)
@@ -85,8 +111,21 @@ class TestBackupAPNS(unittest.TestCase):
         """The count should be 0 if no data is returned."""
 
         self.makeapirequest.return_value = None
-        self.count = savebackup(self.directory.path, "json", self.token)
+        self.count = savebackup(self.directory.path, "json", False, self.token)
         self.assertEqual(0, self.count["config_count"])
+
+    def test_backup_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.makeapirequest.return_value = self.apns
+        self.count = savebackup(self.directory.path, "json", True, self.token)
+
+        with open(self.saved_path + "json", "r", encoding="utf-8") as f:
+            saved_data = json.load(f)
+
+        self.assertTrue(Path(f"{self.directory.path}/Apple Push Notification").exists())
+        self.assertEqual(self.expected_data, saved_data)
+        self.assertEqual(1, self.count["config_count"])
 
 
 if __name__ == "__main__":

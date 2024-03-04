@@ -20,6 +20,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 from .update_assignment import post_assignment_update, update_assignment
 
@@ -27,8 +28,30 @@ from .update_assignment import post_assignment_update, update_assignment
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePolicies"
 
 
+def _set_compliance_script_id(data, token):
+    compliance_script_id = makeapirequest(
+        "https://graph.microsoft.com/beta/deviceManagement/deviceComplianceScripts",
+        token,
+        {"$filter": f"displayName eq '{data['deviceComplianceScriptName']}'"},
+    )
+    if compliance_script_id.get("value"):
+        data["deviceCompliancePolicyScript"][
+            "deviceComplianceScriptId"
+        ] = compliance_script_id["value"][0]["id"]
+
+        return data
+
+    return False
+
+
 def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
+    path,
+    token,
+    assignment=False,
+    report=False,
+    create_groups=False,
+    remove=False,
+    scope_tags=None,
 ):
     """
     This function updates all Compliance Polices in Intune,
@@ -66,11 +89,17 @@ def update(
             with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
 
+            if repo_data.get("platforms") == "linux":
+                continue
+
             # Create object to pass in to assignment function
             assign_obj = {}
             if "assignments" in repo_data:
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
+
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
 
             # If Compliance Policy exists, continue
             data = {"value": ""}
@@ -97,6 +126,15 @@ def update(
                         .get("scheduledActionConfigurations", [])
                     ):
                         remove_keys(scheduled_config)
+
+                if "deviceComplianceScriptName" in repo_data:
+                    script_name = repo_data["deviceComplianceScriptName"]
+                    repo_data = _set_compliance_script_id(repo_data, token)
+                    if repo_data is False:
+                        print(
+                            f"Compliance script {script_name} not found, Compliance Policy not updated"
+                        )
+                        continue
 
                 diff = DeepDiff(
                     data["value"],
@@ -190,6 +228,15 @@ def update(
                     + repo_data["displayName"]
                 )
                 if report is False:
+                    if "deviceComplianceScriptName" in repo_data:
+                        script_name = repo_data["deviceComplianceScriptName"]
+                        repo_data = _set_compliance_script_id(repo_data, token)
+                        if repo_data is False:
+                            print(
+                                f"Compliance script {script_name} not found, Compliance Policy not created"
+                            )
+                            continue
+
                     request_json = json.dumps(repo_data)
                     post_request = makeapirequestPost(
                         ENDPOINT,

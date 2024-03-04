@@ -19,13 +19,14 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from ...intunecdlib.remove_keys import remove_keys
 
 # Set MS Graph endpoint
 ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/roleDefinitions"
 
 
-def update(path, token, report, remove=False):
+def update(path, token, report, remove=False, scope_tags=None):
     """
     This function updates all Roles in Intune if the configuration in Intune differs from the JSON/YAML file.
 
@@ -50,6 +51,9 @@ def update(path, token, report, remove=False):
             # and set query parameter
             with open(file, encoding="utf-8") as f:
                 repo_data = load_file(filename, f)
+
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
 
             role_value = {}
 
@@ -110,6 +114,7 @@ def update(path, token, report, remove=False):
                 print("-" * 90)
                 print("Role not found, creating role: " + repo_data["displayName"])
                 if report is False:
+                    repo_data.pop("roleAssignments", None)
                     request_json = json.dumps(repo_data)
                     post_request = makeapirequestPost(
                         ENDPOINT,

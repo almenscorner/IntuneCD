@@ -23,6 +23,7 @@ from ...intunecdlib.graph_request import (
     makeapirequestPost,
 )
 from ...intunecdlib.load_file import load_file
+from ...intunecdlib.process_scope_tags import get_scope_tags_id
 from .update_assignment import post_assignment_update, update_assignment
 
 # Set MS Graph base endpoint
@@ -30,7 +31,13 @@ BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
 
 def update(
-    path, token, assignment=False, report=False, create_groups=False, remove=False
+    path,
+    token,
+    assignment=False,
+    report=False,
+    create_groups=False,
+    remove=False,
+    scope_tags=False,
 ):
     """
     This function updates all Endpoint Security configurations (intents) in Intune,
@@ -74,6 +81,9 @@ def update(
             if "assignments" in repo_data:
                 assign_obj = repo_data["assignments"]
             repo_data.pop("assignments", None)
+
+            if scope_tags:
+                repo_data = get_scope_tags_id(repo_data, scope_tags)
 
             mem_data = {}
             for intent in intent_responses["value"]:

@@ -15,6 +15,7 @@ from src.IntuneCD.intunecdlib.graph_request import (
     makeapirequestPatch,
     makeapirequestPost,
     makeapirequestPut,
+    makeAuditRequest,
 )
 
 
@@ -429,6 +430,45 @@ class TestGraphRequestDelete(unittest.TestCase):
             )
 
         self.assertEqual(1, mock_patch.call_count)
+
+
+@patch("src.IntuneCD.intunecdlib.graph_request.makeAuditRequest")
+@patch("requests.get")
+@patch("time.sleep", return_value=None)
+class TestGraphAuditRequest(unittest.TestCase):
+    """Test class for graph_request."""
+
+    def setUp(self):
+        self.token = {"access_token": "token"}
+
+    def test_makeAuditRequest(self, _, mock_get, __):
+        """The request should be made and the response should be returned."""
+        self.mock_resp = _mock_response(
+            self,
+            status=200,
+            content=(
+                '{"value": [{"resources": [{"resourceId": "0", "auditResourceType": "MagicResource"}],'
+                '"activityDateTime": "2021-01-01T00:00:00Z", "activityOperationType": "Patch", '
+                '"activityResult": "Success", "actor": {"auditActorType": "ItPro", "userPrincipalName": "test"}}]}'
+            ),
+        )
+        mock_get.return_value = self.mock_resp
+        self.result = makeAuditRequest(
+            "componentName eq 'MobileAppConfiguration'", self.token
+        )
+        self.assertEqual(
+            self.result,
+            [
+                {
+                    "resourceId": "0",
+                    "auditResourceType": "MagicResource",
+                    "actor": "test",
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                }
+            ],
+        )
 
 
 if __name__ == "__main__":

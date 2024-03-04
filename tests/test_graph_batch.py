@@ -18,6 +18,7 @@ from src.IntuneCD.intunecdlib.graph_batch import (
 )
 
 
+@patch("time.sleep", return_value=None)
 class TestGraphBatch(unittest.TestCase):
     """Test class for graph_batch."""
 
@@ -123,7 +124,7 @@ class TestGraphBatch(unittest.TestCase):
         self.batch_request.stop()
         del os.environ["VERBOSE"]
 
-    def test_batch_request(self):
+    def test_batch_request(self, _):
         """The batch request function should return the expected result."""
 
         self.expected_result = [
@@ -146,7 +147,7 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_request_429(self):
+    def test_batch_request_429(self, _):
         """The batch request function should return the expected result."""
 
         self.expected_result = [
@@ -192,7 +193,7 @@ class TestGraphBatch(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 2)
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_request_503(self):
+    def test_batch_request_503(self, _):
         """The batch request function should return the expected result."""
 
         self.expected_result = [
@@ -238,7 +239,7 @@ class TestGraphBatch(unittest.TestCase):
         self.assertEqual(self.makeapirequestPost.call_count, 2)
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_assignment(self):
+    def test_batch_assignment(self, _):
         """The batch assignment function should return the expected result."""
 
         self.expected_result = [
@@ -262,7 +263,7 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_assignment_expand_assignments(self):
+    def test_batch_assignment_expand_assignments(self, _):
         """The batch assignment function should return the expected result."""
 
         self.responses = [
@@ -307,7 +308,9 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_assignment_appProtection_mdmWindowsInformationProtectionPolicy(self):
+    def test_batch_assignment_appProtection_mdmWindowsInformationProtectionPolicy(
+        self, _
+    ):
         """The batch assignment function should return the expected result for the platform."""
 
         self.batch_assignment_data = {
@@ -340,7 +343,7 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_assignment_appProtection_windowsInformationProtectionPolicy(self):
+    def test_batch_assignment_appProtection_windowsInformationProtectionPolicy(self, _):
         """The batch assignment function should return the expected result for the platform."""
 
         self.batch_assignment_data = {
@@ -373,7 +376,7 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_assignment_appProtection_iosManagedAppProtection(self):
+    def test_batch_assignment_appProtection_iosManagedAppProtection(self, _):
         """The batch assignment function should return the expected result for the platform."""
 
         self.batch_assignment_data = {
@@ -403,7 +406,7 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_batch_intents(self):
+    def test_batch_intents(self, _):
         """The batch intents function should return the expected result."""
 
         self.batch_request.side_effect = (
@@ -434,7 +437,7 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_get_object_assignment(self):
+    def test_get_object_assignment(self, _):
         """The get object assignment function should return the expected result."""
 
         self.id = "0"
@@ -450,7 +453,7 @@ class TestGraphBatch(unittest.TestCase):
 
         self.assertEqual(self.result, self.expected_result)
 
-    def test_get_object_details(self):
+    def test_get_object_details(self, _):
         """The get object details function should return the expected result."""
 
         self.id = "0"

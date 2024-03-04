@@ -4,6 +4,7 @@
 """This module tests backing up Apple Enrollment Profile."""
 
 import json
+import os.path
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -62,6 +63,19 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
                 ]
             }
         ]
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.patch_makeapirequest = patch(
             "src.IntuneCD.backup.Intune.backup_appleEnrollmentProfile.makeapirequest"
@@ -73,17 +87,30 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         )
         self.batch_request = self.patch_batch_request.start()
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_appleEnrollmentProfile.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
+        self.process_audit_data_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_appleEnrollmentProfile.process_audit_data"
+        )
+        self.process_audit_data = self.process_audit_data_patch.start()
+
     def tearDown(self):
         self.directory.cleanup()
         self.patch_batch_request.stop()
         self.patch_makeapirequest.stop()
+        self.makeAuditRequest_patch.stop()
+        self.process_audit_data_patch.stop()
 
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.makeapirequest.return_value = self.token_response
         self.batch_request.return_value = self.batch_intune
         self.count = savebackup(
-            self.directory.path, "yaml", self.token, "", self.append_id
+            self.directory.path, "yaml", self.token, "", self.append_id, False
         )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
@@ -101,7 +128,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
         self.makeapirequest.return_value = self.token_response
         self.batch_request.return_value = self.batch_intune
         self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
+            self.directory.path, "json", self.token, "", self.append_id, False
         )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
@@ -119,7 +146,7 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
+            self.directory.path, "json", self.token, "", self.append_id, False
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -127,19 +154,53 @@ class TestBackupAppleEnrollmentProfile(unittest.TestCase):
     def test_backup_with_prefix(self):
         """The count should be 0 if no data is returned."""
 
-        self.makeapirequest.return_value = {"value": []}
+        self.batch_intune[0]["value"][0]["displayName"] = "test - test1"
+        self.batch_request.return_value = self.batch_intune
         self.count = savebackup(
-            self.directory.path, "json", self.token, "test", self.append_id
+            self.directory.path, "json", self.token, "test", self.append_id, False
         )
 
-        self.assertEqual(0, self.count["config_count"])
+        self.assertEqual(1, self.count["config_count"])
+        self.assertTrue(
+            os.path.exists(
+                f"{self.directory.path}/Enrollment Profiles/Apple/test - test1.json"
+            )
+        )
+
+    def test_backup_with_prefix_no_match(self):
+        """The count should be 0 if no data is returned."""
+
+        self.makeapirequest.return_value = self.token_response
+        self.batch_request.return_value = self.batch_intune
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "prefix", self.append_id, False
+        )
+
+        self.assertFalse(
+            os.path.exists(f"{self.directory.path}/Enrollment Profiles/Apple/test.json")
+        )
 
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
         self.makeapirequest.return_value = self.token_response
         self.batch_request.return_value = self.batch_intune
 
-        self.count = savebackup(self.directory.path, "json", self.token, "", True)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "", True, False
+        )
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Enrollment Profiles/Apple/test__0.json"
+            ).exists()
+        )
+
+    def test_backup_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+        self.makeapirequest.return_value = self.token_response
+        self.batch_request.return_value = self.batch_intune
+
+        self.count = savebackup(self.directory.path, "json", self.token, "", True, True)
 
         self.assertTrue(
             Path(

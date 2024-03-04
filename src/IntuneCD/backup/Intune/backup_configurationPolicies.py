@@ -13,7 +13,9 @@ from ...intunecdlib.graph_batch import (
     get_object_assignment,
     get_object_details,
 )
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -22,7 +24,7 @@ BASE_ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement"
 
 
 # Get all Configuration Policies and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Configuration Policies in Intune to a JSON or YAML file.
 
@@ -33,6 +35,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Settings Catalog/"
     policies = makeapirequest(BASE_ENDPOINT + "/configurationPolicies", token)
     policy_ids = []
@@ -48,6 +51,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         "/settings?&top=1000",
         token,
     )
+    if audit:
+        graph_filter = "componentName eq 'DeviceConfiguration'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for policy in policies["value"]:
         if prefix and not check_prefix_match(policy["name"], prefix):
@@ -61,6 +67,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
         if settings:
             policy["settings"] = settings
+
+        if scope_tags:
+            policy = get_scope_tags_name(policy, scope_tags)
 
         if "assignments" not in exclude:
             assignments = get_object_assignment(policy["id"], assignment_responses)
@@ -82,5 +91,11 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         save_output(output, configpath, fname, policy)
 
         results["outputs"].append(fname)
+
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+            )
 
     return results

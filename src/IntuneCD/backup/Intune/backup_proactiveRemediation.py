@@ -15,7 +15,9 @@ from ...intunecdlib.graph_batch import (
     batch_request,
     get_object_assignment,
 )
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -24,7 +26,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceHealthScript
 
 
 # Get all Proactive Remediation and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Proactive Remediation in Intune to a JSON or YAML file and script files.
 
@@ -35,8 +37,13 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = f"{path}/Proactive Remediations/"
     data = makeapirequest(ENDPOINT, token)
+    if audit:
+        graph_filter = "componentName eq 'DeviceConfiguration'"
+        audit_data = makeAuditRequest(graph_filter, token)
+
     if data["value"]:
         pr_ids = []
         for script in data["value"]:
@@ -55,6 +62,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
             if "Microsoft" not in pr_details["publisher"]:
                 results["config_count"] += 1
+
+                if scope_tags:
+                    pr_details = get_scope_tags_name(pr_details, scope_tags)
                 if "assignments" not in exclude:
                     assignments = get_object_assignment(
                         pr_details["id"], assignment_responses
@@ -77,6 +87,12 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 save_output(output, configpath, fname, pr_details)
 
                 results["outputs"].append(fname)
+
+                if audit_data:
+                    compare_data = {"type": "resourceId", "value": graph_id}
+                    process_audit_data(
+                        audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+                    )
 
                 if not os.path.exists(f"{configpath}/Script Data"):
                     os.makedirs(f"{configpath}/Script Data")

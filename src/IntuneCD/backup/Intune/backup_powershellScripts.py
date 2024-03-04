@@ -15,7 +15,9 @@ from ...intunecdlib.graph_batch import (
     batch_request,
     get_object_assignment,
 )
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -24,7 +26,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceManagementSc
 
 
 # Get all Powershell scripts and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Powershell scripts in Intune to a JSON or YAML file and script files.
 
@@ -35,6 +37,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Scripts/Powershell/"
     data = makeapirequest(ENDPOINT, token)
     if data["value"]:
@@ -48,12 +51,18 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         script_data_responses = batch_request(
             script_ids, "deviceManagement/deviceManagementScripts/", "", token
         )
+        if audit:
+            graph_filter = "componentName eq 'DeviceConfiguration'"
+            audit_data = makeAuditRequest(graph_filter, token)
 
         for script_data in script_data_responses:
             if prefix and not check_prefix_match(script_data["displayName"], prefix):
                 continue
 
             results["config_count"] += 1
+
+            if scope_tags:
+                script_data = get_scope_tags_name(script_data, scope_tags)
             if "assignments" not in exclude:
                 assignments = get_object_assignment(
                     script_data["id"], assignment_responses
@@ -78,6 +87,12 @@ def savebackup(path, output, exclude, token, prefix, append_id):
             save_output(output, configpath, fname, script_data)
 
             results["outputs"].append(fname)
+
+            if audit_data:
+                compare_data = {"type": "resourceId", "value": graph_id}
+                process_audit_data(
+                    audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+                )
 
             # Save Powershell script data to the script data folder
             if script_data.get("scriptContent"):

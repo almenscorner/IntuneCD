@@ -131,6 +131,17 @@ def document_intune(configpath, outpath, maxlength, split, cleanup, decode):
         decode,
     )
 
+    # Document Compliance Scripts
+    document_configs(
+        f"{configpath}/Compliance Policies/Scripts",
+        outpath,
+        "Compliance Scripts",
+        maxlength,
+        split,
+        cleanup,
+        decode,
+    )
+
     # Message Templates
     document_configs(
         f"{configpath}/Compliance Policies/Message Templates",

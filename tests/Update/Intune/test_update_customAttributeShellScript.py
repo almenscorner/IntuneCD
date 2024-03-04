@@ -208,6 +208,25 @@ class TestUpdatecustomAttributeShellScripts(unittest.TestCase):
 
         self.assertEqual(self.makeapirequestDelete.call_count, 1)
 
+    def test_update_scope_tags(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
+
+        self.mem_data["testvalue"] = "test"
+        self.mem_data["scriptContent"] = self.repo_script_content
+
+        self.makeapirequest.side_effect = [self.mem_shellScript_data, self.mem_data]
+
+        self.count = update(
+            self.directory.path,
+            self.token,
+            remove=False,
+            assignment=True,
+            scope_tags=["test"],
+        )
+
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
+        self.assertEqual(self.post_assignment_update.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

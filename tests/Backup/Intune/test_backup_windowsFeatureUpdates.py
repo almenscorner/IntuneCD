@@ -32,6 +32,19 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
             "displayName": "test",
         }
         self.enrollment_profile = {"value": [{"displayName": "test", "id": "0"}]}
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.batch_assignment_patch = patch(
             "src.IntuneCD.backup.Intune.backup_windowsFeatureUpdates.batch_assignment"
@@ -51,18 +64,32 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.enrollment_profile
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_windowsFeatureUpdates.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
         self.object_assignment.stop()
         self.makeapirequest.stop()
+        self.makeAuditRequest.stop()
 
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         output = "yaml"
         count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
+            None,
         )
 
         with open(self.saved_path + output, "r", encoding="utf-8") as f:
@@ -78,7 +105,14 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
 
         output = "json"
         count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
+            None,
         )
 
         with open(self.saved_path + output, "r", encoding="utf-8") as f:
@@ -93,7 +127,14 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
+            None,
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -108,6 +149,8 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
             self.token,
             "test1",
             self.append_id,
+            False,
+            None,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -115,7 +158,25 @@ class TestBackupWindowsDriverUpdates(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
+            self.directory.path, "json", self.exclude, self.token, "", True, False, None
+        )
+
+        self.assertTrue(
+            Path(f"{self.directory.path}/Feature Updates/test__0.json").exists()
+        )
+
+    def test_scope_tags_and_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            True,
+            True,
+            [{"id": 0, "displayName": "default"}],
         )
 
         self.assertTrue(

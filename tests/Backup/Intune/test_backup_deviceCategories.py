@@ -4,6 +4,7 @@
 """This module tests backing up deviceCategories."""
 
 import json
+import os.path
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -39,6 +40,19 @@ class TestBackupdeviceCategories(unittest.TestCase):
                 }
             ]
         }
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.patch_makeapirequest = patch(
             "src.IntuneCD.backup.Intune.backup_deviceCategories.makeapirequest",
@@ -46,15 +60,23 @@ class TestBackupdeviceCategories(unittest.TestCase):
         )
         self.makeapirequest = self.patch_makeapirequest.start()
 
+        self.makeAuditRequest = patch(
+            "src.IntuneCD.backup.Intune.backup_deviceCategories.makeAuditRequest",
+            return_value=self.audit_data,
+        )
+        self.makeAuditRequest.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
     def tearDown(self):
         self.directory.cleanup()
         self.makeapirequest.stop()
+        self.makeAuditRequest.stop()
 
     def test_backup_yml(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "yaml", self.token, "", self.append_id
+            self.directory.path, "yaml", self.token, "", self.append_id, False, ""
         )
 
         with open(self.saved_path + "yaml", "r", encoding="utf-8") as f:
@@ -69,7 +91,7 @@ class TestBackupdeviceCategories(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
+            self.directory.path, "json", self.token, "", self.append_id, False, ""
         )
 
         with open(self.saved_path + "json", "r", encoding="utf-8") as f:
@@ -84,23 +106,60 @@ class TestBackupdeviceCategories(unittest.TestCase):
 
         self.makeapirequest.return_value = {"value": []}
         self.count = savebackup(
-            self.directory.path, "json", self.token, "", self.append_id
+            self.directory.path, "json", self.token, "", self.append_id, False, ""
         )
         self.assertEqual(0, self.count["config_count"])
 
     def test_backup_with_prefix(self):
         """The count should be 0 if no data is returned."""
 
-        self.makeapirequest.return_value = {"value": []}
+        self.deviceCategories["value"][0]["displayName"] = "test_Test1"
+        self.makeapirequest.return_value = self.deviceCategories
+
         self.count = savebackup(
-            self.directory.path, "json", self.token, "test", self.append_id
+            self.directory.path, "json", self.token, "test", self.append_id, False, ""
+        )
+        self.assertEqual(1, self.count["config_count"])
+        self.assertTrue(
+            os.path.exists(f"{self.directory.path}/Device Categories/test_Test1.json")
+        )
+
+    def test_backup_with_prefix_no_match(self):
+        """The count should be 0 if no data is returned."""
+
+        self.deviceCategories["value"][0]["displayName"] = "category"
+        self.makeapirequest.return_value = self.deviceCategories
+
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "test", self.append_id, False, ""
         )
         self.assertEqual(0, self.count["config_count"])
 
     def test_backup_append_id(self):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
-        self.count = savebackup(self.directory.path, "json", self.token, "", True)
+        self.count = savebackup(
+            self.directory.path, "json", self.token, "", True, False, ""
+        )
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Device Categories/Test__00000000-0000-0000-0000-000000000000.json"
+            ).exists()
+        )
+
+    def test_backup_scope_tags_and_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.token,
+            "",
+            True,
+            True,
+            [{"id": 0, "displayName": "default"}],
+        )
 
         self.assertTrue(
             Path(

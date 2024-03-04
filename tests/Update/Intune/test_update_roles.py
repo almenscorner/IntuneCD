@@ -50,7 +50,6 @@ class TestUpdaterole(unittest.TestCase):
             "description": "",
             "isBuiltInRoleDefinition": False,
             "isBuiltIn": False,
-            "roleScopeTagIds": ["0"],
             "rolePermissions": [
                 {
                     "resourceActions": [
@@ -165,6 +164,20 @@ class TestUpdaterole(unittest.TestCase):
 
         # self.assertEqual(self.count, [])
         self.assertEqual(self.makeapirequestDelete.call_count, 1)
+
+    def test_update_scope_tags(self):
+        """The count should be 1 and the post_assignment_update and makeapirequestPatch should be called."""
+
+        self.count = update(
+            self.directory.path,
+            self.token,
+            remove=False,
+            report=False,
+            scope_tags=["test"],
+        )
+
+        self.assertEqual(self.count[0].count, 0)
+        self.assertEqual(self.makeapirequestPatch.call_count, 0)
 
 
 if __name__ == "__main__":

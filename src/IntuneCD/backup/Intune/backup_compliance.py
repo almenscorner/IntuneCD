@@ -8,7 +8,9 @@ This module backs up all Compliance Polices in Intune.
 from ...intunecdlib.check_prefix import check_prefix_match
 from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -17,7 +19,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePo
 
 
 # Get all Compliance policies and save them in specified path
-def savebackup(path, output, exclude, token, prefix, append_id):
+def savebackup(path, output, exclude, token, prefix, append_id, audit, scope_tags):
     """
     Saves all Compliance policies in Intune to a JSON or YAML file.
 
@@ -28,6 +30,7 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
+    audit_data = None
     configpath = path + "/" + "Compliance Policies/Policies/"
     q_param = {
         "$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"
@@ -37,6 +40,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
     assignment_responses = batch_assignment(
         data, "deviceManagement/deviceCompliancePolicies/", "/assignments", token
     )
+    if audit:
+        graph_filter = "componentName eq 'DeviceCompliancePolicy'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for policy in data["value"]:
         if prefix and not check_prefix_match(policy["displayName"], prefix):
@@ -44,6 +50,9 @@ def savebackup(path, output, exclude, token, prefix, append_id):
 
         results["config_count"] += 1
         print("Backing up compliance policy: " + policy["displayName"])
+
+        if scope_tags:
+            policy = get_scope_tags_name(policy, scope_tags)
 
         if "assignments" not in exclude:
             assignments = get_object_assignment(policy["id"], assignment_responses)
@@ -59,6 +68,17 @@ def savebackup(path, output, exclude, token, prefix, append_id):
                 "scheduledActionConfigurations"
             ]:
                 remove_keys(scheduled_config)
+        if policy.get("deviceCompliancePolicyScript", None):
+            # Get the name of the script
+            script_name = makeapirequest(
+                "https://graph.microsoft.com/beta/deviceManagement/deviceComplianceScripts/"
+                + policy["deviceCompliancePolicyScript"]["deviceComplianceScriptId"],
+                token,
+            )
+            if script_name:
+                policy["deviceComplianceScriptName"] = script_name["displayName"]
+            else:
+                policy["deviceComplianceScriptName"] = None
 
         # Get filename without illegal characters
         fname = clean_filename(policy["displayName"])
@@ -76,5 +96,11 @@ def savebackup(path, output, exclude, token, prefix, append_id):
         )
 
         results["outputs"].append(fname)
+
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+            )
 
     return results

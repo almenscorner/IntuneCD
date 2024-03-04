@@ -50,6 +50,19 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
                 }
             ]
         }
+        self.audit_data = {
+            "value": [
+                {
+                    "resources": [
+                        {"resourceId": "0", "auditResourceType": "MagicResource"}
+                    ],
+                    "activityDateTime": "2021-01-01T00:00:00Z",
+                    "activityOperationType": "Patch",
+                    "activityResult": "Success",
+                    "actor": [{"auditActorType": "ItPro"}],
+                }
+            ]
+        }
 
         self.batch_assignment_patch = patch(
             "src.IntuneCD.backup.Intune.backup_enrollmentConfigurations.batch_assignment"
@@ -69,17 +82,31 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         self.makeapirequest = self.makeapirequest_patch.start()
         self.makeapirequest.return_value = self.enrollment_config
 
+        self.makeAuditRequest_patch = patch(
+            "src.IntuneCD.backup.Intune.backup_enrollmentConfigurations.makeAuditRequest"
+        )
+        self.makeAuditRequest = self.makeAuditRequest_patch.start()
+        self.makeAuditRequest.return_value = self.audit_data
+
     def tearDown(self):
         self.directory.cleanup()
         self.batch_assignment.stop()
         self.object_assignment.stop()
         self.makeapirequest.stop()
+        self.makeAuditRequest.stop()
 
     def test_backup_yml(self):
         """Test that the backup is saved as yml. And that the data is correct."""
         output = "yaml"
         savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
+            None,
         )
         with open(f"{self.saved_path}yaml", "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
@@ -89,7 +116,14 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         """Test that the backup is saved as json. And that the data is correct."""
         output = "json"
         savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
+            None,
         )
         with open(f"{self.saved_path}json", "r", encoding="utf-8") as file:
             data = yaml.safe_load(file)
@@ -102,7 +136,14 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
             "@odata.type"
         ] = "#microsoft.graph.windows10EnrollmentCompletionPageConfiguration"
         count = savebackup(
-            self.directory.path, output, self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            output,
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
+            None,
         )
 
         self.assertEqual(0, count["config_count"])
@@ -112,7 +153,14 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
 
         self.makeapirequest.side_effect = [{"value": []}]
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", self.append_id
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            self.append_id,
+            False,
+            None,
         )
 
         self.assertEqual(0, self.count["config_count"])
@@ -127,6 +175,8 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
             self.token,
             "test1",
             self.append_id,
+            False,
+            None,
         )
         self.assertEqual(0, self.count["config_count"])
 
@@ -134,7 +184,27 @@ class TestBackupEnrollmentConfigurations(unittest.TestCase):
         """The folder should be created, the file should have the expected contents, and the count should be 1."""
 
         self.count = savebackup(
-            self.directory.path, "json", self.exclude, self.token, "", True
+            self.directory.path, "json", self.exclude, self.token, "", True, False, None
+        )
+
+        self.assertTrue(
+            Path(
+                f"{self.directory.path}/Enrollment Configurations/test_test__test.json"
+            ).exists()
+        )
+
+    def test_backup_scope_tags_and_audit(self):
+        """The folder should be created, the file should have the expected contents, and the count should be 1."""
+
+        self.count = savebackup(
+            self.directory.path,
+            "json",
+            self.exclude,
+            self.token,
+            "",
+            True,
+            True,
+            [{"id": 0, "displayName": "default"}],
         )
 
         self.assertTrue(

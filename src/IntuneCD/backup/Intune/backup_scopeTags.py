@@ -7,7 +7,8 @@ This module backs up Scope Tags in Intune.
 
 from ...intunecdlib.clean_filename import clean_filename
 from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -16,7 +17,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/roleScopeTags"
 
 
 # Get Scope Tags and save in specified path
-def savebackup(path, output, exclude, token, append_id):
+def savebackup(path, output, exclude, token, append_id, audit):
     """
     Save Scope Tags to a JSON or YAML file.
 
@@ -26,13 +27,16 @@ def savebackup(path, output, exclude, token, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
-
+    audit_data = None
     configpath = path + "/" + "Scope Tags/"
     data = makeapirequest(ENDPOINT, token)
 
     assignment_responses = batch_assignment(
         data, "deviceManagement/roleScopeTags/", "/assignments", token
     )
+    if audit:
+        graph_filter = "componentName eq 'RoleBasedAccessControl'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for tag in data["value"]:
         results["config_count"] += 1
@@ -55,5 +59,11 @@ def savebackup(path, output, exclude, token, append_id):
         save_output(output, configpath, fname, tag)
 
         results["outputs"].append(fname)
+
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": tag_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+            )
 
     return results

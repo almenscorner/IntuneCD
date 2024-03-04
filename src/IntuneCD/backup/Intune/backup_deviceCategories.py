@@ -7,7 +7,9 @@ This module backs up Device Categories in Intune.
 
 from ...intunecdlib.check_prefix import check_prefix_match
 from ...intunecdlib.clean_filename import clean_filename
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -16,7 +18,7 @@ ENDPOINT = "https://graph.microsoft.com/beta/deviceManagement/deviceCategories"
 
 
 # Get Device Categories information and save in specified path
-def savebackup(path, output, token, prefix, append_id):
+def savebackup(path, output, token, prefix, append_id, audit, scope_tags):
     """
     Save Device Categories to a JSON or YAML file.
 
@@ -26,9 +28,12 @@ def savebackup(path, output, token, prefix, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
-
+    audit_data = None
     configpath = path + "/" + "Device Categories/"
     data = makeapirequest(ENDPOINT, token)
+    if audit:
+        graph_filter = "componentName eq 'Enrollment'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     if data["value"]:
         for item in data["value"]:
@@ -36,6 +41,8 @@ def savebackup(path, output, token, prefix, append_id):
                 continue
 
             results["config_count"] += 1
+            if scope_tags:
+                item = get_scope_tags_name(item, scope_tags)
             graph_id = item["id"]
             item = remove_keys(item)
             print("Backing up Device Category: " + item["displayName"])
@@ -48,5 +55,11 @@ def savebackup(path, output, token, prefix, append_id):
             save_output(output, configpath, fname, item)
 
             results["outputs"].append(fname)
+
+            if audit_data:
+                compare_data = {"type": "resourceId", "value": graph_id}
+                process_audit_data(
+                    audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+                )
 
     return results

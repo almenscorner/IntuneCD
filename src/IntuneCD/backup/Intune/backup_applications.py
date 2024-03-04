@@ -8,8 +8,14 @@ This module backs up all App Protection Policies in Intune.
 import re
 
 from ...intunecdlib.clean_filename import clean_filename
-from ...intunecdlib.graph_batch import batch_assignment, get_object_assignment
-from ...intunecdlib.graph_request import makeapirequest
+from ...intunecdlib.graph_batch import (
+    batch_assignment,
+    batch_request,
+    get_object_assignment,
+)
+from ...intunecdlib.graph_request import makeapirequest, makeAuditRequest
+from ...intunecdlib.process_audit_data import process_audit_data
+from ...intunecdlib.process_scope_tags import get_scope_tags_name
 from ...intunecdlib.remove_keys import remove_keys
 from ...intunecdlib.save_output import save_output
 
@@ -37,7 +43,7 @@ def match(platform, odata_input) -> bool:
 
 
 # Get all applications and save them in specified path
-def savebackup(path, output, exclude, token, append_id):
+def savebackup(path, output, exclude, token, append_id, audit, scope_tags):
     """
     Saves all applications in Intune to a JSON or YAML file.
 
@@ -48,21 +54,39 @@ def savebackup(path, output, exclude, token, append_id):
     """
 
     results = {"config_count": 0, "outputs": []}
-
+    audit_data = None
     data = makeapirequest(ENDPOINT, token, q_param)
     assignment_responses = batch_assignment(
         data, "deviceAppManagement/mobileApps/", "/assignments", token
     )
+    app_ids = [app["id"] for app in data["value"]]
+    scope_tag_responses = batch_request(
+        app_ids, "deviceAppManagement/mobileApps/", "?$select=roleScopeTagIds,id", token
+    )
+
+    if audit:
+        graph_filter = "componentName eq 'MobileApp'"
+        audit_data = makeAuditRequest(graph_filter, token)
 
     for app in data["value"]:
         app_name = ""
         platform = ""
         results["config_count"] += 1
 
+        scope_tag_data = [v for v in scope_tag_responses if app["id"] == v["id"]]
+        if scope_tag_data:
+            app["roleScopeTagIds"] = scope_tag_data[0]["roleScopeTagIds"]
+
+        if scope_tags:
+            app = get_scope_tags_name(app, scope_tags)
+
         if "assignments" not in exclude:
             assignments = get_object_assignment(app["id"], assignment_responses)
             if assignments:
                 app["assignments"] = assignments
+
+        # if audit:
+        #    audit_data = get_audit_log(app["id"], audit_responses)
 
         graph_id = app["id"]
         app = remove_keys(app)
@@ -136,5 +160,11 @@ def savebackup(path, output, exclude, token, append_id):
         save_output(output, configpath, fname, app)
 
         results["outputs"].append(fname)
+
+        if audit_data:
+            compare_data = {"type": "resourceId", "value": graph_id}
+            process_audit_data(
+                audit_data, compare_data, path, f"{configpath}{fname}.{output}"
+            )
 
     return results
