@@ -168,7 +168,7 @@ def _get_payload_from_audit_data(audit_data, compare_data):
     Gets the payload from the audit data.
 
     :param audit_data: The audit data to get the payload from.
-    :param pid: The resource ID to get the payload for.
+    :param compare_data: The data to compare the audit data to.
     """
 
     records = []
@@ -189,8 +189,8 @@ def process_audit_data(audit_data, compare_data, path, file):
     Processes the audit data from Intune.
 
     :param audit_data: The audit data to process.
-    :param pid: The resource ID to process.
-    :param path: The path to the git repo.
+    :param compare_data: The data to compare the audit data to.
+    :param path: The path to the file.
     :param file: The file to process.
     """
 
