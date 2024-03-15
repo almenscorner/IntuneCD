@@ -244,7 +244,7 @@ def start():
 
         for sum in diff_summary:
             for config in sum:
-                diff_count += config.count
+                diff_count += config.get("count")
 
         return diff_count, diff_summary
 
@@ -288,12 +288,12 @@ def start():
             changes = []
             for sum in summary[1]:
                 for config in sum:
-                    if config.diffs:
+                    if config["diffs"]:
                         changes.append(
                             {
-                                "name": config.name,
-                                "type": config.type,
-                                "diffs": config.diffs,
+                                "name": config["name"],
+                                "type": config["type"],
+                                "diffs": config["diffs"],
                             }
                         )
 

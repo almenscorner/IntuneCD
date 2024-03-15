@@ -6,288 +6,228 @@ def backup_intune(results, path, output, exclude, token, prefix, append_id, args
     Imports all the backup functions and runs them
     """
 
-    from .intunecdlib.process_scope_tags import get_scope_tags
+    from .intunecdlib.process_scope_tags import ProcessScopeTags
+
+    process_scope_tags = ProcessScopeTags(token)
 
     if "ScopeTags" not in exclude:
-        scope_tags = get_scope_tags(token)
+        scope_tags = process_scope_tags.get_scope_tags()
     else:
         scope_tags = None
 
-    if args.activationlock:
-        from .backup.Intune.backup_activationLock import savebackup
+    params = {
+        "token": token,
+        "path": path,
+        "filetype": output,
+        "audit": args.audit,
+        "append_id": append_id,
+        "exclude": exclude,
+        "scope_tags": scope_tags,
+        "prefix": prefix,
+        "ignore_oma_settings": args.ignore_omasettings,
+    }
 
-        savebackup(path, output, token)
+    if args.activationlock:
+        from .backup.Intune.Activationlock import ActivationLockBackupModule
+
+        ActivationLockBackupModule(**params).main()
+
+    if args.autopilot:
+        from .backup.Intune.AutopilotDevices import AutopilotDevicesBackupModule
+
+        AutopilotDevicesBackupModule(**params).main()
 
     if "AppConfigurations" not in exclude:
-        from .backup.Intune.backup_appConfiguration import savebackup
+        from .backup.Intune.AppConfiguration import AppConfigurationBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(AppConfigurationBackupModule(**params).main())
 
     if "AppProtection" not in exclude:
-        from .backup.Intune.backup_AppProtection import savebackup
+        from .backup.Intune.AppProtection import AppProtectionBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(AppProtectionBackupModule(**params).main())
 
-    if "APNs" not in exclude:
-        from .backup.Intune.backup_apns import savebackup
+    if "APNS" not in exclude:
+        from .backup.Intune.APNs import APNSBackupModule
 
-        results.append(savebackup(path, output, args.audit, token))
+        results.append(APNSBackupModule(**params).main())
 
     if "VPP" not in exclude:
-        from .backup.Intune.backup_vppTokens import savebackup
+        from .backup.Intune.VolumePurchaseProgram import VPPBackupModule
 
-        results.append(
-            savebackup(path, output, token, append_id, args.audit, scope_tags)
-        )
+        results.append(VPPBackupModule(**params).main())
 
     if "Applications" not in exclude:
-        from .backup.Intune.backup_applications import savebackup
+        from .backup.Intune.Applications import ApplicationsBackupModule
 
-        results.append(
-            savebackup(path, output, exclude, token, append_id, args.audit, scope_tags)
-        )
+        results.append(ApplicationsBackupModule(**params).main())
 
     if "DeviceCompliancePolicies" not in exclude:
-        from .backup.Intune.backup_compliancePolicies import savebackup
+        from .backup.Intune.DeviceCompliance import DeviceComplianceBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(DeviceComplianceBackupModule(**params).main())
 
     if "ReusablePolicySettings" not in exclude:
-        from .backup.Intune.backup_reusablePolicySettings import savebackup
+        from .backup.Intune.ReusableSettings import ReusableSettingsBackupModule
 
-        results.append(
-            savebackup(path, output, token, prefix, append_id, args.audit, scope_tags)
-        )
+        results.append(ReusableSettingsBackupModule(**params).main())
 
     if "ComplianceScripts" not in exclude:
-        from .backup.Intune.backup_complianceScripts import savebackup
+        from .backup.Intune.ComplianceScripts import ComplianceScriptsBackupModule
 
-        results.append(
-            savebackup(path, output, token, prefix, append_id, args.audit, scope_tags)
-        )
+        results.append(ComplianceScriptsBackupModule(**params).main())
 
     if "Compliance" not in exclude:
-        from .backup.Intune.backup_compliance import savebackup
+        from .backup.Intune.Compliance import ComplianceBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(ComplianceBackupModule(**params).main())
 
     if "DeviceManagementSettings" not in exclude:
-        from .backup.Intune.backup_deviceManagementSettings import savebackup
+        from .backup.Intune.DeviceManagementSettings import (
+            DeviceManagementSettingsBackupModule,
+        )
 
-        results.append(savebackup(path, output, args.audit, token))
+        results.append(DeviceManagementSettingsBackupModule(**params).main())
 
     if "DeviceCategories" not in exclude:
-        from .backup.Intune.backup_deviceCategories import savebackup
+        from .backup.Intune.DeviceCategories import DeviceCategoriesBackupModule
 
-        results.append(
-            savebackup(path, output, token, prefix, append_id, args.audit, scope_tags)
-        )
+        results.append(DeviceCategoriesBackupModule(**params).main())
 
     if "NotificationTemplate" not in exclude:
-        from .backup.Intune.backup_notificationTemplate import savebackup
-
-        results.append(
-            savebackup(path, output, token, prefix, append_id, args.audit, scope_tags)
+        from .backup.Intune.NotificationTemplates import (
+            NotificationTemplateBackupModule,
         )
+
+        results.append(NotificationTemplateBackupModule(**params).main())
 
     if "Profiles" not in exclude:
-        from .backup.Intune.backup_profiles import savebackup
+        from .backup.Intune.DeviceConfigurations import DeviceConfigurationBackupModule
 
-        results.append(
-            savebackup(
-                path,
-                output,
-                exclude,
-                token,
-                prefix,
-                append_id,
-                args.ignore_omasettings,
-                args.audit,
-                scope_tags,
-            )
-        )
+        results.append(DeviceConfigurationBackupModule(**params).main())
 
     if "GPOConfigurations" not in exclude:
-        from .backup.Intune.backup_groupPolicyConfiguration import savebackup
-
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
+        from .backup.Intune.GroupPolicyConfigurations import (
+            GroupPolicyConfigurationsBackupModule,
         )
+
+        results.append(GroupPolicyConfigurationsBackupModule(**params).main())
 
     if "AppleEnrollmentProfile" not in exclude:
-        from .backup.Intune.backup_appleEnrollmentProfile import savebackup
+        from .backup.Intune.AppleEnrollmentProfiles import (
+            AppleEnrollmentProfilesBackupModule,
+        )
 
-        results.append(savebackup(path, output, token, prefix, append_id, args.audit))
+        results.append(AppleEnrollmentProfilesBackupModule(**params).main())
 
     if "WindowsEnrollmentProfile" not in exclude:
-        from .backup.Intune.backup_windowsEnrollmentProfile import savebackup
-
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
+        from .backup.Intune.WindowsEnrollmentProfile import (
+            WindowsEnrollmentProfilesBackupModule,
         )
+
+        results.append(WindowsEnrollmentProfilesBackupModule(**params).main())
 
     if "EnrollmentStatusPage" not in exclude:
-        from .backup.Intune.backup_enrollmentStatusPage import savebackup
+        from .backup.Intune.EnrollmentStatusPage import EnrollmentStatusPageBackupModule
 
-        results.append(
-            savebackup(path, output, exclude, token, prefix, append_id, scope_tags)
-        )
+        results.append(EnrollmentStatusPageBackupModule(**params).main())
 
     if "EnrollmentConfigurations" not in exclude:
-        from .backup.Intune.backup_enrollmentConfigurations import savebackup
-
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
+        from .backup.Intune.EnrollmentConfigurations import (
+            EnrollmentConfigurationsBackupModule,
         )
 
-    if args.autopilot == "True":
-        from .backup.Intune.backup_autopilotDevices import savebackup
-
-        savebackup(path, output, token)
+        results.append(EnrollmentConfigurationsBackupModule(**params).main())
 
     if "Filters" not in exclude:
-        from .backup.Intune.backup_assignmentFilters import savebackup
+        from .backup.Intune.Filters import FiltersBackupModule
 
-        results.append(
-            savebackup(path, output, token, prefix, append_id, args.audit, scope_tags)
-        )
+        results.append(FiltersBackupModule(**params).main())
 
     if "ManagedGooglePlay" not in exclude:
-        from .backup.Intune.backup_managedGPlay import savebackup
+        from .backup.Intune.ManagedGooglePlay import ManagedGooglePlayBackupModule
 
-        results.append(savebackup(path, output, exclude, token, append_id, args.audit))
+        results.append(ManagedGooglePlayBackupModule(**params).main())
 
     if "Intents" not in exclude:
-        from .backup.Intune.backup_managementIntents import savebackup
+        from .backup.Intune.ManagementIntents import ManagementIntentsBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(ManagementIntentsBackupModule(**params).main())
 
     if "CompliancePartner" not in exclude:
-        from .backup.Intune.backup_compliancePartner import savebackup
+        from .backup.Intune.CompliancePartner import CompliancePartnerBackupModule
 
-        results.append(savebackup(path, output, exclude, token, append_id, args.audit))
+        results.append(CompliancePartnerBackupModule(**params).main())
 
     if "ManagementPartner" not in exclude:
-        from .backup.Intune.backup_managementPartner import savebackup
+        from .backup.Intune.ManagementPartner import ManagementPartnerBackupModule
 
-        results.append(savebackup(path, output, token, append_id, args.audit))
+        results.append(ManagementPartnerBackupModule(**params).main())
 
     if "RemoteAssistancePartner" not in exclude:
-        from .backup.Intune.backup_remoteAssistancePartner import savebackup
+        from .backup.Intune.RemoteAssistancePartner import (
+            RemoteAssistancePartnerBackupModule,
+        )
 
-        results.append(savebackup(path, output, token, append_id, args.audit))
+        results.append(RemoteAssistancePartnerBackupModule(**params).main())
 
     if "ProactiveRemediation" not in exclude:
-        from .backup.Intune.backup_proactiveRemediation import savebackup
-
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
+        from .backup.Intune.ProactiveRemediation import (
+            ProactiveRemediationScriptBackupModule,
         )
+
+        results.append(ProactiveRemediationScriptBackupModule(**params).main())
 
     if "PowershellScripts" not in exclude:
-        from .backup.Intune.backup_powershellScripts import savebackup
+        from .backup.Intune.PowershellScripts import PowershellScriptsBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(PowershellScriptsBackupModule(**params).main())
 
     if "ShellScripts" not in exclude:
-        from .backup.Intune.backup_shellScripts import savebackup
+        from .backup.Intune.ShellScripts import ShellScriptsBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(ShellScriptsBackupModule(**params).main())
 
     if "CustomAttributes" not in exclude:
-        from .backup.Intune.backup_customAttributeShellScript import savebackup
+        from .backup.Intune.CustomAttributes import CustomAttributesBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(CustomAttributesBackupModule(**params).main())
 
     if "ConfigurationPolicies" not in exclude:
-        from .backup.Intune.backup_configurationPolicies import savebackup
+        from .backup.Intune.SettingsCatalog import SettingsCatalogBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(SettingsCatalogBackupModule(**params).main())
 
     if "ConditionalAccess" not in exclude:
-        from .backup.Intune.backup_conditionalAccess import savebackup
+        from .backup.Intune.ConditionalAccess import ConditionalAccessBackupModule
 
-        results.append(savebackup(path, output, token, prefix, append_id))
+        results.append(ConditionalAccessBackupModule(**params).main())
 
     if "WindowsDriverUpdates" not in exclude:
-        from .backup.Intune.backup_windowsDriverUpdates import savebackup
+        from .backup.Intune.WindowsDriverUpdates import WindowsDriverUpdatesBackupModule
 
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
-        )
+        results.append(WindowsDriverUpdatesBackupModule(**params).main())
 
     if "WindowsFeatureUpdates" not in exclude:
-        from .backup.Intune.backup_windowsFeatureUpdates import savebackup
-
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
+        from .backup.Intune.WindowsFeatureUpdates import (
+            WindowsFeatureUpdatesBackupModule,
         )
+
+        results.append(WindowsFeatureUpdatesBackupModule(**params).main())
 
     if "WindowsQualityUpdates" not in exclude:
-        from .backup.Intune.backup_windowsQualityUpdates import savebackup
-
-        results.append(
-            savebackup(
-                path, output, exclude, token, prefix, append_id, args.audit, scope_tags
-            )
+        from .backup.Intune.WindowsQualityUpdates import (
+            WindowsQualityUpdatesBackupModule,
         )
+
+        results.append(WindowsQualityUpdatesBackupModule(**params).main())
 
     if "Roles" not in exclude:
-        from .backup.Intune.backup_roles import savebackup
+        from .backup.Intune.Roles import RolesBackupModule
 
-        results.append(
-            savebackup(path, output, exclude, token, append_id, args.audit, scope_tags)
-        )
+        results.append(RolesBackupModule(**params).main())
 
     if "ScopeTags" not in exclude:
-        from .backup.Intune.backup_scopeTags import savebackup
+        from .backup.Intune.ScopeTags import ScopeTagsBackupModule
 
-        results.append(savebackup(path, output, exclude, token, append_id, args.audit))
+        results.append(ScopeTagsBackupModule(**params).main())

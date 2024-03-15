@@ -153,7 +153,8 @@ def start():
     parser.add_argument(
         "-ap",
         "--autopilot",
-        help="If set to True, a record of autopilot devices will be saved",
+        help="If set, a record of autopilot devices will be saved",
+        action="store_true",
     )
     parser.add_argument(
         "-f",
@@ -259,9 +260,9 @@ def start():
 
         backup_intune(results, path, output, exclude, token, prefix, append_id, args)
 
-        from .intunecdlib.assignment_report import get_group_report
+        from .intunecdlib.assignment_report import AssignmentReport
 
-        get_group_report(path, output)
+        AssignmentReport(path, output).main()
 
         config_count = sum([result.get("config_count", 0) for result in results])
 

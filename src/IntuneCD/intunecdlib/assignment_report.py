@@ -8,29 +8,24 @@ This module creates a report of all groups found and their assginment.
 import os
 import platform
 
-from .check_file import check_file
-from .load_file import load_file
-from .save_output import save_output
+from .BaseBackupModule import BaseBackupModule
 
 
-def get_group_report(path, output):
-    """
-    This function is used to get a report of all groups and what they are assigned to.
+class AssignmentReport(BaseBackupModule):
+    """Base class for creating a report of all groups and their assignment."""
 
-    Args:
-        path (str): Path to save the report to
-        output (str): Output format for the report
-    """
+    def __init__(self, path, filetype):
+        super().__init__()
+        self.path = path
+        self.filetype = filetype
 
-    report_path = f"{path}/Assignment Report/"
-
-    def process_file(path, name, payload_type, groups):
-        file_check = check_file(path, name)
+    def _process_file(self, path, name, payload_type, groups):
+        file_check = self.check_file(path, name)
         if not file_check:
             return
 
         with open(os.path.join(path, name), "r", encoding="utf-8") as f:
-            data = load_file(name, f)
+            data = self.load_file(name, f)
             if not isinstance(data, dict) or not data.get("assignments"):
                 return
 
@@ -78,7 +73,7 @@ def get_group_report(path, output):
                     groups.append(group_data)
                     break
 
-    def collect_groups(path):
+    def _collect_groups(self, path):
         exclude = set(["__archive__", "Entra"])
         groups = []
         slash = "/"
@@ -94,7 +89,7 @@ def get_group_report(path, output):
                 payload_type = abs_root.replace(abs_path, "").split(slash)
                 if len(payload_type) > 1:
                     payload_type = payload_type[1]
-                process_file(
+                self._process_file(
                     str(root),
                     file,
                     payload_type,
@@ -102,7 +97,18 @@ def get_group_report(path, output):
                 )
         return groups
 
-    groups = collect_groups(path)
+    def main(self):
+        """
+        This function is used to get a report of all groups and what they are assigned to.
 
-    if groups:
-        save_output(output, report_path, "report", groups)
+        Args:
+            path (str): Path to save the report to
+            output (str): Output format for the report
+        """
+
+        groups = self._collect_groups(self.path)
+
+        if groups:
+            self.save_output(
+                self.filetype, f"{self.path}/Assignment Report/", "report", groups
+            )
