@@ -12,3 +12,9 @@ ignore:
   - "src/IntuneCD/intunecdlib/logger.py"
   - "src/IntuneCD/backup/Intune/backup_autopilotDevices.py"
   - "src/IntuneCD/backup/Intune/backup_activationLock.py"
+coverage:
+  range: 50..75
+  round: up
+  precision: 2
+  status:
+    patch: off
