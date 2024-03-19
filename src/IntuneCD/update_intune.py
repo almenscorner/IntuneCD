@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 def update_intune(
     diff_summary,
-    diff_count,
     path,
     token,
     assignment,
@@ -21,9 +20,9 @@ def update_intune(
         "report": report,
         "remove": remove,
         "create_groups": create_groups,
+        "handle_assignment": assignment,
     }
 
-    # from .intunecdlib.process_scope_tags import get_scope_tags
     from .intunecdlib.process_scope_tags import ProcessScopeTags
 
     process_scope_tags = ProcessScopeTags(token)
@@ -33,7 +32,6 @@ def update_intune(
 
         diff_summary.append(ScopeTagsUpdateModule(**params).main())
         scope_tags = process_scope_tags.get_scope_tags()
-        # scope_tags = get_scope_tags(token)
     else:
         scope_tags = None
 
@@ -54,6 +52,11 @@ def update_intune(
 
         diff_summary.append(AppProtectionUpdateModule(**params).main())
 
+    if "NotificationTemplate" not in exclude:
+        from .update.Intune.NotificationTemplate import NotificationTemplateUpdateModule
+
+        diff_summary.append(NotificationTemplateUpdateModule(**params).main())
+
     if "ReusablePolicySettings" not in exclude:
         from .update.Intune.ReusableSettings import ReusableSettingsUpdateModule
 
@@ -63,9 +66,6 @@ def update_intune(
         from .update.Intune.ComplianceScripts import ComplianceScriptsUpdateModule
 
         diff_summary.append(ComplianceScriptsUpdateModule(**params).main())
-        # from .update.Intune.update_complianceScripts import update
-
-        # diff_summary.append(update(path, token, report, remove, scope_tags))
 
     if "DeviceCompliancePolicies" not in exclude:
         from .update.Intune.Compliance import ComplianceUpdateModule
@@ -84,6 +84,7 @@ def update_intune(
 
         diff_summary.append(DeviceManagementSettingsUpdateModule(**params).main())
     else:
+        print("-" * 100)
         print(
             "***Device Management Settings is only available with interactive auth***"
         )
@@ -93,22 +94,17 @@ def update_intune(
 
         diff_summary.append(DeviceCategoriesUpdateModule(**params).main())
 
-    if "NotificationTemplate" not in exclude:
-        from .update.Intune.NotificationTemplate import NotificationTemplateUpdateModule
-
-        diff_summary.append(NotificationTemplateUpdateModule(**params).main())
-
     if "Profiles" not in exclude:
         from .update.Intune.DeviceConfigurations import DeviceConfigurationsUpdateModule
 
         diff_summary.append(DeviceConfigurationsUpdateModule(**params).main())
 
-    # if "GPOConfigurations" not in exclude:
-    # from .update.Intune.update_groupPolicyConfiguration import update
+    if "GPOConfigurations" not in exclude:
+        from .update.Intune.GroupPolicyConfigurations import (
+            GroupPolicyConfigurationsUpdateModule,
+        )
 
-    # diff_summary.append(
-    #    update(path, token, assignment, report, create_groups, remove, scope_tags)
-    # )
+        diff_summary.append(GroupPolicyConfigurationsUpdateModule(**params).main())
 
     if "AppleEnrollmentProfile" not in exclude:
         from .update.Intune.AppleEnrollmentProfile import (
