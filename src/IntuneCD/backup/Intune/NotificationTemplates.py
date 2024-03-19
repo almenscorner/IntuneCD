@@ -47,7 +47,7 @@ class NotificationTemplateBackupModule(BaseBackupModule):
 
         # Remove the keys that are not needed
         for item in self.graph_data["value"]:
-            for locale in item["localizedNotificationMessages"]:
+            for locale in item.get("localizedNotificationMessages"):
                 self.remove_keys(locale)
 
         try:
