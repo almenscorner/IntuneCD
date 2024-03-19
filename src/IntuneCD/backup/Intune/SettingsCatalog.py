@@ -11,7 +11,7 @@ class SettingsCatalogBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/configurationPolicies"
-    LOG_MESSAGE = "Backing up Device Category: "
+    LOG_MESSAGE = "Backing up Settings Catalog Policy: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the SettingsCatalogBackupModule class
@@ -40,7 +40,7 @@ class SettingsCatalogBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Device Category data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Settings Catalog data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
 
@@ -79,7 +79,7 @@ class SettingsCatalogBackupModule(BaseBackupModule):
                     },
                 )
             except Exception as e:
-                self.log(msg=f"Error processing Device Category data: {e}")
+                self.log(msg=f"Error processing Settings Catalog data: {e}")
                 return None
 
         return self.results
