@@ -11,7 +11,7 @@ class ConditionalAccessBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/identity/conditionalAccess/policies"
-    LOG_MESSAGE = "Backing up Conditional Access policy: "
+    LOG_MESSAGE = "Backing up Conditional Access Policy: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the ConditionalAccessBackupModule class
@@ -23,6 +23,8 @@ class ConditionalAccessBackupModule(BaseBackupModule):
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Conditional Access/"
         self.audit = False
+        # Skip assignments on this module
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Conditional Access policies
@@ -36,7 +38,7 @@ class ConditionalAccessBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Conditional Access policy data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Conditional Access Policy data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
 
@@ -44,9 +46,6 @@ class ConditionalAccessBackupModule(BaseBackupModule):
             # Remove the keys that are not needed from each grantControls
             if item.get("grantControls"):
                 item["grantControls"].pop("authenticationStrength@odata.context", None)
-
-        # Skip assignments on this module
-        self.has_assignments = False
 
         try:
             self.results = self.process_data(
@@ -57,7 +56,7 @@ class ConditionalAccessBackupModule(BaseBackupModule):
                 log_message=self.LOG_MESSAGE,
             )
         except Exception as e:
-            self.log(msg=f"Error processing Conditional Access policy data: {e}")
+            self.log(msg=f"Error processing Conditional Access Policy data: {e}")
             return None
 
         return self.results
