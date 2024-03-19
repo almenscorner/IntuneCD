@@ -36,5 +36,6 @@ ignore=
     document_intune.py,
     document_entra.py,
     run_documentation.py,
-    _test_template.py,
+    _test_backup_template.py,
+    backup_template.py,
     update_template.py,
