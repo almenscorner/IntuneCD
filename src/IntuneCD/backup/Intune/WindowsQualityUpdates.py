@@ -11,7 +11,7 @@ class WindowsQualityUpdatesBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/windowsQualityUpdateProfiles"
-    LOG_MESSAGE = "Backing up Windows Quality Update profile: "
+    LOG_MESSAGE = "Backing up Windows Quality Update Profile: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the WindowsQualityUpdatesBackupModule class
@@ -38,7 +38,7 @@ class WindowsQualityUpdatesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Windows Quality Update profile data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Windows Quality Update data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
 
@@ -52,7 +52,7 @@ class WindowsQualityUpdatesBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Windows Quality Update profile data: {e}")
+            self.log(msg=f"Error processing Windows Quality Update data: {e}")
             return None
 
         return self.results
