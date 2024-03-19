@@ -11,7 +11,7 @@ class GroupPolicyConfigurationsBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/groupPolicyConfigurations"
-    LOG_MESSAGE = "Backing up Device configurtion: "
+    LOG_MESSAGE = "Backing up Device Configuration: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the GroupPolicyConfigurationsBackupModule class
@@ -21,7 +21,7 @@ class GroupPolicyConfigurationsBackupModule(BaseBackupModule):
             **kwargs: The keyword arguments to pass to the base class's __init__ method.
         """
         super().__init__(*args, **kwargs)
-        self.path = f"{self.path}/Device Configurations/"
+        self.path = f"{self.path}/Group Policy Configurations/"
         self.audit_filter = "componentName eq 'DeviceConfiguration'"
         self.assignment_endpoint = "deviceManagement/groupPolicyConfigurations/"
         self.assignment_extra_url = "/assignments"
@@ -52,7 +52,7 @@ class GroupPolicyConfigurationsBackupModule(BaseBackupModule):
                 for definition in item["definitionValues"]:
                     presentation_endpoint = (
                         f"{self.endpoint}{self.CONFIG_ENDPOINT}/{item['id']}/definitionValues/{definition['id']}/"
-                        f"presentationValues?$expand=presentation "
+                        f"presentationValues?$expand=presentation"
                     )
                     presentation = self.make_graph_request(
                         endpoint=presentation_endpoint
