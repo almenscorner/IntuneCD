@@ -11,7 +11,7 @@ class WindowsFeatureUpdatesBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/windowsFeatureUpdateProfiles"
-    LOG_MESSAGE = "Backing up Windows Feature Update profile: "
+    LOG_MESSAGE = "Backing up Windows Feature Update Profile: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the WindowsFeatureUpdatesBackupModule class
@@ -38,7 +38,7 @@ class WindowsFeatureUpdatesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Windows Feature Update profile data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Windows Feature Update data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
 
@@ -52,7 +52,7 @@ class WindowsFeatureUpdatesBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Windows Feature Update profile data: {e}")
+            self.log(msg=f"Error processing Windows Feature Update data: {e}")
             return None
 
         return self.results
