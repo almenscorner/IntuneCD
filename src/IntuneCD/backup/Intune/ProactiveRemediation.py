@@ -13,7 +13,7 @@ class ProactiveRemediationScriptBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/deviceHealthScripts"
-    LOG_MESSAGE = "Backing up Proactive remediation: "
+    LOG_MESSAGE = "Backing up Proactive Remediation: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the ProactiveRemediationScriptBackupModule class
@@ -38,6 +38,10 @@ class ProactiveRemediationScriptBackupModule(BaseBackupModule):
             item (dict): The script data
             script_type (str): The type of script to save
         """
+        if self.prefix:
+            match = self.check_prefix_match(item["displayName"], self.prefix)
+            if not match:
+                return
         try:
             if not os.path.exists(self.script_data_path):
                 os.makedirs(self.script_data_path)
