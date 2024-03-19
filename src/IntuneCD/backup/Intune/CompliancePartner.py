@@ -11,7 +11,7 @@ class CompliancePartnerBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/complianceManagementPartners"
-    LOG_MESSAGE = "Backing up Compliance partner: "
+    LOG_MESSAGE = "Backing up Compliance Partner: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the CompliancePartnerBackupModule class
@@ -22,10 +22,11 @@ class CompliancePartnerBackupModule(BaseBackupModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Partner Connections/Compliance/"
-        self.prefix = None
         self.audit_filter = (
             self.audit_filter or "componentName eq 'DeviceCompliancePolicy'"
         )
+        # Compliance Partner has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Compliance Partners
@@ -42,9 +43,6 @@ class CompliancePartnerBackupModule(BaseBackupModule):
                 msg=f"Error getting Compliance Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
-
-        # Compliance Partner has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         # Remove any partners with a partnerState of unknown
         self.graph_data = [
