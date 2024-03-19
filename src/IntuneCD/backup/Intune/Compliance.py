@@ -30,6 +30,32 @@ class ComplianceBackupModule(BaseBackupModule):
         )
         self.assignment_extra_url = self.assignment_extra_url or "/assignments"
 
+    def _get_notification_template(self, rule: dict[str, any]) -> dict[str, any]:
+        """Gets the notification template for a rule
+
+        Args:
+            rule (dict[str, any]): The rule to get the notification template for
+
+        Returns:
+            dict[str, any]: The notification template
+        """
+        for action in rule["scheduledActionConfigurations"]:
+            if (
+                action.get("notificationTemplateId")
+                != "00000000-0000-0000-0000-000000000000"
+            ):
+                notification_template = self.make_graph_request(
+                    self.endpoint
+                    + "/beta/deviceManagement/notificationMessageTemplates/"
+                    + action["notificationTemplateId"]
+                )
+                if notification_template:
+                    action["notificationTemplateName"] = notification_template[
+                        "displayName"
+                    ]
+
+        return rule
+
     def main(self) -> dict[str, any]:
         """The main method to backup the Compliance Policies
 
@@ -53,6 +79,7 @@ class ComplianceBackupModule(BaseBackupModule):
             # Remove the keys that are not needed from each scheduledActionsForRule
             for rule in item["scheduledActionsForRule"]:
                 self.remove_keys(rule)
+                self._get_notification_template(rule)
 
             # If there is a deviceCompliancePolicyScript, get the name of the script
             if item.get("deviceCompliancePolicyScript", None):
