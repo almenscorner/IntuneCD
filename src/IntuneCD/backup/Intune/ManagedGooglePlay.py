@@ -13,7 +13,7 @@ class ManagedGooglePlayBackupModule(BaseBackupModule):
     CONFIG_ENDPOINT = (
         "/beta/deviceManagement/androidManagedStoreAccountEnterpriseSettings"
     )
-    LOG_MESSAGE = "Backing up Managed Google play: "
+    LOG_MESSAGE = "Backing up Managed Google Play: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the ManagedGooglePlayBackupModule class
@@ -24,11 +24,12 @@ class ManagedGooglePlayBackupModule(BaseBackupModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Managed Google Play/"
-        self.prefix = None
         self.audit_filter = self.audit_filter or (
             "resources/any(s:s/auditResourceType eq "
             "'Microsoft.Management.Services.Api.AndroidManagedStoreAccountEnterpriseSettings')"
         )
+        # Managed Google Play has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Managed Google Play
@@ -45,9 +46,6 @@ class ManagedGooglePlayBackupModule(BaseBackupModule):
                 msg=f"Error getting Managed Google Play data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
-
-        # Managed Google Play has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         try:
             self.results = self.process_data(
