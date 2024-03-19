@@ -173,6 +173,13 @@ class BaseBackupModule(BaseGraphModule):
         """
         self.filename = ""
 
+        if self.prefix:
+            if name_key == "":
+                return self.results
+            match = self.check_prefix_match(data[f"{name_key}"], self.prefix)
+            if not match:
+                return self.results
+
         if log_message:
             self.log(msg=log_message + data[f"{name_key}"])
 
@@ -209,16 +216,9 @@ class BaseBackupModule(BaseGraphModule):
         if self.clean_data is True:
             data = self.remove_keys(data)
 
-        if self.prefix:
-            prefix_match = self.check_prefix_match(data[f"{name_key}"], self.prefix)
-            if prefix_match:
-                self.save_to_file(data, filetype, path, self.filename)
-                self.results["outputs"].append(self.filename)
-                self.results["config_count"] += 1
-        else:
-            self.save_to_file(data, filetype, path, self.filename)
-            self.results["outputs"].append(self.filename)
-            self.results["config_count"] += 1
+        self.save_to_file(data, filetype, path, self.filename)
+        self.results["outputs"].append(self.filename)
+        self.results["config_count"] += 1
 
         return self.results
 
