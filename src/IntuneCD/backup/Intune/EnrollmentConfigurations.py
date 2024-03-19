@@ -11,7 +11,7 @@ class EnrollmentConfigurationsBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/deviceEnrollmentConfigurations/"
-    LOG_MESSAGE = "Backing up Enrollment configuration: "
+    LOG_MESSAGE = "Backing up Enrollment Configuration: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the EnrollmentConfigurationsBackupModule class
@@ -38,8 +38,9 @@ class EnrollmentConfigurationsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                f"Error getting Enrollment Configuration data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Enrollment Configuration data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
+            return None
 
         # Remove the windows10EnrollmentCompletionPageConfiguration from the data
         self.graph_data = [
@@ -59,7 +60,7 @@ class EnrollmentConfigurationsBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(f"Error processing Enrollment Configuration data: {e}")
+            self.log(msg=f"Error processing Enrollment Configuration data: {e}")
             return None
 
         return self.results
