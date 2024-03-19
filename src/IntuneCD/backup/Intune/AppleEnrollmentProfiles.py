@@ -23,6 +23,8 @@ class AppleEnrollmentProfilesBackupModule(BaseBackupModule):
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Enrollment Profiles/Apple/"
         self.audit_filter = "componentName eq 'Enrollment'"
+        # Apple Enrollment Profiles has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Apple Enrollment Profiles
@@ -56,9 +58,6 @@ class AppleEnrollmentProfilesBackupModule(BaseBackupModule):
             for value in profile["value"]
             if value is not None
         ]
-
-        # Apple Enrollment Profiles has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         try:
             self.results = self.process_data(
