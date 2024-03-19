@@ -23,6 +23,8 @@ class DeviceCategoriesBackupModule(BaseBackupModule):
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Device Categories/"
         self.audit_filter = self.audit_filter or "componentName eq 'Enrollment'"
+        # Device Categories has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Device Categories
@@ -39,9 +41,6 @@ class DeviceCategoriesBackupModule(BaseBackupModule):
                 msg=f"Error getting Device Category data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
-
-        # Device Categories has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         try:
             self.results = self.process_data(
