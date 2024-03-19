@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 from src.IntuneCD.backup.Intune.Roles import RolesBackupModule
 

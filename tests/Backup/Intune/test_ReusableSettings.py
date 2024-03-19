@@ -36,7 +36,7 @@ class TestReusableSettingsBackupModule(unittest.TestCase):
             },
         )
         mock_process_data.assert_called_once_with(
-            data=mock_make_graph_request.return_value["value"][0],
+            data=mock_make_graph_request.return_value["value"],
             filetype=None,
             path=self.module.path,
             name_key="displayName",

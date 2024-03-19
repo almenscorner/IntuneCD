@@ -2,9 +2,7 @@
 import unittest
 from unittest.mock import patch
 
-from src.IntuneCD.backup.Intune.VolumePurchaseProgram import (
-    VPPBackupModule,
-)
+from src.IntuneCD.backup.Intune.VolumePurchaseProgram import VPPBackupModule
 
 
 class TestVPPBackupModule(unittest.TestCase):
