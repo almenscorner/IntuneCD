@@ -164,6 +164,7 @@ class ComplianceUpdateModule(BaseUpdateModule):
             )
             for action in actions["value"]:
                 self.remove_keys(action)
+
             item["scheduledActionsForRule"] = actions["value"]
             new_intune_data.append(item)
 
@@ -235,6 +236,37 @@ class ComplianceUpdateModule(BaseUpdateModule):
 
                     self.update_diff_data(setting_diff)
 
+    def _get_notification_template_id(self, rule: dict[str, any]) -> dict[str, any]:
+        """Gets the notification template for a rule
+
+        Args:
+            rule (dict[str, any]): The rule to get the notification template for
+
+        Returns:
+            dict[str, any]: The notification template
+        """
+        for action in rule["scheduledActionConfigurations"]:
+            if action.get("notificationTemplateName"):
+                notification_template = self.make_graph_request(
+                    self.endpoint
+                    + "/beta/deviceManagement/notificationMessageTemplates/",
+                    params={
+                        "$filter": f"displayName eq '{action['notificationTemplateName']}'"
+                    },
+                )
+                if notification_template["value"]:
+                    action["notificationTemplateId"] = notification_template["value"][
+                        0
+                    ]["id"]
+                else:
+                    action[
+                        "notificationTemplateId"
+                    ] = "00000000-0000-0000-0000-000000000000"
+
+                action.pop("notificationTemplateName")
+
+        return rule
+
     def main(self) -> dict[str, any]:
         """The main method to update the Intune data"""
         if self.path_exists():
@@ -259,6 +291,7 @@ class ComplianceUpdateModule(BaseUpdateModule):
 
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
+                    self.create_request = None
                     if "technologies" not in repo_data:
                         continue
                     self.match_info = {
@@ -276,6 +309,10 @@ class ComplianceUpdateModule(BaseUpdateModule):
                     intune_data["value"] = self._get_scheduledActionsForRule(
                         intune_data
                     )
+
+                    for rule in repo_data.get("scheduledActionsForRule"):
+                        self._get_notification_template_id(rule)
+
                     # Remove additional keys from the data
                     new_intune_data = []
                     for item in intune_data["value"]:
