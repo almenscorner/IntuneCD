@@ -80,6 +80,7 @@ def start():
     )
     parser.add_argument(
         "-u",
+        "--update-assignments",
         help="When this parameter is set, assignments are updated for all configurations",
         action="store_true",
     )
@@ -231,7 +232,6 @@ def start():
 
         update_intune(
             diff_summary,
-            diff_count,
             path,
             token,
             assignment,
@@ -274,7 +274,7 @@ def start():
             summary = run_update(
                 args.path,
                 token,
-                args.u,
+                args.update_assignments,
                 exclude,
                 args.report,
                 args.create_groups,
@@ -311,7 +311,7 @@ def start():
             run_update(
                 args.path,
                 token,
-                args.u,
+                args.update_assignments,
                 exclude,
                 args.report,
                 args.create_groups,
