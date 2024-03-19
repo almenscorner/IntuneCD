@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import unittest
 from unittest.mock import patch
+
 from src.IntuneCD.backup.Intune.Activationlock import ActivationLockBackupModule
 
 
