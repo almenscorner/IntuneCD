@@ -11,7 +11,7 @@ class NotificationTemplateBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/notificationMessageTemplates"
-    LOG_MESSAGE = "Backing up Notification message template: "
+    LOG_MESSAGE = "Backing up Notification Message Template: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the NotificationTemplateBackupModule class
@@ -25,6 +25,8 @@ class NotificationTemplateBackupModule(BaseBackupModule):
         self.audit_filter = (
             self.audit_filter or "componentName eq 'NotificationMessageTemplate'"
         )
+        # Notification Templates has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Notification Templates
@@ -47,9 +49,6 @@ class NotificationTemplateBackupModule(BaseBackupModule):
         for item in self.graph_data["value"]:
             for locale in item["localizedNotificationMessages"]:
                 self.remove_keys(locale)
-
-        # APNs has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         try:
             self.results = self.process_data(
