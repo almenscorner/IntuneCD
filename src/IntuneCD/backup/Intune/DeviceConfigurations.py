@@ -13,7 +13,7 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/deviceConfigurations"
-    LOG_MESSAGE = "Backing up Device configuration: "
+    LOG_MESSAGE = "Backing up Device Configuration: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the DeviceConfigurationBackupModule class
@@ -40,8 +40,9 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                f"Error getting Device Configuration data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Device Configuration data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
+            return None
 
         custom_apple_odata = [
             "#microsoft.graph.macOSCustomConfiguration",
@@ -110,7 +111,7 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(f"Error processing Device Configuration data: {e}")
+            self.log(msg=f"Error processing Device Configuration data: {e}")
             return None
 
         return self.results
