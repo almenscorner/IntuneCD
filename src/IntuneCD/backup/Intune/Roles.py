@@ -22,7 +22,6 @@ class RolesBackupModule(BaseBackupModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Roles/"
-        self.prefix = None
         self.audit_filter = "componentName eq 'RoleBasedAccessControl'"
 
     def _get_group_names(self, item) -> list:
