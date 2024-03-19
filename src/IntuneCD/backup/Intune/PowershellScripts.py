@@ -37,6 +37,10 @@ class PowershellScriptsBackupModule(BaseBackupModule):
         Args:
             item (dict): The script data
         """
+        if self.prefix:
+            match = self.check_prefix_match(item["displayName"], self.prefix)
+            if not match:
+                return
         script_name = self._prepare_file_name(item["fileName"].replace(".ps1", ""))
         if self.append_id:
             script_name = f"{script_name}__{item['id']}"
