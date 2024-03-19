@@ -12,7 +12,7 @@ class EnrollmentStatusPageBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/deviceEnrollmentConfigurations"
-    LOG_MESSAGE = "Backing up Enrollment status page: "
+    LOG_MESSAGE = "Backing up Enrollment Status Page: "
     APP_ENDPOINT = "/beta/deviceAppManagement/mobileApps"
 
     def __init__(self, *args, **kwargs):
@@ -40,8 +40,9 @@ class EnrollmentStatusPageBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                f"Error getting Enrollment Status Page data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Enrollment Status Page data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
+            return None
 
         # Only get the windows10EnrollmentCompletionPageConfiguration from the data
         self.graph_data = [
@@ -79,7 +80,7 @@ class EnrollmentStatusPageBackupModule(BaseBackupModule):
                 log_message=self.LOG_MESSAGE,
             )
         except Exception as e:
-            self.log(f"Error processing Enrollment Status Page data: {e}")
+            self.log(msg=f"Error processing Enrollment Status Page data: {e}")
             return None
 
         return self.results
