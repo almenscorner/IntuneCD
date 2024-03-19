@@ -23,11 +23,12 @@ class APNSBackupModule(BaseBackupModule):
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Apple Push Notification/"
         self.append_id = False
-        self.prefix = None
         self.audit_filter = self.audit_filter or (
             "resources/any(s:s/auditResourceType "
             "eq 'Microsoft.Management.Services.Api.ApplePushNotificationCertificate')"
         )
+        # APNs has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Scope Tags
@@ -45,9 +46,6 @@ class APNSBackupModule(BaseBackupModule):
                 msg=f"Error getting APNs data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
-
-        # APNs has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         try:
             self.results = self.process_data(
