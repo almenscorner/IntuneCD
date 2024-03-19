@@ -49,7 +49,7 @@ class TemplateUpdateModule(BaseUpdateModule):
                 return None
 
             # TODO: Remove batch assignment if not needed
-            self.intune_assignments = self.batch_assignment(
+            self.downstream_assignments = self.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",

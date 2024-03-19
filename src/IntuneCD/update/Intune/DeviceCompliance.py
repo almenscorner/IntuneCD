@@ -141,7 +141,7 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
                 self.log(msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.intune_assignments = self.batch_assignment(
+            self.downstream_assignments = self.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",

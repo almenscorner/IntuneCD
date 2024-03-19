@@ -62,14 +62,13 @@ class BaseUpdateModule(BaseGraphModule):
         self.notify = True
         self.get_match = True
         self.url_append_id = True
-        # self.handle_assignment = True
         self.handle_iterable_assignment = False
         self.create_config = True
         self.azure_update = False
         self.config_type = None
         self.match_info = None
         self.config_endpoint = None
-        self.intune_assignments = None
+        self.downstream_assignments = None
         self.create_request = None
         self.assignment_status_code = 200
         self.post_status_code = 201
@@ -663,14 +662,14 @@ class BaseUpdateModule(BaseGraphModule):
             if self.handle_assignment:
                 self.handle_assignments(
                     repo_assignments,
-                    self.intune_assignments,
+                    self.downstream_assignments,
                     self.assignment_key,
                     self.downstream_id,
                 )
             if self.handle_iterable_assignment:
                 self.handle_iterable_assignments(
                     repo_assignments,
-                    self.intune_assignments,
+                    self.downstream_assignments,
                     self.assignment_key,
                     self.downstream_id,
                 )

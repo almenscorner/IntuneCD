@@ -120,7 +120,7 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
 
             intents = self.batch_intents(intune_data)
 
-            self.intune_assignments = self.batch_assignment(
+            self.downstream_assignments = self.batch_assignment(
                 intents["value"],
                 self.assignment_endpoint,
                 "/assignments",
@@ -164,7 +164,7 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
 
                         self.handle_assignments(
                             repo_data.get("assignments", {}),
-                            self.intune_assignments,
+                            self.downstream_assignments,
                             "assignments",
                             intune_id,
                         )
