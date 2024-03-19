@@ -73,7 +73,7 @@ class ManagementIntentsBackupModule(BaseBackupModule):
                 setting.pop("id", None)
 
             try:
-                self.results = self.process_data(
+                results = self.process_data(
                     data=item,
                     filetype=self.filetype,
                     path=self.type_path,
@@ -81,6 +81,7 @@ class ManagementIntentsBackupModule(BaseBackupModule):
                     log_message=self.LOG_MESSAGE,
                     audit_compare_info={"type": "resourceId", "value_key": "id"},
                 )
+                self.update_results(results)
             except Exception as e:
                 self.log(msg=f"Error processing Management Intents data: {e}")
                 return None

@@ -67,7 +67,7 @@ class SettingsCatalogBackupModule(BaseBackupModule):
             )
 
             try:
-                self.results = self.process_data(
+                results = self.process_data(
                     data=item,
                     filetype=self.filetype,
                     path=self.path,
@@ -78,6 +78,7 @@ class SettingsCatalogBackupModule(BaseBackupModule):
                         "value_key": "id",
                     },
                 )
+                self.update_results(results)
             except Exception as e:
                 self.log(msg=f"Error processing Settings Catalog data: {e}")
                 return None

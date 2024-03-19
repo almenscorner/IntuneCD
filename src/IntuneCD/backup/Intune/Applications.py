@@ -120,7 +120,7 @@ class ApplicationsBackupModule(BaseBackupModule):
             self.platform_path = f"{self.path}{platform}/"
 
             try:
-                self.results = self.process_data(
+                app_results = self.process_data(
                     data=app,
                     filetype=self.filetype,
                     path=self.platform_path,
@@ -128,6 +128,7 @@ class ApplicationsBackupModule(BaseBackupModule):
                     log_message=self.LOG_MESSAGE,
                     audit_compare_info={"type": "resourceId", "value_key": "id"},
                 )
+                self.update_results(app_results)
             except Exception as e:
                 self.log(msg=f"Error processing Application data: {e}")
                 return None

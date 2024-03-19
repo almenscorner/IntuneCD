@@ -217,10 +217,8 @@ class BaseBackupModule(BaseGraphModule):
             data = self.remove_keys(data)
 
         self.save_to_file(data, filetype, path, self.filename)
-        self.results["outputs"].append(self.filename)
-        self.results["config_count"] += 1
 
-        return self.results
+        return {"config_count": 1, "outputs": [self.filename]}
 
     def _process_multiple_items(
         self,
@@ -259,6 +257,7 @@ class BaseBackupModule(BaseGraphModule):
             )
             results["config_count"] += item_results["config_count"]
             results["outputs"].extend(item_results["outputs"])
+
         return results
 
     def process_data(
@@ -295,8 +294,8 @@ class BaseBackupModule(BaseGraphModule):
         if self.audit and self.config_audit_data is False:
             self.audit_data = self.make_audit_request(self.audit_filter)
 
-        if isinstance(data, dict):
-            return self._process_single_item(
+        if isinstance(data, list):
+            return self._process_multiple_items(
                 data,
                 filetype,
                 path,
@@ -305,8 +304,9 @@ class BaseBackupModule(BaseGraphModule):
                 audit_compare_info,
                 self.assignment_responses,
             )
-        if isinstance(data, list):
-            return self._process_multiple_items(
+
+        if isinstance(data, dict):
+            return self._process_single_item(
                 data,
                 filetype,
                 path,
@@ -332,3 +332,12 @@ class BaseBackupModule(BaseGraphModule):
         if not prefix_in_name:
             return False
         return True
+
+    def update_results(self, results: dict):
+        """Update the results
+
+        Args:
+            results (dict): The results to update
+        """
+        self.results["config_count"] += results["config_count"]
+        self.results["outputs"].extend(results["outputs"])
