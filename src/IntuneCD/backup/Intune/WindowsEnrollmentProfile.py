@@ -11,7 +11,7 @@ class WindowsEnrollmentProfilesBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/windowsAutopilotDeploymentProfiles"
-    LOG_MESSAGE = "Backing up Windows enrollment profile: "
+    LOG_MESSAGE = "Backing up Windows Enrollment Profile: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the WindowsEnrollmentProfilesBackupModule class
@@ -40,7 +40,7 @@ class WindowsEnrollmentProfilesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Windows enrollment profile data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Windows Enrollment Profile data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
 
@@ -54,7 +54,7 @@ class WindowsEnrollmentProfilesBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Windows enrollment profile data: {e}")
+            self.log(msg=f"Error processing Windows Enrollment Profile data: {e}")
             return None
 
         return self.results
