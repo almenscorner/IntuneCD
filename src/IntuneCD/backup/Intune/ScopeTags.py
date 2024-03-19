@@ -25,7 +25,6 @@ class ScopeTagsBackupModule(BaseBackupModule):
         self.audit_filter = "componentName eq 'RoleBasedAccessControl'"
         self.assignment_endpoint = "deviceManagement/roleScopeTags/"
         self.assignment_extra_url = "/assignments"
-        self.prefix = None
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Scope Tags
