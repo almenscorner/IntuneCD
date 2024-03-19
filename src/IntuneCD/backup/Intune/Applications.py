@@ -22,7 +22,6 @@ class ApplicationsBackupModule(BaseBackupModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Applications/"
-        self.prefix = None
         self.audit_filter = self.audit_filter or "componentName eq 'MobileApp'"
         self.assignment_endpoint = (
             self.assignment_endpoint or "deviceAppManagement/mobileApps/"
