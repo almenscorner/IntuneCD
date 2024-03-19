@@ -25,6 +25,7 @@ class BaseUpdateModule(BaseGraphModule):
         report: bool = False,
         remove: bool = False,
         azure_token: str = None,
+        handle_assignment: bool = False,
     ):
         """Initializes the BaseBackupModule class
 
@@ -50,6 +51,7 @@ class BaseUpdateModule(BaseGraphModule):
         self.create_groups = create_groups
         self.report = report
         self.remove = remove
+        self.handle_assignment = handle_assignment
         # Default variables, can be overridden in child classes
         self.assignment_endpoint = None
         self.assignment_extra_url = None
@@ -60,7 +62,7 @@ class BaseUpdateModule(BaseGraphModule):
         self.notify = True
         self.get_match = True
         self.url_append_id = True
-        self.handle_assignment = True
+        # self.handle_assignment = True
         self.handle_iterable_assignment = False
         self.create_config = True
         self.azure_update = False
@@ -68,6 +70,7 @@ class BaseUpdateModule(BaseGraphModule):
         self.match_info = None
         self.config_endpoint = None
         self.intune_assignments = None
+        self.create_request = None
         self.assignment_status_code = 200
         self.post_status_code = 201
         self.remove_status_code = 200
