@@ -13,7 +13,7 @@ class ShellScriptsBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/deviceShellScripts/"
-    LOG_MESSAGE = "Backing up Shell script: "
+    LOG_MESSAGE = "Backing up Shell Script: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the ShellScriptsBackupModule class
@@ -37,6 +37,10 @@ class ShellScriptsBackupModule(BaseBackupModule):
         Args:
             item (dict): The script data
         """
+        if self.prefix:
+            match = self.check_prefix_match(item["displayName"], self.prefix)
+            if not match:
+                return
         script_name = self._prepare_file_name(item["fileName"].replace(".sh", ""))
         if self.append_id:
             script_name = f"{script_name}__{item['id']}"
