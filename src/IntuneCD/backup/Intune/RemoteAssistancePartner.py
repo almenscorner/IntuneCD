@@ -11,7 +11,7 @@ class RemoteAssistancePartnerBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/remoteAssistancePartners"
-    LOG_MESSAGE = "Backing up Remote Assistance partner: "
+    LOG_MESSAGE = "Backing up Remote Assistance Partner: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the RemoteAssistancePartnerBackupModule class
@@ -22,8 +22,9 @@ class RemoteAssistancePartnerBackupModule(BaseBackupModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Partner Connections/Remote Assistance/"
-        self.prefix = None
         self.audit_filter = self.audit_filter or "componentName eq 'ManagedDevices'"
+        # Remote Assistance Partner has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Remote Assistance Partners
@@ -37,12 +38,9 @@ class RemoteAssistancePartnerBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Remote Assistance partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Remote Assistance Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
-
-        # Compliance Partner has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         # Remove partners that are not onboarded
         self.graph_data = [
@@ -64,7 +62,7 @@ class RemoteAssistancePartnerBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing Remote Assistance partner data: {e}")
+            self.log(msg=f"Error processing Remote Assistance Partner data: {e}")
             return None
 
         return self.results
