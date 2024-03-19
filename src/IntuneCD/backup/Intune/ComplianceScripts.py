@@ -28,6 +28,31 @@ class ComplianceScriptsBackupModule(BaseBackupModule):
         self.audit_filter = (
             self.audit_filter or "componentName eq 'DeviceConfiguration'"
         )
+        # Compliance Scripts has no assignments, so exclude assignments from the run
+        self.has_assignments = False
+
+    def _save_script(self, item: dict) -> None:
+        # If there is a detectionScriptContent, get the name of the script and write the content to a file
+        if self.prefix:
+            match = self.check_prefix_match(item["displayName"], self.prefix)
+            if not match:
+                return
+        if item.get("detectionScriptContent"):
+            if self.append_id:
+                script_name = (
+                    f"{item['displayName'].replace('.ps1', '')}__{item['id']}.ps1"
+                )
+            else:
+                script_name = f"{item['displayName'].replace('.ps1', '')}.ps1"
+            if not os.path.exists(self.script_data_path):
+                os.makedirs(self.script_data_path)
+            decoded = self.decode_base64(item["detectionScriptContent"])
+            f = open(
+                f"{self.script_data_path}{script_name}",
+                "w",
+                encoding="utf-8",
+            )
+            f.write(decoded)
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Compliance Scripts
@@ -45,9 +70,6 @@ class ComplianceScriptsBackupModule(BaseBackupModule):
             )
             return None
 
-        # Compliance Scripts has no assignments, so exclude assignments from the run
-        self.has_assignments = False
-
         script_ids = []
         for script in self.graph_data["value"]:
             script_ids.append(script["id"])
@@ -58,23 +80,7 @@ class ComplianceScriptsBackupModule(BaseBackupModule):
         )
 
         for item in script_data_responses:
-            # If there is a detectionScriptContent, get the name of the script and write the content to a file
-            if item.get("detectionScriptContent"):
-                if self.append_id:
-                    script_name = (
-                        f"{item['displayName'].replace('.ps1', '')}__{item['id']}.ps1"
-                    )
-                else:
-                    script_name = f"{item['displayName'].replace('.ps1', '')}.ps1"
-                if not os.path.exists(self.script_data_path):
-                    os.makedirs(self.script_data_path)
-                decoded = self.decode_base64(item["detectionScriptContent"])
-                f = open(
-                    f"{self.script_data_path}{script_name}",
-                    "w",
-                    encoding="utf-8",
-                )
-                f.write(decoded)
+            self._save_script(item)
 
         try:
             self.results = self.process_data(
