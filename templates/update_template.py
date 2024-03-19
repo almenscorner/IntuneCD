@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from src.IntuneCD.intunecdlib.BaseUpdateModule import BaseUpdateModule
+from ...intunecdlib.BaseUpdateModule import BaseUpdateModule
 
 
 class TemplateUpdateModule(BaseUpdateModule):
