@@ -101,6 +101,37 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
 
                 self.update_diff_data(action_diff)
 
+    def _get_notification_template_id(self, rule: dict[str, any]) -> dict[str, any]:
+        """Gets the notification template for a rule
+
+        Args:
+            rule (dict[str, any]): The rule to get the notification template for
+
+        Returns:
+            dict[str, any]: The notification template
+        """
+        for action in rule["scheduledActionConfigurations"]:
+            if action.get("notificationTemplateName"):
+                notification_template = self.make_graph_request(
+                    self.endpoint
+                    + "/beta/deviceManagement/notificationMessageTemplates/",
+                    params={
+                        "$filter": f"displayName eq '{action['notificationTemplateName']}'"
+                    },
+                )
+                if notification_template["value"]:
+                    action["notificationTemplateId"] = notification_template["value"][
+                        0
+                    ]["id"]
+                else:
+                    action[
+                        "notificationTemplateId"
+                    ] = "00000000-0000-0000-0000-000000000000"
+
+                action.pop("notificationTemplateName")
+
+        return rule
+
     def main(self) -> dict[str, any]:
         """The main method to update the Intune data"""
         if self.path_exists():
@@ -133,6 +164,9 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
                     repo_data = self._compliance_script_check(repo_data)
                     if repo_data is False:
                         continue
+
+                    for rule in repo_data.get("scheduledActionsForRule"):
+                        self._get_notification_template_id(rule)
 
                     try:
                         self.process_update(
