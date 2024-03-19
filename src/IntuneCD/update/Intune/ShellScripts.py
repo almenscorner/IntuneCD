@@ -70,7 +70,7 @@ class ShellScriptsUpdateModule(BaseUpdateModule):
                 repo_data,
             )
 
-            self.diff_summary.append(script_diff)
+            self.update_diff_data(script_diff)
 
     def main(self) -> dict[str, any]:
         """The main method to update the Intune data"""
