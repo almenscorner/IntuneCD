@@ -11,7 +11,7 @@ class WindowsDriverUpdatesBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/windowsDriverUpdateProfiles"
-    LOG_MESSAGE = "Backing up Windows Driver Update profile: "
+    LOG_MESSAGE = "Backing up Windows Driver Update: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the WindowsDriverUpdatesBackupModule class
@@ -38,7 +38,7 @@ class WindowsDriverUpdatesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Windows Driver Update profile data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                msg=f"Error getting Windows Driver Update data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
 
@@ -52,7 +52,7 @@ class WindowsDriverUpdatesBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Windows Driver Update profile data: {e}")
+            self.log(msg=f"Error processing Windows Driver Update data: {e}")
             return None
 
         return self.results
