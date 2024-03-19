@@ -89,17 +89,17 @@ class ReusableSettingsBackupModule(BaseBackupModule):
             if item.get("settingInstance").get("simpleSettingValue"):
                 self._save_script(item)
 
-            try:
-                self.results = self.process_data(
-                    data=item,
-                    filetype=self.filetype,
-                    path=self.path,
-                    name_key="displayName",
-                    log_message=self.LOG_MESSAGE,
-                    audit_compare_info={"type": "resourceId", "value_key": "id"},
-                )
-            except Exception as e:
-                self.log(msg=f"Error processing Reusable Policy Setting data: {e}")
-                return None
+        try:
+            self.results = self.process_data(
+                data=self.graph_data["value"],
+                filetype=self.filetype,
+                path=self.path,
+                name_key="displayName",
+                log_message=self.LOG_MESSAGE,
+                audit_compare_info={"type": "resourceId", "value_key": "id"},
+            )
+        except Exception as e:
+            self.log(msg=f"Error processing Reusable Policy Setting data: {e}")
+            return None
 
         return self.results
