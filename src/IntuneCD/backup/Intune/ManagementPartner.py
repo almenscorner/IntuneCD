@@ -11,7 +11,7 @@ class ManagementPartnerBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/deviceManagementPartners"
-    LOG_MESSAGE = "Backing up Management partner: "
+    LOG_MESSAGE = "Backing up Management Partner: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the ManagementPartnerBackupModule class
@@ -21,8 +21,9 @@ class ManagementPartnerBackupModule(BaseBackupModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Partner Connections/Management/"
-        self.prefix = None
         self.audit_filter = self.audit_filter or "componentName eq 'Enrollment'"
+        # Management Partner has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Management Partners
@@ -39,9 +40,6 @@ class ManagementPartnerBackupModule(BaseBackupModule):
                 msg=f"Error getting Management Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
             )
             return None
-
-        # Management Partner has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         # Filter out unconfigured partners
         self.graph_data = [
