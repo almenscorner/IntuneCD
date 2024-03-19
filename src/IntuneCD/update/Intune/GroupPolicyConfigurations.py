@@ -2,7 +2,7 @@
 import json
 import os
 
-from src.IntuneCD.intunecdlib.BaseUpdateModule import BaseUpdateModule
+from ...intunecdlib.BaseUpdateModule import BaseUpdateModule
 
 
 class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
