@@ -22,10 +22,13 @@ class DeviceManagementSettingsBackupModule(BaseBackupModule):
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Device Management Settings/"
         self.append_id = False
-        self.prefix = None
         self.audit_filter = self.audit_filter or (
             "resources/any(s:s/auditResourceType eq 'DeviceManagementSettings')"
         )
+        # Set the filename to settings
+        self.preset_filename = "settings"
+        # Device management settings has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Device Management Settings
@@ -45,18 +48,12 @@ class DeviceManagementSettingsBackupModule(BaseBackupModule):
 
         self.log(msg="Backing up Device Management Settings")
 
-        # Set the filename to settings
-        self.preset_filename = "settings"
-
-        # Device management settings has no assignments, so exclude assignments from the run
-        self.has_assignments = False
-
         try:
             self.results = self.process_data(
                 data=self.graph_data,
                 filetype=self.filetype,
                 path=self.path,
-                name_key="displayName",
+                name_key="",
                 log_message=None,
                 audit_compare_info={
                     "type": "auditResourceType",
