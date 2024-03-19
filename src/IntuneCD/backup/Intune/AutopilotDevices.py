@@ -23,6 +23,8 @@ class AutopilotDevicesBackupModule(BaseBackupModule):
         self.append_id = False
         self.audit = False
         self.prefix = None
+        # Autopilot Devices has no assignments, so exclude assignments from the run
+        self.has_assignments = False
 
     def main(self) -> None:
         """The main method to backup the Autopilot Devices"""
@@ -37,9 +39,6 @@ class AutopilotDevicesBackupModule(BaseBackupModule):
             return None
 
         self.log(msg="Backing up Autopilot Devices")
-
-        # Autopilot Devices has no assignments, so exclude assignments from the run
-        self.has_assignments = False
 
         try:
             self.process_data(
