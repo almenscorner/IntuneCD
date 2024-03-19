@@ -28,6 +28,37 @@ class ReusableSettingsBackupModule(BaseBackupModule):
         self.audit_filter = (
             self.audit_filter or "componentName eq 'DeviceConfiguration'"
         )
+        # Reusable Policy Settings have no assignments, so exclude assignments from the run
+        self.has_assignments = False
+
+    def _save_script(self, item: dict) -> None:
+        if self.prefix:
+            match = self.check_prefix_match(item["displayName"], self.prefix)
+            if not match:
+                return
+        if self.append_id:
+            script_name = f"{item['displayName'].replace('.sh', '')}__{item['id']}.sh"
+        else:
+            script_name = f"{item['displayName'].replace('.sh', '')}.sh"
+        try:
+            if not os.path.exists(self.script_data_path):
+                os.makedirs(self.script_data_path)
+        except Exception as e:
+            self.log(msg=f"Error creating directory {self.script_data_path}: {e}")
+
+        decoded = self.decode_base64(
+            item["settingInstance"]["simpleSettingValue"]["value"]
+        )
+
+        try:
+            with open(
+                f"{self.script_data_path}{script_name}",
+                "w",
+                encoding="utf-8",
+            ) as f:
+                f.write(decoded)
+        except Exception as e:
+            self.log(msg=f"Error writing script {script_name} to file: {e}")
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Reusable Policy Settings
@@ -48,9 +79,6 @@ class ReusableSettingsBackupModule(BaseBackupModule):
             )
             return None
 
-        # Reusable Policy Settings have no assignments, so exclude assignments from the run
-        self.has_assignments = False
-
         for item in self.graph_data["value"]:
             if (
                 item.get("settingDefinitionId")
@@ -59,33 +87,7 @@ class ReusableSettingsBackupModule(BaseBackupModule):
                 continue
 
             if item.get("settingInstance").get("simpleSettingValue"):
-                if self.append_id:
-                    script_name = (
-                        f"{item['displayName'].replace('.sh', '')}__{item['id']}.sh"
-                    )
-                else:
-                    script_name = f"{item['displayName'].replace('.sh', '')}.sh"
-                try:
-                    if not os.path.exists(self.script_data_path):
-                        os.makedirs(self.script_data_path)
-                except Exception as e:
-                    self.log(
-                        msg=f"Error creating directory {self.script_data_path}: {e}"
-                    )
-
-                decoded = self.decode_base64(
-                    item["settingInstance"]["simpleSettingValue"]["value"]
-                )
-
-                try:
-                    with open(
-                        f"{self.script_data_path}{script_name}",
-                        "w",
-                        encoding="utf-8",
-                    ) as f:
-                        f.write(decoded)
-                except Exception as e:
-                    self.log(msg=f"Error writing script {script_name} to file: {e}")
+                self._save_script(item)
 
             try:
                 self.results = self.process_data(
