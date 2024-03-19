@@ -13,7 +13,7 @@ class CustomAttributesBackupModule(BaseBackupModule):
     """
 
     CONFIG_ENDPOINT = "/beta/deviceManagement/deviceCustomAttributeShellScripts/"
-    LOG_MESSAGE = "Backing up Custom attribute: "
+    LOG_MESSAGE = "Backing up Custom Attribute: "
 
     def __init__(self, *args, **kwargs):
         """Initializes the CustomAttributesBackupModule class
@@ -37,6 +37,10 @@ class CustomAttributesBackupModule(BaseBackupModule):
         Args:
             item (dict): The item to save the script for
         """
+        if self.prefix:
+            match = self.check_prefix_match(item["displayName"], self.prefix)
+            if not match:
+                return
         script_name = self._prepare_file_name(item["fileName"].replace(".sh", ""))
         if self.append_id:
             script_name = f"{script_name}__{item['id']}"
