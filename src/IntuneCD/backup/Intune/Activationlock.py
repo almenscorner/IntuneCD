@@ -25,6 +25,8 @@ class ActivationLockBackupModule(BaseBackupModule):
         self.append_id = False
         self.audit = False
         self.prefix = None
+        self.preset_filename = "activation_lock_bypass_codes"
+        self.has_assignments = False
 
     def main(self) -> None:
         """The main method to backup the Activation Lock Bypass Codes"""
@@ -55,9 +57,6 @@ class ActivationLockBackupModule(BaseBackupModule):
             for d in device_data
             if d["activationLockBypassCode"] is not None
         ]
-
-        self.preset_filename = "activation_lock_bypass_codes"
-        self.has_assignments = False
 
         try:
             self.process_data(
