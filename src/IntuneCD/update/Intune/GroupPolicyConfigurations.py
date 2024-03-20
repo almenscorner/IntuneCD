@@ -444,6 +444,15 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
                         "roleScopeTagIds": repo_data["roleScopeTagIds"],
                     }
 
+                    if repo_data["policyConfigurationIngestionType"] == "custom":
+                        repo_data = self.custom_ingestion_match(repo_data)
+                        if not repo_data:
+                            self.print_config_separator()
+                            self.log(
+                                msg=f"Some definitions was not found for {self.name}, import custom ADMX files to Intune first."
+                            )
+                            continue
+
                     try:
                         self.process_update(
                             downstream_data=intune_profiles,
@@ -481,13 +490,6 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
 
                     if self.create_request:
                         if repo_data["policyConfigurationIngestionType"] == "custom":
-                            repo_data = self.custom_ingestion_match(repo_data)
-                            if not repo_data:
-                                self.log(
-                                    msg="Some definitions was not found, import custom ADMX files to Intune first."
-                                )
-                                continue
-
                             for definition in repo_data.get("definitionValues", []):
                                 definition["presentationValues"] = []
 
