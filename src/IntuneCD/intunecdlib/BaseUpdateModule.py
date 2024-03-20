@@ -679,11 +679,7 @@ class BaseUpdateModule(BaseGraphModule):
                 repo_data["scheduledActionsForRule"] = repo_scheduled_actions
         else:
             self.print_config_separator()
-            if create_data:
-                data = create_data
-            else:
-                data = repo_data
-            # repo_data.pop("assignments", None)
+            data = create_data if create_data else repo_data
             if self.create_config:
                 self.diff_count += 1
                 self.create_downstream_data(
