@@ -200,6 +200,12 @@ def start():
         help="When set, the script will process the audit data from Intune and commit the changes to the git repo using the name of the user who made the change and the date and time of the change",
         action="store_true",
     )
+    parser.add_argument(
+        "-t",
+        "--token",
+        help="The authentication token to use for the update if not using an app registration",
+        type=str,
+    )
 
     args = parser.parse_args()
 
@@ -235,15 +241,18 @@ def start():
             "Policy.Read.All",
         ]
 
-    token = getAuth(
-        args.mode,
-        args.localauth,
-        args.certauth,
-        args.interactiveauth,
-        args.scopes,
-        args.entrabackup,
-        tenant="DEV",
-    )
+    if not args.token:
+        token = getAuth(
+            args.mode,
+            args.localauth,
+            args.certauth,
+            args.interactiveauth,
+            args.scopes,
+            args.entrabackup,
+            tenant="DEV",
+        )
+    else:
+        token = {"access_token": args.token}
 
     if args.entrabackup:
         azure_token = obtain_azure_token(os.environ.get("TENANT_ID"), args.path)
@@ -263,6 +272,8 @@ def start():
         from .intunecdlib.assignment_report import AssignmentReport
 
         AssignmentReport(path, output).main()
+
+        results = [result for result in results if result is not None]
 
         config_count = sum([result.get("config_count", 0) for result in results])
 

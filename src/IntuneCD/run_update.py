@@ -170,6 +170,12 @@ def start():
     parser.add_argument(
         "-v", "--verbose", help="Prints verbose output", action="store_true"
     )
+    parser.add_argument(
+        "-t",
+        "--token",
+        help="The authentication token to use for the update if not using an app registration",
+        type=str,
+    )
 
     args = parser.parse_args()
 
@@ -205,15 +211,18 @@ def start():
             "Policy.Read.All",
         ]
 
-    token = getAuth(
-        args.mode,
-        args.localauth,
-        args.certauth,
-        args.interactiveauth,
-        args.scopes,
-        args.entraupdate,
-        tenant="PROD",
-    )
+    if not args.token:
+        token = getAuth(
+            args.mode,
+            args.localauth,
+            args.certauth,
+            args.interactiveauth,
+            args.scopes,
+            args.entraupdate,
+            tenant="PROD",
+        )
+    else:
+        token = {"access_token": args.token}
 
     if args.entraupdate:
         azure_token = obtain_azure_token(os.environ.get("TENANT_ID"), args.path)
