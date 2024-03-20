@@ -45,14 +45,20 @@ class NotificationTemplateBackupModule(BaseBackupModule):
             )
             return None
 
+        self.graph_data = [
+            item
+            for item in self.graph_data["value"]
+            if item.get("displayName") != "EnrollmentNotificationInternalMEO"
+        ]
+
         # Remove the keys that are not needed
-        for item in self.graph_data["value"]:
+        for item in self.graph_data:
             for locale in item.get("localizedNotificationMessages"):
                 self.remove_keys(locale)
 
         try:
             self.results = self.process_data(
-                data=self.graph_data["value"],
+                data=self.graph_data,
                 filetype=self.filetype,
                 path=self.path,
                 name_key="displayName",
