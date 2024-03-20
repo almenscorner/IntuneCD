@@ -23,7 +23,7 @@ class ReusableSettingsUpdateModule(BaseUpdateModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Compliance Policies/Scripts/"
-        self.config_type = "Compliance Script"
+        self.config_type = "Compliance Script Policy"
         self.params = {
             "$select": "id,settinginstance,displayname,description,settingDefinitionId,version"
         }

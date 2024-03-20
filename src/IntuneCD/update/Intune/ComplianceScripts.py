@@ -23,7 +23,7 @@ class ComplianceScriptsUpdateModule(BaseUpdateModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Compliance Policies/Scripts/"
-        self.config_type = "Compliance Scripts"
+        self.config_type = "Compliance Script Policy"
         self.handle_assignment = False
         self.exclude_paths = "root['detectionScriptContent']"
 

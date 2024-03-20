@@ -24,7 +24,7 @@ class PowerShellScriptsUpdateModule(BaseUpdateModule):
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Scripts/Powershell/"
         self.script_data_path = f"{self.path}Script Data/"
-        self.config_type = "PowerShell Script"
+        self.config_type = "PowerShell Script Policy"
         self.assignment_endpoint = "/deviceManagement/deviceManagementScripts/"
         self.assignment_extra_url = "/assign"
         self.exclude_paths = ["root['assignments']", "root['scriptContent']"]
