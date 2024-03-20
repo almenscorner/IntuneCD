@@ -105,9 +105,10 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
             method="post",
         )
 
-        self.handle_assignments(
-            repo_data["assignments"], [], "assignments", create_request["id"]
-        )
+        if repo_data.get("assignments"):
+            self.handle_assignments(
+                repo_data["assignments"], [], "assignments", create_request["id"]
+            )
 
     def main(self) -> dict[str, any]:
         """The main method to update the Intune data"""
