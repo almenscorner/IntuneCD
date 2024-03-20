@@ -82,9 +82,7 @@ class WindowsEnrollmentProfileUpdateModule(BaseUpdateModule):
 
             for item in intune_data["value"]:
                 # Remvoe any assignments before removing the profile
-                endpoint = (
-                    f"{self.CONFIG_ENDPOINT}{item['id']}{self.assignment_extra_url}"
-                )
+                endpoint = f"{self.endpoint}{self.CONFIG_ENDPOINT}{item['id']}{self.assignment_extra_url}"
                 self.make_graph_request(endpoint, method="delete", status_code=200)
             self.remove_downstream_data(self.CONFIG_ENDPOINT, intune_data["value"])
 
