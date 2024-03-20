@@ -153,11 +153,6 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
                         self._update_priority(
                             self.downstream_object, repo_priority, config_type
                         )
-                    if self.create_request:
-                        self.downstream_id = self.create_request["id"]
-                        self._update_priority(
-                            self.create_request, repo_priority, config_type
-                        )
 
                     self.set_diff_data(diff_data)
                     self.diff_summary.append(diff_data)
