@@ -90,6 +90,7 @@ class AppleEnrollmentProfileUpdateModule(BaseUpdateModule):
                     )
 
                     if not profile_item or not account_id:
+                        self.print_config_separator()
                         self.log(
                             msg=f"Error getting {self.config_type} {self.name} item or account ID"
                         )

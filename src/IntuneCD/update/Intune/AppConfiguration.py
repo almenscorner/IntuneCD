@@ -60,6 +60,7 @@ class AppConfigurationUpdateModule(BaseUpdateModule):
                 repo_data.pop("targetedMobileApps")
                 repo_data["targetedMobileApps"] = [app_ids]
             else:
+                self.print_config_separator()
                 self.log(
                     msg=f"App {repo_data['targetedMobileApps']['appName']} not found, skipping {self.config_type} {self.name} update."
                 )
