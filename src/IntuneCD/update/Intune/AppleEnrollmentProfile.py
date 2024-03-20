@@ -40,12 +40,12 @@ class AppleEnrollmentProfileUpdateModule(BaseUpdateModule):
             tuple[dict, str]: The profile item and account ID of the Apple Enrollment Profile
         """
         profile_item = None
+        account_id = None
         for profile in profile_data:
             if profile["displayName"] == repo_data["displayName"]:
                 profile_item = profile
+                account_id = profile_item["id"].split("_")[0]
                 break
-
-        account_id = profile_item["id"].split("_")[0]
 
         if not account_id or not profile_item:
             return None, None
