@@ -57,6 +57,7 @@ class WindowsDriverUpdatesUpdateModule(BaseUpdateModule):
                     }
                     self.name = repo_data.get("displayName")
                     diff_data = self.create_diff_data(self.name, self.config_type)
+                    create_data = repo_data.copy()
                     self.get_pop_keys(
                         repo_data,
                         [
@@ -75,6 +76,7 @@ class WindowsDriverUpdatesUpdateModule(BaseUpdateModule):
                             method="patch",
                             status_code=200,
                             config_endpoint=self.CONFIG_ENDPOINT,
+                            create_data=create_data,
                         )
                     except Exception as e:
                         self.log(
