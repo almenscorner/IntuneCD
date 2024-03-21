@@ -46,9 +46,9 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
 
         # Set detection and remediation script name and path
         for f in script_files:
-            if "detectionScript" in f:
+            if "detectionscript" in f.lower():
                 detection_script_name = f"{self.script_data_path}{f}"
-            elif "remediationScript" in f:
+            elif "remediationscript" in f.lower():
                 remediation_script_name = f"{self.script_data_path}{f}"
 
         if detection_script_name and remediation_script_name:
@@ -110,10 +110,12 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
                     "root['assignments']",
                     "root['detectionScriptContent']",
                     "root['remediationScriptContent']",
+                    "root['deviceHealthScriptType']",
                 ]
 
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
+                    repo_data.pop("deviceHealthScriptType", None)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                     }
