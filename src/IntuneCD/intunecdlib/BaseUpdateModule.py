@@ -374,9 +374,7 @@ class BaseUpdateModule(BaseGraphModule):
             data (dict): The data to use
             repo_assignments (dict): The repository assignments to use
         """
-        self.log(
-            msg=f"{self.config_type} {self.name} not found, creating {self.config_type}: {self.name}"
-        )
+        self.log(msg=f"{self.config_type} {self.name} not found, creating: {self.name}")
         data.pop("assignments", None)
         request_data = json.dumps(data)
         self.create_request = self.make_graph_request(
@@ -386,7 +384,7 @@ class BaseUpdateModule(BaseGraphModule):
             method="POST",
             status_code=self.post_status_code,
         )
-        self.log(msg=f"{self.config_type} created with id: {self.create_request['id']}")
+        self.log(msg=f"Created with id: {self.create_request['id']}")
 
         if self.handle_assignment:
             self.handle_assignments(
