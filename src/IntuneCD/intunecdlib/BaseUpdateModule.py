@@ -123,6 +123,7 @@ class BaseUpdateModule(BaseGraphModule):
                 )
 
             return DeepDiff(intune_data, repo_data, ignore_order=True)
+
         if isinstance(repo_data, str):
             return DeepDiff(intune_data, repo_data)
 
@@ -172,35 +173,33 @@ class BaseUpdateModule(BaseGraphModule):
             list: The differences between the data and the intune data
         """
         diffs = []
+
+        def get_setting(key: str) -> str:
+            setting = re.search("\\[(.*)\\]", key)
+            return setting[1].split("[")[0] if setting else key
+
+        def get_value(value: dict) -> str:
+            val = list(value.values())
+            return val or "Unknown"
+
+        def set_vals(setting: str, new_val: str, old_val: str) -> dict:
+            return {
+                "setting": setting.replace("'", "").replace('"', "").replace("]", ""),
+                "new_val": new_val,
+                "old_val": old_val,
+            }
+
         if "iterable_item_added" in diff:
             for key, _ in diff["iterable_item_added"].items():
-                setting = re.search("\\[(.*)\\]", key)
-                if setting:
-                    setting = setting.group(1).split("[")[0]
-                new_val = list(diff["iterable_item_added"].values())
-                vals = {
-                    "new_val": new_val if new_val else "Unknown",
-                    "old_val": "",
-                    "setting": str(setting)
-                    .replace("'", "")
-                    .replace('"', "")
-                    .replace("]", ""),
-                }
+                setting = get_setting(key)
+                new_val = get_value(diff["iterable_item_added"])
+                vals = set_vals(setting, new_val, "")
                 diffs.append(vals)
         if "iterable_item_removed" in diff:
             for key, _ in diff["iterable_item_removed"].items():
-                setting = re.search("\\[(.*)\\]", key)
-                if setting:
-                    setting = setting.group(1).split("[")[0]
-                old_val = list(diff["iterable_item_removed"].values())
-                vals = {
-                    "new_val": "",
-                    "old_val": old_val if old_val else "Unknown",
-                    "setting": str(setting)
-                    .replace("'", "")
-                    .replace('"', "")
-                    .replace("]", ""),
-                }
+                setting = get_setting(key)
+                old_val = get_value(diff["iterable_item_removed"])
+                vals = set_vals(setting, "", old_val)
                 diffs.append(vals)
 
         self._log_diffs(diffs, "list changes")
@@ -263,15 +262,19 @@ class BaseUpdateModule(BaseGraphModule):
             else:
                 self.log(msg=f"Updating {self.config_type}, {change_type}:")
             for item in diffs:
-                self.log(
-                    msg=f"Setting: {item['setting']}, New Value: {item['new_val']}, Old Value: {item['old_val']}"
-                )
+                if change_type in {"values changed", "type changed"}:
+                    self.log(
+                        msg=f"Setting: {item['setting']}, New Value: {item['new_val']}, Old Value: {item['old_val']}"
+                    )
+                if change_type == "list changes":
+                    self.log(
+                        msg=f"Setting: {item['setting']}, Added Value: {item['new_val']}, Removed Value: {item['old_val']}"
+                    )
         elif self.message:
             diffs = [self.message]
             self.log(msg=self.message)
-        else:
-            if self.notify:
-                self.log(msg=f"No changes found for {self.config_type}: {self.name}")
+        elif self.notify:
+            self.log(msg=f"No changes found for {self.config_type}: {self.name}")
         self.count = len(diffs)
 
     def get_downstream_data(self, endpoint: str) -> dict:
@@ -339,13 +342,16 @@ class BaseUpdateModule(BaseGraphModule):
         if self.remove:
             for item in downstream_data:
                 if "displayName" in item:
-                    self.name = item["displayName"]
-                if "name" in item:
-                    self.name = item["name"]
+                    config_name = item["displayName"]
+                elif "name" in item:
+                    config_name = item["name"]
                 else:
-                    break
+                    self.print_config_separator()
+                    self.log(
+                        msg=f"Could not find name for {self.config_type}, skipping removal"
+                    )
                 self.print_config_separator()
-                self.log(msg=f"Removing {self.config_type}: {self.name}")
+                self.log(msg=f"Removing {self.config_type}: {config_name}")
                 try:
                     self.make_graph_request(
                         endpoint=self.endpoint + config_endpoint + item["id"],
@@ -355,7 +361,7 @@ class BaseUpdateModule(BaseGraphModule):
                     )
                 except Exception as e:
                     self.log(
-                        msg=f"Failed to remove {self.config_type} {self.name}: {e}"
+                        msg=f"Failed to remove {self.config_type} {config_name}: {e}"
                     )
 
     def create_downstream_data(
