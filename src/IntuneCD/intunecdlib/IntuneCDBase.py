@@ -171,9 +171,14 @@ class IntuneCDBase:
         """
         verbose = os.getenv("VERBOSE")
         if verbose:
-            msg = f"[{time.asctime()}] - [{function}] - {msg}"
+            msg = (
+                f"[{time.asctime()}] - [{function}] - {msg}"
+                if verbose and function
+                else f"[{time.asctime()}] - {msg}"
+            )
             print(msg)
-        if function is None:
+
+        if function is None and not verbose:
             print(msg)
 
     def get_pop_keys(self, data: dict, keys: list[str], method: str = "get") -> None:
