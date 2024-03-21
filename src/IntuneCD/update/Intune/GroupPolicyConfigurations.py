@@ -519,6 +519,6 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
                     self.diff_summary.append(diff_data)
                     self.reset_diffs_and_count()
 
-            self.remove_downstream_data(self.CONFIG_ENDPOINT, intune_data["value"])
+            self.remove_downstream_data(self.CONFIG_ENDPOINT, intune_profiles)
 
         return self.diff_summary
