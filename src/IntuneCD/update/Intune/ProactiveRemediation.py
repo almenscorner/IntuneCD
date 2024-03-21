@@ -136,7 +136,7 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
                             downstream_data=remediation_data,
                             repo_data=repo_data,
                             method="patch",
-                            status_code=204,
+                            status_code=200,
                             config_endpoint=self.CONFIG_ENDPOINT,
                         )
                     except Exception as e:

@@ -134,6 +134,7 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
                     repo_priority = repo_data.get("priority", None)
                     repo_data.pop("priority", None)
                     repo_data.pop("deviceEnrollmentConfigurationType", None)
+                    repo_data.pop("platformType", None)
                     diff_data = self.create_diff_data(self.name, self.config_type)
 
                     try:
@@ -141,7 +142,7 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
                             downstream_data=intune_data["value"],
                             repo_data=repo_data,
                             method="patch",
-                            status_code=204,
+                            status_code=200,
                             config_endpoint=self.CONFIG_ENDPOINT,
                         )
                     except Exception as e:

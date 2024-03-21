@@ -108,6 +108,13 @@ class AppProtectionUpdateModule(BaseUpdateModule):
                     self.match_info = self._get_match_info(repo_data)
                     self.name = repo_data.get("displayName")
                     diff_data = self.create_diff_data(self.name, self.config_type)
+                    if (
+                        repo_data["@odata.type"]
+                        == "#microsoft.graph.windowsInformationProtectionPolicy"
+                    ):
+                        status_code = 200
+                    else:
+                        status_code = 204
 
                     # Get the platform of the App Protection
                     platform = self._get_platform(repo_data)
@@ -120,7 +127,7 @@ class AppProtectionUpdateModule(BaseUpdateModule):
                             downstream_data=intune_data["value"],
                             repo_data=repo_data,
                             method="patch",
-                            status_code=204,
+                            status_code=status_code,
                             config_endpoint=config_endpoint,
                         )
                     except Exception as e:
