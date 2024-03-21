@@ -27,6 +27,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
         self.assignment_endpoint = "/deviceManagement/groupPolicyConfigurations/"
         self.assignment_extra_url = "/assign"
         self.exclude_paths = ["root['assignments']", "root['definitionValues']"]
+        self.remove_status_code = 204
 
     class definition_values_json:
         """Class for creating json for definition values."""
