@@ -59,6 +59,7 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
         self, intune_data: dict[str, any], repo_data: dict[str, any]
     ) -> None:
         omas = []
+        oma_diff = None
         for setting in intune_data.get("omaSettings"):
             if setting["isEncrypted"]:
                 decoded_oma = {}
