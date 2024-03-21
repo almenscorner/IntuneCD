@@ -52,7 +52,8 @@ class BaseGraphModule(IntuneCDBase):
             and endpoint != "https://graph.microsoft.com/beta/$batch"
         ):
             self.log(
-                msg=f"Running in report mode, not making Graph {method.upper()} request to {endpoint}"
+                function="make_graph_request",
+                msg=f"Running in report mode, not making Graph {method.upper()} request to {endpoint}",
             )
             return
 
@@ -857,9 +858,9 @@ class BaseGraphModule(IntuneCDBase):
                         val["target"]["deviceAndAppManagementAssignmentFilterId"]
                         == intune_filter["displayName"]
                     ):
-                        val["target"][
-                            "deviceAndAppManagementAssignmentFilterId"
-                        ] = intune_filter["id"]
+                        val["target"]["deviceAndAppManagementAssignmentFilterId"] = (
+                            intune_filter["id"]
+                        )
 
                 # If filter is None, remove keys
                 if val["target"]["deviceAndAppManagementAssignmentFilterId"] is None:
