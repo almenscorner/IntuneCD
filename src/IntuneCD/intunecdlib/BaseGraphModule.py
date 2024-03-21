@@ -858,9 +858,9 @@ class BaseGraphModule(IntuneCDBase):
                         val["target"]["deviceAndAppManagementAssignmentFilterId"]
                         == intune_filter["displayName"]
                     ):
-                        val["target"]["deviceAndAppManagementAssignmentFilterId"] = (
-                            intune_filter["id"]
-                        )
+                        val["target"][
+                            "deviceAndAppManagementAssignmentFilterId"
+                        ] = intune_filter["id"]
 
                 # If filter is None, remove keys
                 if val["target"]["deviceAndAppManagementAssignmentFilterId"] is None:
