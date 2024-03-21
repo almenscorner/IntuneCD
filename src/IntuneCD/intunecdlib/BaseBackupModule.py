@@ -210,13 +210,14 @@ class BaseBackupModule(BaseGraphModule):
         if hasattr(self, "scope_tags") and self.scope_tags:
             data = self.process_scope_tag.get_scope_tags_name(data, self.scope_tags)
 
-        if self.audit_data:
-            self._get_audit_data(audit_compare_info, data)
-
+        audit_data = data.copy()
         if self.clean_data is True:
             data = self.remove_keys(data)
 
         self.save_to_file(data, filetype, path, self.filename)
+
+        if self.audit_data:
+            self._get_audit_data(audit_compare_info, audit_data)
 
         return {"config_count": 1, "outputs": [self.filename]}
 
