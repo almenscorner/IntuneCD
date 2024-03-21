@@ -82,7 +82,10 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
             repo_data["localizedNotificationMessages"],
         ):
             repo_locale.pop("locale", None)
-            if intune_locale.get("isDefault") != repo_locale.get("isDefault"):
+            if (
+                intune_locale.get("isDefault") != repo_locale.get("isDefault")
+                and repo_locale.get("isDefault") is not None
+            ):
                 if repo_locale["isDefault"] is False:
                     repo_locale.pop("isDefault", None)
 
