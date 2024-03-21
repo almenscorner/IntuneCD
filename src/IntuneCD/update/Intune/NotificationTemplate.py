@@ -28,6 +28,7 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
         self.handle_assignment = False
         self.params = {"$expand": "localizedNotificationMessages"}
         self.exclude_paths = [
+            "root['defaultLocale']",
             "root['localizedNotificationMessages']",
             "root['localizedNotificationMessages@odata.context']",
         ]
@@ -47,11 +48,11 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
             repo_data["localizedNotificationMessages"],
         ):
             self.name = repo_locale.get("locale")
-            locale_diff = self.get_diffs(intune_locale, repo_locale, None)
-            if locale_diff:
+            if locale_diff := self.get_diffs(intune_locale, repo_locale, None):
                 self.config_type = "Notification Template Locale"
-                repo_locale.pop("isDefault", None)
-                repo_locale.pop("locale", None)
+                data = repo_data.copy()
+                data.pop("isDefault", None)
+                data.pop("locale", None)
                 self.update_downstream_data(
                     self.endpoint
                     + self.CONFIG_ENDPOINT
@@ -63,10 +64,40 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
                     + intune_locale["id"],
                     status_code=200,
                     method="patch",
-                    data=repo_locale,
+                    data=data,
                 )
 
                 self.update_diff_data(locale_diff)
+
+    def _handle_locale_isDefault(
+        self, intune_data: dict[str, any], repo_data: dict[str, any]
+    ) -> None:
+        """Update the isDefault value for the locale
+
+        Args:
+            intune_data (dict[str, any]): The Intune data
+        """
+        for intune_locale, repo_locale in zip(
+            intune_data["localizedNotificationMessages"],
+            repo_data["localizedNotificationMessages"],
+        ):
+            repo_locale.pop("locale", None)
+            if intune_locale.get("isDefault") != repo_locale.get("isDefault"):
+                if repo_locale["isDefault"] is False:
+                    repo_locale.pop("isDefault", None)
+
+                self.update_downstream_data(
+                    self.endpoint
+                    + self.CONFIG_ENDPOINT
+                    + self.downstream_id
+                    + "/"
+                    + "localizedNotificationMessages"
+                    + "/"
+                    + intune_locale["id"],
+                    status_code=200,
+                    method="patch",
+                    data=repo_locale,
+                )
 
     def _post_locale_data(self, repo_data: dict[str, any]) -> None:
         """Post the locale data to Intune
@@ -112,6 +143,12 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
                     }
                     self.name = repo_data.get("displayName")
                     diff_data = self.create_diff_data(self.name, self.config_type)
+                    update_and_create_data = {
+                        "displayName": repo_data.get("displayName"),
+                        "description": repo_data.get("description"),
+                        "brandingOptions": repo_data.get("brandingOptions"),
+                        "roleScopeTagIds": repo_data.get("roleScopeTagIds"),
+                    }
 
                     try:
                         self.process_update(
@@ -120,12 +157,8 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
                             method="patch",
                             status_code=200,
                             config_endpoint=self.CONFIG_ENDPOINT,
-                            update_data={
-                                "displayName": repo_data.get("displayName"),
-                                "description": repo_data.get("description"),
-                                "brandingOptions": repo_data.get("brandingOptions"),
-                                "roleScopeTagIds": repo_data.get("roleScopeTagIds"),
-                            },
+                            update_data=update_and_create_data,
+                            create_data=update_and_create_data,
                         )
                     except Exception as e:
                         self.log(
@@ -136,6 +169,7 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
                         self.params = None
                         self.config_type = "Notification Template Locale"
                         self._handle_locale_diffs(self.downstream_object, repo_data)
+                        self._handle_locale_isDefault(self.downstream_object, repo_data)
                     if self.create_request:
                         self.params = None
                         self._post_locale_data(repo_data)

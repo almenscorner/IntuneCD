@@ -25,7 +25,6 @@ class IntuneCDBase:
             "certificate",
             "createdDateTime",
             "lastModifiedDateTime",
-            "isDefault",
             "isAssigned",
             "@odata.context",
             "scheduledActionConfigurations@odata.context",
