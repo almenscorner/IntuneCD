@@ -27,6 +27,7 @@ class ScopeTagsUpdateModule(BaseUpdateModule):
         self.assignment_endpoint = "/deviceManagement/roleScopeTags/"
         self.assignment_extra_url = "/assign"
         self.assignment_status_code = 200
+        self.post_status_code = 200
         self.exclude_paths = [
             "root['assignments']",
         ]
