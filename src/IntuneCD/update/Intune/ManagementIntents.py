@@ -179,6 +179,8 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
 
                     self.diff_summary.append(self.diff_data)
 
-            self.remove_downstream_data(self.CONFIG_ENDPOINT, intents["value"])
+            self.remove_downstream_data(
+                f"{self.CONFIG_ENDPOINT}intents/", intents["value"]
+            )
 
         return self.diff_summary
