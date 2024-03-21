@@ -24,6 +24,7 @@ class AppleEnrollmentProfileUpdateModule(BaseUpdateModule):
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Enrollment Profiles/Apple/"
         self.config_type = "Apple Enrollment Profile"
+        self.exclude_paths = ["root['isDefault']"]
         self.handle_assignment = False
         self.create_config = False
 
@@ -79,6 +80,7 @@ class AppleEnrollmentProfileUpdateModule(BaseUpdateModule):
                 self.downstream_id = None
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
+                    repo_data.pop("isDefault", None)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                     }
