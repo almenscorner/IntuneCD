@@ -80,6 +80,7 @@ def start():
     )
     parser.add_argument(
         "-u",
+        "--update-assignments",
         help="When this parameter is set, assignments are updated for all configurations",
         action="store_true",
     )
@@ -169,6 +170,12 @@ def start():
     parser.add_argument(
         "-v", "--verbose", help="Prints verbose output", action="store_true"
     )
+    parser.add_argument(
+        "-t",
+        "--token",
+        help="The authentication token to use for the update if not using an app registration",
+        type=str,
+    )
 
     args = parser.parse_args()
 
@@ -204,15 +211,18 @@ def start():
             "Policy.Read.All",
         ]
 
-    token = getAuth(
-        args.mode,
-        args.localauth,
-        args.certauth,
-        args.interactiveauth,
-        args.scopes,
-        args.entraupdate,
-        tenant="PROD",
-    )
+    if not args.token:
+        token = getAuth(
+            args.mode,
+            args.localauth,
+            args.certauth,
+            args.interactiveauth,
+            args.scopes,
+            args.entraupdate,
+            tenant="PROD",
+        )
+    else:
+        token = {"access_token": args.token}
 
     if args.entraupdate:
         azure_token = obtain_azure_token(os.environ.get("TENANT_ID"), args.path)
@@ -231,7 +241,6 @@ def start():
 
         update_intune(
             diff_summary,
-            diff_count,
             path,
             token,
             assignment,
@@ -244,7 +253,7 @@ def start():
 
         for sum in diff_summary:
             for config in sum:
-                diff_count += config.count
+                diff_count += config.get("count")
 
         return diff_count, diff_summary
 
@@ -274,7 +283,7 @@ def start():
             summary = run_update(
                 args.path,
                 token,
-                args.u,
+                args.update_assignments,
                 exclude,
                 args.report,
                 args.create_groups,
@@ -288,12 +297,12 @@ def start():
             changes = []
             for sum in summary[1]:
                 for config in sum:
-                    if config.diffs:
+                    if config["diffs"]:
                         changes.append(
                             {
-                                "name": config.name,
-                                "type": config.type,
-                                "diffs": config.diffs,
+                                "name": config["name"],
+                                "type": config["type"],
+                                "diffs": config["diffs"],
                             }
                         )
 
@@ -311,7 +320,7 @@ def start():
             run_update(
                 args.path,
                 token,
-                args.u,
+                args.update_assignments,
                 exclude,
                 args.report,
                 args.create_groups,

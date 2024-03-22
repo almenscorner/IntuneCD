@@ -3,69 +3,80 @@ def backup_entra(results, path, output, token, azure_token, args, exclude):
     """
     Imports all the backup functions and runs them
     """
-    if args.interactiveauth:
-        from .backup.Entra.backup_deviceRegistrationPolicy import savebackup
 
-        results.append(savebackup(path, output, token))
+    params = {
+        "token": token,
+        "azure_token": azure_token,
+        "path": path,
+        "filetype": output,
+        "exclude": ["assignments"],
+    }
+
+    if args.interactiveauth:
+        from .backup.Entra.DeviceRegistration import DeviceRegistrationBackupModule
+
+        results.append(DeviceRegistrationBackupModule(**params).main())
 
     else:
         print(
             "***Device Registration Policy is only available with interactive auth***"
         )
 
-    # Payloads that uses Graph API's
+    if "entraApplications" not in exclude:
+        from .backup.Entra.Applications import ApplicationsBackupModule
+
+        results.append(ApplicationsBackupModule(**params).main())
 
     if "entraAuthenticationMethods" not in exclude:
-        from .backup.Entra.backup_authenticationMethods import savebackup
+        from .backup.Entra.AuthenticationMethods import (
+            AuthenticationMethodsBackupModule,
+        )
 
-        results.append(savebackup(path, output, token))
+        results.append(AuthenticationMethodsBackupModule(**params).main())
 
     if "entraAuthorizationPolicy" not in exclude:
-        from .backup.Entra.backup_authorizationPolicy import savebackup
+        from .backup.Entra.AuthorizationPolicy import AuthorizationPolicyBackupModule
 
-        results.append(savebackup(path, output, token))
+        results.append(AuthorizationPolicyBackupModule(**params).main())
 
     if "entraAuthenticationFlowsPolicy" not in exclude:
-        from .backup.Entra.backup_authenticationFlowsPolicy import savebackup
+        from .backup.Entra.AuthenticationFlows import AuthenticationFlowsBackupModule
 
-        results.append(savebackup(path, output, token))
+        results.append(AuthenticationFlowsBackupModule(**params).main())
 
     if "entraDomains" not in exclude:
-        from .backup.Entra.backup_domains import savebackup
+        from .backup.Entra.Domains import DomainsBackupModule
 
-        results.append(savebackup(path, output, token))
+        results.append(DomainsBackupModule(**params).main())
 
     if "entraExternalIdentitiesPolicy" not in exclude:
-        from .backup.Entra.backup_externalIdentitiesPolicy import savebackup
+        from .backup.Entra.ExternalIdentities import (
+            ExternalIdentitiesPolicyBackupModule,
+        )
 
-        results.append(savebackup(path, output, token))
+        results.append(ExternalIdentitiesPolicyBackupModule(**params).main())
 
     if "entraB2BPolicy" not in exclude:
-        from .backup.Entra.backup_b2bPolicy import savebackup
+        from .backup.Entra.B2B import B2BPolicyBackupModule
 
-        results.append(savebackup(path, output, azure_token))
-
-    if "entraApplications" not in exclude:
-        from .backup.Entra.backup_applications import savebackup
-
-        results.append(savebackup(path, output, token))
+        results.append(B2BPolicyBackupModule(**params).main())
 
     if "entraGroupSettings" not in exclude:
-        from .backup.Entra.backup_groupSettings import savebackup
+        from .backup.Entra.GroupSettings import GroupSettingsBackupModule
 
-        results.append(savebackup(path, output, token))
+        results.append(GroupSettingsBackupModule(**params).main())
 
     if "entraSecurityDefaults" not in exclude:
-        from .backup.Entra.backup_securityDefaults import savebackup
+        from .backup.Entra.SecurityDefaults import SecurityDefaultsBackupModule
 
-        results.append(savebackup(path, output, token))
+        results.append(SecurityDefaultsBackupModule(**params).main())
 
     if "entraSSPR" not in exclude:
-        from .backup.Entra.backup_SSPR import savebackup
+        from .backup.Entra.SSPR import SSPRBackupModule
 
-        results.append(savebackup(path, output, azure_token))
+        results.append(SSPRBackupModule(**params).main())
 
     if "entraRoamingSettings" not in exclude:
-        from .backup.Entra.backup_roamingSettings import savebackup
+        from .backup.Entra.RoamingSettings import RoamingSettingsBackupModule
 
-        results.append(savebackup(path, output, azure_token))
+        results.append(RoamingSettingsBackupModule(**params).main())
