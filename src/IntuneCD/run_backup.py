@@ -157,12 +157,6 @@ def start():
         action="store_true",
     )
     parser.add_argument(
-        "-f",
-        "--frontend",
-        help="***This parameter is deprecated and will be removed in a future release***",
-        type=str,
-    )
-    parser.add_argument(
         "--prefix",
         help="When set, only backs up configurations whose name starts with the configured prefix",
         type=str,
@@ -290,14 +284,6 @@ def start():
         return config_count
 
     if args.output == "json" or args.output == "yaml":
-        if args.frontend:
-            print(
-                "***The --forntend argument is deprecated and will be removed in a future release***"
-            )
-            print(
-                "***Please migrate to --intunecdmonitor instead, see https;//github.com/almenscorner/intunecd/wiki***"
-            )
-
         if token is None:
             raise Exception("Token is empty, please check os.environ variables")
 

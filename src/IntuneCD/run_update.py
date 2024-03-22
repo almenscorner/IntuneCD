@@ -152,12 +152,6 @@ def start():
         action="store_true",
     )
     parser.add_argument(
-        "-f",
-        "--frontend",
-        help="***This parameter is deprecated and will be removed in a future release***",
-        type=str,
-    )
-    parser.add_argument(
         "--entraupdate",
         help="When this parameter is set, the script will also update Entra configurations",
         action="store_true",
@@ -260,14 +254,6 @@ def start():
     if token is None:
         raise Exception("Token is empty, please check os.environ variables")
     else:
-        if args.frontend:
-            print(
-                "***The --frontend argument is deprecated and will be removed in a future release***"
-            )
-            print(
-                "***Please migrate to --intunecdmonitor instead, see https;//github.com/almenscorner/intunecd/wiki***"
-            )
-
         if args.exclude:
             exclude = args.exclude
         else:
