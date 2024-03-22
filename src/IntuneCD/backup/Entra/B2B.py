@@ -34,7 +34,8 @@ class B2BPolicyBackupModule(BaseBackupModule):
             self.entra_data = self.make_azure_request(self.CONFIG_ENDPOINT)
         except Exception as e:
             self.log(
-                msg=f"Error getting External Collaboration Settings data from {self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting External Collaboration Settings data from {self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -48,7 +49,10 @@ class B2BPolicyBackupModule(BaseBackupModule):
                 name_key="",
             )
         except Exception as e:
-            self.log(msg=f"Error processing External Collaboration Settings data: {e}")
+            self.log(
+                tag="error",
+                msg=f"Error processing External Collaboration Settings data: {e}",
+            )
             return None
 
         return self.results

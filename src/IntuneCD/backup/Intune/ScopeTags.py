@@ -38,7 +38,8 @@ class ScopeTagsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Scope Tag data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Scope Tag data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -52,7 +53,7 @@ class ScopeTagsBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Scope Tag data: {e}")
+            self.log(tag="error", msg=f"Error processing Scope Tag data: {e}")
             return None
 
         return self.results

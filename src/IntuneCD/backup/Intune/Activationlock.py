@@ -42,7 +42,8 @@ class ActivationLockBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Activation Lock data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Activation Lock data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -67,5 +68,5 @@ class ActivationLockBackupModule(BaseBackupModule):
                 log_message=None,
             )
         except Exception as e:
-            self.log(msg=f"Error processing Activation Lock data: {e}")
+            self.log(tag="error", msg=f"Error processing Activation Lock data: {e}")
             return None

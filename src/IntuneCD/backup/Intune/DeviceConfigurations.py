@@ -40,7 +40,8 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Device Configuration data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Device Configuration data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -57,7 +58,7 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
                     if not os.path.exists(self.path + "mobileconfig/"):
                         os.makedirs(self.path + "mobileconfig/")
                 except Exception as e:
-                    self.log(f"Error creating mobileconfig path: {e}")
+                    self.log(tag="error", msg=f"Error creating mobileconfig path: {e}")
 
                 try:
                     f = open(
@@ -67,7 +68,9 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
                     )
                     f.write(decoded)
                 except Exception as e:
-                    self.log(f"Error writing mobileconfig data to file: {e}")
+                    self.log(
+                        tag="error", msg=f"Error writing mobileconfig data to file: {e}"
+                    )
 
             elif item["@odata.type"] in custom_windows_odata and item.get(
                 "omaSettings"
@@ -111,7 +114,9 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Device Configuration data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Device Configuration data: {e}"
+            )
             return None
 
         return self.results

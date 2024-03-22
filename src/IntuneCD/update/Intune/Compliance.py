@@ -180,8 +180,9 @@ class ComplianceUpdateModule(BaseUpdateModule):
             script_name = repo_data["detectionScriptName"]
             repo_data = self._set_detection_script_id(repo_data)
             if repo_data is False:
-                print(
-                    f"Detection script {script_name} not found, Compliance Policy {self.name} not updated"
+                self.log(
+                    tag="warning",
+                    msg=f"Detection script {script_name} not found, Compliance Policy {self.name} not updated",
                 )
 
         return repo_data
@@ -274,7 +275,7 @@ class ComplianceUpdateModule(BaseUpdateModule):
             try:
                 intune_data = self.get_downstream_data(self.CONFIG_ENDPOINT)
             except Exception as e:
-                self.log(msg=f"Error getting {self.config_type} data: {e}")
+                self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
             self.downstream_assignments = self.batch_assignment(
                 intune_data["value"],
@@ -331,7 +332,8 @@ class ComplianceUpdateModule(BaseUpdateModule):
                         )
                     except Exception as e:
                         self.log(
-                            msg=f"Error updating {self.config_type} {self.name}: {e}"
+                            tag="error",
+                            msg=f"Error updating {self.config_type} {self.name}: {e}",
                         )
                     # If a match is found, check for differences on the scheduled actions and settings
                     if self.downstream_object:

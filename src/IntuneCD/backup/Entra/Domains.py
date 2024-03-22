@@ -36,7 +36,8 @@ class DomainsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Domain data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Domain data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -50,7 +51,7 @@ class DomainsBackupModule(BaseBackupModule):
                 name_key="id",
             )
         except Exception as e:
-            self.log(msg=f"Error processing Domains data: {e}")
+            self.log(tag="error", msg=f"Error processing Domains data: {e}")
             return None
 
         return self.results

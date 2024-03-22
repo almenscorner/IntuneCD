@@ -64,7 +64,7 @@ class ComplianceScriptsUpdateModule(BaseUpdateModule):
             try:
                 intune_data = self.get_downstream_data(self.CONFIG_ENDPOINT)
             except Exception as e:
-                self.log(msg=f"Error getting {self.config_type}: {e}")
+                self.log(tag="error", msg=f"Error getting {self.config_type}: {e}")
                 return None
             # Get details for each script to populate script content
             intune_data["value"] = self._get_script_details(intune_data)
@@ -92,7 +92,8 @@ class ComplianceScriptsUpdateModule(BaseUpdateModule):
                         )
                     except Exception as e:
                         self.log(
-                            msg=f"Error updating {self.config_type} {self.name}: {e}"
+                            tag="error",
+                            msg=f"Error updating {self.config_type} {self.name}: {e}",
                         )
 
                     # Check for diff on script

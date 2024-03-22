@@ -59,7 +59,7 @@ class AppleEnrollmentProfileUpdateModule(BaseUpdateModule):
             try:
                 intune_data = self.get_downstream_data(self.CONFIG_ENDPOINT)
             except Exception as e:
-                self.log(msg=f"Error getting {self.config_type} data: {e}")
+                self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
             profile_ids = [profile["id"] for profile in intune_data["value"]]
@@ -92,9 +92,9 @@ class AppleEnrollmentProfileUpdateModule(BaseUpdateModule):
                     )
 
                     if not profile_item or not account_id:
-                        self.print_config_separator()
                         self.log(
-                            msg=f"Error getting {self.config_type} {self.name} item or account ID"
+                            tag="error",
+                            msg=f"Error getting {self.config_type} {self.name} item or account ID",
                         )
                         continue
 
@@ -113,7 +113,8 @@ class AppleEnrollmentProfileUpdateModule(BaseUpdateModule):
                         )
                     except Exception as e:
                         self.log(
-                            msg=f"Error updating {self.config_type} {self.name}: {e}"
+                            tag="error",
+                            msg=f"Error updating {self.config_type} {self.name}: {e}",
                         )
 
                     self.set_diff_data(diff_data)

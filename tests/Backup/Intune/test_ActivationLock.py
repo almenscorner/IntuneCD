@@ -50,7 +50,8 @@ class TestActivationLockBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Activation Lock data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Activation Lock data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(ActivationLockBackupModule, "process_data")
@@ -68,7 +69,7 @@ class TestActivationLockBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Activation Lock data: Test exception"
+            tag="error", msg="Error processing Activation Lock data: Test exception"
         )
 
 

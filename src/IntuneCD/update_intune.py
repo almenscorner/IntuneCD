@@ -84,7 +84,6 @@ def update_intune(
 
         diff_summary.append(DeviceManagementSettingsUpdateModule(**params).main())
     else:
-        print("-" * 100)
         print(
             "***Device Management Settings is only available with interactive auth***"
         )

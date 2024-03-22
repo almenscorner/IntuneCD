@@ -73,7 +73,7 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
         intune_priority = intune_object["priority"]
         if repo_data_priority != intune_priority:
             self.log(
-                msg=f"Updating Enrollment Config {config_type} Priority: " + self.name
+                msg=f"Updating Enrollment Config {config_type} Priority: " + self.name,
             )
             # Update priority
             request_data = json.dumps({"priority": repo_data_priority})
@@ -93,7 +93,7 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
             try:
                 intune_data = self.get_downstream_data(self.CONFIG_ENDPOINT)
             except Exception as e:
-                self.log(msg=f"Error getting {self.config_type} data: {e}")
+                self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
             self.downstream_assignments = self.batch_assignment(
@@ -147,7 +147,8 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
                         )
                     except Exception as e:
                         self.log(
-                            msg=f"Error updating {self.config_type} {self.name}: {e}"
+                            tag="error",
+                            msg=f"Error updating {self.config_type} {self.name}: {e}",
                         )
 
                     if self.downstream_object:

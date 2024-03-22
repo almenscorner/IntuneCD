@@ -36,7 +36,8 @@ class RoamingSettingsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Roaming Settings data from {self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Roaming Settings data from {self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -50,7 +51,7 @@ class RoamingSettingsBackupModule(BaseBackupModule):
                 name_key="",
             )
         except Exception as e:
-            self.log(msg=f"Error processing Roaming Settings data: {e}")
+            self.log(tag="error", msg=f"Error processing Roaming Settings data: {e}")
             return None
 
         return self.results

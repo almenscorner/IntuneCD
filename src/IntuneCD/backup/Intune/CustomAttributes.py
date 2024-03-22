@@ -49,7 +49,7 @@ class CustomAttributesBackupModule(BaseBackupModule):
                 if not os.path.exists(self.script_data_path):
                     os.makedirs(self.script_data_path)
             except Exception as e:
-                self.log(msg=f"Error creating script data path: {e}")
+                self.log(tag="error", msg=f"Error creating script data path: {e}")
                 return None
 
             decoded = self.decode_base64(item["scriptContent"])
@@ -62,7 +62,7 @@ class CustomAttributesBackupModule(BaseBackupModule):
                 ) as f:
                     f.write(decoded)
             except Exception as e:
-                self.log(msg=f"Error writing script data to file: {e}")
+                self.log(tag="error", msg=f"Error writing script data to file: {e}")
                 return None
 
     def main(self) -> dict[str, any]:
@@ -77,7 +77,8 @@ class CustomAttributesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Custom Attribute data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Custom Attribute data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -101,7 +102,7 @@ class CustomAttributesBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Custom Attribute data: {e}")
+            self.log(tag="error", msg=f"Error processing Custom Attribute data: {e}")
             return None
 
         return self.results

@@ -44,7 +44,8 @@ class TemplateBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Template data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Template data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -61,7 +62,7 @@ class TemplateBackupModule(BaseBackupModule):
                 },  # TODO: Change this to the audit compare info applicable to the data
             )
         except Exception as e:
-            self.log(msg=f"Error processing Template data: {e}")
+            self.log(tag="error", msg=f"Error processing Template data: {e}")
             return None
 
         return self.results

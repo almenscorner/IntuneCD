@@ -36,7 +36,8 @@ class AuthorizationPolicyBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Authorization Policy data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Authorization Policy data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -50,7 +51,9 @@ class AuthorizationPolicyBackupModule(BaseBackupModule):
                 name_key="",
             )
         except Exception as e:
-            self.log(msg=f"Error processing Authorization Policy data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Authorization Policy data: {e}"
+            )
             return None
 
         return self.results

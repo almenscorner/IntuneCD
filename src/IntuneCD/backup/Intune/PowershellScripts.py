@@ -49,7 +49,10 @@ class PowershellScriptsBackupModule(BaseBackupModule):
                 if not os.path.exists(self.script_data_path):
                     os.makedirs(self.script_data_path)
             except Exception as e:
-                self.log(msg=f"Error creating directory {self.script_data_path}: {e}")
+                self.log(
+                    tag="error",
+                    msg=f"Error creating directory {self.script_data_path}: {e}",
+                )
             decoded = self.decode_base64(item["scriptContent"])
             try:
                 with open(
@@ -59,7 +62,9 @@ class PowershellScriptsBackupModule(BaseBackupModule):
                 ) as f:
                     f.write(decoded)
             except Exception as e:
-                self.log(msg=f"Error writing script {script_name} to file: {e}")
+                self.log(
+                    tag="error", msg=f"Error writing script {script_name} to file: {e}"
+                )
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Powershell Scripts
@@ -73,7 +78,8 @@ class PowershellScriptsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Powershell Script data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Powershell Script data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -97,7 +103,7 @@ class PowershellScriptsBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Powershell Script data: {e}")
+            self.log(tag="error", msg=f"Error processing Powershell Script data: {e}")
             return None
 
         return self.results

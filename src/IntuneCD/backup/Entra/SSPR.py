@@ -34,7 +34,8 @@ class SSPRBackupModule(BaseBackupModule):
             self.entra_data = self.make_azure_request(self.CONFIG_ENDPOINT)
         except Exception as e:
             self.log(
-                msg=f"Error getting Password Reset Policies data from {self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Password Reset Policies data from {self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -48,7 +49,9 @@ class SSPRBackupModule(BaseBackupModule):
                 name_key="",
             )
         except Exception as e:
-            self.log(msg=f"Error processing Password Reset Policies data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Password Reset Policies data: {e}"
+            )
             return None
 
         return self.results

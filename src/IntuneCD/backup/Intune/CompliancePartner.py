@@ -40,7 +40,8 @@ class CompliancePartnerBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Compliance Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Compliance Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -64,7 +65,7 @@ class CompliancePartnerBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing Compliance Partner data: {e}")
+            self.log(tag="error", msg=f"Error processing Compliance Partner data: {e}")
             return None
 
         return self.results

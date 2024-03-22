@@ -38,7 +38,8 @@ class RemoteAssistancePartnerBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Remote Assistance Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Remote Assistance Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -62,7 +63,9 @@ class RemoteAssistancePartnerBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing Remote Assistance Partner data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Remote Assistance Partner data: {e}"
+            )
             return None
 
         return self.results

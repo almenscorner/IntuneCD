@@ -294,7 +294,7 @@ class BaseUpdateModule(BaseGraphModule):
                 endpoint=self.endpoint + endpoint, params=self.params
             )
         except Exception as e:
-            self.log(msg=f"Failed to get Intune data: {e}")
+            self.log(tag="error", msg=f"Failed to get Intune data: {e}")
             return None
 
         return intune_data
@@ -346,11 +346,11 @@ class BaseUpdateModule(BaseGraphModule):
                 elif "name" in item:
                     config_name = item["name"]
                 else:
-                    self.print_config_separator()
                     self.log(
-                        msg=f"Could not find name for {self.config_type}, skipping removal"
+                        tag="warning",
+                        msg=f"Could not find name for {self.config_type}, skipping removal",
                     )
-                self.print_config_separator()
+
                 self.log(msg=f"Removing {self.config_type}: {config_name}")
                 try:
                     self.make_graph_request(
@@ -534,7 +534,7 @@ class BaseUpdateModule(BaseGraphModule):
                 data = plistlib.load(f)
             return data
         except Exception as e:
-            self.log(msg=f"Failed to load payload: {e}")
+            self.log(tag="error", msg=f"Failed to load payload: {e}")
             return None
 
     def load_script_file(self, path: str) -> str:
@@ -547,7 +547,7 @@ class BaseUpdateModule(BaseGraphModule):
                 self.log(msg=f"File not found: {path}")
                 return None
         except Exception as e:
-            self.log(msg=f"Failed to load script file: {e}")
+            self.log(tag="error", msg=f"Failed to load script file: {e}")
             return None
 
     def write_temp_file(self, data: str) -> None:
@@ -556,18 +556,18 @@ class BaseUpdateModule(BaseGraphModule):
             with open(self.path + "temp.mobileconfig", "w", encoding="utf-8") as f:
                 f.write(data)
         except Exception as e:
-            self.log(msg=f"Failed to write temp file: {e}")
+            self.log(tag="error", msg=f"Failed to write temp file: {e}")
 
     def remove_temp_file(self, path: str) -> None:
         """Removes a temp file from the path"""
         try:
             os.remove(path)
         except Exception as e:
-            self.log(msg=f"Failed to remove temp file: {e}")
+            self.log(tag="error", msg=f"Failed to remove temp file: {e}")
 
     def print_config_separator(self) -> None:
         """Prints a separator for the config"""
-        self.log(msg="-" * 100)
+        print("-" * 120)
 
     def create_diff_data(self, name: str, config_type: str) -> dict:
         """Creates the diff data dictionary"""
@@ -629,8 +629,8 @@ class BaseUpdateModule(BaseGraphModule):
             )
 
         if self.downstream_object:
-            if self.notify:
-                self.print_config_separator()
+            # if self.notify:
+            #
             # Temporarily remove scheduledActionsForRule from the data if it exists
             repo_scheduled_actions = None
             if repo_data.get("scheduledActionsForRule"):
@@ -682,7 +682,6 @@ class BaseUpdateModule(BaseGraphModule):
             if repo_scheduled_actions:
                 repo_data["scheduledActionsForRule"] = repo_scheduled_actions
         else:
-            self.print_config_separator()
             data = create_data if create_data else repo_data
             if self.create_config:
                 self.diff_count += 1

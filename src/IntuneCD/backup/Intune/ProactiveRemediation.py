@@ -46,7 +46,10 @@ class ProactiveRemediationScriptBackupModule(BaseBackupModule):
             if not os.path.exists(self.script_data_path):
                 os.makedirs(self.script_data_path)
         except Exception as e:
-            self.log(msg=f"Error creating directory {self.script_data_path}: {e}")
+            self.log(
+                tag="error",
+                msg=f"Error creating directory {self.script_data_path}: {e}",
+            )
 
         # Save detection script to the Script Data folder
         fname = self._prepare_file_name(item["displayName"])
@@ -63,7 +66,7 @@ class ProactiveRemediationScriptBackupModule(BaseBackupModule):
             ) as f:
                 f.write(decoded)
         except Exception as e:
-            self.log(msg=f"Error writing script {fname} to file: {e}")
+            self.log(tag="error", msg=f"Error writing script {fname} to file: {e}")
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Proactive Remediation Scripts
@@ -77,7 +80,8 @@ class ProactiveRemediationScriptBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Proactive Remediation data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Proactive Remediation data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -108,7 +112,9 @@ class ProactiveRemediationScriptBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Proactive Remediation data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Proactive Remediation data: {e}"
+            )
             return None
 
         return self.results

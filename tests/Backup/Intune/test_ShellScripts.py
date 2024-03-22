@@ -48,7 +48,8 @@ class TestShellScriptsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Shell Script data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Shell Script data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(ShellScriptsBackupModule, "make_graph_request")
@@ -72,7 +73,7 @@ class TestShellScriptsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Shell Script data: Test exception"
+            tag="error", msg="Error processing Shell Script data: Test exception"
         )
 
 

@@ -40,7 +40,8 @@ class ManagementIntentsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Management Intents data from {self.endpoint + self.CONFIG_ENDPOINT}/intents: {e}"
+                tag="error",
+                msg=f"Error getting Management Intents data from {self.endpoint + self.CONFIG_ENDPOINT}/intents: {e}",
             )
             return None
         try:
@@ -49,7 +50,8 @@ class ManagementIntentsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Management Intents data from {self.endpoint + self.TEMPALETE_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Management Intents data from {self.endpoint + self.TEMPALETE_ENDPOINT}: {e}",
             )
             return None
 
@@ -83,7 +85,9 @@ class ManagementIntentsBackupModule(BaseBackupModule):
                 )
                 self.update_results(results)
             except Exception as e:
-                self.log(msg=f"Error processing Management Intents data: {e}")
+                self.log(
+                    tag="error", msg=f"Error processing Management Intents data: {e}"
+                )
                 return None
 
         return self.results

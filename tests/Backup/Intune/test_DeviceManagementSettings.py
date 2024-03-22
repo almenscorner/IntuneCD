@@ -45,7 +45,8 @@ class TestDeviceManagementSettingsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Device Management Settings data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Device Management Settings data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(DeviceManagementSettingsBackupModule, "process_data")
@@ -61,7 +62,8 @@ class TestDeviceManagementSettingsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Device Management Settings data: Test exception"
+            tag="error",
+            msg="Error processing Device Management Settings data: Test exception",
         )
 
 

@@ -36,7 +36,7 @@ class SettingsCatalogUpdateModule(BaseUpdateModule):
             try:
                 intune_data = self.get_downstream_data(self.CONFIG_ENDPOINT)
             except Exception as e:
-                self.log(msg=f"Error getting {self.config_type} data: {e}")
+                self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
             self.downstream_assignments = self.batch_assignment(
@@ -66,7 +66,6 @@ class SettingsCatalogUpdateModule(BaseUpdateModule):
                         and repo_data["templateReference"].get("templateDisplayName")
                         == "Endpoint detection and response"
                     ):
-                        self.print_config_separator()
                         self.log(
                             msg=f'Skipping "{repo_data["name"]}", Endpoint detection and response is currently not supported...',
                         )
@@ -88,7 +87,8 @@ class SettingsCatalogUpdateModule(BaseUpdateModule):
                         )
                     except Exception as e:
                         self.log(
-                            msg=f"Error updating {self.config_type} {self.name}: {e}"
+                            tag="error",
+                            msg=f"Error updating {self.config_type} {self.name}: {e}",
                         )
 
                     self.set_diff_data(diff_data)

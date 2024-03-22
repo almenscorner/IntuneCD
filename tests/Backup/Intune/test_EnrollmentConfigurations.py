@@ -47,7 +47,8 @@ class TestEnrollmentConfigurationsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Enrollment Configuration data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Enrollment Configuration data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(EnrollmentConfigurationsBackupModule, "process_data")
@@ -65,7 +66,8 @@ class TestEnrollmentConfigurationsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Enrollment Configuration data: Test exception"
+            tag="error",
+            msg="Error processing Enrollment Configuration data: Test exception",
         )
 
 

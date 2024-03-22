@@ -116,7 +116,7 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
             try:
                 intune_data = self.get_downstream_data(self.CONFIG_ENDPOINT + "intents")
             except Exception as e:
-                self.log(msg=f"Error getting {self.config_type} data: {e}")
+                self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
             intents = self.batch_intents(intune_data)
@@ -138,7 +138,7 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
                         == "e44c2ca3-2f9a-400a-a113-6cc88efd773d"
                     ):
                         self.log(
-                            msg="Endpoint detection and response is currently not supported..."
+                            msg="Endpoint detection and response is currently not supported...",
                         )
                         continue
 
@@ -156,8 +156,9 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
                     )
 
                     if intune_intent:
-                        self.print_config_separator()
-                        self.log(msg=f"Checking if Intent: {self.name} has any updates")
+                        self.log(
+                            msg=f"Checking if Intent: {self.name} has any updates",
+                        )
 
                         for repo_setting in repo_data["settingsDelta"]:
                             self.notify = False
@@ -171,9 +172,8 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
                         )
 
                     else:
-                        self.print_config_separator()
                         self.log(
-                            msg=f"Intent not found, creating new intent: {self.name}"
+                            msg=f"Intent not found, creating new intent: {self.name}",
                         )
                         self._create_intent(repo_data)
 

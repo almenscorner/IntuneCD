@@ -66,13 +66,12 @@ class ComplianceScriptsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Compliance Script data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Compliance Script data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
-        script_ids = []
-        for script in self.graph_data["value"]:
-            script_ids.append(script["id"])
+        script_ids = [script["id"] for script in self.graph_data["value"]]
 
         # Get script data details using batch request
         script_data_responses = self.batch_request(
@@ -92,7 +91,7 @@ class ComplianceScriptsBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Compliance Script data: {e}")
+            self.log(tag="error", msg=f"Error processing Compliance Script data: {e}")
             return None
 
         return self.results

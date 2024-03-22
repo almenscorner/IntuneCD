@@ -42,7 +42,8 @@ class DeviceManagementSettingsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Device Management Settings data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Device Management Settings data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -61,7 +62,10 @@ class DeviceManagementSettingsBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing Device Management Settings data: {e}")
+            self.log(
+                tag="error",
+                msg=f"Error processing Device Management Settings data: {e}",
+            )
             return None
 
         return self.results

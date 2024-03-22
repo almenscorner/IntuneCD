@@ -46,7 +46,8 @@ class TestConditionalAccessBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Conditional Access Policy data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Conditional Access Policy data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(ConditionalAccessBackupModule, "process_data")
@@ -62,7 +63,8 @@ class TestConditionalAccessBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Conditional Access Policy data: Test exception"
+            tag="error",
+            msg="Error processing Conditional Access Policy data: Test exception",
         )
 
 

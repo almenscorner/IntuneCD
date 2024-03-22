@@ -38,7 +38,8 @@ class DeviceCategoriesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Device Category data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Device Category data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -55,7 +56,7 @@ class DeviceCategoriesBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing Device Category data: {e}")
+            self.log(tag="error", msg=f"Error processing Device Category data: {e}")
             return None
 
         return self.results

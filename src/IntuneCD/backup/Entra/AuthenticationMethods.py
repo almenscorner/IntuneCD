@@ -36,7 +36,8 @@ class AuthenticationMethodsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Authentication Methods data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Authentication Methods data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -50,7 +51,9 @@ class AuthenticationMethodsBackupModule(BaseBackupModule):
                 name_key="",
             )
         except Exception as e:
-            self.log(msg=f"Error processing Authentication Methods data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Authentication Methods data: {e}"
+            )
             return None
 
         return self.results

@@ -56,7 +56,8 @@ class TestReusableSettingsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Reusable Policy Setting data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Reusable Policy Setting data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(ReusableSettingsBackupModule, "make_graph_request")
@@ -82,7 +83,8 @@ class TestReusableSettingsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Reusable Policy Setting data: Test exception"
+            tag="error",
+            msg="Error processing Reusable Policy Setting data: Test exception",
         )
 
 

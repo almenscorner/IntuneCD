@@ -219,7 +219,8 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
         if defval_id is None:
             label = presentation.get("presentation", {}).get("label", "None")
             self.log(
-                msg=f"No matching definition found for presentation value '{label}'. Skipping..."
+                tag="warning",
+                msg=f"No matching definition found for presentation value '{label}'. Skipping...",
             )
             return
 
@@ -387,7 +388,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
             try:
                 intune_data = self.get_downstream_data(self.CONFIG_ENDPOINT)
             except Exception as e:
-                self.log(msg=f"Error getting {self.config_type} data: {e}")
+                self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
             self.downstream_assignments = self.batch_assignment(
@@ -448,9 +449,9 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
                     if repo_data["policyConfigurationIngestionType"] == "custom":
                         repo_data = self.custom_ingestion_match(repo_data)
                         if not repo_data:
-                            self.print_config_separator()
                             self.log(
-                                msg=f"Some definitions was not found for {self.name}, import custom ADMX files to Intune first."
+                                tag="warning",
+                                msg=f"Some definitions was not found for {self.name}, import custom ADMX files to Intune first.",
                             )
                             continue
 
@@ -465,7 +466,8 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
                         )
                     except Exception as e:
                         self.log(
-                            msg=f"Error updating {self.config_type} {self.name}: {e}"
+                            tag="error",
+                            msg=f"Error updating {self.config_type} {self.name}: {e}",
                         )
 
                     if self.downstream_object:

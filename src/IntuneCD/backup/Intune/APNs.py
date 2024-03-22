@@ -43,7 +43,8 @@ class APNSBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting APNs data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting APNs data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -60,7 +61,7 @@ class APNSBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing APNs data: {e}")
+            self.log(tag="error", msg=f"Error processing APNs data: {e}")
             return None
 
         return self.results

@@ -36,7 +36,8 @@ class ExternalIdentitiesPolicyBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting External Identities Policy data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting External Identities Policy data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -52,7 +53,9 @@ class ExternalIdentitiesPolicyBackupModule(BaseBackupModule):
                 name_key="",
             )
         except Exception as e:
-            self.log(msg=f"Error processing External Identity Policy data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing External Identity Policy data: {e}"
+            )
             return None
 
         return self.results

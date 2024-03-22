@@ -37,7 +37,8 @@ class ManagementPartnerBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Management Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Management Partner data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -61,7 +62,7 @@ class ManagementPartnerBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing Management Partner data: {e}")
+            self.log(tag="error", msg=f"Error processing Management Partner data: {e}")
             return None
 
         return self.results

@@ -40,7 +40,8 @@ class EnrollmentStatusPageBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Enrollment Status Page data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Enrollment Status Page data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -80,7 +81,9 @@ class EnrollmentStatusPageBackupModule(BaseBackupModule):
                 log_message=self.LOG_MESSAGE,
             )
         except Exception as e:
-            self.log(msg=f"Error processing Enrollment Status Page data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Enrollment Status Page data: {e}"
+            )
             return None
 
         return self.results

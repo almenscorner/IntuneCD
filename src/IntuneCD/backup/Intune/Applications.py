@@ -41,7 +41,8 @@ class ApplicationsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Application data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Application data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -71,6 +72,7 @@ class ApplicationsBackupModule(BaseBackupModule):
                     return app["displayName"] + "_" + app_type + suffix
                 except Exception as e:
                     self.log(
+                        tag="error",
                         msg=f"Error generating app name for {app['id']}: {e}",
                     )
                     return app["displayName"]
@@ -130,7 +132,7 @@ class ApplicationsBackupModule(BaseBackupModule):
                 )
                 self.update_results(app_results)
             except Exception as e:
-                self.log(msg=f"Error processing Application data: {e}")
+                self.log(tag="error", msg=f"Error processing Application data: {e}")
                 return None
 
         return self.results

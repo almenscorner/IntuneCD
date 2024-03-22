@@ -43,7 +43,8 @@ class TestManagedGooglePlayBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Managed Google Play data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Managed Google Play data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(ManagedGooglePlayBackupModule, "process_data")
@@ -59,7 +60,7 @@ class TestManagedGooglePlayBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Managed Google Play data: Test exception"
+            tag="error", msg="Error processing Managed Google Play data: Test exception"
         )
 
 

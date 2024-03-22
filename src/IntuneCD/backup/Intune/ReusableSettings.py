@@ -44,7 +44,10 @@ class ReusableSettingsBackupModule(BaseBackupModule):
             if not os.path.exists(self.script_data_path):
                 os.makedirs(self.script_data_path)
         except Exception as e:
-            self.log(msg=f"Error creating directory {self.script_data_path}: {e}")
+            self.log(
+                tag="error",
+                msg=f"Error creating directory {self.script_data_path}: {e}",
+            )
 
         decoded = self.decode_base64(
             item["settingInstance"]["simpleSettingValue"]["value"]
@@ -58,7 +61,9 @@ class ReusableSettingsBackupModule(BaseBackupModule):
             ) as f:
                 f.write(decoded)
         except Exception as e:
-            self.log(msg=f"Error writing script {script_name} to file: {e}")
+            self.log(
+                tag="error", msg=f"Error writing script {script_name} to file: {e}"
+            )
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Reusable Policy Settings
@@ -75,7 +80,8 @@ class ReusableSettingsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Reusable Policy Setting data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Reusable Policy Setting data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -99,7 +105,9 @@ class ReusableSettingsBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Reusable Policy Setting data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Reusable Policy Setting data: {e}"
+            )
             return None
 
         return self.results

@@ -53,7 +53,8 @@ class TestNotificationTemplateBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Notification Template data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Notification Template data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(NotificationTemplateBackupModule, "process_data")
@@ -76,7 +77,8 @@ class TestNotificationTemplateBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Notification Template data: Test exception"
+            tag="error",
+            msg="Error processing Notification Template data: Test exception",
         )
 
 

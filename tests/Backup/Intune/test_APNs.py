@@ -43,7 +43,8 @@ class TestAPNSBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting APNs data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting APNs data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(APNSBackupModule, "process_data")
@@ -58,7 +59,9 @@ class TestAPNSBackupModule(unittest.TestCase):
 
         self.module.main()
 
-        mock_log.assert_called_with(msg="Error processing APNs data: Test exception")
+        mock_log.assert_called_with(
+            tag="error", msg="Error processing APNs data: Test exception"
+        )
 
 
 if __name__ == "__main__":

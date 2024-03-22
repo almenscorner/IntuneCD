@@ -41,7 +41,8 @@ class AppProtectionBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting App Protection data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting App Protection data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -55,7 +56,7 @@ class AppProtectionBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing App Protection data: {e}")
+            self.log(tag="error", msg=f"Error processing App Protection data: {e}")
             return None
 
         return self.results

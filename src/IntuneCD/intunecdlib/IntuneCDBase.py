@@ -161,23 +161,25 @@ class IntuneCDBase:
         else:
             raise ValueError("Invalid output format")
 
-    def log(self, function: str = None, msg: str = None):
+    def log(self, function: str = None, msg: str = None, tag: str = "info"):
         """Prints a message to the console if the VERBOSE environment variable is set to True.
 
         Args:
             function (str): The name of the function that is calling the log function.
             msg (str): The message to print to the console.
+            tag (str): The tag to use for the log message. Defaults to "info".
         """
         verbose = os.getenv("VERBOSE")
         if verbose:
             msg = (
-                f"[{time.asctime()}] - [{function}] - {msg}"
+                f"{time.asctime()} [{tag.upper()}] [{function}] - {msg}"
                 if verbose and function
                 else f"[{time.asctime()}] - {msg}"
             )
             print(msg)
 
         if function is None and not verbose:
+            msg = f"{time.asctime()} [{tag.upper()}] {msg}"
             print(msg)
 
     def get_pop_keys(self, data: dict, keys: list[str], method: str = "get") -> None:

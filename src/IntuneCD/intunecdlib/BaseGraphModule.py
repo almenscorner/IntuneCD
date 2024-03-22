@@ -86,6 +86,7 @@ class BaseGraphModule(IntuneCDBase):
                         )
             except Exception as e:
                 self.log(
+                    tag="error",
                     msg=f"Error making Graph request to {endpoint}: {e}",
                 )
         else:
@@ -124,7 +125,9 @@ class BaseGraphModule(IntuneCDBase):
                             data=data,
                         )
             except Exception as e:
-                self.log(msg=f"Error making Graph request to {endpoint}: {e}")
+                self.log(
+                    tag="error", msg=f"Error making Graph request to {endpoint}: {e}"
+                )
 
         if response.status_code == status_code:
             if method == "GET":

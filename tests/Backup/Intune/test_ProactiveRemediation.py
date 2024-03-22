@@ -50,7 +50,8 @@ class TestProactiveRemediationScriptBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Proactive Remediation data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Proactive Remediation data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(ProactiveRemediationScriptBackupModule, "make_graph_request")
@@ -74,7 +75,8 @@ class TestProactiveRemediationScriptBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Proactive Remediation data: Test exception"
+            tag="error",
+            msg="Error processing Proactive Remediation data: Test exception",
         )
 
 

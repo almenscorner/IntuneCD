@@ -170,6 +170,7 @@ class ProcessAuditData(IntuneCDBase):
         else:
             self.log(
                 function="_git_commit_changes",
+                tag="error",
                 msg=f"Commit was not successful, error: {commit.stderr}",
             )
 

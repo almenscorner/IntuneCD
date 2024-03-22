@@ -36,7 +36,8 @@ class SecurityDefaultsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Security Defaults data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Security Defaults data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -50,7 +51,7 @@ class SecurityDefaultsBackupModule(BaseBackupModule):
                 name_key="",
             )
         except Exception as e:
-            self.log(msg=f"Error processing Security Defaults data: {e}")
+            self.log(tag="error", msg=f"Error processing Security Defaults data: {e}")
             return None
 
         return self.results

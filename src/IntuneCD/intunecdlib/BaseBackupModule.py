@@ -96,6 +96,7 @@ class BaseBackupModule(BaseGraphModule):
             )
         except Exception as e:
             self.log(
+                tag="error",
                 msg=f"Error handling audit data for {self.filename}: {e}",
             )
 
@@ -120,6 +121,7 @@ class BaseBackupModule(BaseGraphModule):
             self._handle_audit(compare_data)
         except Exception as e:
             self.log(
+                tag="error",
                 msg=f"Error processing audit data for {self.filename}: {e}",
             )
 
@@ -143,6 +145,7 @@ class BaseBackupModule(BaseGraphModule):
             return config_type
         except Exception as e:
             self.log(
+                tag="error",
                 msg=f"Error appending config type for {self.filename}: {e}",
             )
             return None
@@ -191,6 +194,7 @@ class BaseBackupModule(BaseGraphModule):
                 self.filename = self._prepare_file_name(self.filename)
         except Exception as e:
             self.log(
+                tag="error",
                 msg=f"Error preparing filename for {data[f'{name_key}']}, {e}",
             )
 
@@ -199,6 +203,7 @@ class BaseBackupModule(BaseGraphModule):
                 self.filename += f"__{data['id']}"
         except Exception as e:
             self.log(
+                tag="error",
                 msg=f"Error appending id to filename for {self.filename}, {e}",
             )
 

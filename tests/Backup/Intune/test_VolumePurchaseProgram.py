@@ -45,7 +45,8 @@ class TestVPPBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting VPP Token data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting VPP Token data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(VPPBackupModule, "process_data")
@@ -61,7 +62,7 @@ class TestVPPBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing VPP Token data: Test exception"
+            tag="error", msg="Error processing VPP Token data: Test exception"
         )
 
 

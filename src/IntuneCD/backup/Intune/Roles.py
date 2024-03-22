@@ -43,7 +43,8 @@ class RolesBackupModule(BaseBackupModule):
                 )
             except Exception as e:
                 self.log(
-                    msg=f"Error getting group data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                    tag="error",
+                    msg=f"Error getting group data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
                 )
                 return None
 
@@ -66,7 +67,8 @@ class RolesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Role data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Role data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -125,7 +127,7 @@ class RolesBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Role data: {e}")
+            self.log(tag="error", msg=f"Error processing Role data: {e}")
             return None
 
         return self.results

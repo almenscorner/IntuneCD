@@ -38,7 +38,8 @@ class AppleEnrollmentProfilesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Apple Enrollment Profile data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Apple Enrollment Profile data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -69,7 +70,9 @@ class AppleEnrollmentProfilesBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Apple Enrollment Profile data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Apple Enrollment Profile data: {e}"
+            )
             return None
 
         return self.results

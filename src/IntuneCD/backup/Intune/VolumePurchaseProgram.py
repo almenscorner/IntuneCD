@@ -38,7 +38,8 @@ class VPPBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting VPP Token data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting VPP Token data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -55,7 +56,7 @@ class VPPBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing VPP Token data: {e}")
+            self.log(tag="error", msg=f"Error processing VPP Token data: {e}")
             return None
 
         return self.results

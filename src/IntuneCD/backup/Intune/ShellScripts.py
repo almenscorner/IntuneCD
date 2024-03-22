@@ -49,7 +49,10 @@ class ShellScriptsBackupModule(BaseBackupModule):
                 if not os.path.exists(self.script_data_path):
                     os.makedirs(self.script_data_path)
             except Exception as e:
-                self.log(msg=f"Error creating directory {self.script_data_path}: {e}")
+                self.log(
+                    tag="error",
+                    msg=f"Error creating directory {self.script_data_path}: {e}",
+                )
 
             decoded = self.decode_base64(item["scriptContent"])
 
@@ -62,7 +65,8 @@ class ShellScriptsBackupModule(BaseBackupModule):
                     f.write(decoded)
             except Exception as e:
                 self.log(
-                    msg=f"Error writing script data to {self.script_data_path}{script_name}: {e}"
+                    tag="error",
+                    msg=f"Error writing script data to {self.script_data_path}{script_name}: {e}",
                 )
 
     def main(self) -> dict[str, any]:
@@ -77,7 +81,8 @@ class ShellScriptsBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Shell Script data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Shell Script data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -101,7 +106,7 @@ class ShellScriptsBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Shell Script data: {e}")
+            self.log(tag="error", msg=f"Error processing Shell Script data: {e}")
             return None
 
         return self.results

@@ -59,7 +59,8 @@ class TestApplicationsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Application data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Application data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(ApplicationsBackupModule, "make_graph_request")
@@ -87,7 +88,7 @@ class TestApplicationsBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Application data: Test exception"
+            tag="error", msg="Error processing Application data: Test exception"
         )
 
 

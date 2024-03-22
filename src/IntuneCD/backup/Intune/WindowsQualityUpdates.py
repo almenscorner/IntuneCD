@@ -38,7 +38,8 @@ class WindowsQualityUpdatesBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Windows Quality Update data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Windows Quality Update data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -52,7 +53,9 @@ class WindowsQualityUpdatesBackupModule(BaseBackupModule):
                 audit_compare_info={"type": "resourceId", "value_key": "id"},
             )
         except Exception as e:
-            self.log(msg=f"Error processing Windows Quality Update data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Windows Quality Update data: {e}"
+            )
             return None
 
         return self.results

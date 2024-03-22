@@ -60,9 +60,9 @@ class AppConfigurationUpdateModule(BaseUpdateModule):
                 repo_data.pop("targetedMobileApps")
                 repo_data["targetedMobileApps"] = [app_ids]
             else:
-                self.print_config_separator()
                 self.log(
-                    msg=f"App {repo_data['targetedMobileApps']['appName']} not found, skipping {self.config_type} {self.name} update."
+                    tag="warning",
+                    msg=f"App {repo_data['targetedMobileApps']['appName']} not found, skipping {self.config_type} {self.name} update.",
                 )
 
                 return None
@@ -75,7 +75,7 @@ class AppConfigurationUpdateModule(BaseUpdateModule):
             try:
                 intune_data = self.get_downstream_data(self.CONFIG_ENDPOINT)
             except Exception as e:
-                self.log(msg=f"Error getting {self.config_type} data: {e}")
+                self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
             self.downstream_assignments = self.batch_assignment(
@@ -108,7 +108,8 @@ class AppConfigurationUpdateModule(BaseUpdateModule):
                         )
                     except Exception as e:
                         self.log(
-                            msg=f"Error updating {self.config_type} {self.name}: {e}"
+                            tag="error",
+                            msg=f"Error updating {self.config_type} {self.name}: {e}",
                         )
 
                     self.set_diff_data(diff_data)

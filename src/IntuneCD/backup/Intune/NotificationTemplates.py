@@ -41,7 +41,8 @@ class NotificationTemplateBackupModule(BaseBackupModule):
             )
         except Exception as e:
             self.log(
-                msg=f"Error getting Notification Template data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}"
+                tag="error",
+                msg=f"Error getting Notification Template data from {self.endpoint + self.CONFIG_ENDPOINT}: {e}",
             )
             return None
 
@@ -69,7 +70,9 @@ class NotificationTemplateBackupModule(BaseBackupModule):
                 },
             )
         except Exception as e:
-            self.log(msg=f"Error processing Notification Template data: {e}")
+            self.log(
+                tag="error", msg=f"Error processing Notification Template data: {e}"
+            )
             return None
 
         return self.results

@@ -45,7 +45,8 @@ class TestWindowsDriverUpdatesBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg=f"Error getting Windows Driver Update data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception"
+            tag="error",
+            msg=f"Error getting Windows Driver Update data from {self.module.endpoint + self.module.CONFIG_ENDPOINT}: Test exception",
         )
 
     @patch.object(WindowsDriverUpdatesBackupModule, "process_data")
@@ -61,7 +62,8 @@ class TestWindowsDriverUpdatesBackupModule(unittest.TestCase):
         self.module.main()
 
         mock_log.assert_called_with(
-            msg="Error processing Windows Driver Update data: Test exception"
+            tag="error",
+            msg="Error processing Windows Driver Update data: Test exception",
         )
 
 
