@@ -24,7 +24,6 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
         """
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Compliance Policies/Message Templates/"
-        self.config_type = "Notification Template"
         self.handle_assignment = False
         self.params = {"$expand": "localizedNotificationMessages"}
         self.exclude_paths = [
@@ -48,7 +47,9 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
             repo_data["localizedNotificationMessages"],
         ):
             self.name = repo_locale.get("locale")
-            if locale_diff := self.get_diffs(intune_locale, repo_locale, None):
+            if locale_diff := self.get_diffs(
+                intune_locale, repo_locale, "root['isDefault']"
+            ):
                 self.config_type = "Notification Template Locale"
                 data = repo_data.copy()
                 data.pop("isDefault", None)
@@ -88,6 +89,11 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
             ):
                 if repo_locale["isDefault"] is False:
                     repo_locale.pop("isDefault", None)
+
+                self.log(
+                    msg=f"Updating isDefault for {self.name} to {repo_locale.get('isDefault')}",
+                    tag="info",
+                )
 
                 self.update_downstream_data(
                     self.endpoint
@@ -138,6 +144,7 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
             for filename in os.listdir(self.path):
                 # Reset the paramters
                 self.create_request = None
+                self.config_type = "Notification Template"
 
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
