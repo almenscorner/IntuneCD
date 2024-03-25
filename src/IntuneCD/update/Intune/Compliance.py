@@ -260,9 +260,9 @@ class ComplianceUpdateModule(BaseUpdateModule):
                         0
                     ]["id"]
                 else:
-                    action[
-                        "notificationTemplateId"
-                    ] = "00000000-0000-0000-0000-000000000000"
+                    action["notificationTemplateId"] = (
+                        "00000000-0000-0000-0000-000000000000"
+                    )
 
                 action.pop("notificationTemplateName")
 
@@ -321,6 +321,12 @@ class ComplianceUpdateModule(BaseUpdateModule):
                         new_intune_data.append(item)
                     intune_data["value"] = new_intune_data
                     repo_data = self._remove_compliance_keys(repo_data)
+
+                    for item in intune_data["value"]:
+                        for action in item["scheduledActionsForRule"][0][
+                            "scheduledActionConfigurations"
+                        ]:
+                            self.remove_keys(action)
 
                     try:
                         self.process_update(

@@ -81,6 +81,8 @@ class ComplianceBackupModule(BaseBackupModule):
             for rule in item["scheduledActionsForRule"]:
                 self.remove_keys(rule)
                 self._get_notification_template(rule)
+                for action in rule["scheduledActionConfigurations"]:
+                    self.remove_keys(action)
 
             # If there is a deviceCompliancePolicyScript, get the name of the script
             if item.get("deviceCompliancePolicyScript", None):
