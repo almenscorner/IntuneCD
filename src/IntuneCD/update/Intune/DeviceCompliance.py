@@ -29,6 +29,10 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
             "root['assignments']",
             "root['scheduledActionsForRule']",
             "root['deviceComplianceScriptName']",
+            "root['scheduledActionConfigurations']",
+            "root['scheduledActionConfigurations'][0]['id']",
+            "root['assignments']",
+            "root['scheduledActionsForRule'][0]['scheduledActionConfigurations']",
         ]
         self.params = {
             "expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"
@@ -42,9 +46,9 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
             },
         )
         if compliance_script_id.get("value"):
-            data["deviceCompliancePolicyScript"][
-                "deviceComplianceScriptId"
-            ] = compliance_script_id["value"][0]["id"]
+            data["deviceCompliancePolicyScript"]["deviceComplianceScriptId"] = (
+                compliance_script_id["value"][0]["id"]
+            )
 
             return data
 
@@ -124,9 +128,9 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
                         0
                     ]["id"]
                 else:
-                    action[
-                        "notificationTemplateId"
-                    ] = "00000000-0000-0000-0000-000000000000"
+                    action["notificationTemplateId"] = (
+                        "00000000-0000-0000-0000-000000000000"
+                    )
 
                 action.pop("notificationTemplateName")
 
@@ -167,6 +171,12 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
 
                     for rule in repo_data.get("scheduledActionsForRule"):
                         self._get_notification_template_id(rule)
+
+                    for item in intune_data["value"]:
+                        for action in item["scheduledActionsForRule"][0][
+                            "scheduledActionConfigurations"
+                        ]:
+                            self.remove_keys(action)
 
                     try:
                         self.process_update(
