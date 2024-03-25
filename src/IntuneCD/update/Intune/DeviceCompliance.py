@@ -46,9 +46,9 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
             },
         )
         if compliance_script_id.get("value"):
-            data["deviceCompliancePolicyScript"]["deviceComplianceScriptId"] = (
-                compliance_script_id["value"][0]["id"]
-            )
+            data["deviceCompliancePolicyScript"][
+                "deviceComplianceScriptId"
+            ] = compliance_script_id["value"][0]["id"]
 
             return data
 
@@ -128,9 +128,9 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
                         0
                     ]["id"]
                 else:
-                    action["notificationTemplateId"] = (
-                        "00000000-0000-0000-0000-000000000000"
-                    )
+                    action[
+                        "notificationTemplateId"
+                    ] = "00000000-0000-0000-0000-000000000000"
 
                 action.pop("notificationTemplateName")
 

@@ -260,9 +260,9 @@ class ComplianceUpdateModule(BaseUpdateModule):
                         0
                     ]["id"]
                 else:
-                    action["notificationTemplateId"] = (
-                        "00000000-0000-0000-0000-000000000000"
-                    )
+                    action[
+                        "notificationTemplateId"
+                    ] = "00000000-0000-0000-0000-000000000000"
 
                 action.pop("notificationTemplateName")
 
