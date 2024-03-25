@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
+
 from ...intunecdlib.BaseBackupModule import BaseBackupModule
 
 
@@ -57,8 +59,9 @@ class AppConfigurationBackupModule(BaseBackupModule):
                         item["targetedMobileApps"] = {}
                         item["targetedMobileApps"]["appName"] = app_data["displayName"]
                         item["targetedMobileApps"]["type"] = app_data["@odata.type"]
-            if item.get("payloadJson"):
-                item["payloadJson"] = self.decode_base64(item["payloadJson"])
+                if item.get("payloadJson"):
+                    item["payloadJson"] = self.decode_base64(item["payloadJson"])
+                    item["payloadJson"] = json.loads(item["payloadJson"])
 
         try:
             self.results = self.process_data(
