@@ -12,6 +12,7 @@ class TestNotificationTemplateBackupModule(unittest.TestCase):
 
     def setUp(self):
         self.module = NotificationTemplateBackupModule()
+        self.module.exclude = []
 
     @patch.object(NotificationTemplateBackupModule, "make_graph_request")
     @patch.object(NotificationTemplateBackupModule, "process_data")

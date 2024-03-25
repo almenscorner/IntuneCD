@@ -10,11 +10,14 @@ class TestComplianceBackupModule(unittest.TestCase):
 
     def setUp(self):
         self.module = ComplianceBackupModule()
+        self.module.exclude = []
         self.policy = {
             "value": [
                 {
                     "id": "object",
-                    "scheduledActionsForRule": [{"id": "rule"}],
+                    "scheduledActionsForRule": [
+                        {"id": "rule", "scheduledActionConfigurations": []}
+                    ],
                     "deviceCompliancePolicyScript": {
                         "deviceComplianceScriptId": "1",
                     },
