@@ -37,7 +37,11 @@ class ApplicationsBackupModule(BaseBackupModule):
         """
         try:
             self.graph_data = self.make_graph_request(
-                endpoint=self.endpoint + self.CONFIG_ENDPOINT
+                endpoint=self.endpoint + self.CONFIG_ENDPOINT,
+                params={
+                    "$filter": "(microsoft.graph.managedApp/appAvailability) eq null or (microsoft.graph.managedApp/appAvailability) "
+                    "eq 'lineOfBusiness' or isAssigned eq true"
+                },
             )
         except Exception as e:
             self.log(
@@ -63,6 +67,7 @@ class ApplicationsBackupModule(BaseBackupModule):
 
         for app in self.graph_data["value"]:
             self.platform_path = ""
+            app.pop("description", None)
             scope_tag_data = [v for v in scope_tag_responses if app["id"] == v["id"]]
             if scope_tag_data:
                 app["roleScopeTagIds"] = scope_tag_data[0]["roleScopeTagIds"]
