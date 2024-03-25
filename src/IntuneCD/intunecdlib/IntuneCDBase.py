@@ -16,7 +16,6 @@ class IntuneCDBase:
         :param data: The data to remove keys from.
         :return: The data with removed keys.
         """
-        self.exclude = []
 
         keys = {
             "id",
