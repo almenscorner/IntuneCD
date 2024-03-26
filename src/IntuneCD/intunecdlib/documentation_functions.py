@@ -510,7 +510,10 @@ def get_md_files(configpath):
             configpathname = configpath.split(slash)[-1]
             filepath = filepath[filepath.index(configpathname) :]
             filepath = "/".join(filepath[1:])
-
-            md_files.append(f"./{filepath}")
+            ignore_files = ["README", "index", "prod-as-built"]
+            if filepath.rsplit("/", maxsplit=1)[-1] not in ignore_files:
+                md_files.append(f"./{filepath}")
+    # Sort the list alphabetically by file name without extension, case-insensitive
+    md_files.sort(key=lambda f: os.path.splitext(os.path.basename(f))[0].lower())
 
     return md_files
