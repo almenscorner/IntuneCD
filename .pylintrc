@@ -23,6 +23,9 @@ disable=
     too-many-nested-blocks,
     unnecessary-lambda-assignment,
     wrong-import-position,
+    broad-exception-caught,
+    no-member,
+    fixme,
 ignore=
     backup_intune.py,
     backup_entra.py,
@@ -33,3 +36,6 @@ ignore=
     document_intune.py,
     document_entra.py,
     run_documentation.py,
+    _test_backup_template.py,
+    backup_template.py,
+    update_template.py,

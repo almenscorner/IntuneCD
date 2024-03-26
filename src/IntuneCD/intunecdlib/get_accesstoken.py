@@ -45,9 +45,13 @@ def obtain_accesstoken_app(TENANT_NAME, CLIENT_ID, CLIENT_SECRET):
             token = app.acquire_token_for_client(scopes=SCOPE)
             if not token:
                 raise ValueError("No token returned")
+            if "error" in token:
+                raise ValueError(
+                    "Error obtaining access token: " + token["error_description"]
+                )
 
     except (ValueError, Exception) as e:
-        raise ValueError("Error obtaining access token: " + str(e))
+        raise ValueError(str(e))
 
     return token
 
@@ -84,9 +88,13 @@ def obtain_accesstoken_cert(TENANT_NAME, CLIENT_ID, THUMBPRINT, KEY_FILE):
             token = app.acquire_token_for_client(scopes=SCOPE)
             if not token:
                 raise ValueError("No token returned")
+            if "error" in token:
+                raise ValueError(
+                    "Error obtaining access token: " + token["error_description"]
+                )
 
     except (ValueError, Exception) as e:
-        raise ValueError("Error obtaining access token: " + str(e))
+        raise ValueError(str(e))
 
     return token
 
@@ -117,9 +125,13 @@ def obtain_accesstoken_interactive(TENANT_NAME, CLIENT_ID, scopes):
 
         if not token:
             raise ValueError("No token returned")
+        if "error" in token:
+            raise ValueError(
+                "Error obtaining access token: " + token["error_description"]
+            )
 
     except (ValueError, Exception) as e:
-        raise ValueError("Error obtaining access token: " + str(e))
+        raise ValueError(str(e))
 
     return token
 
@@ -178,6 +190,7 @@ def obtain_azure_token(TENANT_ID: str, PATH: str) -> str:
             code = requests.post(
                 f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/devicecode",
                 data=body,
+                timeout=60,
             )
             json_code_data = json.loads(code.text)
             print(
@@ -210,7 +223,9 @@ def obtain_azure_token(TENANT_ID: str, PATH: str) -> str:
         try_count = 0
         while try_count < 10:
             token = requests.post(
-                f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/token", data=body
+                f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/token",
+                data=body,
+                timeout=60,
             )
             json_token_data = json.loads(token.text)
             sleep(5)
