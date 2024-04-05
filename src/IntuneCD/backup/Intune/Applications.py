@@ -66,7 +66,8 @@ class ApplicationsBackupModule(BaseBackupModule):
         self.audit_data = self.make_audit_request(self.audit_filter)
 
         for app in self.graph_data["value"]:
-            self.platform_path = ""
+            platform = None
+            base_path = self.path
             app.pop("description", None)
             scope_tag_data = [v for v in scope_tag_responses if app["id"] == v["id"]]
             if scope_tag_data:
@@ -124,13 +125,14 @@ class ApplicationsBackupModule(BaseBackupModule):
                 app_name = generate_app_name(app, app_type.split(".")[2])
 
             self.preset_filename = app_name
-            self.platform_path = f"{self.path}{platform}/"
+
+            self.path = f"{self.path}{platform}/"
 
             try:
                 app_results = self.process_data(
                     data=app,
                     filetype=self.filetype,
-                    path=self.platform_path,
+                    path=self.path,
                     name_key="displayName",
                     log_message=self.LOG_MESSAGE,
                     audit_compare_info={"type": "resourceId", "value_key": "id"},
@@ -139,5 +141,7 @@ class ApplicationsBackupModule(BaseBackupModule):
             except Exception as e:
                 self.log(tag="error", msg=f"Error processing Application data: {e}")
                 return None
+
+            self.path = base_path
 
         return self.results
