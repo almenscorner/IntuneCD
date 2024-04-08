@@ -171,7 +171,7 @@ class ProcessAuditData(IntuneCDBase):
             self.log(
                 function="_git_commit_changes",
                 tag="error",
-                msg=f"Commit was not successful, error: {commit.stderr}",
+                msg=f"Commit was not successful, error: {commit.stderr[:200] or commit.stdout[:200]}",
             )
 
     def _get_payload_from_audit_data(self, audit_data, compare_data):

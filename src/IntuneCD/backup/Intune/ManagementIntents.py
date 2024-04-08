@@ -65,11 +65,13 @@ class ManagementIntentsBackupModule(BaseBackupModule):
         intent_responses = self.batch_intents(self.intents_graph_data)
 
         for item in intent_responses["value"]:
+            template_type = None
+            base_path = self.path
             for template in self.template_graph_data["value"]:
                 if item["templateId"] == template["id"]:
                     template_type = template["displayName"]
 
-            self.type_path = f"{self.path}/{template_type}/"
+            self.path = f"{self.path}{template_type}/"
 
             for setting in item["settingsDelta"]:
                 setting.pop("id", None)
@@ -78,7 +80,7 @@ class ManagementIntentsBackupModule(BaseBackupModule):
                 results = self.process_data(
                     data=item,
                     filetype=self.filetype,
-                    path=self.type_path,
+                    path=self.path,
                     name_key="displayName",
                     log_message=self.LOG_MESSAGE,
                     audit_compare_info={"type": "resourceId", "value_key": "id"},
@@ -89,5 +91,7 @@ class ManagementIntentsBackupModule(BaseBackupModule):
                     tag="error", msg=f"Error processing Management Intents data: {e}"
                 )
                 return None
+
+            self.path = base_path
 
         return self.results
