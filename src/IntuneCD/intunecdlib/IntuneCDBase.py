@@ -47,7 +47,7 @@ class IntuneCDBase:
         if "VPPusedLicenseCount" in self.exclude:
             keys.add("usedLicenseCount")
         if "GPlaySyncTime" in self.exclude:
-            keys.add("lastSyncDateTime")
+            keys.add("lastAppSyncDateTime")
         if "CompliancePartnerHeartbeat" in self.exclude:
             keys.add("lastHeartbeatDateTime")
 
