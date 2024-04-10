@@ -63,7 +63,8 @@ class ApplicationsBackupModule(BaseBackupModule):
         )
 
         # as we must process each app individually, get the audit data up front
-        self.audit_data = self.make_audit_request(self.audit_filter)
+        if self.audit:
+            self.audit_data = self.make_audit_request(self.audit_filter)
 
         for app in self.graph_data["value"]:
             platform = None

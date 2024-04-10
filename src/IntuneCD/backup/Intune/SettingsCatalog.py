@@ -27,6 +27,7 @@ class SettingsCatalogBackupModule(BaseBackupModule):
         )
         self.assignment_endpoint = "deviceManagement/configurationPolicies/"
         self.assignment_extra_url = "/assignments"
+        self.config_audit_data = True
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Settings Catalog
@@ -52,7 +53,8 @@ class SettingsCatalogBackupModule(BaseBackupModule):
             item_ids_dict, self.assignment_endpoint, self.assignment_extra_url
         )
         # As we need to process each item individually, get the audit data up front
-        self.audit_data = self.make_audit_request(self.audit_filter)
+        if self.audit:
+            self.audit_data = self.make_audit_request(self.audit_filter)
         # Get the settings for each policy using batch request
         policy_responses = self.batch_request(
             item_ids, "deviceManagement/configurationPolicies/", "/settings?&top=1000"
