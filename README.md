@@ -20,8 +20,8 @@ The core functionality of IntuneCD revolves around securely backing up Intune co
 
 By leveraging IntuneCD, users can streamline their configuration management workflow, ensuring smooth and consistent deployment of settings while maintaining an auditable history of changes.
 
-# Exciting news 📣
-The front end for IntuneCD has now been released. Check it out [here](https://github.com/almenscorner/intunecd-monitor)
+# Looking for a GUI?
+Check out the front end for IntuneCD [here](https://github.com/almenscorner/intunecd-monitor)
 
 ***
 
