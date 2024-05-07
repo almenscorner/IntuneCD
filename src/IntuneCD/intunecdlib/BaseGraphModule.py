@@ -852,7 +852,7 @@ class BaseGraphModule(IntuneCDBase):
                         val["target"]["groupId"] = request["id"]
 
             # Request filter id based on filter name
-            if val["target"]["deviceAndAppManagementAssignmentFilterId"]:
+            if "deviceAndAppManagementAssignmentFilterId" in val["target"]:
                 filters = self.make_graph_request(
                     endpoint="https://graph.microsoft.com/beta/deviceManagement/assignmentFilters",
                 )
@@ -861,9 +861,9 @@ class BaseGraphModule(IntuneCDBase):
                         val["target"]["deviceAndAppManagementAssignmentFilterId"]
                         == intune_filter["displayName"]
                     ):
-                        val["target"][
-                            "deviceAndAppManagementAssignmentFilterId"
-                        ] = intune_filter["id"]
+                        val["target"]["deviceAndAppManagementAssignmentFilterId"] = (
+                            intune_filter["id"]
+                        )
 
                 # If filter is None, remove keys
                 if val["target"]["deviceAndAppManagementAssignmentFilterId"] is None:
