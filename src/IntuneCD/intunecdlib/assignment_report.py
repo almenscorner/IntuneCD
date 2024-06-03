@@ -71,7 +71,7 @@ class AssignmentReport(BaseBackupModule):
                 if not payload_added:
                     group_data["assignedTo"][payload_type] = [payload_data]
                     groups.append(group_data)
-                    break
+                    # break
 
     def _collect_groups(self, path):
         exclude = set(["__archive__", "Entra"])

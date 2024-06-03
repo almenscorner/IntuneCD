@@ -24,7 +24,7 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
         super().__init__(*args, **kwargs)
         self.path = f"{self.path}/Device Configurations/"
         self.assignment_endpoint = "/deviceManagement/deviceConfigurations/"
-        self.assignment_extra_url = "/assignments"
+        self.assignment_extra_url = "/assign"
         self.exclude_paths = [
             "root['assignments']",
             "root['payload']",
