@@ -664,19 +664,20 @@ class BaseUpdateModule(BaseGraphModule):
                 )
 
             if self.handle_assignment:
-                self.handle_assignments(
-                    repo_assignments,
-                    self.downstream_assignments,
-                    self.assignment_key,
-                    self.downstream_id,
-                )
-            if self.handle_iterable_assignment:
-                self.handle_iterable_assignments(
-                    repo_assignments,
-                    self.downstream_assignments,
-                    self.assignment_key,
-                    self.downstream_id,
-                )
+                if self.config_type == "Windows Enrollment Profile":
+                    self.handle_iterable_assignments(
+                        repo_assignments,
+                        self.downstream_assignments,
+                        self.assignment_key,
+                        self.downstream_id,
+                    )
+                else:
+                    self.handle_assignments(
+                        repo_assignments,
+                        self.downstream_assignments,
+                        self.assignment_key,
+                        self.downstream_id,
+                    )
 
             # Add scheduledActionsForRule back to the data if it was removed
             if repo_scheduled_actions:

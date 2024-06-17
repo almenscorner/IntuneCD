@@ -32,7 +32,6 @@ class WindowsEnrollmentProfileUpdateModule(BaseUpdateModule):
             "root['assignments']",
         ]
         # Windows enrollment profile assginment is handled differently, so we need to set the following attributes
-        self.handle_assignment = False
         self.handle_iterable_assignment = True
         self.assignment_key = "target"
         self.assignment_status_code = 201
