@@ -387,16 +387,17 @@ class BaseUpdateModule(BaseGraphModule):
         self.log(msg=f"Created with id: {self.create_request['id']}")
 
         if self.handle_assignment:
-            self.handle_assignments(
-                repo_assignments, [], self.assignment_key, self.create_request["id"]
-            )
-        if self.handle_iterable_assignment:
-            self.handle_iterable_assignments(
-                repo_assignments,
-                [],
-                self.assignment_key,
-                self.create_request["id"],
-            )
+            if self.config_type == "Windows Enrollment Profile":
+                self.handle_iterable_assignments(
+                    repo_assignments,
+                    [],
+                    self.assignment_key,
+                    self.create_request["id"],
+                )
+            else:
+                self.handle_assignments(
+                    repo_assignments, [], self.assignment_key, self.create_request["id"]
+                )
 
     def get_match_data(self, intune_data: dict, match_info: dict) -> tuple:
         """Gets the matching data
