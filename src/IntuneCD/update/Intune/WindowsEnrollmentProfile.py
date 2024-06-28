@@ -32,7 +32,6 @@ class WindowsEnrollmentProfileUpdateModule(BaseUpdateModule):
             "root['assignments']",
         ]
         # Windows enrollment profile assginment is handled differently, so we need to set the following attributes
-        self.handle_assignment = False
         self.handle_iterable_assignment = True
         self.assignment_key = "target"
         self.assignment_status_code = 201
@@ -82,9 +81,10 @@ class WindowsEnrollmentProfileUpdateModule(BaseUpdateModule):
                     self.reset_diffs_and_count()
 
             for item in intune_data["value"]:
-                # Remvoe any assignments before removing the profile
-                endpoint = f"{self.endpoint}{self.CONFIG_ENDPOINT}{item['id']}{self.assignment_extra_url}"
-                self.make_graph_request(endpoint, method="delete", status_code=200)
+                if self.remove:
+                    # Remvoe any assignments before removing the profile
+                    endpoint = f"{self.endpoint}{self.CONFIG_ENDPOINT}{item['id']}{self.assignment_extra_url}"
+                    self.make_graph_request(endpoint, method="delete", status_code=200)
             self.remove_downstream_data(self.CONFIG_ENDPOINT, intune_data["value"])
 
         return self.diff_summary

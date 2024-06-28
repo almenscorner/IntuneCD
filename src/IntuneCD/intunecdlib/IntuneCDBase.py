@@ -2,6 +2,7 @@
 import base64
 import json
 import os
+import sys
 import time
 
 import yaml
@@ -168,6 +169,7 @@ class IntuneCDBase:
             msg (str): The message to print to the console.
             tag (str): The tag to use for the log message. Defaults to "info".
         """
+        exit_on_error = os.getenv("EXIT_ON_ERROR")
         verbose = os.getenv("VERBOSE")
         if verbose:
             msg = (
@@ -180,6 +182,9 @@ class IntuneCDBase:
         if function is None and not verbose:
             msg = f"{time.asctime()} [{tag.upper()}] {msg}"
             print(msg)
+
+        if tag == "error" and exit_on_error:
+            sys.exit(1)
 
     def get_pop_keys(self, data: dict, keys: list[str], method: str = "get") -> None:
         """A method to get or pop keys from a dictionary

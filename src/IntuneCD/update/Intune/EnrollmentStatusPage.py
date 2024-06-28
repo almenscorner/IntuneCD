@@ -47,7 +47,7 @@ class EnrollmentStatusPageUpdateModule(BaseUpdateModule):
 
             for app in repo_data["selectedMobileAppNames"]:
                 param = {
-                    "$filter": f"(isof('{str(app['type']).replace('#','')}'))",
+                    "$filter": f"(isof('{str(app['type']).replace('#', '')}'))",
                     "$search": '"' + app["name"] + '"',
                 }
 

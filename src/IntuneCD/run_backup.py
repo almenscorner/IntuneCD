@@ -200,11 +200,19 @@ def start():
         help="The authentication token to use for the update if not using an app registration",
         type=str,
     )
+    parser.add_argument(
+        "--exit-on-error",
+        help="When set, the script will exit on the first error",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
     if args.verbose:
         os.environ["VERBOSE"] = "True"
+
+    if args.exit_on_error:
+        os.environ["EXIT_ON_ERROR"] = "True"
 
     def devtoprod():
         return "devtoprod"
@@ -317,6 +325,9 @@ def start():
 
     if "VERBOSE" in os.environ:
         del os.environ["VERBOSE"]
+
+    if "EXIT_ON_ERROR" in os.environ:
+        del os.environ["EXIT_ON_ERROR"]
 
 
 if __name__ == "__main__":
