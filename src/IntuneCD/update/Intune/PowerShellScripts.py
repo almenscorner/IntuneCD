@@ -44,13 +44,15 @@ class PowerShellScriptsUpdateModule(BaseUpdateModule):
         if len(fname_id) > 1:
             fname_id = fname_id[1].replace(".json", "").replace(".yaml", "")
         else:
-            fname_id = ""
+            fname_id = None
         script_files = os.listdir(self.script_data_path)
-        script_file = [
-            x for x in script_files if fname_id in x or repo_data["fileName"] in x
-        ]
 
-        if script_file:
+        if not fname_id:
+            script_file = [x for x in script_files if repo_data["fileName"] in x]
+        else:
+            script_file = [x for x in script_files if fname_id in x]
+
+        if len(script_file) == 1:
             return script_file[0]
 
         return ""
@@ -97,6 +99,7 @@ class PowerShellScriptsUpdateModule(BaseUpdateModule):
 
             for filename in os.listdir(self.path):
                 self.notify = True
+                script_data = None
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
                     self.match_info = {
