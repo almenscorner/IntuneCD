@@ -87,7 +87,7 @@ class RolesBackupModule(BaseBackupModule):
                             f"{self.endpoint}/beta/deviceManagement/roleAssignments/{assignment['id']}",
                         )
 
-                    item["roleAssignments"].append(role_assignment)
+                        item["roleAssignments"].append(role_assignment)
 
                     # Get the scopeMembers and resourceScopes ids
                     scope_member_names = ""
@@ -103,11 +103,8 @@ class RolesBackupModule(BaseBackupModule):
                             assignment["scopeMembers"] = scope_member_names
                         assignment.pop("resourceScopes", None)
 
-                        for assignment in item["roleAssignments"]:
-                            if assignment.get("members"):
-                                member_names = self._get_group_names(
-                                    assignment["members"]
-                                )
+                        if assignment.get("members"):
+                            member_names = self._get_group_names(assignment["members"])
 
                         assignment["members"] = member_names
 
