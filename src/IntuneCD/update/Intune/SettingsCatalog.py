@@ -50,7 +50,9 @@ class SettingsCatalogUpdateModule(BaseUpdateModule):
                 profile_ids, "deviceManagement/configurationPolicies/", ""
             )
             batch_settings = self.batch_request(
-                profile_ids, "deviceManagement/configurationPolicies/", "/settings"
+                profile_ids,
+                "deviceManagement/configurationPolicies/",
+                "/settings?&top=1000",
             )
 
             for profile in batch_data:
