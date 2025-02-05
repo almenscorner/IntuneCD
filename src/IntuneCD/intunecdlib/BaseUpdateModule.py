@@ -640,6 +640,10 @@ class BaseUpdateModule(BaseGraphModule):
 
             self.downstream_object = self.remove_keys(self.downstream_object)
 
+            def _add_schedule_action():
+                if repo_scheduled_actions:
+                    repo_data["scheduledActionsForRule"] = repo_scheduled_actions
+
             diffs = self.get_diffs(
                 repo_data, self.downstream_object, self.exclude_paths
             )
@@ -664,6 +668,9 @@ class BaseUpdateModule(BaseGraphModule):
                     data=data,
                 )
 
+                # Add scheduledActionsForRule back to the data if it was removed
+                _add_schedule_action()
+
             if self.handle_assignment:
                 if self.config_type == "Windows Enrollment Profile":
                     self.handle_iterable_assignments(
@@ -680,9 +687,9 @@ class BaseUpdateModule(BaseGraphModule):
                         self.downstream_id,
                     )
 
-            # Add scheduledActionsForRule back to the data if it was removed
-            if repo_scheduled_actions:
-                repo_data["scheduledActionsForRule"] = repo_scheduled_actions
+                # Add scheduledActionsForRule back to the data if it was removed
+                _add_schedule_action()
+
         else:
             data = create_data if create_data else repo_data
             if self.create_config:
