@@ -205,6 +205,12 @@ def start():
         help="When set, the script will exit on the first error",
         action="store_true",
     )
+    parser.add_argument(
+        "--max-workers",
+        help="The maximum number of workers to use when running the backup. If hitting rate limits, reduce this number. If not hitting rate limits, increase this number for faster backups.",
+        type=int,
+        default=10,
+    )
 
     args = parser.parse_args()
 
@@ -259,7 +265,7 @@ def start():
     if args.entrabackup:
         azure_token = obtain_azure_token(os.environ.get("TENANT_ID"), args.path)
 
-    def run_backup(path, output, exclude, token, prefix, append_id):
+    def run_backup(path, output, exclude, token, prefix, append_id, max_workers):
         results = []
 
         if args.entrabackup:
@@ -269,7 +275,17 @@ def start():
 
             print("***Intune backup***")
 
-        backup_intune(results, path, output, exclude, token, prefix, append_id, args)
+        backup_intune(
+            results,
+            path,
+            output,
+            exclude,
+            token,
+            prefix,
+            append_id,
+            args,
+            max_workers,
+        )
 
         from .intunecdlib.assignment_report import AssignmentReport
 
@@ -304,7 +320,13 @@ def start():
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
             count = run_backup(
-                args.path, args.output, exclude, token, args.prefix, args.append_id
+                args.path,
+                args.output,
+                exclude,
+                token,
+                args.prefix,
+                args.append_id,
+                args.max_workers,
             )
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
@@ -317,7 +339,13 @@ def start():
 
         else:
             run_backup(
-                args.path, args.output, exclude, token, args.prefix, args.append_id
+                args.path,
+                args.output,
+                exclude,
+                token,
+                args.prefix,
+                args.append_id,
+                args.max_workers,
             )
 
     else:
