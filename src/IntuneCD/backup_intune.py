@@ -4,7 +4,25 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-sys.path.insert(0, os.path.dirname(__file__))
+# Add the repo root to sys.path if running locally
+if "src" in os.path.abspath(os.path.dirname(__file__)):
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+
+def import_backup_module(module_path: str):
+    """
+    Dynamically imports a backup module, handling both installed and local Git repository cases.
+    """
+    try:
+        # Try importing as an installed package
+        return importlib.import_module(module_path, package="IntuneCD")
+    except ModuleNotFoundError:
+        try:
+            # If that fails, assume we're running locally and try direct relative import
+            return importlib.import_module(module_path)
+        except ModuleNotFoundError as e:
+            print(f"[ERROR] Could not import {module_path}: {e}")
+            return None
 
 
 def backup_intune(
@@ -218,21 +236,13 @@ def backup_intune(
 
         for exclude_key, module_path, class_name in backup_modules:
             if exclude_key not in exclude:
-                try:
-                    module = importlib.import_module(
-                        module_path, package="src.IntuneCD"
-                    )
+                module = import_backup_module(module_path)
+                if module:
                     backup_class = getattr(module, class_name)
-                    future = executor.submit(
-                        backup_class(**params).main
-                    )  # Run in parallel
+                    future = executor.submit(backup_class(**params).main)
                     future_to_module[future] = exclude_key
-                except ModuleNotFoundError as e:
-                    print(f"[ERROR] Could not import {module_path}: {e}")
 
         # Collect results as tasks complete
-        import traceback
-
         for future in as_completed(future_to_module):
             module_name = future_to_module[future]
             try:
@@ -240,7 +250,4 @@ def backup_intune(
                 if result:
                     results.append(result)
             except Exception as e:
-                error_details = traceback.format_exc()
-                raise Exception(
-                    f"Error occurred while processing module {module_name}: {e}\n{error_details}"
-                )
+                print(f"[ERROR] {module_name} failed with exception: {e}")
