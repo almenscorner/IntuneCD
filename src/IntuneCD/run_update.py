@@ -175,6 +175,11 @@ def start():
         help="When this parameter is set, IntuneCD will exit on error",
         action="store_true",
     )
+    parser.add_argument(
+        "--max-workers",
+        help="Maximum number of concurrent threads when updating, default is 10",
+        default=10,
+    )
 
     args = parser.parse_args()
 
@@ -229,7 +234,9 @@ def start():
     if args.entraupdate:
         azure_token = obtain_azure_token(os.environ.get("TENANT_ID"), args.path)
 
-    def run_update(path, token, assignment, exclude, report, create_groups, remove):
+    def run_update(
+        path, token, assignment, exclude, report, create_groups, remove, max_workers
+    ):
         diff_count = 0
         diff_summary = []
 
@@ -251,6 +258,7 @@ def start():
             remove,
             exclude,
             args,
+            max_workers,
         )
 
         for sum in diff_summary:
@@ -282,6 +290,7 @@ def start():
                 args.report,
                 args.create_groups,
                 args.remove,
+                args.max_workers,
             )
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
@@ -319,6 +328,7 @@ def start():
                 args.report,
                 args.create_groups,
                 args.remove,
+                args.max_workers,
             )
 
     if "VERBOSE" in os.environ:
