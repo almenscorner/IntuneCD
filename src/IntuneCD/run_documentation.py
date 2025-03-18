@@ -93,11 +93,24 @@ def start():
         help="If set, will decode all base64 encoded values",
         action="store_true",
     )
+    parser.add_argument(
+        "--split-per-config",
+        help="If set, will split the documentation per configuration and save resulting MD file in /docs in the configpath directory",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
     def run_documentation(
-        configpath, outpath, tenantname, jsondata, maxlength, split, cleanup, decode
+        configpath,
+        outpath,
+        tenantname,
+        jsondata,
+        maxlength,
+        split,
+        cleanup,
+        decode,
+        split_per_config,
     ):
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -107,7 +120,15 @@ def start():
 
         write_type_header(split, outpath, "Intune")
 
-        document_intune(configpath, outpath, maxlength, split, cleanup, decode)
+        document_intune(
+            configpath,
+            outpath,
+            maxlength,
+            split,
+            cleanup,
+            decode,
+            split_per_config,
+        )
 
         write_type_header(split, outpath, "Entra")
 
@@ -137,7 +158,7 @@ def start():
             tenant = f"**Tenant:** {tenantname}"
             updated = f"**Document updated on:**"
 
-        if split:
+        if split or split_per_config:
             files = get_md_files(configpath)
             index_md = f"{configpath}/index.md"
             md_file(index_md)
@@ -178,6 +199,7 @@ def start():
         args.split,
         args.cleanup,
         args.decode,
+        args.split_per_config,
     )
 
 

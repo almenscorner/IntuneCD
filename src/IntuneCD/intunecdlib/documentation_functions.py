@@ -279,108 +279,136 @@ def write_type_header(split, outpath, header):
             md.write("# " + header + "\n")
 
 
-def document_configs(configpath, outpath, header, max_length, split, cleanup, decode):
+def document_configs(
+    configpath,
+    outpath,
+    header,
+    max_length,
+    split,
+    cleanup,
+    decode,
+    split_per_config=False,
+):
     """
-    This function documents the configuration.
+    Documents configurations, optionally splitting by type or per config.
 
-    :param configpath: The path to where the backup files are saved
-    :param outpath: The path to save the Markdown document to
-    :param header: Header of the configuration being documented
-    :param max_length: The maximum length of the configuration to write to the Markdown document
-    :param split: Split documentation into multiple files
-    :param cleanup: Remove empty values from documentation
+    :param configpath: Path to backup files
+    :param outpath: Base path for Markdown output
+    :param header: Configuration type header (e.g., "AppConfigurations")
+    :param max_length: Max length for displayed values
+    :param split: Split into one file per type
+    :param cleanup: Remove empty values
+    :param decode: Decode base64 values
+    :param split_per_config: Split into one file per individual config
     """
+    if not os.path.exists(configpath):
+        return
 
-    # If configurations path exists, continue
-    if os.path.exists(configpath):
-        if split:
-            outpath = configpath + "/" + header + ".md"
-            md_file(outpath)
+    # Base file for non-split or type-split mode
+    if split and not split_per_config:
+        outpath = os.path.join(configpath, f"{header}.md")
+        md_file(outpath)
+
+    if split_per_config is False:
         with open(outpath, "a", encoding="utf-8") as md:
             md.write("## " + header + "\n")
 
-        pattern = configpath + "*/*"
-        for filename in sorted(glob.glob(pattern, recursive=True), key=str.casefold):
-            if (
-                filename.endswith(".md")
-                or os.path.isdir(filename)
-                or filename == ".DS_Store"
-            ):
-                continue
+    # Use recursive pattern to catch deeper structures
+    pattern = os.path.join(
+        configpath, "**", "*.[jy][sa][mo][nl]"
+    )  # Matches .json, .yaml, .yml
+    files = sorted(glob.glob(pattern, recursive=True), key=str.casefold)
+    if not files:
+        return
 
-            # Check which format the file is saved as then open file, load data and set query parameter
+    for filename in files:
+        if (
+            filename.endswith(".md")
+            or os.path.isdir(filename)
+            or os.path.basename(filename) == ".DS_Store"
+        ):
+            continue
+
+        try:
+            # Load data
             with open(filename, encoding="utf-8") as f:
-                if filename.endswith(".yaml"):
-                    data = json.dumps(yaml.safe_load(f))
-                    repo_data = json.loads(data)
+                if filename.endswith((".yaml", ".yml")):
+                    repo_data = json.loads(json.dumps(yaml.safe_load(f)))
                 elif filename.endswith(".json"):
-                    f = open(filename, encoding="utf-8")
                     repo_data = json.load(f)
+                else:
+                    continue
 
-                # Create assignments table
-                assignments_table = ""
-                assignments_table = assignment_table(repo_data)
-                repo_data.pop("assignments", None)
+            # Prepare assignments table
+            assignments_table = assignment_table(repo_data)
+            repo_data.pop("assignments", None)
 
-                description = ""
-                if "description" in repo_data:
-                    if repo_data["description"] is not None:
-                        description = repo_data["description"]
-                        repo_data.pop("description")
+            # Handle description
+            description = repo_data.pop("description", "") or ""
 
-                # Write configuration Markdown table
-                config_table_list = []
-                for key, value in zip(
-                    repo_data.keys(), clean_list(repo_data.values(), decode)
-                ):
-                    if cleanup:
-                        if not value and not isinstance(value, bool):
-                            continue
+            # Build config table
+            config_table_list = []
+            for key, value in zip(
+                repo_data.keys(), clean_list(repo_data.values(), decode)
+            ):
+                if cleanup and not value and not isinstance(value, bool):
+                    continue
+                if key == "@odata.type":
+                    key = "Odata type"
+                else:
+                    key = " ".join(re.findall("[A-Z][^A-Z]*", key[0].upper() + key[1:]))
+                if max_length and isinstance(value, str) and len(value) > max_length:
+                    value = "Value too long to display"
+                config_table_list.append([key, value])
 
-                    if key == "@odata.type":
-                        key = "Odata type"
+            config_table = write_table(config_table_list)
 
-                    else:
-                        key = key[0].upper() + key[1:]
-                        key = re.findall("[A-Z][^A-Z]*", key)
-                        key = " ".join(key)
+            # Determine output file and header
+            config_name = repo_data.get(
+                "displayName",
+                repo_data.get(
+                    "name",
+                    os.path.splitext(os.path.basename(filename))[0]
+                    .replace("_", " ")
+                    .title(),
+                ),
+            )
+            if split_per_config:
+                # One file per config
+                safe_config_name = re.sub(
+                    r'[<>:"/\\|?*]', "_", config_name
+                )  # Sanitize filename
+                if not os.path.exists(f"{configpath}/docs"):
+                    os.makedirs(f"{configpath}/docs")
+                config_outpath = os.path.join(
+                    f"{configpath}/docs", f"{safe_config_name}.md"
+                )
+                md_file(config_outpath)
+                target_md = config_outpath
+                top_header = f"# {config_name}"
+                split_per_config_index_md(configpath, header)
+            elif split:
+                # One file per type
+                target_md = outpath
+                top_header = f"### {config_name}"
+            else:
+                # Single file
+                target_md = outpath
+                top_header = f"### {config_name}"
 
-                    if max_length:
-                        if value and isinstance(value, str) and len(value) > max_length:
-                            value = "Value too long to display"
+            # Write to file
+            with open(target_md, "a", encoding="utf-8") as md:
+                md.write(top_header + "\n")
+                if description:
+                    md.write(f"Description: {escape_markdown(description)}\n")
+                if assignments_table:
+                    md.write("#### Assignments\n")
+                    md.write(str(assignments_table) + "\n")
+                md.write("#### Configuration\n")
+                md.write(str(config_table) + "\n")
 
-                    if decode:
-                        if is_base64(value):
-                            value = decode_base64(value)
-
-                    config_table_list.append([key, value])
-
-                config_table = write_table(config_table_list)
-
-                # Write data to file
-                with open(outpath, "a", encoding="utf-8") as md:
-                    if "displayName" in repo_data:
-                        md.write("### " + repo_data["displayName"] + "\n")
-                    if "name" in repo_data:
-                        md.write("### " + repo_data["name"] + "\n")
-                    if "displayName" not in repo_data and "name" not in repo_data:
-                        # Remove the file extension
-                        filename_without_ext = os.path.splitext(filename)[0]
-                        # Get basename
-                        filename_without_ext = os.path.basename(filename_without_ext)
-                        # Replace underscores with spaces
-                        formatted_filename = filename_without_ext.replace(
-                            "_", " "
-                        ).title()
-                        if formatted_filename != header:
-                            md.write("### " + formatted_filename + "\n")
-                    if description:
-                        md.write(f"Description: {escape_markdown(description)} \n")
-                    if assignments_table:
-                        md.write("#### Assignments \n")
-                        md.write(str(assignments_table) + "\n")
-                    md.write("#### Configuration \n")
-                    md.write(str(config_table) + "\n")
+        except Exception as e:
+            print(f"[DEBUG] Error processing {filename}: {type(e).__name__}: {e}")
 
 
 def document_management_intents(configpath, outpath, header, split):
@@ -398,6 +426,7 @@ def document_management_intents(configpath, outpath, header, split):
         if split:
             outpath = configpath + "/" + header + ".md"
             md_file(outpath)
+
         with open(outpath, "a", encoding="utf-8") as md:
             md.write("## " + header + "\n")
 
@@ -493,6 +522,50 @@ def document_management_intents(configpath, outpath, header, split):
                     md.write(str(config_table) + "\n")
 
 
+def split_per_config_index_md(configpath, header):
+    """
+    This function creates an index Markdown file for split_per_config mode.
+    :param configpath: The path to where the backup files are saved
+    :param outpath: The path to save the Markdown document to
+    :param header: Header of the configuration being documented
+    """
+    # get all md files from the docs directory
+    files = get_docs_md_files(configpath)
+    index_md = f"{configpath}/{header}.md"
+    md_file(index_md)
+
+    with open(index_md, "w", encoding="utf-8") as doc:
+        l1 = f"# {header} \n\n"
+        l2 = "## File index \n\n"
+        doc.writelines([l1, l2])
+        for file in files:
+            doc.writelines(
+                [
+                    "[",
+                    str(file).split("/")[-1],
+                    "](",
+                    str(file).replace(" ", "%20"),
+                    ") \n\n",
+                ]
+            )
+
+
+def get_docs_md_files(configpath):
+    """
+    This function gets the Markdown files in the configpath/docs directory.
+    :return: List of Markdown files
+    """
+    slash = "/"
+    md_files = []
+    client_os = platform.uname().system
+    mdpath = configpath + "/docs/*.md"
+    if client_os == "Windows":
+        slash = "\\"
+    for filename in glob.glob(mdpath):
+        md_files.append(f"./docs/{filename.split(slash)[-1]}")
+    return md_files
+
+
 def get_md_files(configpath):
     """
     This function gets the Markdown files in the configpath directory.
@@ -503,15 +576,19 @@ def get_md_files(configpath):
     if client_os == "Windows":
         slash = "\\"
     md_files = []
-    patterns = ["*/*.md", "*/*/*.md", "*/*/*/*.md"]
+    patterns = ["*/*.md", "*/*/*.md", "*/*/*/*.md", "*/*/*/*/*.md"]
     for pattern in patterns:
         for filename in glob.glob(configpath + pattern, recursive=True):
+            # if folder name is docs, skip
+            if "docs" in filename:
+                continue
             filepath = filename.split(slash)
             configpathname = configpath.split(slash)[-1]
             filepath = filepath[filepath.index(configpathname) :]
             filepath = "/".join(filepath[1:])
             ignore_files = ["README", "index", "prod-as-built"]
-            if filepath.rsplit("/", maxsplit=1)[-1] not in ignore_files:
+            file_basename = os.path.splitext(filepath.rsplit("/", maxsplit=1)[-1])[0]
+            if file_basename not in ignore_files:
                 md_files.append(f"./{filepath}")
     # Sort the list alphabetically by file name without extension, case-insensitive
     md_files.sort(key=lambda f: os.path.splitext(os.path.basename(f))[0].lower())
