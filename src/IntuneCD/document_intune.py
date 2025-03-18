@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from .intunecdlib.documentation_functions import (
     document_configs,
     document_management_intents,
@@ -13,6 +15,7 @@ def document_intune(
     cleanup,
     decode,
     split_per_config,
+    max_workers,
 ):
     """
     This function is used to document Intune configuration using threading.
@@ -72,19 +75,45 @@ def document_intune(
     # sort doc_tasks alphabetically
     doc_tasks = sorted(doc_tasks, key=lambda x: x[1])
 
-    for task in sorted(doc_tasks):
-        document_configs(
-            f"{configpath}/{task[0]}",
-            outpath,
-            task[1],
-            maxlength,
-            split,
-            cleanup,
-            decode,
-            split_per_config,
-        )
+    if split or split_per_config:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(
+                    document_configs,
+                    f"{configpath}/{task[0]}",
+                    outpath,
+                    task[1],
+                    maxlength,
+                    split,
+                    cleanup,
+                    decode,
+                    split_per_config,
+                ): task[1]
+                for task in doc_tasks
+            }
 
-    # Run document_management_intents() sequentially
+            for future in as_completed(futures):
+                task_name = futures[future]
+                try:
+                    future.result()
+                except Exception as e:
+                    print(f"Error processing {task_name}: {e}")
+
+    else:
+        # Run sequentially if split options are disabled
+        for task in doc_tasks:
+            document_configs(
+                f"{configpath}/{task[0]}",
+                outpath,
+                task[1],
+                maxlength,
+                split,
+                cleanup,
+                decode,
+                split_per_config,
+            )
+
+    # **Run Management Intents Sequentially**
     document_management_intents(
         f"{configpath}/Management Intents/", outpath, "Management Intents", split
     )
