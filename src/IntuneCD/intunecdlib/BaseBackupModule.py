@@ -80,7 +80,7 @@ class BaseBackupModule(BaseGraphModule):
             str: The prepared filename
         """
 
-        remove_characters = "/\\:*?<>|"
+        remove_characters = '/\\:*?<>"|'
         if not isinstance(filename, str):
             filename = str(filename)
         for character in remove_characters:
