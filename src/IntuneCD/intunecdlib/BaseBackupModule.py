@@ -42,7 +42,7 @@ class BaseBackupModule(BaseGraphModule):
         self.platform_keywords = {
             "mobile": ["ios", "android", "aosp"],
             "mac": ["macos"],
-            "windows": ["windows"],
+            "windows": ["windows", "win32", "win"],
         }
         # Variables set from the backup run
         self.token = token
