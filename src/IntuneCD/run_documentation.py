@@ -98,6 +98,11 @@ def start():
         help="If set, will split the documentation per configuration and save resulting MD file in /docs in the configpath directory",
         action="store_true",
     )
+    parser.add_argument(
+        "--max-workers",
+        help="Maximum number of concurrent threads when documenting, default is 10. Can only be used with --split-per-config or --split",
+        default=10,
+    )
 
     args = parser.parse_args()
 
@@ -111,6 +116,7 @@ def start():
         cleanup,
         decode,
         split_per_config,
+        max_workers,
     ):
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -128,6 +134,7 @@ def start():
             cleanup,
             decode,
             split_per_config,
+            max_workers,
         )
 
         write_type_header(split, outpath, "Entra")
@@ -200,6 +207,7 @@ def start():
         args.cleanup,
         args.decode,
         args.split_per_config,
+        args.max_workers,
     )
 
 
