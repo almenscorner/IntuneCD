@@ -21,6 +21,7 @@ class BaseBackupModule(BaseGraphModule):
         ignore_oma_settings: bool = False,
         prefix: str = None,
         azure_token: str = None,
+        platforms: list = [],
     ):
         """Initializes the BaseBackupModule class
 
@@ -38,6 +39,11 @@ class BaseBackupModule(BaseGraphModule):
         """
         super().__init__()
         self.endpoint = "https://graph.microsoft.com"
+        self.platform_keywords = {
+            "mobile": ["ios", "android", "aosp"],
+            "mac": ["macos"],
+            "windows": ["windows"],
+        }
         # Variables set from the backup run
         self.token = token
         self.azure_token = azure_token
@@ -49,6 +55,7 @@ class BaseBackupModule(BaseGraphModule):
         self.scope_tags = scope_tags
         self.ignore_oma_settings = ignore_oma_settings
         self.prefix = prefix
+        self.platforms = platforms
         # Default variables, can be overridden in child classes
         self.assignment_endpoint = None
         self.assignment_extra_url = None
@@ -150,6 +157,36 @@ class BaseBackupModule(BaseGraphModule):
             )
             return None
 
+    def _matches_role(self, data, platform_keywords, platforms):
+        """Check if a policy matches a specific role (e.g., 'mobile', 'mac', 'windows')."""
+
+        # Ensure @odata.type and platform exist and are strings
+        odata_type = str(data.get("@odata.type", "")).lower()
+        config_platform = str(data.get("platform", "")).lower()
+        config_platforms = str(data.get("platforms", "")).lower()
+        settings_delta = str(data.get("settingsDelta", ""))
+        definition_id = ""
+        if len(settings_delta) > 0:
+            definition_id = str(
+                data["settingsDelta"][0].get("definitionId", "")
+            ).lower()
+
+        # Get keywords for the requested role
+        keywords = []
+        for r in platforms:
+            keywords.extend(platform_keywords.get(r, []))
+
+        if any(
+            keyword in odata_type
+            or keyword in config_platform
+            or keyword in definition_id
+            or keyword in config_platforms
+            for keyword in keywords
+        ):
+            return True
+
+        return False
+
     def _process_single_item(
         self,
         data: dict,
@@ -175,6 +212,12 @@ class BaseBackupModule(BaseGraphModule):
             dict: The results of the backup
         """
         self.filename = ""
+
+        if self.platforms:
+            result = self._matches_role(data, self.platform_keywords, self.platforms)
+
+            if result is False:
+                return {"config_count": 0, "outputs": []}
 
         if self.prefix:
             if name_key == "":

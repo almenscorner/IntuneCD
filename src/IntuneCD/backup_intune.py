@@ -26,7 +26,16 @@ def import_backup_module(module_path: str):
 
 
 def backup_intune(
-    results, path, output, exclude, token, prefix, append_id, args, max_workers
+    results,
+    path,
+    output,
+    exclude,
+    token,
+    prefix,
+    append_id,
+    args,
+    max_workers,
+    platforms,
 ):
     """
     Imports all the backup functions dynamically and runs them in parallel.
@@ -51,6 +60,7 @@ def backup_intune(
         "scope_tags": scope_tags,
         "prefix": prefix,
         "ignore_oma_settings": args.ignore_omasettings,
+        "platforms": platforms,
     }
 
     # List of backup modules to dynamically import and execute

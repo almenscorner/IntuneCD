@@ -211,6 +211,12 @@ def start():
         type=int,
         default=10,
     )
+    parser.add_argument(
+        "--platforms",
+        help="Configures the platform type to backup configurations for. Default is all, valid options are 'mobile', 'mac' and 'windows' separated by space.",
+        choices=["mobile", "mac", "windows"],
+        nargs="+",
+    )
 
     args = parser.parse_args()
 
@@ -265,7 +271,9 @@ def start():
     if args.entrabackup:
         azure_token = obtain_azure_token(os.environ.get("TENANT_ID"), args.path)
 
-    def run_backup(path, output, exclude, token, prefix, append_id, max_workers):
+    def run_backup(
+        path, output, exclude, token, prefix, append_id, max_workers, platforms
+    ):
         results = []
 
         if args.entrabackup:
@@ -285,6 +293,7 @@ def start():
             append_id,
             args,
             max_workers,
+            platforms,
         )
 
         from .intunecdlib.assignment_report import AssignmentReport
@@ -316,6 +325,19 @@ def start():
         else:
             exclude = []
 
+        if args.platforms:
+            platforms = args.platforms
+            if "mac" not in platforms:
+                exclude.append("ShellScripts")
+                exclude.append("CustomAttributes")
+                exclude.append("ComplianceScripts")
+            if "windows" not in platforms:
+                exclude.append("PowershellScripts")
+                exclude.append("ProactiveRemediation")
+                exclude.append("ComplianceScripts")
+        else:
+            platforms = []
+
         if args.intunecdmonitor:
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
@@ -327,6 +349,7 @@ def start():
                 args.prefix,
                 args.append_id,
                 args.max_workers,
+                platforms,
             )
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
@@ -346,6 +369,7 @@ def start():
                 args.prefix,
                 args.append_id,
                 args.max_workers,
+                platforms,
             )
 
     else:
