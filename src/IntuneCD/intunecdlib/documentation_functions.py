@@ -224,6 +224,10 @@ def clean_list(data, decode):
     def simple_value_to_string(key, val) -> str:
         if decode and is_base64(val):
             val = decode_base64(val)
+
+        if isinstance(val, str):
+            val = val.replace("\\", "\\\\")
+
         return f"**{key}:** {val}<br/>"
 
     def list_string(item_list) -> str:
@@ -243,6 +247,7 @@ def clean_list(data, decode):
     def string(s) -> str:
         if decode and is_base64(s):
             s = decode_base64(s)
+
         if len(s) > 200:
             string = f"<details><summary>Click to expand...</summary>{s}</details>"
         else:
