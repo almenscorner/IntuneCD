@@ -189,7 +189,7 @@ class BaseGraphModule(IntuneCDBase):
                 f"{audit_filter} and activityDateTime gt {start_date} and activityDateTime le {end_date} and "
                 "activityOperationType ne 'Get'"
             ),
-            "$select": "actor,activityDateTime,activityOperationType,activityResult,resources",
+            "$select": "actor,activityDateTime,activityType,activityOperationType,activityResult,resources",
             "$orderby": "activityDateTime desc",
         }
         self.log(function="makeAuditRequest", msg=f"Query parameters: {q_param}")
@@ -218,6 +218,7 @@ class BaseGraphModule(IntuneCDBase):
                         ],
                         "actor": actor,
                         "activityDateTime": audit_log["activityDateTime"],
+                        "activityType": audit_log["activityType"],
                         "activityOperationType": audit_log["activityOperationType"],
                         "activityResult": audit_log["activityResult"],
                     }
