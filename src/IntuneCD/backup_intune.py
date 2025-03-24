@@ -4,6 +4,8 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from .decorators import time_command
+
 # Add the repo root to sys.path if running locally
 if "src" in os.path.abspath(os.path.dirname(__file__)):
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -25,6 +27,7 @@ def import_backup_module(module_path: str):
             return None
 
 
+@time_command()
 def backup_intune(
     results,
     path,

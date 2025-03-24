@@ -3,6 +3,7 @@ import importlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .intunecdlib.process_scope_tags import ProcessScopeTags
+from .decorators import time_command
 
 
 def import_update_module(module_path: str):
@@ -21,6 +22,7 @@ def import_update_module(module_path: str):
             return None
 
 
+@time_command()
 def update_intune(
     diff_summary,
     path,

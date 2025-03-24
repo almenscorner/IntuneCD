@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from .decorators import time_command
+
+
+@time_command()
 def update_entra(diff_summary, path, token, azure_token, report, args, exclude):
     """
     Imports all the update functions and runs them
