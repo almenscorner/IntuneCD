@@ -160,32 +160,47 @@ class BaseBackupModule(BaseGraphModule):
     def _matches_role(self, data, platform_keywords, platforms):
         """Check if a policy matches a specific role (e.g., 'mobile', 'mac', 'windows')."""
 
-        # Ensure @odata.type and platform exist and are strings
         odata_type = str(data.get("@odata.type", "")).lower()
         config_platform = str(data.get("platform", "")).lower()
         config_platforms = str(data.get("platforms", "")).lower()
-        settings_delta = str(data.get("settingsDelta", ""))
-        definition_id = ""
-        if len(settings_delta) > 0:
-            definition_id = str(
-                data["settingsDelta"][0].get("definitionId", "")
-            ).lower()
 
-        # Get keywords for the requested role
-        keywords = []
-        for r in platforms:
-            keywords.extend(platform_keywords.get(r, []))
+        # Try to extract a definitionId if present
+        settings_delta = data.get("settingsDelta", [])
+        definition_id = (
+            str(settings_delta[0].get("definitionId", "")).lower()
+            if settings_delta and isinstance(settings_delta, list)
+            else ""
+        )
 
-        if any(
-            keyword in odata_type
-            or keyword in config_platform
-            or keyword in definition_id
-            or keyword in config_platforms
-            for keyword in keywords
+        # Infer platform from path
+        inferred_platform = ""
+        if "mac" in platforms and (
+            "Shell" in self.path
+            or "Custom Attributes" in self.path
+            or "Scripts" in self.path
         ):
-            return True
+            inferred_platform = "macos"
+        elif "windows" in platforms and (
+            "Powershell" in self.path
+            or "Proactive Remediations" in self.path
+            or "Scripts" in self.path
+        ):
+            inferred_platform = "windows"
 
-        return False
+        # Collect keywords to match
+        keywords = [kw for r in platforms for kw in platform_keywords.get(r, [])]
+
+        return any(
+            keyword in val
+            for keyword in keywords
+            for val in [
+                odata_type,
+                config_platform,
+                config_platforms,
+                definition_id,
+                inferred_platform,
+            ]
+        )
 
     def _process_single_item(
         self,
