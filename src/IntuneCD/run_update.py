@@ -1,24 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-          ..
-        ....
-       .::::
-      .:::::            ___       _                     ____ ____
-     .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
-    .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
-   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| |
-  ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
-        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___
-        ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
-        :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
-        ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
-        :::
-        ::
-
-This module contains the functions to run the update.
-"""
 
 import argparse
 import base64
@@ -35,9 +17,10 @@ from .update_intune import update_intune
 REPO_DIR = os.environ.get("REPO_DIR")
 
 
-def start():
+def get_parser(include_help=True):
     parser = argparse.ArgumentParser(
-        description="Update Intune configurations with values from backup"
+        description="Update Intune configurations with values from backup",
+        add_help=include_help,
     )
     parser.add_argument(
         "-p",
@@ -181,7 +164,12 @@ def start():
         default=10,
     )
 
-    args = parser.parse_args()
+    return parser
+
+
+def start(args=None):
+    if args is None:
+        args = get_parser(include_help=True).parse_args()
 
     if args.verbose:
         os.environ["VERBOSE"] = "True"

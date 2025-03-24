@@ -1,25 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-          ..
-        ....
-       .::::
-      .:::::            ___       _                     ____ ____
-     .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
-    .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
-   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| |
-  ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
-        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___
-        ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
-        :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
-        ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
-        :::
-        ::
-
-This module contains the functions to run the backup.
-"""
-
 import argparse
 import base64
 import json
@@ -36,8 +17,10 @@ from .intunecdlib.get_authparams import getAuth
 REPO_DIR = os.environ.get("REPO_DIR")
 
 
-def start():
-    parser = argparse.ArgumentParser(description="Save backup of Intune configurations")
+def get_parser(include_help=True):
+    parser = argparse.ArgumentParser(
+        description="Save backup of Intune configurations", add_help=include_help
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -217,8 +200,18 @@ def start():
         choices=["mobile", "mac", "windows"],
         nargs="+",
     )
+    parser.add_argument(
+        "--skip-archive",
+        help="When set, the script will not move files to archive. Might require manual cleanup.",
+        action="store_true",
+    )
 
-    args = parser.parse_args()
+    return parser
+
+
+def start(args=None):
+    if args is None:
+        args = get_parser(include_help=True).parse_args()
 
     if args.verbose:
         os.environ["VERBOSE"] = "True"
@@ -312,7 +305,8 @@ def start():
             if output is not None
         ]
 
-        move_to_archive(path, created_files, output)
+        if not args.skip_archive:
+            move_to_archive(path, created_files, output)
 
         return config_count
 

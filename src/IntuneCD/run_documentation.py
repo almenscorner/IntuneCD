@@ -1,24 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-          ..
-        ....
-       .::::
-      .:::::            ___       _                     ____ ____
-     .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
-    .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
-   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| |
-  ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
-        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___
-        ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
-        :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
-        ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
-        :::
-        ::
-
-This module contains the functions to run the documentation.
-"""
 
 import argparse
 import json
@@ -38,9 +20,9 @@ from .intunecdlib.documentation_functions import (
 REPO_DIR = os.environ.get("REPO_DIR")
 
 
-def start():
+def get_parser(include_help=True):
     parser = argparse.ArgumentParser(
-        description="Create markdown document from backup files"
+        description="Create markdown document from backup files", add_help=include_help
     )
     parser.add_argument(
         "-p",
@@ -101,10 +83,16 @@ def start():
     parser.add_argument(
         "--max-workers",
         help="Maximum number of concurrent threads when documenting, default is 10. Can only be used with --split-per-config or --split",
+        type=int,
         default=10,
     )
 
-    args = parser.parse_args()
+    return parser
+
+
+def start(args=None):
+    if args is None:
+        args = get_parser(include_help=True).parse_args()
 
     def run_documentation(
         configpath,
