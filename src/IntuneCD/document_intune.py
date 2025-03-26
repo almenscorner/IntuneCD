@@ -1,401 +1,121 @@
 # -*- coding: utf-8 -*-
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from .intunecdlib.documentation_functions import (
     document_configs,
     document_management_intents,
 )
+from .decorators import time_command
 
 
-def document_intune(configpath, outpath, maxlength, split, cleanup, decode):
+@time_command()
+def document_intune(
+    configpath,
+    outpath,
+    maxlength,
+    split,
+    cleanup,
+    decode,
+    split_per_config,
+    max_workers,
+):
     """
-    This function is used to document Intune configuration.
+    This function is used to document Intune configuration using threading.
+
+    :param configpath: Path where backup files are stored
+    :param outpath: Path to save the Markdown documentation
+    :param maxlength: Maximum length of values in the documentation
+    :param split: Determines if documentation should be split into multiple files
+    :param cleanup: Remove empty values from documentation
+    :param decode: Decode base64 values
+    :param split_per_config: Whether to split each config into its own Markdown file
+    :param max_workers: Maximum number of concurrent threads
     """
 
-    # Document App Configuration
-    document_configs(
-        f"{configpath}/App Configuration",
-        outpath,
-        "App Configuration",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
+    # Ensure the output directory exists
+    # os.makedirs(outpath, exist_ok=True)
 
-    # Document App Protection
-    document_configs(
-        f"{configpath}/App Protection",
-        outpath,
-        "App Protection",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
+    # List of documentation tasks
+    doc_tasks = [
+        ("App Configuration", "App Configuration"),
+        ("App Protection", "App Protection"),
+        ("Apple Push Notification", "Apple Push Notification"),
+        ("Apple VPP Tokens", "Apple VPP Tokens"),
+        ("Applications/iOS", "iOS Applications"),
+        ("Applications/macOS", "macOS Applications"),
+        ("Applications/Android", "Android Applications"),
+        ("Applications/Windows", "Windows Applications"),
+        ("Applications/Web App", "Web Applications"),
+        ("Applications/Office Suite", "Office Suite Applications"),
+        ("Compliance Policies/Policies", "Compliance Policies"),
+        ("Compliance Policies/Scripts", "Compliance Scripts"),
+        ("Compliance Policies/Message Templates", "Message Templates"),
+        ("Conditional Access", "Conditional Access"),
+        ("Device Configurations", "Configuration Profiles"),
+        ("Device Management Settings", "Device Management Settings"),
+        ("Group Policy Configurations", "Group Policy Configurations"),
+        ("Enrollment Profiles/Apple", "Apple Enrollment Profiles"),
+        ("Enrollment Profiles/Windows", "Windows Enrollment Profiles"),
+        ("Enrollment Profiles/Windows/ESP", "Enrollment Status Page"),
+        ("Enrollment Configurations", "Enrollment Configurations"),
+        ("Device Categories", "Device Categories"),
+        ("Filters", "Filters"),
+        ("Managed Google Play", "Managed Google Play"),
+        ("Partner Connections", "Partner Connections"),
+        ("Proactive Remediations", "Proactive Remediations"),
+        ("Scripts/Shell", "Shell Scripts"),
+        ("Custom Attributes", "Custom Attributes"),
+        ("Scripts/Powershell", "Powershell Scripts"),
+        ("Settings Catalog", "Settings Catalog"),
+        ("Driver Updates", "Windows Driver Updates"),
+        ("Feature Updates", "Windows Feature Updates"),
+        ("Quality Updates", "Windows Quality Updates"),
+        ("Roles", "Roles"),
+        ("Scope Tags", "Scope Tags"),
+    ]
 
-    # Document Apple Push Notification
-    document_configs(
-        f"{configpath}/Apple Push Notification",
-        outpath,
-        "Apple Push Notification",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
+    # sort doc_tasks alphabetically
+    doc_tasks = sorted(doc_tasks, key=lambda x: x[1])
 
-    # Document Apple VPP Tokens
-    document_configs(
-        f"{configpath}/Apple VPP Tokens",
-        outpath,
-        "Apple VPP Tokens",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
+    if split or split_per_config:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(
+                    document_configs,
+                    f"{configpath}/{task[0]}",
+                    outpath,
+                    task[1],
+                    maxlength,
+                    split,
+                    cleanup,
+                    decode,
+                    split_per_config,
+                ): task[1]
+                for task in doc_tasks
+            }
 
-    # Document iOS Applications
-    document_configs(
-        f"{configpath}/Applications/iOS",
-        outpath,
-        "iOS Applications",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
+            for future in as_completed(futures):
+                task_name = futures[future]
+                try:
+                    future.result()
+                except Exception as e:
+                    print(f"Error processing {task_name}: {e}")
 
-    # Document macOS Applications
-    document_configs(
-        f"{configpath}/Applications/macOS",
-        outpath,
-        "macOS Applications",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
+    else:
+        # Run sequentially if split options are disabled
+        for task in doc_tasks:
+            document_configs(
+                f"{configpath}/{task[0]}",
+                outpath,
+                task[1],
+                maxlength,
+                split,
+                cleanup,
+                decode,
+                split_per_config,
+            )
 
-    # Document Android Applications
-    document_configs(
-        f"{configpath}/Applications/Android",
-        outpath,
-        "Android Applications",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Windows Applications
-    document_configs(
-        f"{configpath}/Applications/Windows",
-        outpath,
-        "Windows Applications",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Web Apps
-    document_configs(
-        f"{configpath}/Applications/Web App",
-        outpath,
-        "Web Applications",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Office Suite apps
-    document_configs(
-        f"{configpath}/Applications/Office Suite",
-        outpath,
-        "Office Suite Applications",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document compliance
-    document_configs(
-        f"{configpath}/Compliance Policies/Policies",
-        outpath,
-        "Compliance Policies",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Compliance Scripts
-    document_configs(
-        f"{configpath}/Compliance Policies/Scripts",
-        outpath,
-        "Compliance Scripts",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Message Templates
-    document_configs(
-        f"{configpath}/Compliance Policies/Message Templates",
-        outpath,
-        "Message Templates",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Conditional Access
-    document_configs(
-        f"{configpath}/Conditional Access",
-        outpath,
-        "Conditional Access",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document profiles
-    document_configs(
-        f"{configpath}/Device Configurations",
-        outpath,
-        "Configuration Profiles",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Device Management Settings
-    document_configs(
-        f"{configpath}/Device Management Settings",
-        outpath,
-        "Device Management Settings",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Group Policy Configurations
-    document_configs(
-        f"{configpath}/Group Policy Configurations",
-        outpath,
-        "Group Policy Configurations",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Apple Enrollment Profiles
-    document_configs(
-        f"{configpath}/Enrollment Profiles/Apple",
-        outpath,
-        "Apple Enrollment Profiles",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Windows Enrollment Profiles
-    document_configs(
-        f"{configpath}/Enrollment Profiles/Windows",
-        outpath,
-        "Windows Enrollment Profiles",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Enrollment Status Page profiles
-    document_configs(
-        f"{configpath}/Enrollment Profiles/Windows/ESP",
-        outpath,
-        "Enrollment Status Page",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Enrollment Configurations
-    document_configs(
-        f"{configpath}/Enrollment Configurations",
-        outpath,
-        "Enrollment Configurations",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Device Categories
-    document_configs(
-        f"{configpath}/Device Categories",
-        outpath,
-        "Device Categories",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document filters
-    document_configs(
-        f"{configpath}/Filters",
-        outpath,
-        "Filters",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Managed Google Play
-    document_configs(
-        f"{configpath}/Managed Google Play",
-        outpath,
-        "Managed Google Play",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Intents
+    # **Run Management Intents Sequentially**
     document_management_intents(
         f"{configpath}/Management Intents/", outpath, "Management Intents", split
-    )
-
-    # Document Partner Connections
-    document_configs(
-        f"{configpath}/Partner Connections/",
-        outpath,
-        "Partner Connections",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Proactive Remediations
-    document_configs(
-        f"{configpath}/Proactive Remediations",
-        outpath,
-        "Proactive Remediations",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Shell Scripts
-    document_configs(
-        f"{configpath}/Scripts/Shell",
-        outpath,
-        "Shell Scripts",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Custom Attributes
-    document_configs(
-        f"{configpath}/Custom Attributes",
-        outpath,
-        "Custom Attributes",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Powershell Scripts
-    document_configs(
-        f"{configpath}/Scripts/Powershell",
-        outpath,
-        "Powershell Scripts",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Settings Catalog
-    document_configs(
-        f"{configpath}/Settings Catalog",
-        outpath,
-        "Settings Catalog",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Windows Driver Update Profiles
-    document_configs(
-        f"{configpath}/Driver Updates",
-        outpath,
-        "Windows Driver Updates",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Windows Feature Update Profiles
-    document_configs(
-        f"{configpath}/Feature Updates",
-        outpath,
-        "Windows Feature Updates",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Windows Quality Update Profiles
-    document_configs(
-        f"{configpath}/Quality Updates",
-        outpath,
-        "Windows Quality Updates",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Roles
-    document_configs(
-        f"{configpath}/Roles",
-        outpath,
-        "Roles",
-        maxlength,
-        split,
-        cleanup,
-        decode,
-    )
-
-    # Document Scope Tags
-    document_configs(
-        f"{configpath}/Scope Tags",
-        outpath,
-        "Scope Tags",
-        maxlength,
-        split,
-        cleanup,
-        decode,
     )

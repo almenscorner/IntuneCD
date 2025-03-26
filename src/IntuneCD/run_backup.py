@@ -1,25 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-          ..
-        ....
-       .::::
-      .:::::            ___       _                     ____ ____
-     .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
-    .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
-   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| |
-  ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
-        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___
-        ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
-        :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
-        ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
-        :::
-        ::
-
-This module contains the functions to run the backup.
-"""
-
 import argparse
 import base64
 import json
@@ -36,8 +17,10 @@ from .intunecdlib.get_authparams import getAuth
 REPO_DIR = os.environ.get("REPO_DIR")
 
 
-def start():
-    parser = argparse.ArgumentParser(description="Save backup of Intune configurations")
+def get_parser(include_help=True):
+    parser = argparse.ArgumentParser(
+        description="Save backup of Intune configurations", add_help=include_help
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -205,8 +188,30 @@ def start():
         help="When set, the script will exit on the first error",
         action="store_true",
     )
+    parser.add_argument(
+        "--max-workers",
+        help="The maximum number of workers to use when running the backup. If hitting rate limits, reduce this number. If not hitting rate limits, increase this number for faster backups.",
+        type=int,
+        default=10,
+    )
+    parser.add_argument(
+        "--platforms",
+        help="Configures the platform type to backup configurations for. Default is all, valid options are 'mobile', 'mac' and 'windows' separated by space.",
+        choices=["mobile", "mac", "windows"],
+        nargs="+",
+    )
+    parser.add_argument(
+        "--skip-archive",
+        help="When set, the script will not move files to archive. Might require manual cleanup.",
+        action="store_true",
+    )
 
-    args = parser.parse_args()
+    return parser
+
+
+def start(args=None):
+    if args is None:
+        args = get_parser(include_help=True).parse_args()
 
     if args.verbose:
         os.environ["VERBOSE"] = "True"
@@ -259,7 +264,9 @@ def start():
     if args.entrabackup:
         azure_token = obtain_azure_token(os.environ.get("TENANT_ID"), args.path)
 
-    def run_backup(path, output, exclude, token, prefix, append_id):
+    def run_backup(
+        path, output, exclude, token, prefix, append_id, max_workers, platforms
+    ):
         results = []
 
         if args.entrabackup:
@@ -269,7 +276,18 @@ def start():
 
             print("***Intune backup***")
 
-        backup_intune(results, path, output, exclude, token, prefix, append_id, args)
+        backup_intune(
+            results,
+            path,
+            output,
+            exclude,
+            token,
+            prefix,
+            append_id,
+            args,
+            max_workers,
+            platforms,
+        )
 
         from .intunecdlib.assignment_report import AssignmentReport
 
@@ -287,7 +305,8 @@ def start():
             if output is not None
         ]
 
-        move_to_archive(path, created_files, output)
+        if not args.skip_archive:
+            move_to_archive(path, created_files, output)
 
         return config_count
 
@@ -300,11 +319,31 @@ def start():
         else:
             exclude = []
 
+        if args.platforms:
+            platforms = args.platforms
+            if "mac" not in platforms:
+                exclude.append("ShellScripts")
+                exclude.append("CustomAttributes")
+                exclude.append("ComplianceScripts")
+            if "windows" not in platforms:
+                exclude.append("PowershellScripts")
+                exclude.append("ProactiveRemediation")
+                exclude.append("ComplianceScripts")
+        else:
+            platforms = []
+
         if args.intunecdmonitor:
             old_stdout = sys.stdout
             sys.stdout = feedstdout = StringIO()
             count = run_backup(
-                args.path, args.output, exclude, token, args.prefix, args.append_id
+                args.path,
+                args.output,
+                exclude,
+                token,
+                args.prefix,
+                args.append_id,
+                args.max_workers,
+                platforms,
             )
             sys.stdout = old_stdout
             feed_bytes = feedstdout.getvalue().encode("utf-8")
@@ -317,7 +356,14 @@ def start():
 
         else:
             run_backup(
-                args.path, args.output, exclude, token, args.prefix, args.append_id
+                args.path,
+                args.output,
+                exclude,
+                token,
+                args.prefix,
+                args.append_id,
+                args.max_workers,
+                platforms,
             )
 
     else:

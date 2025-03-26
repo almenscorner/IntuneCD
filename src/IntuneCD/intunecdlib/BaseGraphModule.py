@@ -23,41 +23,29 @@ class BaseGraphModule(IntuneCDBase):
         status_code: int = 200,
         data: dict = None,
     ) -> dict:
-        """A function to make a request to the Microsoft Graph API.
+        """A function to make a request to the Microsoft Graph API."""
 
-        Args:
-            endpoint (str): The endpoint to make the request to.
-            params (dict, optional): The parameters to include in the request. Defaults to None.
-            method (str, optional): The HTTP method to use. Defaults to "GET".
-            status_code (int, optional): The expected status code of the response. Defaults to 200.
-            data (dict, optional): The data to include in the request. Defaults to None.
-
-        Raises:
-            requests.exceptions.HTTPError: If the request fails.
-
-        Returns:
-            dict: The response from the request.
-        """
-
-        retry_codes = [504, 502, 503]
+        retry_codes = [504, 502, 503, 429]
+        max_retries = 5
+        retry_count = 0
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer {0}".format(self.token["access_token"]),
+            "Authorization": f"Bearer {self.token['access_token']}",
         }
 
         if (
             method != "GET"
-            and self.report is True
+            and self.report
             and endpoint != "https://graph.microsoft.com/beta/$batch"
         ):
             self.log(
-                function="make_graph_request",
-                msg=f"Running in report mode, not making Graph {method.upper()} request to {endpoint}",
+                msg=f"Running in report mode, not making Graph {method.upper()} request to {endpoint}"
             )
-            return
+            return {}
 
-        if params is not None:
+        while retry_count < max_retries:
+            response = None  # Ensure response is defined even on exception
             try:
                 response = requests.request(
                     method=method,
@@ -67,97 +55,77 @@ class BaseGraphModule(IntuneCDBase):
                     timeout=120,
                     data=data,
                 )
+
+                # Handle transient errors (5xx and 429)
                 if response.status_code in retry_codes:
-                    self.log(
-                        msg="Ran into issues with Graph request, waiting 10 seconds and trying again..."
-                    )
-                    time.sleep(10)
-                    response = requests.request(
-                        method=method, url=endpoint, headers=headers, timeout=120
-                    )
-                elif response.status_code == 429:
-                    self.log(
-                        msg=f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds"
-                    )
-                    while response.status_code == 429:
-                        time.sleep(int(response.headers["Retry-After"]))
-                        response = requests.request(
-                            method=method, url=endpoint, headers=headers, timeout=120
+                    retry_after = response.headers.get("Retry-After", None)
+                    wait_time = 10  # Default wait time
+
+                    if response.status_code == 429:
+                        if retry_after is not None and retry_after.isdigit():
+                            wait_time = int(retry_after)
+                            self.log(msg=f"Parsed Retry-After as {wait_time} seconds")
+                        else:
+                            self.log(
+                                tag="warning",
+                                msg=f"Retry-After '{retry_after}' is not an integer, using exponential backoff",
+                            )
+                            wait_time = min((2**retry_count) * 10, 60)
+
+                        self.log(
+                            msg=f"Hit Graph throttling (429), retrying in {wait_time} seconds"
                         )
+                        time.sleep(wait_time)
+
+                    else:
+                        self.log(
+                            msg=f"Encountered {response.status_code}, retrying in {wait_time} seconds..."
+                        )
+                        time.sleep(
+                            wait_time
+                        )  # Allow each thread to retry at its own rate
+
+                    retry_count += 1
+                    continue  # Retry after sleeping
+
+                # Break on success or non-retryable status
+                if response.status_code == status_code:
+                    break
+
+                self.log(
+                    msg=f"Request failed with status {response.status_code}, response: {response.text}"
+                )
+                break
+
             except Exception as e:
                 self.log(
                     tag="error",
-                    msg=f"Error making Graph request to {endpoint}: {e}",
+                    msg=f"Error making Graph request to {endpoint}: {type(e).__name__}: {e}\nURL: {endpoint}\nParams: {params}",
                 )
-        else:
-            try:
-                response = requests.request(
-                    method=method, url=endpoint, headers=headers, timeout=120, data=data
-                )
-                if response.status_code in retry_codes:
-                    retry_count = 0
-                    while retry_count < 3:
-                        self.log(
-                            msg="Ran into issues with Graph request, waiting 10 seconds and trying again..."
-                        )
-                        time.sleep(10)
-                        response = requests.request(
-                            method=method,
-                            url=endpoint,
-                            headers=headers,
-                            timeout=120,
-                            data=data,
-                        )
-                        if response.status_code == 200:
-                            break
-                        retry_count += 1
-                elif response.status_code == 429:
-                    self.log(
-                        msg=f"Hit Graph throttling, trying again after {response.headers['Retry-After']} seconds"
-                    )
-                    while response.status_code == 429:
-                        time.sleep(int(response.headers["Retry-After"]))
-                        response = requests.request(
-                            method=method,
-                            url=endpoint,
-                            headers=headers,
-                            timeout=120,
-                            data=data,
-                        )
-            except Exception as e:
-                self.log(
-                    tag="error", msg=f"Error making Graph request to {endpoint}: {e}"
-                )
+                retry_count += 1
+                time.sleep(10)
+                continue
 
-        if response.status_code == status_code:
-            if method == "GET":
-                json_data = json.loads(response.text)
-
-                if "@odata.nextLink" in json_data.keys():
-                    record = self.make_graph_request(
-                        method=method,
-                        endpoint=json_data["@odata.nextLink"],
-                    )
-                    entries = len(record["value"])
-                    count = 0
-                    while count < entries:
-                        json_data["value"].append(record["value"][count])
-                        count += 1
-
-                return json_data
-
-            if response.text:
-                return json.loads(response.text)
-            return {}
-
-        if response.status_code == 404:
-            self.log(msg="Resource not found in Microsoft Graph: " + endpoint)
-        else:
+        # Final check
+        if response is None or response.status_code != status_code:
+            if response and response.status_code == 404:
+                self.log(msg=f"🔎 Resource not found in Microsoft Graph: {endpoint}")
+                return {}
             raise requests.exceptions.HTTPError(
-                "Request failed with {} - {}".format(
-                    response.status_code, response.text
-                )
+                f"Request failed after {max_retries} retries with {response.status_code if response else 'no response'} - {response.text if response else 'no response'}"
             )
+
+        # Handle JSON response
+        if method == "GET" and response.text:
+            json_data = json.loads(response.text)
+            if "@odata.nextLink" in json_data:
+                record = self.make_graph_request(
+                    method=method, endpoint=json_data["@odata.nextLink"]
+                )
+                json_data["value"].extend(record["value"])
+            return json_data
+
+        return json.loads(response.text) if response.text else {}
 
     def make_audit_request(self, audit_filter: str):
         """
@@ -189,7 +157,7 @@ class BaseGraphModule(IntuneCDBase):
                 f"{audit_filter} and activityDateTime gt {start_date} and activityDateTime le {end_date} and "
                 "activityOperationType ne 'Get'"
             ),
-            "$select": "actor,activityDateTime,activityOperationType,activityResult,resources",
+            "$select": "actor,activityDateTime,activityType,activityOperationType,activityResult,resources",
             "$orderby": "activityDateTime desc",
         }
         self.log(function="makeAuditRequest", msg=f"Query parameters: {q_param}")
@@ -218,6 +186,7 @@ class BaseGraphModule(IntuneCDBase):
                         ],
                         "actor": actor,
                         "activityDateTime": audit_log["activityDateTime"],
+                        "activityType": audit_log["activityType"],
                         "activityOperationType": audit_log["activityOperationType"],
                         "activityResult": audit_log["activityResult"],
                     }
@@ -281,7 +250,11 @@ class BaseGraphModule(IntuneCDBase):
                     ]
                 retry_pool += failed_batch_requests
 
-            wait_time = max(wait_time, int(resp["headers"].get("Retry-After", 0)))
+            retry_after = resp["headers"].get("Retry-After")
+            wait_time = max(
+                wait_time,
+                int(retry_after) if retry_after and retry_after.isdigit() else 0,
+            )
 
         return responses, retry_pool, wait_time
 

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from .intunecdlib.documentation_functions import document_configs
+from .decorators import time_command
 
 
+@time_command()
 def document_entra(configpath, outpath, maxlength, split, cleanup, decode):
     """
     This function is used to document Entra settings.

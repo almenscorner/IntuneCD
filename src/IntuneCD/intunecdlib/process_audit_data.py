@@ -155,7 +155,7 @@ class ProcessAuditData(IntuneCDBase):
             "commit",
             "-m",
             (
-                f"{audit_record['auditResourceType']} {audit_record['activityOperationType']} by {audit_record['actor']}\n"
+                f"{audit_record['activityType']} by {audit_record['actor']}\n"
                 f"Date: {audit_record['activityDateTime']}\n"
                 f"result: {audit_record['activityResult']}"
             ),

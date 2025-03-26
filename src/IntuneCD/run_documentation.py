@@ -1,24 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-          ..
-        ....
-       .::::
-      .:::::            ___       _                     ____ ____
-     .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
-    .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
-   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| |
-  ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
-        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___
-        ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
-        :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
-        ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
-        :::
-        ::
-
-This module contains the functions to run the documentation.
-"""
 
 import argparse
 import json
@@ -38,9 +20,9 @@ from .intunecdlib.documentation_functions import (
 REPO_DIR = os.environ.get("REPO_DIR")
 
 
-def start():
+def get_parser(include_help=True):
     parser = argparse.ArgumentParser(
-        description="Create markdown document from backup files"
+        description="Create markdown document from backup files", add_help=include_help
     )
     parser.add_argument(
         "-p",
@@ -93,11 +75,36 @@ def start():
         help="If set, will decode all base64 encoded values",
         action="store_true",
     )
+    parser.add_argument(
+        "--split-per-config",
+        help="If set, will split the documentation per configuration and save resulting MD file in /docs in the configpath directory",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--max-workers",
+        help="Maximum number of concurrent threads when documenting, default is 10. Can only be used with --split-per-config or --split",
+        type=int,
+        default=10,
+    )
 
-    args = parser.parse_args()
+    return parser
+
+
+def start(args=None):
+    if args is None:
+        args = get_parser(include_help=True).parse_args()
 
     def run_documentation(
-        configpath, outpath, tenantname, jsondata, maxlength, split, cleanup, decode
+        configpath,
+        outpath,
+        tenantname,
+        jsondata,
+        maxlength,
+        split,
+        cleanup,
+        decode,
+        split_per_config,
+        max_workers,
     ):
         now = datetime.now()
         current_date = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -107,7 +114,16 @@ def start():
 
         write_type_header(split, outpath, "Intune")
 
-        document_intune(configpath, outpath, maxlength, split, cleanup, decode)
+        document_intune(
+            configpath,
+            outpath,
+            maxlength,
+            split,
+            cleanup,
+            decode,
+            split_per_config,
+            max_workers,
+        )
 
         write_type_header(split, outpath, "Entra")
 
@@ -137,7 +153,7 @@ def start():
             tenant = f"**Tenant:** {tenantname}"
             updated = f"**Document updated on:**"
 
-        if split:
+        if split or split_per_config:
             files = get_md_files(configpath)
             index_md = f"{configpath}/index.md"
             md_file(index_md)
@@ -178,6 +194,8 @@ def start():
         args.split,
         args.cleanup,
         args.decode,
+        args.split_per_config,
+        args.max_workers,
     )
 
 

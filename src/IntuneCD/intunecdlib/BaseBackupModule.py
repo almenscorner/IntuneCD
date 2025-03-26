@@ -21,6 +21,7 @@ class BaseBackupModule(BaseGraphModule):
         ignore_oma_settings: bool = False,
         prefix: str = None,
         azure_token: str = None,
+        platforms: list = [],
     ):
         """Initializes the BaseBackupModule class
 
@@ -38,6 +39,11 @@ class BaseBackupModule(BaseGraphModule):
         """
         super().__init__()
         self.endpoint = "https://graph.microsoft.com"
+        self.platform_keywords = {
+            "mobile": ["ios", "android", "aosp"],
+            "mac": ["macos"],
+            "windows": ["windows", "win32", "win"],
+        }
         # Variables set from the backup run
         self.token = token
         self.azure_token = azure_token
@@ -49,6 +55,7 @@ class BaseBackupModule(BaseGraphModule):
         self.scope_tags = scope_tags
         self.ignore_oma_settings = ignore_oma_settings
         self.prefix = prefix
+        self.platforms = platforms
         # Default variables, can be overridden in child classes
         self.assignment_endpoint = None
         self.assignment_extra_url = None
@@ -73,7 +80,7 @@ class BaseBackupModule(BaseGraphModule):
             str: The prepared filename
         """
 
-        remove_characters = "/\\:*?<>|"
+        remove_characters = '/\\:*?<>"|'
         if not isinstance(filename, str):
             filename = str(filename)
         for character in remove_characters:
@@ -150,6 +157,51 @@ class BaseBackupModule(BaseGraphModule):
             )
             return None
 
+    def _matches_role(self, data, platform_keywords, platforms):
+        """Check if a policy matches a specific role (e.g., 'mobile', 'mac', 'windows')."""
+
+        odata_type = str(data.get("@odata.type", "")).lower()
+        config_platform = str(data.get("platform", "")).lower()
+        config_platforms = str(data.get("platforms", "")).lower()
+
+        # Try to extract a definitionId if present
+        settings_delta = data.get("settingsDelta", [])
+        definition_id = (
+            str(settings_delta[0].get("definitionId", "")).lower()
+            if settings_delta and isinstance(settings_delta, list)
+            else ""
+        )
+
+        # Infer platform from path
+        inferred_platform = ""
+        if "mac" in platforms and (
+            "Shell" in self.path
+            or "Custom Attributes" in self.path
+            or "Scripts" in self.path
+        ):
+            inferred_platform = "macos"
+        elif "windows" in platforms and (
+            "Powershell" in self.path
+            or "Proactive Remediations" in self.path
+            or "Scripts" in self.path
+        ):
+            inferred_platform = "windows"
+
+        # Collect keywords to match
+        keywords = [kw for r in platforms for kw in platform_keywords.get(r, [])]
+
+        return any(
+            keyword in val
+            for keyword in keywords
+            for val in [
+                odata_type,
+                config_platform,
+                config_platforms,
+                definition_id,
+                inferred_platform,
+            ]
+        )
+
     def _process_single_item(
         self,
         data: dict,
@@ -175,6 +227,12 @@ class BaseBackupModule(BaseGraphModule):
             dict: The results of the backup
         """
         self.filename = ""
+
+        if self.platforms:
+            result = self._matches_role(data, self.platform_keywords, self.platforms)
+
+            if result is False:
+                return {"config_count": 0, "outputs": []}
 
         if self.prefix:
             if name_key == "":
