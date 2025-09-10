@@ -102,15 +102,16 @@ class BaseUpdateModule(BaseGraphModule):
 
     def remove_non_graph_properties(self, data):
         """
-        Recursively remove properties not accepted by Graph API, such as 'categoryDisplayName' from settingDefinitions.
+        Recursively remove properties not accepted by Graph API, including the entire 'settingDefinitions' property from settings.
         """
         if isinstance(data, dict):
-            # Remove from settingDefinitions in settings
+            # Remove settingDefinitions from settings
             if "settings" in data and isinstance(data["settings"], list):
                 for setting in data["settings"]:
-                    if "settingDefinitions" in setting and isinstance(setting["settingDefinitions"], list):
-                        for definition in setting["settingDefinitions"]:
-                            definition.pop("categoryDisplayName", None)
+                    if "settingDefinitions" in setting:
+                        setting.pop("settingDefinitions", None)
+                    # Recursively clean nested dicts in settings
+                    self.remove_non_graph_properties(setting)
             # Recursively clean nested dicts
             for v in data.values():
                 self.remove_non_graph_properties(v)
