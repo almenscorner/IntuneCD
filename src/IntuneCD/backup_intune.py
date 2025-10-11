@@ -39,6 +39,7 @@ def backup_intune(
     args,
     max_workers,
     platforms,
+    enrich_documentation=False,
 ):
     """
     Imports all the backup functions dynamically and runs them in parallel.
@@ -65,6 +66,21 @@ def backup_intune(
         "ignore_oma_settings": args.ignore_omasettings,
         "platforms": platforms,
     }
+
+    # Enrich data if the --enrich-documentation flag is set
+    if enrich_documentation:
+        from .intunecdlib.BaseGraphModule import BaseGraphModule
+        import os
+        import json
+
+        graph = BaseGraphModule()
+        graph.token = token
+        settings = graph.make_graph_request("https://graph.microsoft.com/beta/deviceManagement/configurationSettings")
+        with open(os.path.join(path, "configurationSettings.json"), "w", encoding="utf-8") as f:
+            json.dump(settings, f, indent=2)
+        categories = graph.make_graph_request("https://graph.microsoft.com/beta/deviceManagement/configurationCategories")
+        with open(os.path.join(path, "configurationCategories.json"), "w", encoding="utf-8") as f:
+            json.dump(categories, f, indent=2)
 
     # List of backup modules to dynamically import and execute
     backup_modules = [
