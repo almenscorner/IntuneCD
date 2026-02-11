@@ -88,6 +88,8 @@ def document_intune(
     if enrich_documentation:
         settings_lookup = {}
         categories_lookup = {}
+        settings_json = None
+        categories_json = None
 
         settings_path = os.path.join(configpath, "configurationSettings.json")
         categories_path = os.path.join(configpath, "configurationCategories.json")
