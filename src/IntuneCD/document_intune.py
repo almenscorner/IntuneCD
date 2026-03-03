@@ -108,6 +108,10 @@ def document_intune(
             for c in categories_json.get("value", []):
                 categories_lookup[c.get("id")] = c
 
+        # If either one of the lookups are empty, disable enrichment
+        if not settings_json or not categories_json:
+            enrich_documentation = False
+
     if split or split_per_config:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {}
