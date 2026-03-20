@@ -12,9 +12,9 @@ import json
 import os
 import platform
 import re
-
 import yaml
 from pytablewriter import MarkdownTableWriter
+from collections import defaultdict
 
 
 def md_file(outpath):
@@ -29,16 +29,16 @@ def md_file(outpath):
         open(outpath, "w", encoding="utf-8").close()
 
 
-def write_table(data):
+def write_table(data, headers=None):
     """
     This function creates the markdown table.
 
     :param data: The data to be written to the table
+    :param headers: The headers for the table
     :return: The Markdown table writer
     """
-
     writer = MarkdownTableWriter(
-        headers=["setting", "value"],
+        headers=headers if headers else ["setting", "value"],
         value_matrix=data,
     )
 
@@ -47,16 +47,49 @@ def write_table(data):
 
 def escape_markdown(text):
     """
-    This function escapes markdown characters.
+    Escapes markdown characters except inside http/https links.
 
     :param text: The text to be escaped
     :return: The escaped text
     """
+    # Regex to match http/https links
+    link_pattern = re.compile(r'(https?://[^\s\)\]\}]+)')
+    parts = []
+    last_end = 0
+    for match in link_pattern.finditer(text):
+        # Escape markdown in text before the link
+        before = text[last_end:match.start()]
+        escaped = re.sub(r"([\_*\[\]()\{\}`>\#\+\-=|\.!])", r"\\\1", before)
+        parts.append(escaped)
+        # Add the link unescaped
+        parts.append(match.group(0))
+        last_end = match.end()
+    # Escape markdown in the remaining text
+    after = text[last_end:]
+    escaped_after = re.sub(r"([\_*\[\]()\{\}`>\#\+\-=|\.!])", r"\\\1", after)
+    parts.append(escaped_after)
+    return ''.join(parts)
 
-    # Escape markdown characters
-    parse = re.sub(r"([\_*\[\]()\{\}`>\#\+\-=|\.!])", r"\\\1", text)
 
-    return parse
+def sanitize_text(text):
+    """
+    Sanitizes the input text by removing extra spaces, newlines, and non-printable/control characters.
+    :param text: The text to be sanitized
+    :return: The sanitized text
+    """
+    text = re.sub(r'[ \t]+', ' ', text)
+    text = re.sub(r'[\r\n]+', '\n', text)
+    text = re.sub(r'[^\x20-\x7E\n]', '', text)
+    return text.strip()
+
+
+def convert_newlines_to_br(text):
+    """
+    Converts any newline characters in the text to <br>.
+    :param text: The input text
+    :return: Text with newlines replaced by <br>
+    """
+    return text.replace('\n', '<br>')
 
 
 def assignment_table(data):
@@ -598,3 +631,238 @@ def get_md_files(configpath):
     md_files.sort(key=lambda f: os.path.splitext(os.path.basename(f))[0].lower())
 
     return md_files
+
+
+def extract_setting(setting_instance, settings_lookup):
+    """
+    Extracts setting information from a setting instance using the provided settings lookup.
+    :param setting_instance: The setting instance dictionary
+    :param settings_lookup: The settings lookup dictionary
+    :return: A list of lists containing setting name, formatted value, and description
+    """
+
+    def escape_backslash_for_md(value):
+        """
+        This function processes the input string to ensure that backslashes preceding Markdown special characters are properly escaped, preventing unintended formatting when rendered. It is recommended to pass the input as a raw string to avoid Python interpreting escape sequences.
+        :param value: The input string to be processed, pass value as raw string: Example: escape_backslash_for_md(rf"{value}")
+        :return: The processed string with backslashes properly escaped for Markdown
+        """
+        escapable = r"_*\[\](){}#`>+-=|.!"
+        value = re.sub(rf'(?<!\\)\\([{re.escape(escapable)}])', r'\\\\\\\1', value)
+        value = re.sub(rf'(?<!\\)\\(?![{re.escape(escapable)}])', r'\\\\', value)
+        return value
+
+    setting_definition_id = setting_instance.get("settingDefinitionId", "")
+    definition = settings_lookup.get(setting_definition_id)
+    root_definition_id = definition.get("rootDefinitionId") if definition else None
+    display_name = definition.get("displayName", setting_definition_id)
+    info_urls = definition.get("infoUrls", [])
+
+    # Indent sub-settings
+    if root_definition_id and root_definition_id != setting_definition_id:
+        display_name = f"→ {display_name}"
+
+    # Ensure description is a string
+    raw_description = definition.get("description", "")
+    if not isinstance(raw_description, str):
+        raw_description = str(raw_description) if raw_description is not None else ""
+    description = sanitize_text(raw_description)
+    description = escape_markdown(description)
+    description = convert_newlines_to_br(description)
+    # Append info URLs to description
+    if info_urls:
+        links = "<br>".join([f'[{url}]({url})' for i, url in enumerate(info_urls)])
+        description = f"{description}<br>InfoUrls:<br>{links}" if description else links
+    description = f"<details><summary>Click to expand...</summary>{description}</details>" if description else ""
+
+    if "simpleSettingValue" in setting_instance:
+        value = setting_instance["simpleSettingValue"].get("value", "")
+        formatted_value = escape_backslash_for_md(rf"{value}") if value != "" else "Not configured"
+        return [[display_name, formatted_value, description]]
+
+    elif "simpleSettingCollectionValue" in setting_instance:
+        collection = setting_instance["simpleSettingCollectionValue"]
+        if isinstance(collection, list) and collection:
+            values = []
+            for item in collection:
+                value = item.get("value", "")
+                if value != "":
+                    values.append(str(escape_backslash_for_md(rf"{value}")))
+            formatted_value = ", ".join(values) if values else "Not configured"
+            return [[display_name, formatted_value, description]]
+        else:
+            return [[display_name, "Not configured", description]]
+
+    elif "choiceSettingValue" in setting_instance:
+        choice_value_obj = setting_instance["choiceSettingValue"]
+        value = choice_value_obj.get("value", "")
+        children = choice_value_obj.get("children", [])
+        option_display_name = None
+        if value and "options" in definition:
+            for option in definition["options"]:
+                if option.get("value") == value or option.get("itemId") == value:
+                    option_display_name = option.get("displayName") or option.get("name")
+                    break
+        formatted_value = option_display_name if option_display_name else (value if value else "Not configured")
+        rows = []
+        rows.append([display_name, formatted_value, description])
+        for child in children:
+            rows.extend(extract_setting(child, settings_lookup))
+        return rows
+
+    elif "groupSettingCollectionValue" in setting_instance:
+        collection = setting_instance["groupSettingCollectionValue"]
+        rows = []
+        if isinstance(collection, list):
+            for item in collection:
+                children = item.get("children", [])
+                for child in children:
+                    rows.extend(extract_setting(child, settings_lookup))
+        return rows if rows else [[display_name, "Collection value", description]]
+
+    return [[display_name, "Not configured", description]]
+
+
+def document_settings_catalog(
+    configpath,
+    outpath,
+    header,
+    max_length,
+    split,
+    split_per_config,
+    settings_lookup=None,
+    categories_lookup=None,
+):
+    """
+    Documents Settings Catalog configurations, enriched with configurationSettings and configurationCategories. This function is only started when backup and documentation are started with --enrich-documentation.
+
+    :param configpath: Path to backup files
+    :param outpath: Base path for Markdown output
+    :param header: Configuration type header (e.g., "AppConfigurations")
+    :param max_length: Max length for displayed values
+    :param split: Split into one file per type
+    :param split_per_config: Split into one file per individual config
+    :param settings_lookup: Lookup dictionary for configurationSettings
+    :param categories_lookup: Lookup dictionary for configurationCategories
+    """
+    if not os.path.exists(configpath):
+        return
+
+    # Prepare output path for split mode
+    if split and not split_per_config:
+        outpath = os.path.join(configpath, f"{header}.md")
+        md_file(outpath)
+
+    if split_per_config is False:
+        with open(outpath, "a", encoding="utf-8") as md:
+            md.write("## " + header + "\n")
+
+    pattern = os.path.join(configpath, "**", "*.json")
+    files = sorted(glob.glob(pattern, recursive=True), key=str.casefold)
+    if not files:
+        return
+
+    for filename in files:
+        if filename.endswith(".md") or os.path.isdir(filename):
+            continue
+
+        try:
+            with open(filename, encoding="utf-8") as f:
+                repo_data = json.load(f)
+
+            # Assignments Table
+            assignments_table = assignment_table(repo_data)
+            repo_data.pop("assignments", None)
+
+            # Basics Table
+            basics_table = [
+                ["Name", repo_data.get("name", "")],
+                ["Profile type", "Settings catalog"],
+                ["Platform supported", repo_data.get("platforms", "")],
+                ["Technologies", repo_data.get("technologies", "")],
+                ["Scope tags", ", ".join(repo_data.get("roleScopeTagIds", []))],
+            ]
+            basics_md_table = write_table(basics_table)
+
+            # Configuration Table
+            config_table_list = []
+
+            for setting in repo_data.get("settings", []):
+                rows = extract_setting(setting.get("settingInstance", {}), settings_lookup)
+                for row in rows:
+                    setting_name = row[0]
+                    value = row[1]
+                    description = row[2]
+                    setting_definition_id = setting.get("settingInstance", {}).get("settingDefinitionId", "")
+                    definition = settings_lookup.get(setting_definition_id, {})
+                    category_id = definition.get("categoryId", "")
+                    category_name = categories_lookup.get(category_id, {}).get("displayName", "")
+                    root_category_id = categories_lookup.get(category_id, {}).get("rootCategoryId", "")
+                    root_category_name = categories_lookup.get(root_category_id, {}).get("displayName", "")
+
+                    if max_length and isinstance(value, str) and len(value) > max_length:
+                        value = "Value too long to display"
+                    config_table_list.append({
+                        "setting_name": setting_name,
+                        "value": value,
+                        "description": description,
+                        "category_name": category_name,
+                        "root_category_name": root_category_name
+                    })
+
+            # Sort by category_name, then root_category_name
+            config_table_list_sorted = sorted(
+                config_table_list,
+                key=lambda x: (x["root_category_name"], x["category_name"])
+            )
+
+            # Group items by root_category_name and category_name
+            grouped = defaultdict(lambda: defaultdict(list))
+            for item in config_table_list_sorted:
+                grouped[item["root_category_name"]][item["category_name"]].append(item)
+
+
+            # Output file logic
+            config_name = repo_data.get("name", os.path.splitext(os.path.basename(filename))[0])
+            safe_config_name = re.sub(r'[<>:"/\\|?*]', "_", config_name)
+            if split_per_config:
+                if not os.path.exists(f"{configpath}/docs"):
+                    os.makedirs(f"{configpath}/docs")
+                config_outpath = os.path.join(f"{configpath}/docs", f"{safe_config_name}.md")
+                md_file(config_outpath)
+                target_md = config_outpath
+                top_header = f"# {config_name}"
+                split_per_config_index_md(configpath, header)
+            elif split:
+                target_md = outpath
+                top_header = f"### {config_name}"
+            else:
+                target_md = outpath
+                top_header = f"### {config_name}"
+
+            # Write markdown
+            with open(target_md, "a", encoding="utf-8") as md:
+                md.write(top_header + "\n")
+                if assignments_table:
+                    md.write("#### Assignments\n")
+                    md.write(str(assignments_table) + "\n")
+                md.write("#### Basics\n")
+                md.write(str(basics_md_table) + "\n")
+                md.write("#### Configuration\n")
+
+                # Write grouped tables
+                table_data = []
+                for root_cat, categories in grouped.items():
+
+                    for cat, items in categories.items():
+                        if cat == root_cat:
+                            table_data.append([f"**{root_cat}**", "", ""])
+                        else:
+                            table_data.append([f"**{root_cat}** > **{cat}**", "", ""])
+                        for i in items:
+                            table_data.append([i["setting_name"], i["value"], i["description"]])
+                table_md = write_table(table_data, headers=["Setting", "Value", "Description"])
+                md.write(str(table_md) + "\n")
+
+        except Exception as e:
+            print(f"[DEBUG] Error processing {filename}: {type(e).__name__}: {e}")
