@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+
 from ...intunecdlib.BaseBackupModule import BaseBackupModule
 
 
@@ -28,6 +30,55 @@ class ApplicationsBackupModule(BaseBackupModule):
         )
         self.assignment_extra_url = self.assignment_extra_url or "/assignments"
         self.config_audit_data = True
+
+    def _save_script_win32(self, item: dict, rule_type, script_data_path) -> None:
+        # If there is a detectionScriptContent, get the name of the script and write the content to a file
+        if self.prefix:
+            match = self.check_prefix_match(item["displayName"], self.prefix)
+            if not match:
+                return
+        if item.get(f"{rule_type}Rules"):
+            for rule in item[f"{rule_type}Rules"]:
+                if rule.get("scriptContent"):
+                    if self.append_id:
+                        script_name = (
+                            f"{item['displayName']}_{rule_type}Script__{item['id']}.ps1"
+                        )
+                    else:
+                        script_name = f"{item['displayName']}_{rule_type}Script.ps1"
+                    if not os.path.exists(script_data_path):
+                        os.makedirs(script_data_path)
+                    decoded = self.decode_base64(rule["scriptContent"])
+                    f = open(
+                        f"{script_data_path}{script_name}",
+                        "w",
+                        encoding="utf-8",
+                    )
+                    f.write(decoded)
+
+    def _save_script_mac(self, item: dict, script_type, script_data_path) -> None:
+        # If there is a detectionScriptContent, get the name of the script and write the content to a file
+        if self.prefix:
+            match = self.check_prefix_match(item["displayName"], self.prefix)
+            if not match:
+                return
+        if item.get(f"{script_type}InstallScript"):
+            if item[f"{script_type}InstallScript"].get("scriptContent"):
+                if self.append_id:
+                    script_name = f"{item['displayName']}_{script_type}InstallScript__{item['id']}.sh"
+                else:
+                    script_name = f"{item['displayName']}_{script_type}InstallScript.sh"
+                if not os.path.exists(script_data_path):
+                    os.makedirs(script_data_path)
+                decoded = self.decode_base64(
+                    item[f"{script_type}InstallScript"]["scriptContent"]
+                )
+                f = open(
+                    f"{script_data_path}{script_name}",
+                    "w",
+                    encoding="utf-8",
+                )
+                f.write(decoded)
 
     def main(self) -> dict[str, any]:
         """The main method to backup the Applications
@@ -118,12 +169,20 @@ class ApplicationsBackupModule(BaseBackupModule):
                     else "_" + str(app["displayVersion"]).replace(".", "_")
                 )
                 app_name = generate_app_name(app, "Win32", suffix)
+                script_path = f"{self.path}{platform}/Script Data/"
+                self._save_script_win32(app, "detection", script_path)
+                self._save_script_win32(app, "requirement", script_path)
             elif app_type == "#microsoft.graph.windowsMobileMSI":
                 app_name = generate_app_name(
                     app, "WinMSI", "_" + str(app["productVersion"]).replace(".", "_")
                 )
             else:
                 app_name = generate_app_name(app, app_type.split(".")[2])
+
+            if app_type == "#microsoft.graph.macOSPkgApp":
+                script_path = f"{self.path}{platform}/Script Data/"
+                self._save_script_mac(app, "pre", script_path)
+                self._save_script_mac(app, "post", script_path)
 
             self.preset_filename = app_name
 

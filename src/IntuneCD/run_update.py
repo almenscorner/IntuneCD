@@ -162,6 +162,7 @@ def get_parser(include_help=True):
         "--max-workers",
         help="Maximum number of concurrent threads when updating, default is 10",
         default=10,
+        type=int,
     )
 
     return parser

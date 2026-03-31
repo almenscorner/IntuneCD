@@ -45,12 +45,14 @@ class IntuneCDBase:
             "deviceHealthScriptType",
         }
 
-        if "VPPusedLicenseCount" in self.exclude:
-            keys.add("usedLicenseCount")
-        if "GPlaySyncTime" in self.exclude:
-            keys.add("lastAppSyncDateTime")
-        if "CompliancePartnerHeartbeat" in self.exclude:
-            keys.add("lastHeartbeatDateTime")
+        EXCLUDE_KEY_MAP = {
+            "VPPusedLicenseCount": "usedLicenseCount",
+            "GPlaySyncTime": "lastAppSyncDateTime",
+            "CompliancePartnerHeartbeat": "lastHeartbeatDateTime",
+            "VPPeleaseDateTime": "releaseDateTime",
+        }
+
+        keys.update(v for k, v in EXCLUDE_KEY_MAP.items() if k in self.exclude)
 
         for k in keys:
             data.pop(k, None)

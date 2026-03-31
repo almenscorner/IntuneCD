@@ -87,11 +87,11 @@ class TestDocumentationFunctions(unittest.TestCase):
 
     def test_escape_markdown(self):
         """The escaped string should be returned."""
-        self.string = "\\`*_{}[]()#+-.!Hello World"
+        self.string = "\\`*_{}[]()#+-.!Hello World Check this link: https://example.com/test_path?param=1&other=2"
 
         self.assertEqual(
             escape_markdown(self.string),
-            "\\\\`\\*\\_\\{\\}\\[\\]\\(\\)\\#\\+\\-\\.\\!Hello World",
+            "\\\\`\\*\\_\\{\\}\\[\\]\\(\\)\\#\\+\\-\\.\\!Hello World Check this link: https://example.com/test_path?param=1&other=2",
         )
 
     def test_clean_list_list(self):
