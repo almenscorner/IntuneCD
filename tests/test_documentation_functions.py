@@ -125,13 +125,13 @@ class TestDocumentationFunctions(unittest.TestCase):
             '{"@odata.type":"test","test":"test","name":"test","description":"test","testvals":"1,2","testbool":false,"testlist":["test"],"testlistdict":[{"test":{"test":{"test":["1"],"testb64":"dW5pY29ybg=="}}}],"testdict2":{"test":{"test":{"test":["1"]}}},"testdictlist":{"test":["a","b","c"]},"assignments":[{"intent":"Include","target":{"@odata.type":"#test","groupName":"test-group","deviceAndAppManagementAssignmentFilterId":"test-filter","deviceAndAppManagementAssignmentFilterType":"test"}}]}',
             encoding="utf-8",
         )
-        self.expected_data = "##test###testDescription:test####Assignments|intent|target|filtertype|filtername||-------|----------|-----------|-----------||Include|test-group|test|test-filter|####Configuration|setting|value||------------|-------------------------------------------------------------------------------------||Odatatype|test||Test|test||Name|test||Testvals|1,2||Testbool|False||Testlist|test<br/>||Testlistdict|**test:**<ul>**test:**<ul><li>1</li></ul>**testb64:**dW5pY29ybg==<br/></ul><br/>||Testdict2|**test:**<ul>**test:**<ul>**test:**<ul><li>1</li></ul></ul></ul>||Testdictlist|**test:**<ul><li>a</li><li>b</li><li>c</li></ul>|"
+        self.expected_data = "##test###testDescription:test####Assignments|intent|target|filtertype|filtername||-------|----------|-----------|-----------||Include|test-group|test|test-filter|####Configuration|setting|value||------------|----------------------------------------------------------------------------------------------------------------------------------------||Odatatype|test||Test|test||Name|test||Testvals|1,2||Testbool|False||Testlist|test<br/>||Testlistdict|**test:**<ul>**test:**<ul><li>1</li></ul>**testb64:**<details><summary>Clicktoexpand...</summary>unicorn</details><br/></ul><br/>||Testdict2|**test:**<ul>**test:**<ul>**test:**<ul><li>1</li></ul></ul></ul>||Testdictlist|**test:**<ul><li>a</li><li>b</li><li>c</li></ul>|"
 
         document_configs(
             f"{self.directory.path}/config",
             f"{self.directory.path}/test.md",
             "test",
-            100,
+            10000,
             split=False,
             cleanup=True,
             decode=True,
