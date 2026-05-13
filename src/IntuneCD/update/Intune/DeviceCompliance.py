@@ -46,9 +46,9 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
             },
         )
         if compliance_script_id.get("value"):
-            data["deviceCompliancePolicyScript"][
-                "deviceComplianceScriptId"
-            ] = compliance_script_id["value"][0]["id"]
+            data["deviceCompliancePolicyScript"]["deviceComplianceScriptId"] = (
+                compliance_script_id["value"][0]["id"]
+            )
 
             return data
 
@@ -77,8 +77,8 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
             repo_data (dict): The data to check the scheduled actions for the rule for
         """
         for intune_action, repo_action in zip(
-            self.downstream_object.get("scheduledActionsForRule"),
-            repo_data["scheduledActionsForRule"],
+            self.downstream_object.get("scheduledActionsForRule", []),
+            repo_data.get("scheduledActionsForRule", []),
         ):
             action_diff = self.get_diffs(repo_action, intune_action, None)
 
@@ -89,7 +89,7 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
                             "ruleName": "PasswordRequired",
                             "scheduledActionConfigurations": repo_data[
                                 "scheduledActionsForRule"
-                            ][0]["scheduledActionConfigurations"],
+                            ][0].get("scheduledActionConfigurations", []),
                         }
                     ]
                 }
@@ -114,7 +114,7 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
         Returns:
             dict[str, any]: The notification template
         """
-        for action in rule["scheduledActionConfigurations"]:
+        for action in rule.get("scheduledActionConfigurations", []):
             if action.get("notificationTemplateName"):
                 notification_template = self.make_graph_request(
                     self.endpoint
@@ -128,9 +128,9 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
                         0
                     ]["id"]
                 else:
-                    action[
-                        "notificationTemplateId"
-                    ] = "00000000-0000-0000-0000-000000000000"
+                    action["notificationTemplateId"] = (
+                        "00000000-0000-0000-0000-000000000000"
+                    )
 
                 action.pop("notificationTemplateName")
 
@@ -151,13 +151,19 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
                 "/assignments",
             )
 
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 self.config_type = "Compliance Policy"
                 self.notify = True
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
                     if repo_data.get("platforms") == "linux":
                         continue
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                         "@odata.type": repo_data.get("@odata.type"),
@@ -169,7 +175,7 @@ class DeviceComplianceUpdateModule(BaseUpdateModule):
                     if repo_data is False:
                         continue
 
-                    for rule in repo_data.get("scheduledActionsForRule"):
+                    for rule in repo_data.get("scheduledActionsForRule") or []:
                         self._get_notification_template_id(rule)
 
                     for item in intune_data.get(
