@@ -129,7 +129,12 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
 
             # Set glob pattern
             pattern = self.path + "*/*"
-            for filename in glob.glob(pattern, recursive=True):
+            filenames = glob.glob(pattern, recursive=True)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 self.notify = True
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
@@ -142,6 +147,7 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
                         )
                         continue
 
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                         "templateId": repo_data.get("templateId"),
@@ -152,7 +158,7 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
                     self.diff_data["name"] = self.name
 
                     intune_intent, intune_id = self.get_match_data(
-                        intents["value"], self.match_info
+                        intents["value"], self.match_info, self.match_id
                     )
 
                     if intune_intent:

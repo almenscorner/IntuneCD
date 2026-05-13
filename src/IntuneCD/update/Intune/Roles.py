@@ -44,9 +44,15 @@ class RolesUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                     }

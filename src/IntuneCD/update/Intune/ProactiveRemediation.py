@@ -103,7 +103,12 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
                 "",
             )
 
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 self.config_type = "Proactive Remediation"
                 self.notify = True
                 self.exclude_paths = [
@@ -116,6 +121,7 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
                     repo_data.pop("deviceHealthScriptType", None)
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                     }
