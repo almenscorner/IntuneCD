@@ -181,9 +181,11 @@ def is_base64(s):
             decoded = base64.b64decode(s.encode())
         else:
             decoded = base64.b64decode(s)
-        # If decoding succeeds and the decoded bytes match the original string, it's a valid base64-encoded string
-        return decoded == s.encode()
-    except (TypeError, binascii.Error):
+        # Verify the decoded bytes are valid UTF-8
+        decoded.decode("utf-8")
+        # If decoding succeeds and re-encoding matches the original, it's a valid base64-encoded string
+        return base64.b64encode(decoded).decode("utf-8") == s
+    except (TypeError, binascii.Error, UnicodeDecodeError):
         # If decoding fails, it's not a valid base64-encoded string
         return False
 
@@ -256,6 +258,8 @@ def clean_list(data, decode):
     def simple_value_to_string(key, val) -> str:
         if decode and is_base64(val):
             val = decode_base64(val)
+            val = val.replace("\r\n", "<br>").replace("\r", "<br>").replace("\n", "<br>")
+            return f"**{key}:** <details><summary>Click to expand...</summary>{val}</details><br/>"
 
         if isinstance(val, str):
             val = val.replace("\\", "\\\\")
@@ -279,6 +283,8 @@ def clean_list(data, decode):
     def string(s) -> str:
         if decode and is_base64(s):
             s = decode_base64(s)
+            s = s.replace("\r\n", "<br>").replace("\r", "<br>").replace("\n", "<br>")
+            return f"<details><summary>Click to expand...</summary>{s}</details>"
 
         if len(s) > 200:
             string = f"<details><summary>Click to expand...</summary>{s}</details>"
