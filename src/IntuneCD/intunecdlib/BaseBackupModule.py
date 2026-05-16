@@ -10,6 +10,7 @@ class BaseBackupModule(BaseGraphModule):
     """Base class for backup modules."""
 
     REMOVE_CHARACTERS = '/\\:*?<>"|'
+    ZERO_WIDTH_CHARACTERS = "\u200b\u200c\u200d\u2060\ufeff"
 
     def __init__(
         self,
@@ -84,7 +85,8 @@ class BaseBackupModule(BaseGraphModule):
 
         if not isinstance(filename, str):
             filename = str(filename)
-        filename = re.sub(r"[\x00-\x1f\x7f]+", "_", filename)
+        filename = re.sub(r"[\x00-\x1f\x7f]+", "", filename)
+        filename = re.sub(rf"[{re.escape(self.ZERO_WIDTH_CHARACTERS)}]+", "", filename)
         filename = re.sub(rf"[{re.escape(self.REMOVE_CHARACTERS)}]", "_", filename)
 
         return filename
