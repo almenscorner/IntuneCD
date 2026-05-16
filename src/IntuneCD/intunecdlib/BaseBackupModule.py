@@ -85,6 +85,7 @@ class BaseBackupModule(BaseGraphModule):
             filename = str(filename)
         for character in remove_characters:
             filename = filename.replace(character, "_")
+        filename = re.sub(r"[\x00-\x1f]+", "_", filename)
 
         return filename
 
