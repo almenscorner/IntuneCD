@@ -29,20 +29,25 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
         self.assignment_key = "deviceHealthScriptAssignments"
 
     def _get_script_data(self, filename: str) -> tuple[str, str]:
-        fname_id = filename.split("__")
         detection_script_name = ""
         remediation_script_name = ""
-
-        if len(fname_id) > 1:
-            fname_id = fname_id[1].replace(".json", "").replace(".yaml", "")
-        else:
-            fname_id = ""
 
         # Get all remediation scripts and detection scripts files
         script_files = os.listdir(self.script_data_path)
 
-        # Filter out files that matches the id
-        script_files = [f for f in script_files if fname_id in f]
+        # Prefer the filename prefix used when backups do not append ids.
+        filename_prefix = os.path.splitext(filename)[0]
+        prefix_matches = [
+            f for f in script_files if f.startswith(f"{filename_prefix}_")
+        ]
+        if prefix_matches:
+            script_files = prefix_matches
+        else:
+            filename_parts = filename_prefix.rsplit("__", 1)
+            if len(filename_parts) > 1:
+                script_files = [f for f in script_files if filename_parts[1] in f]
+            else:
+                script_files = []
 
         # Set detection and remediation script name and path
         for f in script_files:
