@@ -68,13 +68,19 @@ class ComplianceScriptsUpdateModule(BaseUpdateModule):
                 return None
             # Get details for each script to populate script content
             intune_data["value"] = self._get_script_details(intune_data)
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 self.notify = True
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
                     # Skip if policy contains settingDefinitionId as it is not a device compliance script
                     if repo_data.get("settingDefinitionId"):
                         continue
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                     }

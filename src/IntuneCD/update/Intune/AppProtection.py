@@ -101,10 +101,16 @@ class AppProtectionUpdateModule(BaseUpdateModule):
                 "/assignments",
             )
 
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 self.assignment_endpoint = "/deviceAppManagement/"
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = self._get_match_info(repo_data)
                     self.name = repo_data.get("displayName")
                     diff_data = self.create_diff_data(self.name, self.config_type)

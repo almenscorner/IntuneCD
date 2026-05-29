@@ -67,6 +67,7 @@ class BaseUpdateModule(BaseGraphModule):
         self.azure_update = False
         self.config_type = None
         self.match_info = None
+        self.match_id = None
         self.config_endpoint = None
         self.downstream_assignments = None
         self.create_request = None
@@ -399,16 +400,72 @@ class BaseUpdateModule(BaseGraphModule):
                     repo_assignments, [], self.assignment_key, self.create_request["id"]
                 )
 
-    def get_match_data(self, intune_data: dict, match_info: dict) -> tuple:
+    _FILENAME_ID_RE = re.compile(
+        r"__(?P<id>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?=\.[^.]+$)"
+    )
+
+    def _match_id_from_filename(self, filename: str) -> str:
+        """Extracts an `__<guid>` suffix from a backup filename, if present."""
+        if not filename:
+            return None
+        match = self._FILENAME_ID_RE.search(filename)
+        return match.group("id") if match else None
+
+    def _duplicate_filenames_to_skip(self, filenames: list) -> set:
+        """Detects filenames that would resolve to the same tenant object.
+
+        Groups files by their name with any `__<guid>` suffix stripped. If a
+        group has more than one file:
+          - If any file in the group has an ID suffix, files without one are
+            skipped (the ID-suffixed entry is the authoritative copy).
+          - If no file in the group has an ID, all but the first are skipped.
+        """
+        groups: dict = {}
+        for f in filenames:
+            base = self._FILENAME_ID_RE.sub("", f)
+            groups.setdefault(base, []).append(f)
+
+        skip: set = set()
+        for base, fnames in groups.items():
+            if len(fnames) <= 1:
+                continue
+            with_id = [f for f in fnames if self._FILENAME_ID_RE.search(f)]
+            without_id = [f for f in fnames if not self._FILENAME_ID_RE.search(f)]
+            if with_id:
+                for f in without_id:
+                    skip.add(f)
+                    self.log(
+                        tag="warning",
+                        msg=f"Skipping {f}: duplicate of ID-suffixed file(s) {with_id}",
+                    )
+            else:
+                for f in without_id[1:]:
+                    skip.add(f)
+                    self.log(
+                        tag="error",
+                        msg=f"Skipping {f}: duplicate of {without_id[0]} with no ID to disambiguate",
+                    )
+        return skip
+
+    def get_match_data(
+        self, intune_data: dict, match_info: dict, match_id: str = None
+    ) -> tuple:
         """Gets the matching data
 
         Args:
             intune_data (dict): The intune data
             match_info (dict): The match info from the repository
+            match_id (str, optional): If provided, prefer an item with this id
+                before falling back to match_info matching.
 
         Returns:
             tuple: The matching data
         """
+        if match_id:
+            for item in intune_data:
+                if item.get("id") == match_id:
+                    intune_data.remove(item)
+                    return dict(item), item["id"]
         config_match_count = len(match_info)
         intune_item = None
         intune_id = None
@@ -626,7 +683,7 @@ class BaseUpdateModule(BaseGraphModule):
             self.downstream_id = downstream_data.get("id", "")
         else:
             self.downstream_object, self.downstream_id = self.get_match_data(
-                downstream_data, self.match_info
+                downstream_data, self.match_info, self.match_id
             )
 
         if self.downstream_object:

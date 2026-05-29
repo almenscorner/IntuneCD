@@ -3,6 +3,6 @@ testfixtures>=7.0
 deepdiff>=5.6.0
 requests
 msal
-pytest==6.2.5
-pytest-cov==3.0.0
+pytest>=8.3
+pytest-cov>=5.0
 pytablewriter

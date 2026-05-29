@@ -29,20 +29,25 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
         self.assignment_key = "deviceHealthScriptAssignments"
 
     def _get_script_data(self, filename: str) -> tuple[str, str]:
-        fname_id = filename.split("__")
         detection_script_name = ""
         remediation_script_name = ""
-
-        if len(fname_id) > 1:
-            fname_id = fname_id[1].replace(".json", "").replace(".yaml", "")
-        else:
-            fname_id = ""
 
         # Get all remediation scripts and detection scripts files
         script_files = os.listdir(self.script_data_path)
 
-        # Filter out files that matches the id
-        script_files = [f for f in script_files if fname_id in f]
+        # Prefer the filename prefix used when backups do not append ids.
+        filename_prefix = os.path.splitext(filename)[0]
+        prefix_matches = [
+            f for f in script_files if f.startswith(f"{filename_prefix}_")
+        ]
+        if prefix_matches:
+            script_files = prefix_matches
+        else:
+            filename_parts = filename_prefix.rsplit("__", 1)
+            if len(filename_parts) > 1:
+                script_files = [f for f in script_files if filename_parts[1] in f]
+            else:
+                script_files = []
 
         # Set detection and remediation script name and path
         for f in script_files:
@@ -103,7 +108,12 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
                 "",
             )
 
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 self.config_type = "Proactive Remediation"
                 self.notify = True
                 self.exclude_paths = [
@@ -116,6 +126,7 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
                     repo_data.pop("deviceHealthScriptType", None)
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                     }

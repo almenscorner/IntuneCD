@@ -9,6 +9,9 @@ from .process_scope_tags import ProcessScopeTags
 class BaseBackupModule(BaseGraphModule):
     """Base class for backup modules."""
 
+    REMOVE_CHARACTERS = '/\\:*?<>"|'
+    ZERO_WIDTH_CHARACTERS = "\u200b\u200c\u200d\u2060\ufeff"
+
     def __init__(
         self,
         path: str = None,
@@ -80,11 +83,11 @@ class BaseBackupModule(BaseGraphModule):
             str: The prepared filename
         """
 
-        remove_characters = '/\\:*?<>"|'
         if not isinstance(filename, str):
             filename = str(filename)
-        for character in remove_characters:
-            filename = filename.replace(character, "_")
+        filename = re.sub(r"[\x00-\x1f\x7f]+", "", filename)
+        filename = re.sub(rf"[{re.escape(self.ZERO_WIDTH_CHARACTERS)}]+", "", filename)
+        filename = re.sub(rf"[{re.escape(self.REMOVE_CHARACTERS)}]", "_", filename)
 
         return filename
 

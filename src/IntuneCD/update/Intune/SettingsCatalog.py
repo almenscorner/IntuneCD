@@ -60,7 +60,12 @@ class SettingsCatalogUpdateModule(BaseUpdateModule):
                 if settings:
                     profile["settings"] = settings
 
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 repo_data = self.load_repo_data(filename)
                 if repo_data:
                     if (
@@ -72,6 +77,7 @@ class SettingsCatalogUpdateModule(BaseUpdateModule):
                             msg=f'Skipping "{repo_data["name"]}", Endpoint detection and response is currently not supported...',
                         )
                         continue
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "name": repo_data.get("name"),
                         "technologies": repo_data.get("technologies"),

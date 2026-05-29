@@ -11,11 +11,11 @@ def import_update_module(module_path: str):
     Dynamically imports a update module, handling both installed and local Git repository cases.
     """
     try:
-        # Try importing as an installed package
-        return importlib.import_module(module_path, package="IntuneCD")
+        # Resolve relative to the package this file is part of, so dev runs
+        # (src.IntuneCD.*) and installed runs (IntuneCD.*) both work.
+        return importlib.import_module(module_path, package=__package__)
     except ModuleNotFoundError:
         try:
-            # If that fails, assume we're running locally and try direct relative import
             return importlib.import_module(module_path)
         except ModuleNotFoundError as e:
             print(f"[ERROR] Could not import {module_path}: {e}")
@@ -205,4 +205,7 @@ def update_intune(
                 if result:
                     diff_summary.append(result)
             except Exception as e:
+                # import traceback
+
                 print(f"[ERROR] {module_name} failed with exception: {e}")
+                # traceback.print_exc()

@@ -53,12 +53,12 @@ def escape_markdown(text):
     :return: The escaped text
     """
     # Regex to match http/https links
-    link_pattern = re.compile(r'(https?://[^\s\)\]\}]+)')
+    link_pattern = re.compile(r"(https?://[^\s\)\]\}]+)")
     parts = []
     last_end = 0
     for match in link_pattern.finditer(text):
         # Escape markdown in text before the link
-        before = text[last_end:match.start()]
+        before = text[last_end : match.start()]
         escaped = re.sub(r"([\_*\[\]()\{\}`>\#\+\-=|\.!])", r"\\\1", before)
         parts.append(escaped)
         # Add the link unescaped
@@ -68,7 +68,7 @@ def escape_markdown(text):
     after = text[last_end:]
     escaped_after = re.sub(r"([\_*\[\]()\{\}`>\#\+\-=|\.!])", r"\\\1", after)
     parts.append(escaped_after)
-    return ''.join(parts)
+    return "".join(parts)
 
 
 def sanitize_text(text):
@@ -77,9 +77,9 @@ def sanitize_text(text):
     :param text: The text to be sanitized
     :return: The sanitized text
     """
-    text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'[\r\n]+', '\n', text)
-    text = re.sub(r'[^\x20-\x7E\n]', '', text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"[\r\n]+", "\n", text)
+    text = re.sub(r"[^\x20-\x7E\n]", "", text)
     return text.strip()
 
 
@@ -89,7 +89,7 @@ def convert_newlines_to_br(text):
     :param text: The input text
     :return: Text with newlines replaced by <br>
     """
-    return text.replace('\n', '<br>')
+    return text.replace("\n", "<br>")
 
 
 def assignment_table(data):
@@ -144,16 +144,14 @@ def assignment_table(data):
                 [
                     intent,
                     target,
-                    assignment["target"][
-                        "deviceAndAppManagementAssignmentFilterType"
-                    ],
-                    assignment["target"][
-                        "deviceAndAppManagementAssignmentFilterId"
-                    ],
+                    assignment["target"]["deviceAndAppManagementAssignmentFilterType"],
+                    assignment["target"]["deviceAndAppManagementAssignmentFilterId"],
                 ]
             )
 
-            assignment_list.sort(key=lambda x: x[0], reverse=True)  # Sort by the 'Intent' column in reverse order
+            assignment_list.sort(
+                key=lambda x: x[0], reverse=True
+            )  # Sort by the 'Intent' column in reverse order
             table = write_assignment_table(assignment_list, headers)
 
     return table
@@ -181,9 +179,11 @@ def is_base64(s):
             decoded = base64.b64decode(s.encode())
         else:
             decoded = base64.b64decode(s)
-        # If decoding succeeds and the decoded bytes match the original string, it's a valid base64-encoded string
-        return decoded == s.encode()
-    except (TypeError, binascii.Error):
+        # Verify the decoded bytes are valid UTF-8
+        decoded.decode("utf-8")
+        # If decoding succeeds and re-encoding matches the original, it's a valid base64-encoded string
+        return base64.b64encode(decoded).decode("utf-8") == s
+    except (TypeError, binascii.Error, UnicodeDecodeError):
         # If decoding fails, it's not a valid base64-encoded string
         return False
 
@@ -256,6 +256,10 @@ def clean_list(data, decode):
     def simple_value_to_string(key, val) -> str:
         if decode and is_base64(val):
             val = decode_base64(val)
+            val = (
+                val.replace("\r\n", "<br>").replace("\r", "<br>").replace("\n", "<br>")
+            )
+            return f"**{key}:** <details><summary>Click to expand...</summary>{val}</details><br/>"
 
         if isinstance(val, str):
             val = val.replace("\\", "\\\\")
@@ -279,6 +283,8 @@ def clean_list(data, decode):
     def string(s) -> str:
         if decode and is_base64(s):
             s = decode_base64(s)
+            s = s.replace("\r\n", "<br>").replace("\r", "<br>").replace("\n", "<br>")
+            return f"<details><summary>Click to expand...</summary>{s}</details>"
 
         if len(s) > 200:
             string = f"<details><summary>Click to expand...</summary>{s}</details>"
@@ -648,8 +654,8 @@ def extract_setting(setting_instance, settings_lookup):
         :return: The processed string with backslashes properly escaped for Markdown
         """
         escapable = r"_*\[\](){}#`>+-=|.!"
-        value = re.sub(rf'(?<!\\)\\([{re.escape(escapable)}])', r'\\\\\\\1', value)
-        value = re.sub(rf'(?<!\\)\\(?![{re.escape(escapable)}])', r'\\\\', value)
+        value = re.sub(rf"(?<!\\)\\([{re.escape(escapable)}])", r"\\\\\\\1", value)
+        value = re.sub(rf"(?<!\\)\\(?![{re.escape(escapable)}])", r"\\\\", value)
         return value
 
     setting_definition_id = setting_instance.get("settingDefinitionId", "")
@@ -671,13 +677,19 @@ def extract_setting(setting_instance, settings_lookup):
     description = convert_newlines_to_br(description)
     # Append info URLs to description
     if info_urls:
-        links = "<br>".join([f'[{url}]({url})' for i, url in enumerate(info_urls)])
+        links = "<br>".join([f"[{url}]({url})" for i, url in enumerate(info_urls)])
         description = f"{description}<br>InfoUrls:<br>{links}" if description else links
-    description = f"<details><summary>Click to expand...</summary>{description}</details>" if description else ""
+    description = (
+        f"<details><summary>Click to expand...</summary>{description}</details>"
+        if description
+        else ""
+    )
 
     if "simpleSettingValue" in setting_instance:
         value = setting_instance["simpleSettingValue"].get("value", "")
-        formatted_value = escape_backslash_for_md(rf"{value}") if value != "" else "Not configured"
+        formatted_value = (
+            escape_backslash_for_md(rf"{value}") if value != "" else "Not configured"
+        )
         return [[display_name, formatted_value, description]]
 
     elif "simpleSettingCollectionValue" in setting_instance:
@@ -701,9 +713,15 @@ def extract_setting(setting_instance, settings_lookup):
         if value and "options" in definition:
             for option in definition["options"]:
                 if option.get("value") == value or option.get("itemId") == value:
-                    option_display_name = option.get("displayName") or option.get("name")
+                    option_display_name = option.get("displayName") or option.get(
+                        "name"
+                    )
                     break
-        formatted_value = option_display_name if option_display_name else (value if value else "Not configured")
+        formatted_value = (
+            option_display_name
+            if option_display_name
+            else (value if value else "Not configured")
+        )
         rows = []
         rows.append([display_name, formatted_value, description])
         for child in children:
@@ -788,32 +806,48 @@ def document_settings_catalog(
             config_table_list = []
 
             for setting in repo_data.get("settings", []):
-                rows = extract_setting(setting.get("settingInstance", {}), settings_lookup)
+                rows = extract_setting(
+                    setting.get("settingInstance", {}), settings_lookup
+                )
                 for row in rows:
                     setting_name = row[0]
                     value = row[1]
                     description = row[2]
-                    setting_definition_id = setting.get("settingInstance", {}).get("settingDefinitionId", "")
+                    setting_definition_id = setting.get("settingInstance", {}).get(
+                        "settingDefinitionId", ""
+                    )
                     definition = settings_lookup.get(setting_definition_id, {})
                     category_id = definition.get("categoryId", "")
-                    category_name = categories_lookup.get(category_id, {}).get("displayName", "")
-                    root_category_id = categories_lookup.get(category_id, {}).get("rootCategoryId", "")
-                    root_category_name = categories_lookup.get(root_category_id, {}).get("displayName", "")
+                    category_name = categories_lookup.get(category_id, {}).get(
+                        "displayName", ""
+                    )
+                    root_category_id = categories_lookup.get(category_id, {}).get(
+                        "rootCategoryId", ""
+                    )
+                    root_category_name = categories_lookup.get(
+                        root_category_id, {}
+                    ).get("displayName", "")
 
-                    if max_length and isinstance(value, str) and len(value) > max_length:
+                    if (
+                        max_length
+                        and isinstance(value, str)
+                        and len(value) > max_length
+                    ):
                         value = "Value too long to display"
-                    config_table_list.append({
-                        "setting_name": setting_name,
-                        "value": value,
-                        "description": description,
-                        "category_name": category_name,
-                        "root_category_name": root_category_name
-                    })
+                    config_table_list.append(
+                        {
+                            "setting_name": setting_name,
+                            "value": value,
+                            "description": description,
+                            "category_name": category_name,
+                            "root_category_name": root_category_name,
+                        }
+                    )
 
             # Sort by category_name, then root_category_name
             config_table_list_sorted = sorted(
                 config_table_list,
-                key=lambda x: (x["root_category_name"], x["category_name"])
+                key=lambda x: (x["root_category_name"], x["category_name"]),
             )
 
             # Group items by root_category_name and category_name
@@ -821,14 +855,17 @@ def document_settings_catalog(
             for item in config_table_list_sorted:
                 grouped[item["root_category_name"]][item["category_name"]].append(item)
 
-
             # Output file logic
-            config_name = repo_data.get("name", os.path.splitext(os.path.basename(filename))[0])
+            config_name = repo_data.get(
+                "name", os.path.splitext(os.path.basename(filename))[0]
+            )
             safe_config_name = re.sub(r'[<>:"/\\|?*]', "_", config_name)
             if split_per_config:
                 if not os.path.exists(f"{configpath}/docs"):
                     os.makedirs(f"{configpath}/docs")
-                config_outpath = os.path.join(f"{configpath}/docs", f"{safe_config_name}.md")
+                config_outpath = os.path.join(
+                    f"{configpath}/docs", f"{safe_config_name}.md"
+                )
                 md_file(config_outpath)
                 target_md = config_outpath
                 top_header = f"# {config_name}"
@@ -860,8 +897,12 @@ def document_settings_catalog(
                         else:
                             table_data.append([f"**{root_cat}** > **{cat}**", "", ""])
                         for i in items:
-                            table_data.append([i["setting_name"], i["value"], i["description"]])
-                table_md = write_table(table_data, headers=["Setting", "Value", "Description"])
+                            table_data.append(
+                                [i["setting_name"], i["value"], i["description"]]
+                            )
+                table_md = write_table(
+                    table_data, headers=["Setting", "Value", "Description"]
+                )
                 md.write(str(table_md) + "\n")
 
         except Exception as e:

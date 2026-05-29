@@ -137,7 +137,12 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
                 "#microsoft.graph.macOSCustomConfiguration",
             ]
 
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 self.notify = True
                 self.config_type = "Device Configuration"
 
@@ -145,6 +150,7 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
                 if repo_data:
                     if "@odata.type" not in repo_data:
                         continue
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "displayName": repo_data.get("displayName"),
                         "@odata.type": repo_data.get("@odata.type"),

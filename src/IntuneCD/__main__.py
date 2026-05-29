@@ -7,6 +7,7 @@ from IntuneCD.run_documentation import (
     start as run_documentation,
 )
 from IntuneCD.run_update import get_parser as get_update_parser, start as run_update
+from IntuneCD.run_compare import get_parser as get_compare_parser, start as run_compare
 from importlib.metadata import version, PackageNotFoundError
 
 
@@ -79,6 +80,11 @@ def main():
         "document", parents=[get_documentation_parser(include_help=False)]
     )
     documentation_parser.set_defaults(func=run_documentation)
+
+    compare_parser = subparsers.add_parser(
+        "compare", parents=[get_compare_parser(include_help=False)]
+    )
+    compare_parser.set_defaults(func=run_compare)
 
     args = parser.parse_args()
     args.func(args)

@@ -48,17 +48,25 @@ class AppConfigurationBackupModule(BaseBackupModule):
             return None
 
         if self.graph_data["value"]:
-            item = ""
             for item in self.graph_data["value"]:
-                for app in item["targetedMobileApps"]:
-                    app_data = self.make_graph_request(
-                        endpoint=self.endpoint + self.APP_ENDPOINT + "/" + app
+                app = None
+                try:
+                    for app in item["targetedMobileApps"]:
+                        app_data = self.make_graph_request(
+                            endpoint=self.endpoint + self.APP_ENDPOINT + "/" + app
+                        )
+                        if app_data:
+                            item.pop("targetedMobileApps")
+                            item["targetedMobileApps"] = {}
+                            item["targetedMobileApps"]["appName"] = app_data[
+                                "displayName"
+                            ]
+                            item["targetedMobileApps"]["type"] = app_data["@odata.type"]
+                except Exception as e:
+                    self.log(
+                        tag="error",
+                        msg=f"Error getting app data for App Configuration {item.get('displayName', 'Unknown')} with app id {app}: {e}",
                     )
-                    if app_data:
-                        item.pop("targetedMobileApps")
-                        item["targetedMobileApps"] = {}
-                        item["targetedMobileApps"]["appName"] = app_data["displayName"]
-                        item["targetedMobileApps"]["type"] = app_data["@odata.type"]
                 if item.get("payloadJson"):
                     item["payloadJson"] = self.decode_base64(item["payloadJson"])
                     item["payloadJson"] = json.loads(item["payloadJson"])

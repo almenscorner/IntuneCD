@@ -260,9 +260,9 @@ class ComplianceUpdateModule(BaseUpdateModule):
                         0
                     ]["id"]
                 else:
-                    action[
-                        "notificationTemplateId"
-                    ] = "00000000-0000-0000-0000-000000000000"
+                    action["notificationTemplateId"] = (
+                        "00000000-0000-0000-0000-000000000000"
+                    )
 
                 action.pop("notificationTemplateName")
 
@@ -283,7 +283,12 @@ class ComplianceUpdateModule(BaseUpdateModule):
                 "/assignments",
             )
 
-            for filename in os.listdir(self.path):
+            filenames = os.listdir(self.path)
+            skip = self._duplicate_filenames_to_skip(filenames)
+
+            for filename in filenames:
+                if filename in skip:
+                    continue
                 # reset params
                 self.params = None
                 self.create_request = None
@@ -295,6 +300,7 @@ class ComplianceUpdateModule(BaseUpdateModule):
                     self.create_request = None
                     if "technologies" not in repo_data:
                         continue
+                    self.match_id = self._match_id_from_filename(filename)
                     self.match_info = {
                         "name": repo_data.get("name"),
                         "technologies": repo_data.get("technologies"),
@@ -323,9 +329,9 @@ class ComplianceUpdateModule(BaseUpdateModule):
                     repo_data = self._remove_compliance_keys(repo_data)
 
                     for item in intune_data["value"]:
-                        for action in item["scheduledActionsForRule"][0][
-                            "scheduledActionConfigurations"
-                        ]:
+                        for action in item["scheduledActionsForRule"][0].get(
+                            "scheduledActionConfigurations", []
+                        ):
                             self.remove_keys(action)
 
                     try:

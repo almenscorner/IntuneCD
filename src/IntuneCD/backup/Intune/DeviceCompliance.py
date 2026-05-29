@@ -167,9 +167,9 @@ class DeviceComplianceBackupModule(BaseBackupModule):
             for action in item["scheduledActionsForRule"]:
                 self.remove_keys(action)
                 self._get_notification_template(action)
-            for config in item["scheduledActionsForRule"][0][
-                "scheduledActionConfigurations"
-            ]:
+            for config in item["scheduledActionsForRule"][0].get(
+                "scheduledActionConfigurations", []
+            ):
                 self.remove_keys(config)
 
         try:
