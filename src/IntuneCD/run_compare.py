@@ -14,9 +14,43 @@ import argparse
 import json
 import os
 import re
+import sys
 
 import yaml
 from deepdiff import DeepDiff
+
+
+def _color_enabled() -> bool:
+    if os.environ.get("NO_COLOR"):
+        return False
+    if os.environ.get("FORCE_COLOR"):
+        return True
+    return sys.stdout.isatty()
+
+
+class _C:
+    """ANSI color codes. All empty strings when color is disabled."""
+
+    RESET = ""
+    BOLD = ""
+    DIM = ""
+    RED = ""
+    GREEN = ""
+    YELLOW = ""
+    CYAN = ""
+    MAGENTA = ""
+
+    @classmethod
+    def enable(cls):
+        cls.RESET = "\033[0m"
+        cls.BOLD = "\033[1m"
+        cls.DIM = "\033[2m"
+        cls.RED = "\033[31m"
+        cls.GREEN = "\033[32m"
+        cls.YELLOW = "\033[33m"
+        cls.CYAN = "\033[36m"
+        cls.MAGENTA = "\033[35m"
+
 
 # Keys that are Intune-generated metadata and should not affect drift results.
 # Mirrors the logic in IntuneCDBase.remove_keys().
@@ -122,7 +156,9 @@ def _process_diffs(diff: dict) -> list:
                 {
                     "setting": _setting(key),
                     "source_val": "",
-                    "target_val": str(list(diff["iterable_item_removed"].values()))[:100],
+                    "target_val": str(list(diff["iterable_item_removed"].values()))[
+                        :100
+                    ],
                 }
             )
 
@@ -132,7 +168,9 @@ def _process_diffs(diff: dict) -> list:
 def _collect_files(root: str) -> dict[str, str]:
     """Return {relative_path: absolute_path} for all JSON/YAML files under root."""
     files = {}
-    for dirpath, _, filenames in os.walk(root):
+    skip_dirs = {"__archive__"}
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in skip_dirs]
         for filename in filenames:
             if filename.endswith((".json", ".yaml")):
                 abs_path = os.path.join(dirpath, filename)
@@ -250,6 +288,19 @@ def get_parser(include_help=True):
         help="Additional keys to strip before comparing, separated by space.",
         nargs="+",
     )
+    parser.add_argument(
+        "--no-color",
+        help="Disable colored output. Color is also disabled when stdout is not a TTY or NO_COLOR is set.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--html",
+        help=(
+            "Also write a self-contained HTML report alongside the JSON output. "
+            "The HTML file uses the same path as -o with a .html extension."
+        ),
+        action="store_true",
+    )
 
     return parser
 
@@ -260,37 +311,71 @@ def start(args=None):
 
     extra_keys = set(args.exclude_keys) if args.exclude_keys else None
 
-    print(f"Comparing:\n  source: {args.source}\n  target: {args.target}\n")
+    use_color = False if getattr(args, "no_color", False) else _color_enabled()
+    if use_color:
+        _C.enable()
+
+    print(
+        f"Comparing:\n  {_C.BOLD}source:{_C.RESET} {args.source}\n"
+        f"  {_C.BOLD}target:{_C.RESET} {args.target}\n"
+    )
 
     result = compare(args.source, args.target, extra_keys)
 
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
 
-    print(f"{'=' * 80}")
+    html_path = None
+    if getattr(args, "html", False):
+        from .intunecdlib.compare_html import render_html
+
+        base, _ = os.path.splitext(args.output)
+        html_path = f"{base}.html"
+        with open(html_path, "w", encoding="utf-8") as f:
+            _ = f.write(render_html(result))
+
+    print(f"{_C.DIM}{'=' * 80}{_C.RESET}")
     if result["missing_in_target"]:
-        print(f"In source but not in target ({len(result['missing_in_target'])}):")
+        print(
+            f"{_C.BOLD}In source but not in target "
+            f"({len(result['missing_in_target'])}):{_C.RESET}"
+        )
         for p in result["missing_in_target"]:
-            print(f"  + {p}")
+            print(f"  {_C.GREEN}+ {p}{_C.RESET}")
 
     if result["missing_in_source"]:
-        print(f"In target but not in source ({len(result['missing_in_source'])}):")
+        print(
+            f"{_C.BOLD}In target but not in source "
+            f"({len(result['missing_in_source'])}):{_C.RESET}"
+        )
         for p in result["missing_in_source"]:
-            print(f"  - {p}")
+            print(f"  {_C.RED}- {p}{_C.RESET}")
 
     if result["changes"]:
-        print(f"\nConfigurations with differences ({len(result['changes'])}):")
+        print(
+            f"\n{_C.BOLD}Configurations with differences "
+            f"({len(result['changes'])}):{_C.RESET}"
+        )
         for change in result["changes"]:
-            print(f"\n  [{change['config_type']}] {change['name']} ({change['file']})")
+            print(
+                f"\n  {_C.CYAN}[{change['config_type']}]{_C.RESET} "
+                f"{_C.BOLD}{change['name']}{_C.RESET} "
+                f"{_C.DIM}({change['file']}){_C.RESET}"
+            )
             for diff in change["diffs"]:
                 print(
-                    f"    setting: {diff['setting']}"
-                    f"  |  source: {diff['source_val']}"
-                    f"  |  target: {diff['target_val']}"
+                    f"    {_C.DIM}setting:{_C.RESET} {_C.YELLOW}{diff['setting']}{_C.RESET}"
+                    f"  {_C.DIM}|{_C.RESET}  {_C.DIM}source:{_C.RESET} {_C.GREEN}{diff['source_val']}{_C.RESET}"
+                    f"  {_C.DIM}|{_C.RESET}  {_C.DIM}target:{_C.RESET} {_C.RED}{diff['target_val']}{_C.RESET}"
                 )
 
-    print(f"\nTotal diffs: {result['diff_count']}")
-    print(f"Summary written to: {args.output}")
+    total_color = _C.GREEN if result["diff_count"] == 0 else _C.YELLOW
+    print(
+        f"\n{_C.BOLD}Total diffs:{_C.RESET} {total_color}{result['diff_count']}{_C.RESET}"
+    )
+    print(f"{_C.BOLD}Summary written to:{_C.RESET} {args.output}")
+    if html_path:
+        print(f"{_C.BOLD}HTML report written to:{_C.RESET} {html_path}")
 
 
 if __name__ == "__main__":
