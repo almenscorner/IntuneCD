@@ -496,7 +496,7 @@ class BaseUpdateModule(BaseGraphModule):
             intune_id (str): The intune configuration id to use
         """
         intune_assignment_data = self.get_object_assignment(
-            intune_id, intune_assignments
+            intune_id, intune_assignments, preserve_group_id=True
         )
         assignment_update = self.update_assignment(
             repo_assignments, intune_assignment_data, self.create_groups
@@ -529,7 +529,7 @@ class BaseUpdateModule(BaseGraphModule):
             intune_id (str): The intune configuration id to use
         """
         intune_assignment_data = self.get_object_assignment(
-            intune_id, intune_assignments
+            intune_id, intune_assignments, preserve_group_id=True
         )
         assignment_update = self.update_assignment(
             repo_assignments, intune_assignment_data, self.create_groups
