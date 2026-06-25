@@ -4,6 +4,7 @@ import json
 import os
 import time
 import uuid
+from copy import deepcopy
 from uuid import uuid4
 
 import requests
@@ -660,19 +661,24 @@ class BaseGraphModule(IntuneCDBase):
 
         return intent_values
 
-    def get_object_assignment(self, data_id: str, responses: list) -> list:
+    def get_object_assignment(
+        self, data_id: str, responses: list, preserve_group_id: bool = False
+    ) -> list:
         """
         Get the object assignment for the object ID.
 
         :param data_id: Id of the object to get the assignment for
         :param responses: List of responses from the batch request
+        :param preserve_group_id: Preserve group IDs for update comparisons
         :return: List of assignments for the object
         """
         if not responses:
             return []
-        remove_keys = {"id", "groupId", "sourceId"}
+        remove_keys = {"id", "sourceId"}
+        if not preserve_group_id:
+            remove_keys.add("groupId")
         assignments_list = [
-            val
+            deepcopy(val)
             for list in responses
             if list and "value" in list
             if data_id in list["@odata.context"]
@@ -682,6 +688,10 @@ class BaseGraphModule(IntuneCDBase):
             for k in remove_keys:
                 value.pop(k, None)
                 value["target"].pop(k, None)
+            if preserve_group_id:
+                value["target"].pop("groupName", None)
+                value["target"].pop("groupType", None)
+                value["target"].pop("membershipRule", None)
 
         return assignments_list
 
@@ -745,6 +755,12 @@ class BaseGraphModule(IntuneCDBase):
 
                 if (
                     diff_object[root]["target"]["@odata.type"]
+                    == "#microsoft.graph.exclusionGroupAssignmentTarget"
+                ):
+                    target = diff_object[root]["target"]["groupId"]
+
+                if (
+                    diff_object[root]["target"]["@odata.type"]
                     == "#microsoft.graph.allDevicesAssignmentTarget"
                 ):
                     target = "All Devices"
@@ -773,12 +789,7 @@ class BaseGraphModule(IntuneCDBase):
         :return: If update is true, return repo data, else return None
         """
 
-        diff = DeepDiff(intune_data, repo_data, ignore_order=True)
-        added = diff.get("iterable_item_added", {})
-        update = False
-
-        if not diff:
-            return None
+        update = not repo_data
 
         for val in repo_data:
             # Request group id based on group name
@@ -852,20 +863,36 @@ class BaseGraphModule(IntuneCDBase):
             ):
                 update = True
 
+        diff = DeepDiff(intune_data, repo_data, ignore_order=True)
+
+        if not diff:
+            return None
+
         if update is True:
-            # Print added assignments
-            added = {
-                key: value
-                for key, value in added.items()
-                if "target" in value and "groupName" not in value["target"]
-            }
+            added = diff.get("iterable_item_added", {})
+            removed = diff.get("iterable_item_removed", {})
+            changed = diff.get("values_changed", {})
+
+            self.log(msg="Updating assignments")
+
             if added:
-                self.log(msg="Updating assignments, added assignments:")
+                self.log(msg="Added assignments:")
                 updates = self.get_added_removed(added)
                 for update in updates:
                     self.log(msg=update)
-                return repo_data
-            return None
+
+            if removed:
+                self.log(msg="Removed assignments:")
+                updates = self.get_added_removed(removed)
+                for update in updates:
+                    self.log(msg=update)
+
+            if changed:
+                self.log(msg="Changed assignments detected")
+
+            return repo_data
+
+        return None
 
     def make_azure_request(
         self,
