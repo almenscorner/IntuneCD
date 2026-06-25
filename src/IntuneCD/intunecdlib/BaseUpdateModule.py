@@ -11,6 +11,36 @@ from .BaseGraphModule import BaseGraphModule
 from .process_scope_tags import ProcessScopeTags
 
 
+_DIFF_IGNORED_LEAF_KEYS = frozenset(
+    {
+        "id",
+        "version",
+        "topicIdentifier",
+        "certificate",
+        "createdDateTime",
+        "lastModifiedDateTime",
+        "isAssigned",
+        "@odata.context",
+        "scheduledActionConfigurations@odata.context",
+        "scheduledActionsForRule@odata.context",
+        "sourceId",
+        "supportsScopeTags",
+        "companyCodes",
+        "isGlobalScript",
+        "highestAvailableVersion",
+        "token",
+        "lastSyncDateTime",
+        "isReadOnly",
+        "secretReferenceValueId",
+        "isEncrypted",
+        "modifiedDateTime",
+        "deployedAppCount",
+        "intunecd_name",
+        "deviceHealthScriptType",
+    }
+)
+
+
 class BaseUpdateModule(BaseGraphModule):
     """This class is the base class for all update modules. It contains methods for updating downstream data."""
 
@@ -121,12 +151,15 @@ class BaseUpdateModule(BaseGraphModule):
                     repo_data,
                     exclude_paths=exclude_paths,
                     ignore_order=True,
+                    verbose_level=2,
                 )
 
-            return DeepDiff(intune_data, repo_data, ignore_order=True)
+            return DeepDiff(
+                intune_data, repo_data, ignore_order=True, verbose_level=2
+            )
 
         if isinstance(repo_data, str):
-            return DeepDiff(intune_data, repo_data)
+            return DeepDiff(intune_data, repo_data, verbose_level=2)
 
     def _process_diffs(self, diff: dict) -> list:
         """Processes the differences between the data and the intune data
@@ -142,8 +175,50 @@ class BaseUpdateModule(BaseGraphModule):
             diffs.extend(self._process_value_changes(diff))
         if "iterable_item_added" in diff or "iterable_item_removed" in diff:
             diffs.extend(self._process_iterable_changes(diff))
+        if "dictionary_item_added" in diff or "dictionary_item_removed" in diff:
+            diffs.extend(self._process_dictionary_changes(diff))
         if "type_changes" in diff:
             diffs.extend(self._process_type_changes(diff))
+
+        return diffs
+
+    def _process_dictionary_changes(self, diff: dict) -> list:
+        """Processes dictionary key additions and removals"""
+        diffs = []
+
+        def get_setting(key: str) -> str:
+            setting = re.search("\\[(.*)\\]", key)
+            return setting[1].split("[")[0] if setting else key
+
+        def leaf_key(path: str) -> str:
+            matches = re.findall(r"\['([^']+)'\]|\[\"([^\"]+)\"\]", path)
+            if not matches:
+                return ""
+            last = matches[-1]
+            return last[0] or last[1]
+
+        def is_ignored(path: str) -> bool:
+            return leaf_key(path) in _DIFF_IGNORED_LEAF_KEYS
+
+        def set_vals(setting: str, new_val: str, old_val: str) -> dict:
+            return {
+                "setting": setting.replace("'", "").replace('"', "").replace("]", ""),
+                "new_val": new_val,
+                "old_val": old_val,
+            }
+
+        if "dictionary_item_added" in diff:
+            for key, value in diff["dictionary_item_added"].items():
+                if is_ignored(key):
+                    continue
+                diffs.append(set_vals(get_setting(key), str(value), ""))
+        if "dictionary_item_removed" in diff:
+            for key, value in diff["dictionary_item_removed"].items():
+                if is_ignored(key):
+                    continue
+                diffs.append(set_vals(get_setting(key), "", str(value)))
+
+        self._log_diffs(diffs, "list changes")
 
         return diffs
 

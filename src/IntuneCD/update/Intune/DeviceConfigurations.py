@@ -44,6 +44,10 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
 
             payload_diff = self.get_diffs(repo_payload_data, intune_payload_data, None)
             if payload_diff:
+                repo_payload_raw = self.load_script_file(payload_path)
+                if repo_payload_raw is not None:
+                    repo_data["payload"] = self.encode_base64(repo_payload_raw)
+
                 self.update_downstream_data(
                     self.endpoint + self.CONFIG_ENDPOINT + self.downstream_id,
                     "patch",

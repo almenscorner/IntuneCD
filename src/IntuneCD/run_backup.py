@@ -126,6 +126,7 @@ def get_parser(include_help=True):
             "entraSSPR",
             "entraUserSettings",
             "entraDomains",
+            "VPPreleaseDateTime",
         ],
         nargs="+",
     )
@@ -271,7 +272,15 @@ def start(args=None):
         azure_token = obtain_azure_token(os.environ.get("TENANT_ID"), args.path)
 
     def run_backup(
-        path, output, exclude, token, prefix, append_id, max_workers, platforms, enrich_documentation
+        path,
+        output,
+        exclude,
+        token,
+        prefix,
+        append_id,
+        max_workers,
+        platforms,
+        enrich_documentation,
     ):
         results = []
 

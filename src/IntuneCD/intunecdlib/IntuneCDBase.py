@@ -49,7 +49,7 @@ class IntuneCDBase:
             "VPPusedLicenseCount": "usedLicenseCount",
             "GPlaySyncTime": "lastAppSyncDateTime",
             "CompliancePartnerHeartbeat": "lastHeartbeatDateTime",
-            "VPPeleaseDateTime": "releaseDateTime",
+            "VPPreleaseDateTime": "releaseDateTime",
         }
 
         keys.update(v for k, v in EXCLUDE_KEY_MAP.items() if k in self.exclude)
