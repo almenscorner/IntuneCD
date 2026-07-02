@@ -19,13 +19,15 @@ def get_version():
 
 
 def banner():
-    green = "\033[92m"
     bold = "\033[1m"
     reset = "\033[0m"
-    return (
-        bold
-        + green
-        + r"""
+
+    # Gradient matching the IntuneCD logo: green at the top -> teal/cyan at the
+    # bottom (sampled from the project logo on GitHub).
+    top = (138, 248, 147)
+    bottom = (38, 210, 218)
+
+    art = r"""
           ..
         ....
        .::::
@@ -39,13 +41,24 @@ def banner():
         :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
         ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
         :::
-        ::
+        ::""".split("\n")
 
-Keep your Intune setup version-controlled and auditable. 
-IntuneCD brings Intune to your CI/CD pipeline and command line with automated backups, updates, and documentation.
-    """
-        + reset
+    steps = max(len(art) - 1, 1)
+    colored = []
+    for i, line in enumerate(art):
+        t = i / steps
+        r = round(top[0] + (bottom[0] - top[0]) * t)
+        g = round(top[1] + (bottom[1] - top[1]) * t)
+        b = round(top[2] + (bottom[2] - top[2]) * t)
+        colored.append(f"{bold}\033[38;2;{r};{g};{b}m{line}{reset}")
+
+    tagline = (
+        "\n\nKeep your Intune setup version-controlled and auditable. \n"
+        "IntuneCD brings Intune to your CI/CD pipeline and command line with "
+        "automated backups, updates, and documentation.\n    "
     )
+
+    return "\n".join(colored) + tagline
 
 
 class BannerHelpFormatter(argparse.RawTextHelpFormatter):
