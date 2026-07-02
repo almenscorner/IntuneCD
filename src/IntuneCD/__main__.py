@@ -20,6 +20,7 @@ def get_version():
 
 def banner():
     bold = "\033[1m"
+    dim = "\033[2m"
     reset = "\033[0m"
 
     # Gradient matching the IntuneCD logo: green at the top -> teal/cyan at the
@@ -27,52 +28,68 @@ def banner():
     top = (138, 248, 147)
     bottom = (38, 210, 218)
 
-    art = r"""
-          ..
-        ....
-       .::::
-      .:::::            ___       _                     ____ ____
-     .::::::           |_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \
-    .:::::::.           | || '_ \| __| | | | '_ \ / _ \ |   | | | |
-   ::::::::::::::.      | || | | | |_| |_| | | | |  __/ |___| |_| |
-  ::::::::::::::.      |___|_| |_|\__|\__,_|_| |_|\___|\____|____/                 _
-        :::::::.       |_ _|_ __ | |_ _   _ _ __   ___    __ _ ___    ___ ___   __| | ___
-        ::::::.         | || '_ \| __| | | | '_ \ / _ \  / _` / __|  / __/ _ \ / _` |/ _ \
-        :::::.          | || | | | |_| |_| | | | |  __/ | (_| \__ \ | (_| (_) | (_| |  __/
-        ::::           |___|_| |_|\__|\__,_|_| |_|\___|  \__,_|___/  \___\___/ \__,_|\___|
-        :::
-        ::""".split("\n")
+    # Bolt silhouette sampled from the project logo.
+    bolt = [
+        "       ▄██      ",
+        "      ▄███      ",
+        "     ▄████      ",
+        "    ▄█████      ",
+        "   ███████      ",
+        "  ████████▄▄▄▄▄ ",
+        " ███████████████",
+        "███████████████ ",
+        "     ▀███████▀  ",
+        "      ██████▀   ",
+        "      █████▀    ",
+        "      ████▀     ",
+        "      ███▀      ",
+        "      ██▀       ",
+    ]
 
-    steps = max(len(art) - 1, 1)
-    colored = []
-    for i, line in enumerate(art):
+    wordmark = [
+        r" ___       _                     ____ ____",
+        r"|_ _|_ __ | |_ _   _ _ __   ___ / ___|  _ \ ",
+        r" | || '_ \| __| | | | '_ \ / _ \ |   | | | |",
+        r" | || | | | |_| |_| | | | |  __/ |___| |_| |",
+        r"|___|_| |_|\__|\__,_|_| |_|\___|\____|____/ ",
+    ]
+
+    # The bolt carries the gradient; the wordmark stays plain like the logo,
+    # with the tagline dimmed underneath.
+    text_block = [f"{bold}{line}{reset}" for line in wordmark]
+    text_block += ["", f"{dim}Intune as code{reset}"]
+    pad_top = (len(bolt) - len(text_block)) // 2
+
+    steps = max(len(bolt) - 1, 1)
+    lines = []
+    for i, bolt_line in enumerate(bolt):
         t = i / steps
         r = round(top[0] + (bottom[0] - top[0]) * t)
         g = round(top[1] + (bottom[1] - top[1]) * t)
         b = round(top[2] + (bottom[2] - top[2]) * t)
-        colored.append(f"{bold}\033[38;2;{r};{g};{b}m{line}{reset}")
+        text = text_block[i - pad_top] if 0 <= i - pad_top < len(text_block) else ""
+        lines.append(f"  \033[38;2;{r};{g};{b}m{bolt_line}{reset}  {text}".rstrip())
 
     tagline = (
-        "\n\nKeep your Intune setup version-controlled and auditable. \n"
+        "\n\nKeep your Intune setup version-controlled and auditable.\n"
         "IntuneCD brings Intune to your CI/CD pipeline and command line with "
-        "automated backups, updates, and documentation.\n    "
+        "automated backups, updates, and documentation."
     )
 
-    return "\n".join(colored) + tagline
+    return "\n".join(lines) + tagline
 
 
-class BannerHelpFormatter(argparse.RawTextHelpFormatter):
-    def add_usage(self, usage, actions, groups, prefix=None):
-        if prefix is None:
-            prefix = ""
-        banner_text = banner()
-        super().add_usage(
-            banner_text + "\n\n" + (prefix or "Usage: "), actions, groups, ""
-        )
+class BannerArgumentParser(argparse.ArgumentParser):
+    # The banner is prepended in format_help rather than via a custom
+    # formatter: argparse reuses the parent's formatter_class internally to
+    # compute each subcommand's prog, so a banner-injecting formatter leaks
+    # the banner into every subparser's usage line.
+    def format_help(self):
+        return banner() + "\n\n" + super().format_help()
 
 
 def main():
-    parser = argparse.ArgumentParser(formatter_class=BannerHelpFormatter)
+    parser = BannerArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     parser.add_argument(
@@ -101,3 +118,7 @@ def main():
 
     args = parser.parse_args()
     args.func(args)
+
+
+if __name__ == "__main__":
+    main()
