@@ -7,11 +7,12 @@ from datetime import datetime
 
 from deepdiff import DeepDiff
 
-from .BaseGraphModule import BaseGraphModule
+from .GraphModule import GraphModule
+from .IntuneCDBase import IntuneCDBase
 from .process_scope_tags import ProcessScopeTags
 
 
-class BaseUpdateModule(BaseGraphModule):
+class BaseUpdateModule(IntuneCDBase):
     """This class is the base class for all update modules. It contains methods for updating downstream data."""
 
     def __init__(
@@ -42,14 +43,12 @@ class BaseUpdateModule(BaseGraphModule):
         """
         self.endpoint = "https://graph.microsoft.com"
         # Variables set from the update run
-        self.token = token
-        self.azure_token = azure_token
+        self.graph = GraphModule(token=token, azure_token=azure_token, report=report)
         self.path = path
         self.filetype = filetype
         self.exclude = exclude
         self.scope_tags = scope_tags
         self.create_groups = create_groups
-        self.report = report
         self.remove = remove
         self.handle_assignment = handle_assignment
         # Default variables, can be overridden in child classes
@@ -291,7 +290,7 @@ class BaseUpdateModule(BaseGraphModule):
         """
 
         try:
-            intune_data = self.make_graph_request(
+            intune_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + endpoint, params=self.params
             )
         except Exception as e:
@@ -314,7 +313,7 @@ class BaseUpdateModule(BaseGraphModule):
         data.pop("assignments", None)
         request_data = json.dumps(data)
         if self.azure_update:
-            self.make_azure_request(
+            self.graph.make_azure_request(
                 endpoint=config_endpoint,
                 params=self.params,
                 data=request_data,
@@ -322,7 +321,7 @@ class BaseUpdateModule(BaseGraphModule):
                 status_code=status_code,
             )
         else:
-            self.make_graph_request(
+            self.graph.make_graph_request(
                 endpoint=config_endpoint,
                 params=self.params,
                 data=request_data,
@@ -354,7 +353,7 @@ class BaseUpdateModule(BaseGraphModule):
 
                 self.log(msg=f"Removing {self.config_type}: {config_name}")
                 try:
-                    self.make_graph_request(
+                    self.graph.make_graph_request(
                         endpoint=self.endpoint + config_endpoint + item["id"],
                         params=self.params,
                         method="DELETE",
@@ -378,7 +377,7 @@ class BaseUpdateModule(BaseGraphModule):
         self.log(msg=f"{self.config_type} {self.name} not found, creating: {self.name}")
         data.pop("assignments", None)
         request_data = json.dumps(data)
-        self.create_request = self.make_graph_request(
+        self.create_request = self.graph.make_graph_request(
             endpoint=self.endpoint + config_endpoint,
             params=self.params,
             data=request_data,
@@ -495,15 +494,15 @@ class BaseUpdateModule(BaseGraphModule):
             intune_assignments (dict): The intune assignments to compare
             intune_id (str): The intune configuration id to use
         """
-        intune_assignment_data = self.get_object_assignment(
+        intune_assignment_data = self.graph.get_object_assignment(
             intune_id, intune_assignments
         )
-        assignment_update = self.update_assignment(
+        assignment_update = self.graph.update_assignment(
             repo_assignments, intune_assignment_data, self.create_groups
         )
         if assignment_update is not None:
             request_data = {assignment_key: assignment_update}
-            self.make_graph_request(
+            self.graph.make_graph_request(
                 endpoint=self.endpoint
                 + "/beta"
                 + self.assignment_endpoint
@@ -528,16 +527,16 @@ class BaseUpdateModule(BaseGraphModule):
             intune_assignments (dict): The intune assignments to compare
             intune_id (str): The intune configuration id to use
         """
-        intune_assignment_data = self.get_object_assignment(
+        intune_assignment_data = self.graph.get_object_assignment(
             intune_id, intune_assignments
         )
-        assignment_update = self.update_assignment(
+        assignment_update = self.graph.update_assignment(
             repo_assignments, intune_assignment_data, self.create_groups
         )
         if assignment_update is not None:
             for assignment in assignment_update:
                 request_data = {assignment_key: assignment["target"]}
-                self.make_graph_request(
+                self.graph.make_graph_request(
                     endpoint=self.endpoint
                     + "/beta"
                     + self.assignment_endpoint
