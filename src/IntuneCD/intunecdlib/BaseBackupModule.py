@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
 
-from .BaseGraphModule import BaseGraphModule
+from .GraphModule import GraphModule
+from .IntuneCDBase import IntuneCDBase
 from .process_audit_data import ProcessAuditData
 from .process_scope_tags import ProcessScopeTags
 
 
-class BaseBackupModule(BaseGraphModule):
+class BaseBackupModule(IntuneCDBase):
     """Base class for backup modules."""
 
     REMOVE_CHARACTERS = '/\\:*?<>"|'
@@ -48,8 +49,7 @@ class BaseBackupModule(BaseGraphModule):
             "windows": ["windows", "win32", "win"],
         }
         # Variables set from the backup run
-        self.token = token
-        self.azure_token = azure_token
+        self.graph = GraphModule(token=token, azure_token=azure_token, report=False)
         self.audit = audit
         self.path = path
         self.filetype = filetype
@@ -63,8 +63,8 @@ class BaseBackupModule(BaseGraphModule):
         self.assignment_endpoint = None
         self.assignment_extra_url = None
         self.assignment_responses = None
+        self.app_protection = False
         self.config_audit_data = False
-        self.report = False
         self.clean_data = True
         self.audit_filter = None
         self.audit_data = None
@@ -269,7 +269,9 @@ class BaseBackupModule(BaseGraphModule):
             )
 
         if assignment_responses:
-            assignments = self.get_object_assignment(data["id"], assignment_responses)
+            assignments = self.graph.get_object_assignment(
+                data["id"], assignment_responses
+            )
             if assignments:
                 data["assignments"] = assignments
 
@@ -354,12 +356,15 @@ class BaseBackupModule(BaseGraphModule):
                 getattr(self, "has_assignments", True) is not False
                 and self.assignment_responses is None
             ):
-                self.assignment_responses = self.batch_assignment(
-                    data, self.assignment_endpoint, self.assignment_extra_url
+                self.assignment_responses = self.graph.batch_assignment(
+                    data,
+                    self.assignment_endpoint,
+                    self.assignment_extra_url,
+                    app_protection=self.app_protection,
                 )
 
         if self.audit and self.config_audit_data is False:
-            self.audit_data = self.make_audit_request(self.audit_filter)
+            self.audit_data = self.graph.make_audit_request(self.audit_filter)
 
         if isinstance(data, list):
             return self._process_multiple_items(
