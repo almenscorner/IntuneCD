@@ -35,7 +35,7 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT
             )
         except Exception as e:
@@ -86,7 +86,7 @@ class DeviceConfigurationBackupModule(BaseBackupModule):
                             decoded_oma["omaUri"] = setting["omaUri"]
                             decoded_oma["isEncrypted"] = False
                             decoded_oma["secretReferenceValueId"] = None
-                            oma_value = self.make_graph_request(
+                            oma_value = self.graph.make_graph_request(
                                 endpoint=self.endpoint
                                 + self.CONFIG_ENDPOINT
                                 + "/"

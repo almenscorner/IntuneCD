@@ -47,7 +47,7 @@ class ComplianceScriptsUpdateModule(BaseUpdateModule):
     def _get_script_details(self, intune_data: dict) -> dict[str, any]:
         new_intune_data = []
         for item in intune_data["value"]:
-            script_data = self.make_graph_request(
+            script_data = self.graph.make_graph_request(
                 self.endpoint + self.CONFIG_ENDPOINT + item["id"]
             )
 

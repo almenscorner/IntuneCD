@@ -63,7 +63,7 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
         for setting in intune_data.get("omaSettings"):
             if setting["isEncrypted"]:
                 decoded_oma = {}
-                oma_value = self.make_graph_request(
+                oma_value = self.graph.make_graph_request(
                     endpoint=self.endpoint
                     + self.CONFIG_ENDPOINT
                     + "/"
@@ -126,7 +126,7 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",

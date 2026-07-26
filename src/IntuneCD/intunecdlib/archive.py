@@ -69,7 +69,7 @@ class Archive(BaseBackupModule):
             "$orderby": "activityDateTime desc",
         }
 
-        audit_data = self.make_graph_request(
+        audit_data = self.graph.make_graph_request(
             self.audit_endpoint, params=q_params, method="GET"
         )
 

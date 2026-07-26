@@ -33,7 +33,7 @@ class GroupPolicyConfigurationsBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT
             )
         except Exception as e:
@@ -46,7 +46,7 @@ class GroupPolicyConfigurationsBackupModule(BaseBackupModule):
         for item in self.graph_data["value"]:
             definition_endpoint = f"{self.endpoint}{self.CONFIG_ENDPOINT}/{item['id']}/definitionValues?$expand=definition"
             # Get definitions
-            definitions = self.make_graph_request(endpoint=definition_endpoint)
+            definitions = self.graph.make_graph_request(endpoint=definition_endpoint)
 
             if definitions:
                 item["definitionValues"] = definitions["value"]
@@ -55,7 +55,7 @@ class GroupPolicyConfigurationsBackupModule(BaseBackupModule):
                         f"{self.endpoint}{self.CONFIG_ENDPOINT}/{item['id']}/definitionValues/{definition['id']}/"
                         f"presentationValues?$expand=presentation"
                     )
-                    presentation = self.make_graph_request(
+                    presentation = self.graph.make_graph_request(
                         endpoint=presentation_endpoint
                     )
                     definition["presentationValues"] = presentation["value"]

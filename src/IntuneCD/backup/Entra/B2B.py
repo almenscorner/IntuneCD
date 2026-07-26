@@ -31,7 +31,7 @@ class B2BPolicyBackupModule(BaseBackupModule):
         """
 
         try:
-            self.entra_data = self.make_azure_request(self.CONFIG_ENDPOINT)
+            self.entra_data = self.graph.make_azure_request(self.CONFIG_ENDPOINT)
         except Exception as e:
             self.log(
                 tag="error",

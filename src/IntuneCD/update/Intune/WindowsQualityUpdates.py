@@ -41,7 +41,7 @@ class WindowsQualityUpdatesUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",

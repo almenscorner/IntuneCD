@@ -33,7 +33,7 @@ class B2BUpdateModule(BaseUpdateModule):
         """The main method to update the Entra data"""
         if self.path_exists():
             try:
-                entra_data = self.make_azure_request(self.CONFIG_ENDPOINT)
+                entra_data = self.graph.make_azure_request(self.CONFIG_ENDPOINT)
             except Exception as e:
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None

@@ -105,7 +105,7 @@ class DeviceComplianceBackupModule(BaseBackupModule):
                 action.get("notificationTemplateId")
                 != "00000000-0000-0000-0000-000000000000"
             ):
-                notification_template = self.make_graph_request(
+                notification_template = self.graph.make_graph_request(
                     self.endpoint
                     + "/beta/deviceManagement/notificationMessageTemplates/"
                     + action["notificationTemplateId"]
@@ -122,7 +122,7 @@ class DeviceComplianceBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT,
                 params={
                     "$expand": "settings",
@@ -145,7 +145,7 @@ class DeviceComplianceBackupModule(BaseBackupModule):
                         item, detection_script_id_path
                     )
                     # get the script name
-                    detection_script = self.make_graph_request(
+                    detection_script = self.graph.make_graph_request(
                         endpoint=self.endpoint
                         + "/beta/deviceManagement/reusablePolicySettings/",
                         params={"$filter": f"id eq '{detection_script_id}'"},
@@ -158,7 +158,7 @@ class DeviceComplianceBackupModule(BaseBackupModule):
                         item["detectionScriptName"] = None
 
             # get scheduledActionsForRule
-            scheduledActionsForRule = self.make_graph_request(
+            scheduledActionsForRule = self.graph.make_graph_request(
                 endpoint=f"{self.endpoint + self.CONFIG_ENDPOINT}/{item['id']}/scheduledActionsForRule",
                 params={"$expand": "scheduledActionConfigurations"},
             )

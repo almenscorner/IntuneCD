@@ -39,24 +39,24 @@ class SettingsCatalogUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",
             )
 
             profile_ids = [x["id"] for x in intune_data["value"]]
-            batch_data = self.batch_request(
+            batch_data = self.graph.batch_request(
                 profile_ids, "deviceManagement/configurationPolicies/", ""
             )
-            batch_settings = self.batch_request(
+            batch_settings = self.graph.batch_request(
                 profile_ids,
                 "deviceManagement/configurationPolicies/",
                 "/settings?&top=1000",
             )
 
             for profile in batch_data:
-                settings = self.get_object_details(profile["id"], batch_settings)
+                settings = self.graph.get_object_details(profile["id"], batch_settings)
                 if settings:
                     profile["settings"] = settings
 

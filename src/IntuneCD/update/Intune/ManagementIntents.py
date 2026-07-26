@@ -77,7 +77,7 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
             # Create dict that we will use as the request json
             settings = self._build_request_data(repo_setting, intune_setting_id)
             request_data = json.dumps(settings)
-            self.make_graph_request(
+            self.graph.make_graph_request(
                 self.endpoint
                 + self.CONFIG_ENDPOINT
                 + "intents/"
@@ -95,7 +95,7 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
         template_id = repo_data["templateId"]
         repo_data.pop("templateId")
         request_json = json.dumps(repo_data)
-        create_request = self.make_graph_request(
+        create_request = self.graph.make_graph_request(
             endpoint=self.endpoint
             + self.CONFIG_ENDPOINT
             + "templates/"
@@ -119,9 +119,9 @@ class ManagementIntentsUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            intents = self.batch_intents(intune_data)
+            intents = self.graph.batch_intents(intune_data)
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intents["value"],
                 self.assignment_endpoint,
                 "/assignments",

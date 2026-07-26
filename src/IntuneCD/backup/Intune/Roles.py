@@ -37,7 +37,7 @@ class RolesBackupModule(BaseBackupModule):
 
         for group in item:
             try:
-                group_name = self.make_graph_request(
+                group_name = self.graph.make_graph_request(
                     endpoint=f"https://graph.microsoft.com/beta/groups/{group}",
                     params={"$select": "displayName"},
                 )
@@ -61,7 +61,7 @@ class RolesBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT,
                 params={"$filter": "isBuiltIn eq false"},
             )
@@ -74,7 +74,7 @@ class RolesBackupModule(BaseBackupModule):
 
         for item in self.graph_data["value"]:
             if "assignments" not in self.exclude:
-                assignments = self.make_graph_request(
+                assignments = self.graph.make_graph_request(
                     self.endpoint
                     + self.CONFIG_ENDPOINT
                     + f"/{item['id']}/roleAssignments"
@@ -83,7 +83,7 @@ class RolesBackupModule(BaseBackupModule):
                 if assignments["value"]:
                     item["roleAssignments"] = []
                     for assignment in assignments["value"]:
-                        role_assignment = self.make_graph_request(
+                        role_assignment = self.graph.make_graph_request(
                             f"{self.endpoint}/beta/deviceManagement/roleAssignments/{assignment['id']}",
                         )
 

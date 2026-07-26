@@ -129,7 +129,7 @@ class ComplianceUpdateModule(BaseUpdateModule):
             dict[str, any]: The data with the detection script id set
         """
         # get detection script id
-        script_id = self.make_graph_request(
+        script_id = self.graph.make_graph_request(
             self.endpoint + "/beta/deviceManagement/reusablePolicySettings/",
             {"$filter": f"displayName eq '{repo_data['detectionScriptName']}'"},
         )
@@ -155,7 +155,7 @@ class ComplianceUpdateModule(BaseUpdateModule):
         """
         new_intune_data = []
         for item in intune_data["value"]:
-            actions = self.make_graph_request(
+            actions = self.graph.make_graph_request(
                 endpoint=self.endpoint
                 + self.CONFIG_ENDPOINT
                 + item["id"]
@@ -248,7 +248,7 @@ class ComplianceUpdateModule(BaseUpdateModule):
         """
         for action in rule["scheduledActionConfigurations"]:
             if action.get("notificationTemplateName"):
-                notification_template = self.make_graph_request(
+                notification_template = self.graph.make_graph_request(
                     self.endpoint
                     + "/beta/deviceManagement/notificationMessageTemplates/",
                     params={
@@ -277,7 +277,7 @@ class ComplianceUpdateModule(BaseUpdateModule):
             except Exception as e:
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",

@@ -33,7 +33,7 @@ class ActivationLockBackupModule(BaseBackupModule):
         self.log(msg="Backing up Activation Lock Bypass Codes")
 
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT,
                 params={
                     "$select": "id",
@@ -48,7 +48,7 @@ class ActivationLockBackupModule(BaseBackupModule):
             return None
 
         device_ids = [device["id"] for device in self.graph_data["value"]]
-        device_data = self.batch_request(
+        device_data = self.graph.batch_request(
             device_ids,
             "deviceManagement/managedDevices/",
             "?$select=id,deviceName,serialNumber,activationLockBypassCode",

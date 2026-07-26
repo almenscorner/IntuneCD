@@ -137,7 +137,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
         """Match definitions from custom ingestion to definitions in Intune."""
 
         match = 0
-        categories = self.make_graph_request(
+        categories = self.graph.make_graph_request(
             self.endpoint
             + "/beta/deviceManagement/groupPolicyCategories?$expand=definitions($select=id, displayName, categoryPath, classType)&$select=id, displayName&$filter=ingestionSource eq 'custom'",
         )
@@ -203,7 +203,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
         defval_id = None
 
         # Get definition values from API
-        def_vals = self.make_graph_request(
+        def_vals = self.graph.make_graph_request(
             self.endpoint
             + self.CONFIG_ENDPOINT
             + f"{intune_id}/definitionValues?$expand=definition"
@@ -232,7 +232,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
         request_data = json.dumps(json_data.request_json)
 
         # Make API request to update definition values
-        self.make_graph_request(
+        self.graph.make_graph_request(
             endpoint=self.endpoint
             + self.CONFIG_ENDPOINT
             + f"{intune_id}/updateDefinitionValues/",
@@ -263,7 +263,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
         request_data = json.dumps(json_data.request_json)
 
         # Make API request to update definition values
-        self.make_graph_request(
+        self.graph.make_graph_request(
             endpoint=self.endpoint
             + self.CONFIG_ENDPOINT
             + f"{intune_id}/updateDefinitionValues/",
@@ -391,7 +391,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",
@@ -399,7 +399,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
 
             intune_profiles = []
             for profile in intune_data["value"]:
-                definitions = self.make_graph_request(
+                definitions = self.graph.make_graph_request(
                     endpoint=self.endpoint
                     + self.CONFIG_ENDPOINT
                     + profile["id"]
@@ -413,7 +413,7 @@ class GroupPolicyConfigurationsUpdateModule(BaseUpdateModule):
                 profile["definitionValues"] = definitions["value"]
 
                 for definition in profile["definitionValues"]:
-                    presentation = self.make_graph_request(
+                    presentation = self.graph.make_graph_request(
                         endpoint=self.endpoint
                         + self.CONFIG_ENDPOINT
                         + profile["id"]

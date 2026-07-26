@@ -116,7 +116,7 @@ class NotificationTemplateUpdateModule(BaseUpdateModule):
         """
         for locale in repo_data["localizedNotificationMessages"]:
             data = json.dumps(locale)
-            self.make_graph_request(
+            self.graph.make_graph_request(
                 endpoint=self.endpoint
                 + self.CONFIG_ENDPOINT
                 + self.create_request["id"]

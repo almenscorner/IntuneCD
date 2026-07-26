@@ -34,7 +34,7 @@ class RoamingSettingsUpdateModule(BaseUpdateModule):
         """The main method to update the Entra data"""
         if self.path_exists():
             try:
-                entra_data = self.make_azure_request(
+                entra_data = self.graph.make_azure_request(
                     endpoint=self.CONFIG_ENDPOINT, params="?ESRV2=true"
                 )
             except Exception as e:

@@ -35,7 +35,7 @@ class ManagementIntentsBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.intents_graph_data = self.make_graph_request(
+            self.intents_graph_data = self.graph.make_graph_request(
                 endpoint=f"{self.endpoint + self.CONFIG_ENDPOINT}/intents"
             )
         except Exception as e:
@@ -45,7 +45,7 @@ class ManagementIntentsBackupModule(BaseBackupModule):
             )
             return None
         try:
-            self.template_graph_data = self.make_graph_request(
+            self.template_graph_data = self.graph.make_graph_request(
                 endpoint=f"{self.endpoint + self.TEMPALETE_ENDPOINT}"
             )
         except Exception as e:
@@ -58,11 +58,11 @@ class ManagementIntentsBackupModule(BaseBackupModule):
         self.intent_ids = [
             {"id": intent_id["id"]} for intent_id in self.intents_graph_data["value"]
         ]
-        self.assignment_responses = self.batch_assignment(
+        self.assignment_responses = self.graph.batch_assignment(
             self.intent_ids, self.assignment_endpoint, self.assignment_extra_url
         )
 
-        intent_responses = self.batch_intents(self.intents_graph_data)
+        intent_responses = self.graph.batch_intents(self.intents_graph_data)
 
         for item in intent_responses["value"]:
             template_type = None

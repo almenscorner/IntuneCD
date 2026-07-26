@@ -45,7 +45,7 @@ class WindowsEnrollmentProfileUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",
@@ -90,7 +90,9 @@ class WindowsEnrollmentProfileUpdateModule(BaseUpdateModule):
                 if self.remove:
                     # Remvoe any assignments before removing the profile
                     endpoint = f"{self.endpoint}{self.CONFIG_ENDPOINT}{item['id']}{self.assignment_extra_url}"
-                    self.make_graph_request(endpoint, method="delete", status_code=200)
+                    self.graph.make_graph_request(
+                        endpoint, method="delete", status_code=200
+                    )
             self.remove_downstream_data(self.CONFIG_ENDPOINT, intune_data["value"])
 
         return self.diff_summary

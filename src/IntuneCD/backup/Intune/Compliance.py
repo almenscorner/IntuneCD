@@ -44,7 +44,7 @@ class ComplianceBackupModule(BaseBackupModule):
                 action.get("notificationTemplateId")
                 != "00000000-0000-0000-0000-000000000000"
             ):
-                notification_template = self.make_graph_request(
+                notification_template = self.graph.make_graph_request(
                     self.endpoint
                     + "/beta/deviceManagement/notificationMessageTemplates/"
                     + action["notificationTemplateId"]
@@ -63,7 +63,7 @@ class ComplianceBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT,
                 params={
                     "$expand": "scheduledActionsForRule($expand=scheduledActionConfigurations)"
@@ -87,7 +87,7 @@ class ComplianceBackupModule(BaseBackupModule):
             # If there is a deviceCompliancePolicyScript, get the name of the script
             if item.get("deviceCompliancePolicyScript", None):
                 # Get the name of the script
-                script_name = self.make_graph_request(
+                script_name = self.graph.make_graph_request(
                     self.endpoint
                     + "/beta/deviceManagement/deviceComplianceScripts/"
                     + item["deviceCompliancePolicyScript"]["deviceComplianceScriptId"]

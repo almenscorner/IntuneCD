@@ -31,7 +31,7 @@ class RoamingSettingsBackupModule(BaseBackupModule):
         """
 
         try:
-            self.entra_data = self.make_azure_request(
+            self.entra_data = self.graph.make_azure_request(
                 endpoint=self.CONFIG_ENDPOINT,
             )
         except Exception as e:

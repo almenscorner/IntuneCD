@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from .BaseGraphModule import BaseGraphModule
+from .GraphModule import GraphModule
+from .IntuneCDBase import IntuneCDBase
 
 
-class ProcessScopeTags(BaseGraphModule):
+class ProcessScopeTags(IntuneCDBase):
     """Process scope tags from Intune."""
 
     def __init__(
@@ -10,7 +11,7 @@ class ProcessScopeTags(BaseGraphModule):
         token: str = None,
     ):
         """Initializes the ProcessScopeTags class"""
-        self.token = token
+        self.graph = GraphModule(token=token)
 
     def get_scope_tags(self):
         """
@@ -19,7 +20,7 @@ class ProcessScopeTags(BaseGraphModule):
         :param token: Token to use for authenticating the request
         """
         endpoint = "https://graph.microsoft.com/beta/deviceManagement/roleScopeTags"
-        data = self.make_graph_request(endpoint)
+        data = self.graph.make_graph_request(endpoint)
         return data["value"]
 
     def get_scope_tags_name(self, data, scope_tags):

@@ -94,7 +94,7 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",
@@ -102,7 +102,7 @@ class ProactiveRemediationUpdateModule(BaseUpdateModule):
 
             profile_ids = [profile["id"] for profile in intune_data["value"]]
 
-            remediation_data = self.batch_request(
+            remediation_data = self.graph.batch_request(
                 profile_ids,
                 "deviceManagement/deviceHealthScripts/",
                 "",

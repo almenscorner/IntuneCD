@@ -87,7 +87,7 @@ class ApplicationsBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT,
                 params={
                     "$filter": "(microsoft.graph.managedApp/appAvailability) eq null or (microsoft.graph.managedApp/appAvailability) "
@@ -102,20 +102,20 @@ class ApplicationsBackupModule(BaseBackupModule):
             return None
 
         app_ids = [app["id"] for app in self.graph_data["value"]]
-        scope_tag_responses = self.batch_request(
+        scope_tag_responses = self.graph.batch_request(
             app_ids, "deviceAppManagement/mobileApps/", "?$select=roleScopeTagIds,id"
         )
 
         # create a list of dicts with the app id and the response
         self.app_ids = [{"id": app_id} for app_id in app_ids]
         # as we must process each app individually, get the assignment data up front
-        self.assignment_responses = self.batch_assignment(
+        self.assignment_responses = self.graph.batch_assignment(
             self.app_ids, self.assignment_endpoint, self.assignment_extra_url
         )
 
         # as we must process each app individually, get the audit data up front
         if self.audit:
-            self.audit_data = self.make_audit_request(self.audit_filter)
+            self.audit_data = self.graph.make_audit_request(self.audit_filter)
 
         for app in self.graph_data["value"]:
             platform = None

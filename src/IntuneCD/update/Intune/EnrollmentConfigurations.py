@@ -67,7 +67,7 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
         if repo_data_priority == 0:
             return None
         # get priority from intune again to check if it was updated
-        intune_object = self.make_graph_request(
+        intune_object = self.graph.make_graph_request(
             self.endpoint + self.CONFIG_ENDPOINT + self.downstream_id,
         )
         intune_priority = intune_object["priority"]
@@ -77,7 +77,7 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
             )
             # Update priority
             request_data = json.dumps({"priority": repo_data_priority})
-            self.make_graph_request(
+            self.graph.make_graph_request(
                 self.endpoint
                 + self.CONFIG_ENDPOINT
                 + self.downstream_id
@@ -96,7 +96,7 @@ class EnrollmentConfigurationsUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 self.assignment_endpoint,
                 "/assignments",

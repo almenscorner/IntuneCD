@@ -37,7 +37,7 @@ class AppConfigurationBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT
             )
         except Exception as e:
@@ -52,7 +52,7 @@ class AppConfigurationBackupModule(BaseBackupModule):
                 app = None
                 try:
                     for app in item["targetedMobileApps"]:
-                        app_data = self.make_graph_request(
+                        app_data = self.graph.make_graph_request(
                             endpoint=self.endpoint + self.APP_ENDPOINT + "/" + app
                         )
                         if app_data:

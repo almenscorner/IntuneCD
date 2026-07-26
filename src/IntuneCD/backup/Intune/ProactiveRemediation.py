@@ -75,7 +75,7 @@ class ProactiveRemediationScriptBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT
             )
         except Exception as e:
@@ -87,7 +87,7 @@ class ProactiveRemediationScriptBackupModule(BaseBackupModule):
 
         proactiveremediation_ids = [item["id"] for item in self.graph_data["value"]]
         # Get the script data details using batch request
-        proactiveremediations_responses = self.batch_request(
+        proactiveremediations_responses = self.graph.batch_request(
             proactiveremediation_ids, "deviceManagement/deviceHealthScripts/", ""
         )
         # Get items that are not from Microsoft

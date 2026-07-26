@@ -31,7 +31,7 @@ class DomainsBackupModule(BaseBackupModule):
         """
 
         try:
-            self.entra_data = self.make_graph_request(
+            self.entra_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT
             )
         except Exception as e:

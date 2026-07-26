@@ -64,7 +64,7 @@ class AppleEnrollmentProfileUpdateModule(BaseUpdateModule):
 
             profile_ids = [profile["id"] for profile in intune_data["value"]]
 
-            batch_data = self.batch_request(
+            batch_data = self.graph.batch_request(
                 profile_ids,
                 "deviceManagement/depOnboardingSettings/",
                 "/enrollmentProfiles",

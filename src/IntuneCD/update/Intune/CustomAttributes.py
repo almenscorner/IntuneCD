@@ -89,7 +89,7 @@ class CustomAttributesUpdateModule(BaseUpdateModule):
                 self.log(tag="error", msg=f"Error getting {self.config_type} data: {e}")
                 return None
 
-            self.downstream_assignments = self.batch_assignment(
+            self.downstream_assignments = self.graph.batch_assignment(
                 intune_data["value"],
                 "deviceManagement/deviceCustomAttributeShellScripts/",
                 "?$expand=assignments",
@@ -97,7 +97,7 @@ class CustomAttributesUpdateModule(BaseUpdateModule):
 
             profile_ids = [profile["id"] for profile in intune_data["value"]]
 
-            shell_script_data = self.batch_request(
+            shell_script_data = self.graph.batch_request(
                 profile_ids,
                 "deviceManagement/deviceCustomAttributeShellScripts/",
                 "",

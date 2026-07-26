@@ -35,7 +35,7 @@ class EnrollmentStatusPageBackupModule(BaseBackupModule):
             dict[str, any]: The results of the backup
         """
         try:
-            self.graph_data = self.make_graph_request(
+            self.graph_data = self.graph.make_graph_request(
                 endpoint=self.endpoint + self.CONFIG_ENDPOINT
             )
         except Exception as e:
@@ -59,7 +59,7 @@ class EnrollmentStatusPageBackupModule(BaseBackupModule):
                 app_ids = item["selectedMobileAppIds"]
                 app_names = []
                 for app_id in app_ids:
-                    app_data = self.make_graph_request(
+                    app_data = self.graph.make_graph_request(
                         endpoint=f"{self.endpoint + self.APP_ENDPOINT}/{app_id}"
                     )
                     if app_data:
