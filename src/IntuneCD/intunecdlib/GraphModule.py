@@ -2,6 +2,7 @@
 import datetime
 import json
 import os
+import threading
 import time
 import uuid
 from uuid import uuid4
@@ -12,8 +13,44 @@ from deepdiff import DeepDiff
 from .IntuneCDBase import IntuneCDBase
 
 
-class BaseGraphModule(IntuneCDBase):
-    """Base class for the Graph API, used to make requests to the Microsoft Graph API."""
+class GraphModule(IntuneCDBase):
+    """Client for the Microsoft Graph API, used to make requests to the Graph API.
+
+    Implemented as a singleton, every instantiation returns the same object, so the
+    credentials and report flag configured by the run are shared by all modules
+    using it. Arguments left as None do not overwrite already configured state.
+    """
+
+    _instance = None
+    _instance_lock = threading.Lock()
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            with cls._instance_lock:
+                if cls._instance is None:
+                    instance = super().__new__(cls)
+                    instance.token = None
+                    instance.azure_token = None
+                    instance.report = False
+                    cls._instance = instance
+        return cls._instance
+
+    def __init__(
+        self, token: str = None, azure_token: str = None, report: bool = None
+    ) -> None:
+        """Configures the shared client.
+
+        Args:
+            token (str, optional): The token used to authenticate Graph requests.
+            azure_token (str, optional): The token used to authenticate Azure requests.
+            report (bool, optional): Whether write requests should only be reported.
+        """
+        if token is not None:
+            self.token = token
+        if azure_token is not None:
+            self.azure_token = azure_token
+        if report is not None:
+            self.report = report
 
     def make_graph_request(
         self,
@@ -493,14 +530,15 @@ class BaseGraphModule(IntuneCDBase):
                     if "deviceAndAppManagementAssignmentFilterId" in val["target"]:
                         self.get_filter_name(val, filter_responses)
 
-    def batch_assignment(self, data: list, url: str, extra_url: str) -> list:
+    def batch_assignment(
+        self, data: list, url: str, extra_url: str, app_protection: bool = False
+    ) -> list:
         """
         Batch request to the Graph API.
 
         :param data: List of objects
         :param url: MS graph endpoint for the object
         :param extra_url: Used if anything extra is needed for the url such as /assignments or ?$filter
-        :param self.token: OAuth self.token used for authentication
         :param app_protection: By default False, set to true when getting assignments for APP to get the platform
         :return: List of responses from the batch request
         """
@@ -510,7 +548,7 @@ class BaseGraphModule(IntuneCDBase):
         filter_ids = []
 
         # If getting App Protection Assignments, get the platform
-        if hasattr(self, "app_protection") and self.app_protection:
+        if app_protection:
             for a_id in data:
                 if (
                     a_id["@odata.type"]
