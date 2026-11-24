@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -90,6 +92,28 @@ class TestApplicationsBackupModule(unittest.TestCase):
         mock_log.assert_called_with(
             tag="error", msg="Error processing Application data: Test exception"
         )
+
+    def test_save_script_win32_sanitizes_display_name(self):
+        """A win32 app named with characters not allowed in file names still saves its script"""
+        item = {
+            "id": "0",
+            "displayName": "Tools/Setup: v1?",
+            "detectionRules": [{"scriptContent": "V3JpdGUtT3V0cHV0IDE="}],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            self.module._save_script_win32(item, "detection", tmp + "/")
+            self.assertEqual(os.listdir(tmp), ["Tools_Setup_ v1__detectionScript.ps1"])
+
+    def test_save_script_mac_sanitizes_display_name(self):
+        """A macOS app named with characters not allowed in file names still saves its script"""
+        item = {
+            "id": "0",
+            "displayName": "Tools/Setup: v1?",
+            "preInstallScript": {"scriptContent": "ZWNobyAx"},
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            self.module._save_script_mac(item, "pre", tmp + "/")
+            self.assertEqual(os.listdir(tmp), ["Tools_Setup_ v1__preInstallScript.sh"])
 
 
 if __name__ == "__main__":

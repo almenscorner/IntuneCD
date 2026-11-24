@@ -38,12 +38,11 @@ class ComplianceScriptsBackupModule(BaseBackupModule):
             if not match:
                 return
         if item.get("detectionScriptContent"):
+            base_name = self._prepare_file_name(item["displayName"].replace(".ps1", ""))
             if self.append_id:
-                script_name = (
-                    f"{item['displayName'].replace('.ps1', '')}__{item['id']}.ps1"
-                )
+                script_name = f"{base_name}__{item['id']}.ps1"
             else:
-                script_name = f"{item['displayName'].replace('.ps1', '')}.ps1"
+                script_name = f"{base_name}.ps1"
             if not os.path.exists(self.script_data_path):
                 os.makedirs(self.script_data_path)
             decoded = self.decode_base64(item["detectionScriptContent"])

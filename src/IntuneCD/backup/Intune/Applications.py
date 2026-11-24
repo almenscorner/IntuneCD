@@ -40,12 +40,11 @@ class ApplicationsBackupModule(BaseBackupModule):
         if item.get(f"{rule_type}Rules"):
             for rule in item[f"{rule_type}Rules"]:
                 if rule.get("scriptContent"):
+                    app_name = self._prepare_file_name(item["displayName"])
                     if self.append_id:
-                        script_name = (
-                            f"{item['displayName']}_{rule_type}Script__{item['id']}.ps1"
-                        )
+                        script_name = f"{app_name}_{rule_type}Script__{item['id']}.ps1"
                     else:
-                        script_name = f"{item['displayName']}_{rule_type}Script.ps1"
+                        script_name = f"{app_name}_{rule_type}Script.ps1"
                     if not os.path.exists(script_data_path):
                         os.makedirs(script_data_path)
                     decoded = self.decode_base64(rule["scriptContent"])
@@ -64,10 +63,13 @@ class ApplicationsBackupModule(BaseBackupModule):
                 return
         if item.get(f"{script_type}InstallScript"):
             if item[f"{script_type}InstallScript"].get("scriptContent"):
+                app_name = self._prepare_file_name(item["displayName"])
                 if self.append_id:
-                    script_name = f"{item['displayName']}_{script_type}InstallScript__{item['id']}.sh"
+                    script_name = (
+                        f"{app_name}_{script_type}InstallScript__{item['id']}.sh"
+                    )
                 else:
-                    script_name = f"{item['displayName']}_{script_type}InstallScript.sh"
+                    script_name = f"{app_name}_{script_type}InstallScript.sh"
                 if not os.path.exists(script_data_path):
                     os.makedirs(script_data_path)
                 decoded = self.decode_base64(

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -79,6 +81,18 @@ class TestComplianceScriptsBackupModule(unittest.TestCase):
         mock_log.assert_called_with(
             tag="error", msg="Error processing Compliance Script data: Test exception"
         )
+
+    def test_save_script_sanitizes_display_name(self):
+        """A compliance script named with characters not allowed in file names still saves"""
+        item = {
+            "id": "0",
+            "displayName": "Disk/Encryption: check?",
+            "detectionScriptContent": "V3JpdGUtT3V0cHV0IDE=",
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            self.module.script_data_path = tmp + "/"
+            self.module._save_script(item)
+            self.assertEqual(os.listdir(tmp), ["Disk_Encryption_ check_.ps1"])
 
 
 if __name__ == "__main__":

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -86,6 +88,18 @@ class TestReusableSettingsBackupModule(unittest.TestCase):
             tag="error",
             msg="Error processing Reusable Policy Setting data: Test exception",
         )
+
+    def test_save_script_sanitizes_display_name(self):
+        """A reusable setting named with characters not allowed in file names still saves"""
+        item = {
+            "id": "0",
+            "displayName": "Disk/Encryption: check?",
+            "settingInstance": {"simpleSettingValue": {"value": "ZWNobyAx"}},
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            self.module.script_data_path = tmp + "/"
+            self.module._save_script(item)
+            self.assertEqual(os.listdir(tmp), ["Disk_Encryption_ check_.sh"])
 
 
 if __name__ == "__main__":

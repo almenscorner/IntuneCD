@@ -36,10 +36,11 @@ class ReusableSettingsBackupModule(BaseBackupModule):
             match = self.check_prefix_match(item["displayName"], self.prefix)
             if not match:
                 return
+        base_name = self._prepare_file_name(item["displayName"].replace(".sh", ""))
         if self.append_id:
-            script_name = f"{item['displayName'].replace('.sh', '')}__{item['id']}.sh"
+            script_name = f"{base_name}__{item['id']}.sh"
         else:
-            script_name = f"{item['displayName'].replace('.sh', '')}.sh"
+            script_name = f"{base_name}.sh"
         try:
             if not os.path.exists(self.script_data_path):
                 os.makedirs(self.script_data_path)
