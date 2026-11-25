@@ -63,7 +63,6 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
         self, intune_data: dict[str, any], repo_data: dict[str, any]
     ) -> None:
         omas = []
-        oma_diff = None
         for setting in intune_data.get("omaSettings"):
             if setting["isEncrypted"]:
                 decoded_oma = {}
@@ -90,12 +89,23 @@ class DeviceConfigurationsUpdateModule(BaseUpdateModule):
         intune_data.pop("omaSettings")
         intune_data["omaSettings"] = omas
 
+        # Collect the differences of every OMA setting, not only the last one, and
+        # treat an added or removed setting as a difference.
+        oma_diff = []
         for intune_omaSetting, repo_omaSetting in zip(
             intune_data.get("omaSettings"),
             repo_data["omaSettings"],
         ):
-            oma_diff = self.get_diffs(
+            oma_diff += self.get_diffs(
                 repo_omaSetting, intune_omaSetting, ["root['isEncrypted']"]
+            )
+        if len(intune_data.get("omaSettings")) != len(repo_data["omaSettings"]):
+            oma_diff.append(
+                {
+                    "setting": "omaSettings",
+                    "new_val": f"{len(repo_data['omaSettings'])} settings",
+                    "old_val": f"{len(intune_data.get('omaSettings'))} settings",
+                }
             )
 
         if oma_diff:
